@@ -13,7 +13,7 @@ function TestComponent() {
 
   return (
     <div className="p-2">
-      <h3>{result}</h3>
+      <h3>Result: {result}</h3>
     </div>
   );
 }
