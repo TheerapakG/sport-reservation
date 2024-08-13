@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sport-reservation-auth
+  labels:
+    app: sport-reservation-auth
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sport-reservation-auth
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 5
+  template:
+    metadata:
+      labels:
+        app: sport-reservation-auth
+    spec:
+      containers:
+        - name: sport-reservation-auth
+          image: <IMAGE>
+          ports:
+            - containerPort: 3000
+              name: sp-auth-svc
+          env:
+            - name: NITRO_POSTGRES_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-auth-secret
+                  key: nitroPostgresUrl
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sport-reservation-auth-service
+spec:
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: sp-auth-svc
+  selector:
+    app: sport-reservation-auth

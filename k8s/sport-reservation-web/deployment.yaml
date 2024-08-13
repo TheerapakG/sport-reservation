@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sport-reservation-web
+  labels:
+    app: sport-reservation-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sport-reservation-web
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 5
+  template:
+    metadata:
+      labels:
+        app: sport-reservation-web
+    spec:
+      containers:
+        - name: sport-reservation-web
+          image: <IMAGE>
+          ports:
+            - containerPort: 3000
+              name: sp-web-svc
+          env:
+            - name: AUTH_BASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-web-secret
+                  key: authBaseUrl
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sport-reservation-web-service
+spec:
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: sp-web-svc
+  selector:
+    app: sport-reservation-web
