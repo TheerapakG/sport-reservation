@@ -71,6 +71,11 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@eslint/compat": "^1.1.1",
+    "@eslint/eslintrc": "^3.1.0",
+    "@eslint/js": "^9.9.0",
+    "@types/eslint__eslintrc": "^2.1.2",
+    "@types/eslint__js": "^8.42.3",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@typescript-eslint/eslint-plugin": "^8.1.0",
@@ -80,6 +85,8 @@
     "eslint": "^9.9.0",
     "eslint-plugin-react-hooks": "^4.6.2",
     "eslint-plugin-react-refresh": "^0.4.9",
+    "globals": "^15.9.0",
+    "jiti": "^1.21.6",
     "postcss": "^8.4.41",
     "prettier": "^3.3.3",
     "prettier-plugin-tailwindcss": "^0.6.6",

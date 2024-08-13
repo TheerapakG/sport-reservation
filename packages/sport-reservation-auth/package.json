@@ -13,6 +13,7 @@
     "sport-reservation-common": "workspace:../sport-reservation-common"
   },
   "devDependencies": {
-    "nitropack": "latest"
+    "nitropack": "latest",
+    "prettier": "^3.3.3"
   }
 }
