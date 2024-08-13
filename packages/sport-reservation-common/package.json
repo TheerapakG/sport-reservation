@@ -1,0 +1,15 @@
+{
+  "name": "sport-reservation-web",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.32.2",
+    "postgres": "^3.4.4"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.23.2"
+  }
+}
