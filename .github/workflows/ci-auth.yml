@@ -120,7 +120,7 @@ jobs:
         run: pnpm build
 
       - name: Build container image
-        run: docker build -t registry.digitalocean.com/${{ secrets.REGISTRY_NAME }}/sport-reservation-web:$(echo $GITHUB_SHA | head -c7) .
+        run: docker build -t registry.digitalocean.com/${{ secrets.REGISTRY_NAME }}/sport-reservation-auth:$(echo $GITHUB_SHA | head -c7) .
 
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
@@ -131,13 +131,13 @@ jobs:
         run: doctl registry login --expiry-seconds 1200
 
       - name: Push image to DigitalOcean Container Registry
-        run: docker push registry.digitalocean.com/${{ secrets.REGISTRY_NAME }}/sport-reservation-web:$(echo $GITHUB_SHA | head -c7)
+        run: docker push registry.digitalocean.com/${{ secrets.REGISTRY_NAME }}/sport-reservation-auth:$(echo $GITHUB_SHA | head -c7)
 
       - name: Update deployment file
-        run: TAG=$(echo $GITHUB_SHA | head -c7) && sed -i 's|<IMAGE>|registry.digitalocean.com/${{ secrets.REGISTRY_NAME }}/sport-reservation-web:'${TAG}'|' $GITHUB_WORKSPACE/k8s/sport-reservation-web/deployment.yaml
+        run: TAG=$(echo $GITHUB_SHA | head -c7) && sed -i 's|<IMAGE>|registry.digitalocean.com/${{ secrets.REGISTRY_NAME }}/sport-reservation-auth:'${TAG}'|' $GITHUB_WORKSPACE/k8s/sport-reservation-auth/deployment.yaml
 
       - name: Save DigitalOcean kubeconfig with short-lived credentials
         run: doctl kubernetes cluster kubeconfig save --expiry-seconds 600 ${{ secrets.CLUSTER_NAME }}
 
       - name: Deploy to DigitalOcean Kubernetes
-        run: kubectl apply -f $GITHUB_WORKSPACE/k8s/sport-reservation-web/deployment.yaml
+        run: kubectl apply -f $GITHUB_WORKSPACE/k8s/sport-reservation-auth/deployment.yaml
