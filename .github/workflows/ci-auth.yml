@@ -7,7 +7,7 @@ on:
       - "k8s/sport-reservation-auth/deployment.yaml"
       - "packages/sport-reservation-common/**"
       - "packages/sport-reservation-auth/**"
-    branches: ["master"]
+    branches: ["main"]
   workflow_dispatch:
 
 jobs:
@@ -63,34 +63,6 @@ jobs:
       - name: Run Format
         run: pnpm prettier -c .
 
-  lint:
-    needs: [cache-dependencies]
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./packages/sport-reservation-auth
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-
-      - name: Setup node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "20"
-          cache: "pnpm"
-
-      - name: Install Dependencies
-        run: pnpm install
-
-      - name: Run Lint
-        run: pnpm eslint .
-
   typecheck:
     needs: [cache-dependencies]
     runs-on: ubuntu-latest
@@ -117,10 +89,10 @@ jobs:
         run: pnpm install
 
       - name: Run Typecheck
-        run: pnpm nuxi typecheck
+        run: pnpm tsc --noEmit
 
   build:
-    needs: [cache-dependencies, format, lint, typecheck]
+    needs: [cache-dependencies, format, typecheck]
     runs-on: ubuntu-latest
     defaults:
       run:

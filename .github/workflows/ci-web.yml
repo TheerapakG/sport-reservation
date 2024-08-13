@@ -6,7 +6,7 @@ on:
       - ".github/workflows/ci-web.yml"
       - "k8s/sport-reservation-web/deployment.yaml"
       - "packages/sport-reservation-web/**"
-    branches: ["master"]
+    branches: ["main"]
   workflow_dispatch:
 
 jobs:
@@ -88,7 +88,7 @@ jobs:
         run: pnpm install
 
       - name: Run Lint
-        run: pnpm eslint .
+        run: pnpm eslint --flag unstable_ts_config .
 
   typecheck:
     needs: [cache-dependencies]
@@ -116,7 +116,7 @@ jobs:
         run: pnpm install
 
       - name: Run Typecheck
-        run: pnpm nuxi typecheck
+        run: pnpm tsc --noEmit
 
   build:
     needs: [cache-dependencies, format, lint, typecheck]
