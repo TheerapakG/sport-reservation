@@ -1,3 +1,3 @@
-export default eventHandler<string>((event) => {
-  return "Server Value.";
-});
+import { Effect } from "effect";
+
+export default effectEventHandler(Effect.succeed("Server Value."));
