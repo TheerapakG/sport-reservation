@@ -1,10 +1,10 @@
+import React from "react";
 import {
   createRootRoute,
   Link,
   Outlet,
   ScrollRestoration,
 } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 import { Body, Head, Html, Meta, Scripts } from "@tanstack/start";
 
 import appCss from "@/styles/app.css?url";
@@ -15,6 +15,15 @@ import {
   NavigationMenuLink,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
+
+const TanStackRouterDevtools =
+  import.meta.env.MODE === "production"
+    ? () => null
+    : React.lazy(() =>
+        import("@tanstack/router-devtools").then((res) => ({
+          default: res.TanStackRouterDevtools,
+        })),
+      );
 
 const RootDocument = ({ children }: { children: React.ReactNode }) => {
   return (
