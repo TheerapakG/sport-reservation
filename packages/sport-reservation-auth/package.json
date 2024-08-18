@@ -10,11 +10,12 @@
     "preview": "node .output/server/index.mjs"
   },
   "dependencies": {
-    "effect": "^3.6.3",
-    "sport-reservation-common": "workspace:../sport-reservation-common"
+    "effect": "^3.6.4",
+    "sport-reservation-common": "workspace:../sport-reservation-common",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
-    "nitropack": "latest",
+    "nitropack": "^2.9.7",
     "prettier": "^3.3.3"
   }
 }

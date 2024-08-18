@@ -7,11 +7,11 @@ export class Event extends Context.Tag("EventService")<
 >() {}
 
 export const effectEventHandler = <Response = EventHandlerResponse>(
-  handler: Effect.Effect<Response, unknown, Event>
+  handler: Effect.Effect<Response, unknown, Event>,
 ) =>
   eventHandler(async (event) => {
     const exit = await Effect.runPromiseExit(
-      Effect.provideService(handler, Event, { event: Effect.succeed(event) })
+      Effect.provideService(handler, Event, { event: Effect.succeed(event) }),
     );
     if (Exit.isFailure(exit)) {
       const cause = exit.cause;
