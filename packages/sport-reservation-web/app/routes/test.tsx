@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/start";
+import { Effect } from "effect";
 
 import { authGet } from "@/utils/fetch/authFetch";
 
 const renderTest = createServerFn("GET", async () => {
   "use server";
-  return await authGet();
+  return await Effect.runPromise(authGet());
 });
 
 function TestComponent() {

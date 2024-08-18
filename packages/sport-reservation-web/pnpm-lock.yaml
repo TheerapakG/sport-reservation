@@ -125,6 +125,9 @@ dependencies:
   destr:
     specifier: ^2.0.3
     version: 2.0.3
+  effect:
+    specifier: ^3.6.3
+    version: 3.6.3
   embla-carousel-react:
     specifier: ^8.1.8
     version: 8.1.8(react@18.3.1)
@@ -4501,6 +4504,10 @@ packages:
 
   /ee-first@1.1.1:
     resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
+    dev: false
+
+  /effect@3.6.3:
+    resolution: {integrity: sha512-KHD2j476/9KvmeqBN+kNNf+HwCycLqSY1jqxtVjL0P0D7SMV9FGSMBiNmFqy8BZ7kKCsCeF2sQ/8v6KxKF3Gkg==}
     dev: false
 
   /electron-to-chromium@1.5.6:
