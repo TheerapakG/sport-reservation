@@ -63,6 +63,34 @@ jobs:
       - name: Run Format
         run: pnpm prettier -c .
 
+  lint:
+    needs: [cache-dependencies]
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./packages/sport-reservation-auth
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Setup node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Run Lint
+        run: pnpm eslint --flag unstable_ts_config .
+
   typecheck:
     needs: [cache-dependencies]
     runs-on: ubuntu-latest
@@ -92,7 +120,7 @@ jobs:
         run: pnpm tsc --noEmit
 
   build:
-    needs: [cache-dependencies, format, typecheck]
+    needs: [cache-dependencies, format, lint, typecheck]
     runs-on: ubuntu-latest
     defaults:
       run:
