@@ -1,0 +1,16 @@
+{
+  "short_name": "Sport Reservation",
+  "name": "Sport Reservation - Reserve sport facilities with ease!",
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "type": "image/svg+xml",
+      "sizes": "512x512"
+    }
+  ],
+  "id": "/?source=pwa",
+  "start_url": "/?source=pwa",
+  "display": "standalone",
+  "scope": "/",
+  "description": "Reserve sport facilities quickly and easily. No more waiting for admin response!"
+}

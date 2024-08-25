@@ -3,6 +3,15 @@ export default defineNitroConfig({
   srcDir: "server",
   runtimeConfig: {
     postgresUrl: "NITRO_POSTGRES_URL",
+    valkey: {
+      host: "NITRO_VALKEY_HOST",
+      port: "NITRO_VALKEY_PORT",
+      password: "NITRO_VALKEY_PASSWORD",
+    },
+    line: {
+      clientId: "NITRO_LINE_CLIENT_ID",
+      redirectUri: "NITRO_LINE_REDIRECT_URI",
+    },
   },
   experimental: {
     openAPI: true,
