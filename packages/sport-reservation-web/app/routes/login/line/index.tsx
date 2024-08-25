@@ -7,7 +7,7 @@ const renderIndex = createServerFn("GET", async () => {
 });
 
 function IndexComponent() {
-  const result = Route.useLoaderData();
+  const _result = Route.useLoaderData();
 
   return null;
 }
