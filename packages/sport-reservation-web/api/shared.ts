@@ -8,7 +8,7 @@ type NitroApi = Record<
 type MatchResult<
   Key extends string,
   Exact extends boolean = false,
-  Score extends any[] = [],
+  Score extends unknown[] = [],
   catchAll extends boolean = false,
 > = {
   [k in Key]: {
@@ -19,26 +19,26 @@ type MatchResult<
   };
 }[Key];
 type Subtract<
-  Minuend extends any[] = [],
-  Subtrahend extends any[] = [],
+  Minuend extends unknown[] = [],
+  Subtrahend extends unknown[] = [],
 > = Minuend extends [...Subtrahend, ...infer Remainder] ? Remainder : never;
 type TupleIfDiff<
   First extends string,
   Second extends string,
-  Tuple extends any[] = [],
+  Tuple extends unknown[] = [],
 > = First extends `${Second}${infer Diff}`
   ? Diff extends ""
     ? []
     : Tuple
   : [];
-type MaxTuple<N extends any[] = [], T extends any[] = []> = {
+type MaxTuple<N extends unknown[] = [], T extends unknown[] = []> = {
   current: T;
   result: MaxTuple<N, ["", ...T]>;
 }[[N["length"]] extends [Partial<T>["length"]] ? "current" : "result"];
 type CalcMatchScore<
   Key extends string,
   Route extends string,
-  Score extends any[] = [],
+  Score extends unknown[] = [],
   Init extends boolean = false,
   FirstKeySegMatcher extends string = Init extends true ? ":Invalid:" : "",
 > = `${Key}/` extends `${infer KeySeg}/${infer KeyRest}`
