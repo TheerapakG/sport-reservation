@@ -28,4 +28,6 @@ dist-ssr
 *.sln
 *.sw?
 
+api/*
+!api/index.ts
 routeTree.gen.ts

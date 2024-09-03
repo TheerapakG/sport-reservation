@@ -1,21 +1,18 @@
-name: CI-auth
+name: CI
 
 on:
   push:
     paths:
-      - ".github/workflows/ci-auth.yml"
+      - ".github/workflows/ci.yml"
       - "k8s/sport-reservation-auth/deployment.yaml"
-      - "packages/sport-reservation-common/**"
-      - "packages/sport-reservation-auth/**"
+      - "k8s/sport-reservation-web/deployment.yaml"
+      - "packages/**"
     branches: ["main"]
   workflow_dispatch:
 
 jobs:
   cache-dependencies:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./packages/sport-reservation-auth
 
     steps:
       - name: Checkout
@@ -33,14 +30,17 @@ jobs:
           cache: "pnpm"
 
       - name: Install Dependencies
-        run: pnpm install
+        run: pnpm install --workspace-root
 
   format:
+    strategy:
+      matrix:
+        package: [auth, web]
     needs: [cache-dependencies]
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./packages/sport-reservation-auth
+        working-directory: ./packages/sport-reservation-${{ matrix.package }}
 
     steps:
       - name: Checkout
@@ -58,17 +58,20 @@ jobs:
           cache: "pnpm"
 
       - name: Install Dependencies
-        run: pnpm install
+        run: pnpm install --workspace-root
 
       - name: Run Format
         run: pnpm prettier -c .
 
   lint:
+    strategy:
+      matrix:
+        package: [auth, web]
     needs: [cache-dependencies]
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./packages/sport-reservation-auth
+        working-directory: ./packages/sport-reservation-${{ matrix.package }}
 
     steps:
       - name: Checkout
@@ -86,17 +89,20 @@ jobs:
           cache: "pnpm"
 
       - name: Install Dependencies
-        run: pnpm install
+        run: pnpm install --workspace-root
 
       - name: Run Lint
         run: pnpm eslint --flag unstable_ts_config .
 
   typecheck:
+    strategy:
+      matrix:
+        package: [auth, web]
     needs: [cache-dependencies]
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./packages/sport-reservation-auth
+        working-directory: ./packages/sport-reservation-${{ matrix.package }}
 
     steps:
       - name: Checkout
@@ -114,17 +120,20 @@ jobs:
           cache: "pnpm"
 
       - name: Install Dependencies
-        run: pnpm install
+        run: pnpm install --workspace-root
 
       - name: Run Typecheck
         run: pnpm tsc --noEmit
 
   build:
+    strategy:
+      matrix:
+        package: [auth, web]
     needs: [cache-dependencies, format, lint, typecheck]
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./packages/sport-reservation-auth
+        working-directory: ./packages/sport-reservation-${{ matrix.package }}
 
     steps:
       - name: Checkout
@@ -142,13 +151,13 @@ jobs:
           cache: "pnpm"
 
       - name: Install Dependencies
-        run: pnpm install
+        run: pnpm install --workspace-root
 
       - name: Run Build
         run: pnpm build
 
       - name: Build container image
-        run: docker build -t registry.digitalocean.com/${{ secrets.REGISTRY_NAME }}/sport-reservation-auth:$(echo $GITHUB_SHA | head -c7) .
+        run: docker build -t registry.digitalocean.com/${{ secrets.REGISTRY_NAME }}/sport-reservation-${{ matrix.package }}:$(echo $GITHUB_SHA | head -c7) .
 
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
@@ -159,13 +168,13 @@ jobs:
         run: doctl registry login --expiry-seconds 1200
 
       - name: Push image to DigitalOcean Container Registry
-        run: docker push registry.digitalocean.com/${{ secrets.REGISTRY_NAME }}/sport-reservation-auth:$(echo $GITHUB_SHA | head -c7)
+        run: docker push registry.digitalocean.com/${{ secrets.REGISTRY_NAME }}/sport-reservation-${{ matrix.package }}:$(echo $GITHUB_SHA | head -c7)
 
       - name: Update deployment file
-        run: TAG=$(echo $GITHUB_SHA | head -c7) && sed -i 's|<IMAGE>|registry.digitalocean.com/${{ secrets.REGISTRY_NAME }}/sport-reservation-auth:'${TAG}'|' $GITHUB_WORKSPACE/k8s/sport-reservation-auth/deployment.yaml
+        run: TAG=$(echo $GITHUB_SHA | head -c7) && sed -i 's|<IMAGE>|registry.digitalocean.com/${{ secrets.REGISTRY_NAME }}/sport-reservation-${{ matrix.package }}:'${TAG}'|' $GITHUB_WORKSPACE/k8s/sport-reservation-${{ matrix.package }}/deployment.yaml
 
       - name: Save DigitalOcean kubeconfig with short-lived credentials
         run: doctl kubernetes cluster kubeconfig save --expiry-seconds 600 ${{ secrets.CLUSTER_NAME }}
 
       - name: Deploy to DigitalOcean Kubernetes
-        run: kubectl apply -f $GITHUB_WORKSPACE/k8s/sport-reservation-auth/deployment.yaml
+        run: kubectl apply -f $GITHUB_WORKSPACE/k8s/sport-reservation-${{ matrix.package }}/deployment.yaml

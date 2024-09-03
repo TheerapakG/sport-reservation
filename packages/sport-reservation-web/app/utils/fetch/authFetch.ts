@@ -1,16 +1,43 @@
-import { Effect } from "effect";
+import { apiRoutes } from "api";
+import { Type } from "arktype";
+import { Context, Effect } from "effect";
 import { ofetch } from "ofetch";
-import { z } from "zod";
+import { addRoute, createRouter } from "rou3";
 import { config } from "../config";
-import { Fetch, typedFetch, withMock } from "./shared";
+import { Fetch, Router, typedNitroFetch, withMock } from "./shared";
 
 export const authFetch = ofetch.create({ baseURL: config.authBaseUrl });
+export const authRouter = createRouter<Type[]>();
+Object.entries(apiRoutes["auth"]).forEach(([route, methodPath]) =>
+  Object.entries(methodPath).forEach(([method, path]) =>
+    addRoute(authRouter, method, route, path),
+  ),
+);
 
-const authGetResult = z.string();
-export const authGet = withMock((_opts?: Record<string, never>) => {
-  return Effect.provideService(
-    typedFetch(authGetResult, "/", { method: "GET" }),
-    Fetch,
-    { fetch: Effect.succeed(authFetch) },
-  );
-});
+const authContext = Context.empty().pipe(
+  Context.add(Fetch, { fetch: authFetch }),
+  Context.add(Router, { router: authRouter }),
+);
+
+export const authGetGenerateLineLoginRequest = withMock(
+  (_opts: Record<string, never>) => {
+    return Effect.provide(
+      typedNitroFetch("auth", "/login/line/generateRequest", {
+        method: "GET",
+      }),
+      authContext,
+    );
+  },
+);
+
+export const authPostGetLineLoginAuthToken = withMock(
+  ({ code, state }: { code: string; state: string }) => {
+    return Effect.provide(
+      typedNitroFetch("auth", "/login/line/getAuthToken", {
+        method: "POST",
+        body: { code, state },
+      }),
+      authContext,
+    );
+  },
+);

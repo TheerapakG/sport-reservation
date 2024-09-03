@@ -1,35 +1,45 @@
-import { Effect, Context, Cause } from "effect";
+import { Effect, Cause, Context } from "effect";
 import { $Fetch, ResponseType, FetchRequest, FetchOptions } from "ofetch";
-import { z } from "zod";
+import { Type } from "arktype";
+import { ArktypeError } from "~~/models/errors.ts";
 
-export class Fetch extends Context.Tag("FetchService")<
-  Fetch,
-  { fetch: Effect.Effect<$Fetch> }
->() {}
+export class Fetch
+  extends /*@__PURE__*/ Context.Tag("FetchService")<
+    Fetch,
+    { fetch: $Fetch }
+  >() {}
 
+/*@__NO_SIDE_EFFECTS__*/
 export const typedFetch = <
-  T extends z.ZodTypeAny,
+  T = unknown,
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  $ = {},
   R extends ResponseType = "json",
 >(
-  type: T,
+  t: Type<T, $>,
   request: FetchRequest,
   options?: FetchOptions<R>,
-) => {
-  return Fetch.pipe(
-    Effect.andThen((fetch) => fetch.fetch),
-    Effect.andThen((fetch) => Effect.tryPromise(() => fetch(request, options))),
-    Effect.andThen((result) =>
-      Effect.tryPromise(() => type.parseAsync(result) as Promise<z.infer<T>>),
-    ),
-  );
+): Effect.Effect<
+  Type<T, $>["infer"],
+  Cause.UnknownException | ArktypeError,
+  Fetch
+> => {
+  return Effect.gen(function* () {
+    const { fetch } = yield* Fetch;
+    return yield* effectType(
+      t,
+      yield* Effect.tryPromise(() => fetch(request, options)),
+    );
+  });
 };
 
-export const withMock = <Opts extends object, Result>(
-  fetch: (opts?: Opts) => Effect.Effect<Result, Cause.UnknownException, never>,
+/*@__NO_SIDE_EFFECTS__*/
+export const withMock = <Opts extends object, Result, E, R = never>(
+  fetch: (opts: Opts) => Effect.Effect<Result, E, R>,
 ) => {
   return (
-    opts?: Opts & {
-      mock?: Effect.Effect<Result, Cause.UnknownException, never>;
+    opts: Opts & {
+      mock?: Effect.Effect<Result, E, never>;
     },
   ) => {
     const { mock } = opts ?? {};

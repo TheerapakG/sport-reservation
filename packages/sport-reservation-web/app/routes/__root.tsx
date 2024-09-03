@@ -49,21 +49,6 @@ const RootDocument = ({ children }: { children: React.ReactNode }) => {
                 </Link>
               </NavigationMenuLink>
             </NavigationMenuItem>
-            <NavigationMenuItem>
-              <NavigationMenuLink
-                className={navigationMenuTriggerStyle()}
-                asChild
-              >
-                <Link
-                  to="/test"
-                  activeProps={{
-                    className: "font-bold",
-                  }}
-                >
-                  Test
-                </Link>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>
         <hr />

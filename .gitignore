@@ -1,3 +1,5 @@
 .vscode
 .env.secret
 volume.yaml
+
+node_modules
