@@ -70,6 +70,30 @@ export const typedNitroFetch = <
   });
 };
 
+export const provideTypedNitroFetch = <
+  T = unknown,
+  P extends keyof ApiTypes = keyof ApiTypes,
+  R extends NitroFetchRequest<ApiTypes[P]> = NitroFetchRequest<ApiTypes[P]>,
+  O extends NitroFetchOptions<ApiTypes[P], R> = NitroFetchOptions<
+    ApiTypes[P],
+    R
+  >,
+  E = never,
+>(
+  context: Effect.Effect<Context.Context<Fetch | Router>, E>,
+  pkg: P,
+  request: R,
+  options?: O,
+) => {
+  return Effect.gen(function* () {
+    const ctx = yield* context;
+    return yield* Effect.provide(
+      typedNitroFetch<T, P, R, O>(pkg, request, options),
+      ctx,
+    );
+  });
+};
+
 export const withMock = <Opts extends object, Result, E, R = never>(
   fetch: (opts: Opts) => Effect.Effect<Result, E, R>,
 ) => {
