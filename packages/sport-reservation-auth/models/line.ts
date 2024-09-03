@@ -1,8 +1,30 @@
-import { z } from "zod";
+import { type } from "arktype";
 
-export const lineRequestState = z.object({ state: z.string() });
-export const lineRequestData = z.object({
-  nonce: z.string(),
-  codeVerifier: z.string(),
+export const lineRequestState = /*@__PURE__*/ type({ state: "string" });
+export const lineRequestData = /*@__PURE__*/ type({
+  nonce: "string",
+  codeVerifier: "string",
 });
-export const lineRequest = lineRequestState.merge(lineRequestData);
+export const lineRequest = /*@__PURE__*/ type([
+  lineRequestState,
+  "&",
+  lineRequestData,
+]);
+
+export const lineLoginRequest = /*@__PURE__*/ type({
+  responseType: "string",
+  clientId: "string",
+  redirectUri: "string",
+  state: "string",
+  scope: "string",
+  nonce: "string",
+  codeChallenge: "string",
+  codeChallengeMethod: "string",
+});
+
+export const lineAuthToken = /*@__PURE__*/ type({
+  access: "string",
+  id: "string",
+  refresh: "string",
+  type: "string",
+});

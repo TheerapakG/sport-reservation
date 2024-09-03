@@ -4,10 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vinxi dev",
     "build": "vinxi build",
-    "start": "vinxi start",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
+    "dev": "vinxi dev",
+    "prepare": "tsr generate",
+    "start": "vinxi start"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -41,10 +41,11 @@
     "@tanstack/react-form": "^0.29.2",
     "@tanstack/react-query": "^5.52.1",
     "@tanstack/react-router": "^1.50.0",
+    "@tanstack/router-arktype-adapter": "^1.50.0",
     "@tanstack/router-devtools": "^1.50.0",
     "@tanstack/router-plugin": "^1.49.3",
     "@tanstack/start": "^1.50.0",
-    "@tanstack/zod-form-adapter": "^0.29.2",
+    "arktype": "2.0.0-rc.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "cmdk": "1.0.0",
@@ -52,9 +53,11 @@
     "destr": "^2.0.3",
     "effect": "^3.6.5",
     "embla-carousel-react": "^8.2.0",
+    "h3": "^1.12.0",
     "input-otp": "^1.2.4",
     "lucide-react": "^0.435.0",
     "next-themes": "^0.3.0",
+    "nitropack": "^2.9.7",
     "ofetch": "^1.3.4",
     "react": "^18.3.1",
     "react-day-picker": "9.0.8",
@@ -62,14 +65,14 @@
     "react-hook-form": "^7.53.0",
     "react-resizable-panels": "^2.1.1",
     "recharts": "^2.12.7",
+    "rou3": "^0.5.1",
     "sonner": "^1.5.0",
-    "sport-reservation-auth": "workspace:../sport-reservation-auth",
-    "sport-reservation-common": "workspace:../sport-reservation-common",
+    "sport-reservation-auth": "workspace:*",
+    "sport-reservation-common": "workspace:*",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.1",
-    "vinxi": "^0.4.1",
-    "zod": "^3.23.8"
+    "vinxi": "^0.4.1"
   },
   "devDependencies": {
     "@eslint/compat": "^1.1.1",

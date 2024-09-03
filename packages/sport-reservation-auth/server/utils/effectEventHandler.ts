@@ -1,27 +1,61 @@
+import { Type } from "arktype";
 import { Effect, Context, Exit, Cause, pipe } from "effect";
-import { H3Event, EventHandlerRequest, EventHandlerResponse } from "h3";
-import { LineLoginRepository } from "~~/repositories/lineLoginRepository";
-import { lineLoginRepositoryImpl } from "~~/repositories/lineLoginRepositoryImpl";
+import {
+  eventHandler,
+  H3Event,
+  EventHandlerRequest,
+  EventHandlerResponse,
+  EventHandler,
+} from "h3";
+import { LineLoginRepository } from "~~/repositories/lineLoginRepository.ts";
+import { lineLoginRepositoryImpl } from "~~/repositories/lineLoginRepositoryImpl.ts";
 
-export class Event extends Context.Tag("EventService")<
-  Event,
-  { event: Effect.Effect<H3Event<EventHandlerRequest>> }
->() {}
+export class EventContext
+  extends /*@__PURE__*/ Context.Tag("EventContext")<
+    EventContext,
+    { event: H3Event<EventHandlerRequest> }
+  >() {}
 
-const repositoryContext = Context.empty().pipe(
-  Context.add(LineLoginRepository, lineLoginRepositoryImpl),
+const repositoryContext = /*@__PURE__*/ Context.empty().pipe(
+  /*@__PURE__*/ Context.add(LineLoginRepository, lineLoginRepositoryImpl),
 );
 
-export const effectEventHandler = <Response = EventHandlerResponse>(
-  handler: Effect.Effect<Response, unknown, Event | LineLoginRepository>,
-) =>
-  eventHandler(async (event) => {
+type EffectEventHandler<
+  T = unknown,
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  $ = {},
+  Request extends EventHandlerRequest = EventHandlerRequest,
+> = EventHandler<Request, Promise<Type<T, $>["infer"]>>;
+
+/*@__NO_SIDE_EFFECTS__*/
+export const effectEventHandler = <
+  T = unknown,
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  $ = {},
+  Request extends EventHandlerRequest = EventHandlerRequest,
+>({
+  type,
+  handler,
+}: {
+  type: Type<T, $>;
+  handler: Effect.Effect<
+    EventHandlerResponse<Type<T, $>["infer"]>,
+    unknown,
+    EventContext | LineLoginRepository
+  >;
+}): EffectEventHandler<T, $, Request> => {
+  return eventHandler(async (event) => {
     const exit = await Effect.runPromiseExit(
-      pipe(
-        handler,
-        Effect.provideService(Event, { event: Effect.succeed(event) }),
-        Effect.provide(repositoryContext),
-      ),
+      Effect.gen(function* () {
+        return yield* effectType(
+          type,
+          yield* pipe(
+            handler,
+            Effect.provideService(EventContext, { event }),
+            Effect.provide(repositoryContext),
+          ),
+        );
+      }),
     );
     if (Exit.isFailure(exit)) {
       const cause = exit.cause;
@@ -33,3 +67,4 @@ export const effectEventHandler = <Response = EventHandlerResponse>(
     }
     return exit.value;
   });
+};

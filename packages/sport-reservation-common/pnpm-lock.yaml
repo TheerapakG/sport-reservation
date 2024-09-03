@@ -5,15 +5,15 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  arktype:
+    specifier: 2.0.0-rc.0
+    version: 2.0.0-rc.0
   drizzle-orm:
     specifier: ^0.33.0
     version: 0.33.0(postgres@3.4.4)
   postgres:
     specifier: ^3.4.4
     version: 3.4.4
-  zod:
-    specifier: ^3.23.8
-    version: 3.23.8
 
 devDependencies:
   drizzle-kit:
@@ -21,6 +21,16 @@ devDependencies:
     version: 0.24.1
 
 packages:
+
+  /@ark/schema@0.4.0:
+    resolution: {integrity: sha512-8U+qNYIu+pFFXd44cqd8lTexPg3bWLpDP9aJ7PKOO6Ec/WonaMEN5JBiwfX/VNBA14lmR4/NLs54CdSzm860VQ==}
+    dependencies:
+      '@ark/util': 0.3.0
+    dev: false
+
+  /@ark/util@0.3.0:
+    resolution: {integrity: sha512-rH6FF1/+JXagsmhTeUHPmwS0gshof0BLDHXYPMQA/ApTN91VM4Cce//HTIMuuVC8KqX6VyQbMsgfF4PffGX53g==}
+    dev: false
 
   /@drizzle-team/brocli@0.10.1:
     resolution: {integrity: sha512-AHy0vjc+n/4w/8Mif+w86qpppHuF3AyXbcWW+R/W7GNA3F5/p2nuhlkCJaTXSLZheB4l1rtHzOfr9A7NwoR/Zg==}
@@ -445,6 +455,13 @@ packages:
     dev: true
     optional: true
 
+  /arktype@2.0.0-rc.0:
+    resolution: {integrity: sha512-bHEu42yMwdsy75q3u7Y8eitRRgv5a8RS36c3hzr1QofCbcBwXl8TCcxcUysBUxEHQKHRQOCATA23ioelKmN8tg==}
+    dependencies:
+      '@ark/schema': 0.4.0
+      '@ark/util': 0.3.0
+    dev: false
+
   /buffer-from@1.1.2:
     resolution: {integrity: sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ==}
     dev: true
@@ -667,7 +684,3 @@ packages:
     resolution: {integrity: sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==}
     engines: {node: '>=0.10.0'}
     dev: true
-
-  /zod@3.23.8:
-    resolution: {integrity: sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g==}
-    dev: false

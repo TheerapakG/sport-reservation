@@ -1,12 +1,19 @@
-import { z } from "zod";
+import { type } from "arktype";
 
-export const LineLoginRequest = z.object({
-  responseType: z.string(),
-  clientId: z.string(),
-  redirectUri: z.string().url(),
-  state: z.string(),
-  scope: z.string(),
-  nonce: z.string(),
-  codeChallenge: z.string(),
-  codeChallengeMethod: z.string(),
+export const LineLoginRequest = type({
+  responseType: "string",
+  clientId: "string",
+  redirectUri: "string",
+  state: "string",
+  scope: "string",
+  nonce: "string",
+  codeChallenge: "string",
+  codeChallengeMethod: "string",
+});
+
+export const LineAuthToken = type({
+  access: "string",
+  id: "string",
+  refresh: "string",
+  type: "string",
 });

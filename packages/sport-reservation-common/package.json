@@ -1,13 +1,13 @@
 {
-  "name": "sport-reservation-web",
+  "name": "sport-reservation-common",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {},
   "dependencies": {
+    "arktype": "2.0.0-rc.0",
     "drizzle-orm": "^0.33.0",
-    "postgres": "^3.4.4",
-    "zod": "^3.23.8"
+    "postgres": "^3.4.4"
   },
   "devDependencies": {
     "drizzle-kit": "^0.24.1"
