@@ -4,13 +4,12 @@ import { ArktypeError } from "~~/models/errors.ts";
 
 /*@__NO_SIDE_EFFECTS__*/
 export const effectType = <
-  T = unknown,
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  $ = {},
+  T extends Type<unknown, {}> = Type<unknown, {}>,
 >(
-  t: Type<T, $>,
+  t: T,
   data: unknown,
-): Effect.Effect<Type<T, $>["infer"], ArktypeError> => {
+): Effect.Effect<T["infer"], ArktypeError> => {
   return Effect.gen(function* () {
     const result = t(data);
     if (result instanceof type.errors) {

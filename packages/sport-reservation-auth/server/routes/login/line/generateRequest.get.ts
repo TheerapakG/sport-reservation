@@ -3,8 +3,12 @@ import { Effect } from "effect";
 import { lineLoginRequest } from "~~/models/line.ts";
 import { LineLoginRepository } from "~~/repositories/lineLoginRepository.ts";
 import { effectEventHandler } from "~~/server/utils/effectEventHandler";
+import { anyObject } from "~~/utils/type";
 
+export const handlerName = "getGenerateLineLoginRequest";
 export const handlerType = lineLoginRequest;
+export const handlerQueryParams = anyObject;
+export const handlerRouterParams = anyObject;
 export default effectEventHandler({
   type: handlerType,
   handler: /*@__PURE__*/ Effect.gen(function* () {

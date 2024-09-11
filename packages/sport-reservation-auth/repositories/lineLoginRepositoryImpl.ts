@@ -6,6 +6,7 @@ import {
 } from "./lineLoginRepository";
 import { lineRequestData } from "../models/line";
 import { linePostIssueAccessToken } from "../server/utils/fetch";
+import { ValkeyError } from "~~/models/errors";
 
 export const lineLoginRepositoryImpl = {
   generateRequest: () =>
@@ -14,13 +15,16 @@ export const lineLoginRepositoryImpl = {
       const nonce = crypto.randomBytes(16).toString("hex");
       const codeVerifier = crypto.randomBytes(64).toString("hex");
 
-      yield* Effect.tryPromise(async () => {
-        await useStorage().setItem<typeof lineRequestData.infer>(
-          `valkey:request:line:${state}`,
-          { nonce, codeVerifier },
-          { ttl: 600 },
-        );
-      });
+      yield* Effect.mapError(
+        Effect.tryPromise(async () => {
+          await useStorage().setItem<typeof lineRequestData.infer>(
+            `valkey:request:line:${state}`,
+            { nonce, codeVerifier },
+            { ttl: 600 },
+          );
+        }),
+        () => new ValkeyError(),
+      );
 
       return { state, nonce, codeVerifier };
     }),
@@ -28,11 +32,14 @@ export const lineLoginRepositoryImpl = {
     Effect.gen(function* () {
       const { codeVerifier } = yield* Option.match(
         Option.fromNullable(
-          yield* Effect.tryPromise(async () => {
-            return await useStorage().getItem<typeof lineRequestData.infer>(
-              `valkey:request:line:${state}`,
-            );
-          }),
+          yield* Effect.orElseSucceed(
+            Effect.tryPromise(async () => {
+              return await useStorage().getItem<typeof lineRequestData.infer>(
+                `valkey:request:line:${state}`,
+              );
+            }),
+            () => null,
+          ),
         ),
         {
           onSome: (e) => Effect.succeed(e),

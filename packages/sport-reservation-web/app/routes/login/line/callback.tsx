@@ -1,4 +1,4 @@
-import { authPostGetLineLoginAuthToken } from "@/utils/fetch/authFetch";
+import { authClient } from "@/utils/client/authClient";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/start";
 import { arkTypeSearchValidator } from "@tanstack/router-arktype-adapter";
@@ -10,7 +10,13 @@ const renderCallback = createServerFn(
   async ({ code, state }: { code: string; state: string }) => {
     "use server";
 
-    await Effect.runPromise(authPostGetLineLoginAuthToken({ code, state }));
+    await Effect.runPromise(
+      Effect.gen(function* () {
+        return yield* (yield* authClient).postGetLineLoginAuthToken({
+          query: { code, state },
+        });
+      }),
+    );
 
     throw redirect({ to: "/" });
   },

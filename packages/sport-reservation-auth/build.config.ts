@@ -5,10 +5,11 @@ export default defineBuildConfig({
   entries: [
     {
       builder: "rollup",
-      input: "./routes",
+      input: "./client/client",
     },
   ],
   declaration: true,
+  sourcemap: true,
   alias: {
     "#imports": path.resolve(".nitro/types/nitro-imports"),
     "~": path.resolve("./server"),
@@ -16,7 +17,8 @@ export default defineBuildConfig({
     "~~": path.resolve("./"),
     "@@": path.resolve("./"),
   },
-  rollup: { inlineDependencies: true },
+  externals: ["effect", "arktype", "ofetch", "ufo"],
+  rollup: { inlineDependencies: true, esbuild: { minify: true } },
   hooks: {
     "rollup:options": (_, options) => {
       options.treeshake = {

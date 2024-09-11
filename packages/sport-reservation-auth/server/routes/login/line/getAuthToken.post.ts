@@ -1,19 +1,25 @@
 import { type } from "arktype";
 import { Effect } from "effect";
 import { lineAuthToken } from "~~/models/line.ts";
+import { effectType } from "~~/utils/effectType";
 import { LineLoginRepository } from "~~/repositories/lineLoginRepository.ts";
 import { effectEventHandler } from "~~/server/utils/effectEventHandler";
+import { anyObject } from "~~/utils/type";
 
-const queryParams = /*@__PURE__*/ type({ code: "string", state: "string" });
-
+export const handlerName = "postGetLineLoginAuthToken";
 export const handlerType = lineAuthToken;
+export const handlerQueryParams = type({
+  code: "string",
+  state: "string",
+});
+export const handlerRouterParams = anyObject;
 export default effectEventHandler({
   type: handlerType,
   handler: /*@__PURE__*/ Effect.gen(function* () {
     const { event } = yield* EventContext;
     const lineLoginRepository = yield* LineLoginRepository;
     const { code, state } = yield* effectType(
-      queryParams,
+      handlerQueryParams,
       yield* Effect.tryPromise(async () => await readBody(event)),
     );
     const { access, id, refresh, type } =
