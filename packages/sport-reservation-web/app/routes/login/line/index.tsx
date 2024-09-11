@@ -1,4 +1,4 @@
-import { authGetGenerateLineLoginRequest } from "@/utils/fetch/authFetch";
+import { authClient } from "@/utils/client/authClient";
 import { useUrl } from "@/utils/useUrl";
 import { createFileRoute } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/start";
@@ -7,7 +7,11 @@ import { useEffect } from "react";
 
 const renderIndex = createServerFn("GET", async () => {
   "use server";
-  return await Effect.runPromise(authGetGenerateLineLoginRequest({}));
+  return await Effect.runPromise(
+    Effect.gen(function* () {
+      return yield* (yield* authClient).getGenerateLineLoginRequest({});
+    }),
+  );
 });
 
 function IndexComponent() {
@@ -38,7 +42,7 @@ function IndexComponent() {
 
   useEffect(() => {
     window.location.replace(url);
-  }, []);
+  }, [url]);
 
   return null;
 }

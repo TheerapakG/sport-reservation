@@ -1,6 +1,6 @@
-import { Cause, Context, Effect } from "effect";
-import { ArktypeError } from "../models/errors";
-import { lineAuthToken, lineRequest } from "../models/line";
+import { Context, Effect } from "effect";
+import { ArktypeError, FetchError, ValkeyError } from "~~/models/errors";
+import { lineAuthToken, lineRequest } from "~~/models/line";
 
 export class InvalidLineStateError {
   readonly _tag = "InvalidStateError";
@@ -16,14 +16,14 @@ export class LineLoginRepository
     {
       generateRequest: () => Effect.Effect<
         typeof lineRequest.infer,
-        Cause.UnknownException
+        FetchError | ValkeyError
       >;
       getAuthToken: (data: {
         code: string;
         state: string;
       }) => Effect.Effect<
         typeof lineAuthToken.infer,
-        ArktypeError | InvalidLineStateError | Cause.UnknownException
+        FetchError | ArktypeError | InvalidLineStateError
       >;
       getProfileByAuthToken: (
         data: typeof lineAuthToken.infer,

@@ -7,6 +7,7 @@ import {
   EventHandlerResponse,
   EventHandler,
 } from "h3";
+import { effectType } from "~~/utils/effectType";
 import { LineLoginRepository } from "~~/repositories/lineLoginRepository.ts";
 import { lineLoginRepositoryImpl } from "~~/repositories/lineLoginRepositoryImpl.ts";
 
@@ -21,29 +22,27 @@ const repositoryContext = /*@__PURE__*/ Context.empty().pipe(
 );
 
 type EffectEventHandler<
-  T = unknown,
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  $ = {},
+  T extends Type<unknown, {}> = Type<unknown, {}>,
   Request extends EventHandlerRequest = EventHandlerRequest,
-> = EventHandler<Request, Promise<Type<T, $>["infer"]>>;
+> = EventHandler<Request, Promise<T["infer"]>>;
 
 /*@__NO_SIDE_EFFECTS__*/
 export const effectEventHandler = <
-  T = unknown,
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  $ = {},
+  T extends Type<unknown, {}> = Type<unknown, {}>,
   Request extends EventHandlerRequest = EventHandlerRequest,
 >({
   type,
   handler,
 }: {
-  type: Type<T, $>;
+  type: T;
   handler: Effect.Effect<
-    EventHandlerResponse<Type<T, $>["infer"]>,
+    EventHandlerResponse<T["infer"]>,
     unknown,
     EventContext | LineLoginRepository
   >;
-}): EffectEventHandler<T, $, Request> => {
+}): EffectEventHandler<T, Request> => {
   return eventHandler(async (event) => {
     const exit = await Effect.runPromiseExit(
       Effect.gen(function* () {
