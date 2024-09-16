@@ -1,4 +1,10 @@
 {
   "name": "sport-reservation",
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "husky": "^9.1.6"
+  },
+  "scripts": {
+    "prepare": "husky"
+  }
 }

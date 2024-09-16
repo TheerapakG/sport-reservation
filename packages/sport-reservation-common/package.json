@@ -3,13 +3,28 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "scripts": {},
+  "exports": {
+    "./utils/*": {
+      "types": "./dist/utils/*.d.ts",
+      "import": "./dist/utils/*.mjs",
+      "require": "./dist/utils/*.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "unbuild",
+    "prepare": "unbuild"
+  },
   "dependencies": {
     "arktype": "2.0.0-rc.0",
     "drizzle-orm": "^0.33.0",
     "postgres": "^3.4.4"
   },
   "devDependencies": {
-    "drizzle-kit": "^0.24.1"
+    "drizzle-kit": "^0.24.1",
+    "unbuild": "^2.0.0"
   }
 }

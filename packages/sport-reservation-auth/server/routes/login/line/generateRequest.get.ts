@@ -4,6 +4,7 @@ import { lineLoginRequest } from "~~/models/line.ts";
 import { LineLoginRepository } from "~~/repositories/lineLoginRepository.ts";
 import { effectEventHandler } from "~~/server/utils/effectEventHandler";
 import { anyObject } from "~~/utils/type";
+import { useUrl } from "sport-reservation-common/utils/useUrl";
 
 export const handlerName = "getGenerateLineLoginRequest";
 export const handlerType = lineLoginRequest;
@@ -17,20 +18,25 @@ export default effectEventHandler({
     const { state, nonce, codeVerifier } =
       yield* lineloginRepository.generateRequest();
     return {
-      responseType: "code",
-      clientId: config.line.clientId as string,
-      redirectUri: config.line.redirectUri as string,
-      state,
-      scope: "profile openid",
-      nonce,
-      codeChallenge: crypto
-        .createHash("sha256")
-        .update(codeVerifier)
-        .digest("base64")
-        .replace(/\+/g, "-")
-        .replace(/\//g, "_")
-        .replace(/=/g, ""),
-      codeChallengeMethod: "S256",
+      url: useUrl({
+        baseUrl: "https://access.line.me/oauth2/v2.1/authorize",
+        searchParams: {
+          responseType: "code",
+          clientId: config.line.clientId as string,
+          redirectUri: config.line.redirectUri as string,
+          state,
+          scope: "profile openid",
+          nonce,
+          codeChallenge: crypto
+            .createHash("sha256")
+            .update(codeVerifier)
+            .digest("base64")
+            .replace(/\+/g, "-")
+            .replace(/\//g, "_")
+            .replace(/=/g, ""),
+          codeChallengeMethod: "S256",
+        },
+      }).toString(),
     };
   }),
 });
