@@ -12,14 +12,7 @@ export const lineRequest = /*@__PURE__*/ type([
 ]);
 
 export const lineLoginRequest = /*@__PURE__*/ type({
-  responseType: "string",
-  clientId: "string",
-  redirectUri: "string",
-  state: "string",
-  scope: "string",
-  nonce: "string",
-  codeChallenge: "string",
-  codeChallengeMethod: "string",
+  url: "string",
 });
 
 export const lineAuthToken = /*@__PURE__*/ type({
