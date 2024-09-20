@@ -33,7 +33,7 @@
   },
   "peerDependencies": {
     "arktype": "2.0.0-rc.5",
-    "effect": "^3.7.0",
+    "effect": "^3.8.0",
     "ofetch": "^1.3.4",
     "sport-reservation-common": "workspace:*",
     "ufo": "^1.5.4"
