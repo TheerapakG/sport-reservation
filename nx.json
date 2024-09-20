@@ -1,6 +1,17 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "targetDefaults": {
+    "format": {
+      "cache": false
+    },
+    "lint": {
+      "dependsOn": ["^generate"],
+      "cache": false
+    },
+    "typecheck": {
+      "dependsOn": ["^generate"],
+      "cache": false
+    },
     "generate": {
       "dependsOn": ["^generate"],
       "outputs": [

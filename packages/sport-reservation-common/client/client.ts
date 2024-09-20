@@ -51,7 +51,7 @@ type Method<
 > = (
   opts: Opts & {
     mock?: Effect.Effect<A, E, never>;
-  }
+  },
 ) => Effect.Effect<A, E, R>;
 
 /*@__NO_SIDE_EFFECTS__*/
@@ -87,11 +87,11 @@ const createMethod = <
           method,
           query,
           router,
-        }
+        },
       ),
       Fetch,
-      fetch
-    )
+      fetch,
+    ),
   );
 
 /*@__NO_SIDE_EFFECTS__*/
@@ -114,8 +114,8 @@ export const createClient = <CR extends ClientRoutes>(clientRoutes: CR) => {
               InferRouterParams<typeof routerParams>,
             typeof type.infer
           >,
-        ]
-      )
+        ],
+      ),
     ) as unknown as {
       [K in keyof typeof clientRoutes]: Method<
         InferQueryParams<(typeof clientRoutes)[K]["queryParams"]> &

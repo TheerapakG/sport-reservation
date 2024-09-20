@@ -32,15 +32,9 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --workspace-root
 
-  format:
-    strategy:
-      matrix:
-        package: [auth, web]
+  checks:
     needs: [cache-dependencies]
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./packages/sport-reservation-${{ matrix.package }}
 
     steps:
       - name: Checkout
@@ -60,85 +54,14 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --workspace-root
 
-      - name: Autogenerate Types
-        run: pnpm nx run-many -t generate --output-style=stream
-
-      - name: Run Format
-        run: pnpm prettier -c .
-
-  lint:
-    strategy:
-      matrix:
-        package: [auth, web]
-    needs: [cache-dependencies]
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./packages/sport-reservation-${{ matrix.package }}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-
-      - name: Setup node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "20"
-          cache: "pnpm"
-
-      - name: Install Dependencies
-        run: pnpm install --workspace-root
-
-      - name: Autogenerate Types
-        run: pnpm nx run-many -t generate --output-style=stream
-
-      - name: Run Lint
-        run: pnpm eslint --flag unstable_ts_config .
-
-  typecheck:
-    strategy:
-      matrix:
-        package: [auth, web]
-    needs: [cache-dependencies]
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./packages/sport-reservation-${{ matrix.package }}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8
-
-      - name: Setup node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "20"
-          cache: "pnpm"
-
-      - name: Install Dependencies
-        run: pnpm install --workspace-root
-
-      - name: Autogenerate Types
-        run: pnpm nx run-many -t generate --output-style=stream
-
-      - name: Run Typecheck
-        run: pnpm tsc --noEmit
+      - name: Run Checks
+        run: pnpm nx run-many -t format,lint,typecheck --output-style=stream
 
   build:
     strategy:
       matrix:
         package: [auth, web]
-    needs: [cache-dependencies, format, lint, typecheck]
+    needs: [cache-dependencies, checks]
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -162,11 +85,8 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --workspace-root
 
-      - name: Autogenerate Types
-        run: pnpm nx run-many -t generate --output-style=stream
-
       - name: Run Build
-        run: pnpm build
+        run: pnpm nx build sport-reservation-${{ matrix.package }} --output-style=stream
 
       - name: Build container image
         run: docker build -t registry.digitalocean.com/${{ secrets.REGISTRY_NAME }}/sport-reservation-${{ matrix.package }}:$(echo $GITHUB_SHA | head -c7) .
