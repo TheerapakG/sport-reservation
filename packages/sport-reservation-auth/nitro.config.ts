@@ -16,5 +16,8 @@ export default defineNitroConfig({
       redirectUri: "NITRO_LINE_REDIRECT_URI",
     },
   },
-  hooks: nitroHooks,
+  hooks: {
+    "types:extend": nitroHooks["types:extend"],
+    compiled: nitroHooks["compiled"],
+  },
 });

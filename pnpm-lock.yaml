@@ -33,7 +33,7 @@ importers:
         specifier: ^0.33.0
         version: 0.33.0
       effect:
-        specifier: ^3.7.0
+        specifier: ^3.8.0
         version: 3.8.0
       h3:
         specifier: ^1.12.0
@@ -115,7 +115,7 @@ importers:
         specifier: ^0.33.0
         version: 0.33.0
       effect:
-        specifier: ^3.7.0
+        specifier: ^3.8.0
         version: 3.8.0
       hookable:
         specifier: ^5.5.3
@@ -269,8 +269,8 @@ importers:
         specifier: ^2.0.3
         version: 2.0.3
       effect:
-        specifier: ^3.7.0
-        version: 3.7.0
+        specifier: ^3.8.0
+        version: 3.8.0
       embla-carousel-react:
         specifier: ^8.2.0
         version: 8.2.0(react@18.3.1)
@@ -5879,10 +5879,6 @@ packages:
 
   /ee-first@1.1.1:
     resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
-
-  /effect@3.7.0:
-    resolution: {integrity: sha512-TXrb4SHTHrij396NfvGgpOD/5Sh503LtN2AeskkB7YO6Oe1tWSekk8dcrj3AWbMDOJ/fXOvcf6HD+Svus2zIeA==}
-    dev: false
 
   /effect@3.8.0:
     resolution: {integrity: sha512-9ouAF51iUYMhbWOSQjWayfoyDDMziQCr2Y8VfhnUmRdfi44n+91VplTA5qqV2mWvFNM3ZV4R6bcfW2js9fK7IA==}

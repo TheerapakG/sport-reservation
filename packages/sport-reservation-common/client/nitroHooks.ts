@@ -14,7 +14,7 @@ async function writeFile(file: string, contents: Buffer | string) {
   );
 }
 
-export const nitroHooks: NestedHooks<NitroHooks> = {
+export const nitroHooks = {
   "types:extend": async (types) => {
     const metadata = Object.entries(types.routes).flatMap(([path, methods]) =>
       Object.entries(methods).map(([method, types]) => {
@@ -58,4 +58,4 @@ export const nitroHooks: NestedHooks<NitroHooks> = {
         Effect.tryPromise(async () => build(".", false))
       );
   },
-};
+} as const satisfies NestedHooks<NitroHooks>;
