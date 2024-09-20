@@ -53,7 +53,7 @@
     "@typescript-eslint/parser": "catalog:",
     "dotenv": "^16.4.5",
     "eslint": "catalog:",
-    "globals": "^15.9.0",
+    "globals": "catalog:",
     "jiti": "catalog:",
     "nitropack": "catalog:",
     "prettier": "catalog:",
