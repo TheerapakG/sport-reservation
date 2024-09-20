@@ -8,7 +8,8 @@ import {
 import { Type } from "arktype";
 import { effectType } from "~~/utils/effectType";
 import { encodePath } from "ufo";
-import { FetchError } from "~~/models/errors";
+import { ArktypeError, FetchError } from "~~/models/errors";
+import { anyObject } from "./type";
 
 export class Fetch
   extends /*@__PURE__*/ Context.Tag("FetchService")<
@@ -37,19 +38,17 @@ export type TypedFetchOptions<
 /*@__NO_SIDE_EFFECTS__*/
 export const typedFetch = <
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  T extends Type<unknown, {}>,
+  T extends Type<unknown, {}> = Type<unknown, {}>,
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  QP extends Type<unknown, {}>,
+  QP extends Type<unknown, {}> = Type<unknown, {}>,
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  RP extends Type<unknown, {}>,
+  RP extends Type<unknown, {}> = Type<unknown, {}>,
   R extends ResponseType = "json",
 >(
-  t: T,
-  _qp: QP,
-  _rp: RP,
+  { response }: { response?: T; queryParams?: QP; routerParams?: RP },
   request: string,
-  options?: TypedFetchOptions<QP, RP, R>,
-) => {
+  options?: TypedFetchOptions<QP, RP, R>
+): Effect.Effect<T["infer"], ArktypeError | FetchError, Fetch> => {
   return Effect.gen(function* () {
     const { fetch } = yield* Fetch;
     const { router, ...opts } = options ?? {};
@@ -64,11 +63,11 @@ export const typedFetch = <
       })
       .join("/");
     return yield* effectType(
-      t,
+      (response ?? anyObject) as T,
       yield* Effect.mapError(
         Effect.tryPromise(() => fetch(parsedRequest, opts)),
-        (error) => new FetchError(error.error as OFetchError),
-      ),
+        (error) => new FetchError(error.error as OFetchError)
+      )
     );
   });
 };
@@ -80,12 +79,12 @@ export const withMock = <
   R = never,
   Opts extends Record<string, unknown> = Record<string, unknown>,
 >(
-  fetch: (opts: Opts) => Effect.Effect<A, E, R>,
+  fetch: (opts: Opts) => Effect.Effect<A, E, R>
 ) => {
   return (
     opts: Opts & {
       mock?: Effect.Effect<A, E, never>;
-    },
+    }
   ) => {
     const { mock } = opts ?? {};
     return mock ?? fetch(opts);

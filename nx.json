@@ -1,0 +1,21 @@
+{
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "targetDefaults": {
+    "generate": {
+      "dependsOn": ["^generate"],
+      "outputs": [
+        "{projectRoot}/dist",
+        "{projectRoot}/.nitro",
+        "{projectRoot}/app/routeTree.gen.ts",
+        "{projectRoot}/client/routes.gen.ts"
+      ],
+      "cache": true
+    },
+    "build": {
+      "dependsOn": ["^generate"],
+      "outputs": ["{projectRoot}/dist", "{projectRoot}/.output"],
+      "cache": true
+    }
+  },
+  "defaultBase": "main"
+}

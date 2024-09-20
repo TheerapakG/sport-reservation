@@ -6,7 +6,7 @@
   "scripts": {
     "build": "vinxi build",
     "dev": "vinxi dev",
-    "prepare": "tsr generate",
+    "generate": "tsr generate",
     "start": "vinxi start"
   },
   "dependencies": {
@@ -64,12 +64,14 @@
     "react-resizable-panels": "^2.1.2",
     "recharts": "^2.12.7",
     "sonner": "^1.5.0",
-    "sport-reservation-auth": "workspace:*",
-    "sport-reservation-common": "workspace:*",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.1",
     "vinxi": "^0.4.2"
+  },
+  "peerDependencies": {
+    "sport-reservation-auth": "workspace:*",
+    "sport-reservation-common": "workspace:*"
   },
   "devDependencies": {
     "@eslint/compat": "^1.1.1",

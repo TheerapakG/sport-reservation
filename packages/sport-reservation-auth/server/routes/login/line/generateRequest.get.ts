@@ -3,7 +3,7 @@ import { Effect } from "effect";
 import { lineLoginRequest } from "~~/models/line.ts";
 import { LineLoginRepository } from "~~/repositories/lineLoginRepository.ts";
 import { effectEventHandler } from "~~/server/utils/effectEventHandler";
-import { anyObject } from "~~/utils/type";
+import { anyObject } from "sport-reservation-common/utils/type";
 import { useUrl } from "sport-reservation-common/utils/useUrl";
 
 export const handlerName = "getGenerateLineLoginRequest";
@@ -15,7 +15,7 @@ export default effectEventHandler({
   handler: /*@__PURE__*/ Effect.gen(function* () {
     const config = useRuntimeConfig();
     const lineloginRepository = yield* LineLoginRepository;
-    const { state, nonce, codeVerifier } =
+    const { state, nonce, codeVerifier, scope } =
       yield* lineloginRepository.generateRequest();
     return {
       url: useUrl({
@@ -25,7 +25,7 @@ export default effectEventHandler({
           clientId: config.line.clientId as string,
           redirectUri: config.line.redirectUri as string,
           state,
-          scope: "profile openid",
+          scope,
           nonce,
           codeChallenge: crypto
             .createHash("sha256")

@@ -30,7 +30,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: sport-reservation-auth-secret
-                  key: nitroPostgresUrl
+                  key: postgresUrl
             - name: NITRO_VALKEY_HOST
               valueFrom:
                 secretKeyRef:

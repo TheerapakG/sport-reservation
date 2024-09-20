@@ -1,6 +1,6 @@
 import { Context, Effect } from "effect";
 import { ArktypeError, FetchError, ValkeyError } from "~~/models/errors";
-import { lineAuthToken, lineRequest } from "~~/models/line";
+import { lineAuthToken } from "~~/models/line";
 
 export class InvalidLineStateError {
   readonly _tag = "InvalidStateError";
@@ -15,7 +15,12 @@ export class LineLoginRepository
     LineLoginRepository,
     {
       generateRequest: () => Effect.Effect<
-        typeof lineRequest.infer,
+        {
+          state: string;
+          nonce: string;
+          codeVerifier: string;
+          scope: string;
+        },
         FetchError | ValkeyError
       >;
       getAuthToken: (data: {
@@ -25,14 +30,18 @@ export class LineLoginRepository
         typeof lineAuthToken.infer,
         FetchError | ArktypeError | InvalidLineStateError
       >;
-      getProfileByAuthToken: (
-        data: typeof lineAuthToken.infer,
-      ) => Effect.Effect<unknown, ArktypeError | InvalidLineNonceError>;
-      findUserByProfile: (
-        data: typeof lineAuthToken.infer,
-      ) => Effect.Effect<unknown>;
-      createUserByProfile: (
-        data: typeof lineAuthToken.infer,
-      ) => Effect.Effect<unknown>;
+      getProfileByAuthToken: (data: {
+        nonce: string;
+        idToken: string;
+      }) => Effect.Effect<
+        { id: string; name: string; avatar: string },
+        FetchError | ArktypeError | InvalidLineNonceError
+      >;
+      findUserByProfile: (data: { id: string }) => Effect.Effect<unknown>;
+      createUserByProfile: (data: {
+        id: string;
+        name: string;
+        avatar: string;
+      }) => Effect.Effect<unknown>;
     }
   >() {}
