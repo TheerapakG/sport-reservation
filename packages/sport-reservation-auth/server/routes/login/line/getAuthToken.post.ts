@@ -1,10 +1,10 @@
 import { type } from "arktype";
 import { Effect } from "effect";
 import { lineAuthToken } from "~~/models/line.ts";
-import { effectType } from "~~/utils/effectType";
+import { effectType } from "sport-reservation-common/utils/effectType";
 import { LineLoginRepository } from "~~/repositories/lineLoginRepository.ts";
 import { effectEventHandler } from "~~/server/utils/effectEventHandler";
-import { anyObject } from "~~/utils/type";
+import { anyObject } from "sport-reservation-common/utils/type";
 
 export const handlerName = "postGetLineLoginAuthToken";
 export const handlerType = lineAuthToken;

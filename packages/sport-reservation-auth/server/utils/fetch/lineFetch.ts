@@ -1,8 +1,11 @@
 import { Effect } from "effect";
 import { ofetch } from "ofetch";
-import { Fetch, typedFetch, withMock } from "~~/utils/fetch";
+import {
+  Fetch,
+  typedFetch,
+  withMock,
+} from "sport-reservation-common/utils/fetch";
 import { type } from "arktype";
-import { anyObject } from "~~/utils/type";
 
 export const lineFetch = /*@__PURE__*/ ofetch.create({
   baseURL: "https://api.line.me/oauth2/v2.1",
@@ -16,17 +19,15 @@ const linePostIssueAccessTokenResponse = /*@__PURE__*/ type({
   scope: "string",
   token_type: "string",
 });
-const linePostIssueAccessTokenQueryParams = anyObject;
-const linePostIssueAccessTokenRouterParams = anyObject;
 export const linePostIssueAccessToken = withMock(
   ({ code, codeVerifier }: { code: string; codeVerifier: string }) =>
     Effect.provideService(
       Effect.gen(function* () {
         const config = useRuntimeConfig();
         return yield* typedFetch(
-          linePostIssueAccessTokenResponse,
-          linePostIssueAccessTokenQueryParams,
-          linePostIssueAccessTokenRouterParams,
+          {
+            response: linePostIssueAccessTokenResponse,
+          },
           "/token",
           {
             method: "POST",
@@ -37,6 +38,44 @@ export const linePostIssueAccessToken = withMock(
               client_id: config.line.clientId,
               client_secret: config.line.clientSecret,
               code_verifier: codeVerifier,
+            }),
+          },
+        );
+      }),
+      Fetch,
+      { fetch: lineFetch },
+    ),
+);
+
+const lineGetUserProfileResponse = /*@__PURE__*/ type({
+  iss: "string",
+  sub: "string",
+  aud: "string",
+  exp: "number",
+  iat: "number",
+  "auth_time?": "number",
+  "nonce?": "string",
+  "amr?": "string[]",
+  "name?": "string",
+  "picture?": "string",
+  "email?": "string",
+});
+export const linePostGetUserProfile = withMock(
+  ({ idToken, nonce }: { idToken: string; nonce: string }) =>
+    Effect.provideService(
+      Effect.gen(function* () {
+        const config = useRuntimeConfig();
+        return yield* typedFetch(
+          {
+            response: lineGetUserProfileResponse,
+          },
+          "/verify",
+          {
+            method: "POST",
+            body: new URLSearchParams({
+              id_token: idToken,
+              client_id: config.line.clientId,
+              nonce,
             }),
           },
         );

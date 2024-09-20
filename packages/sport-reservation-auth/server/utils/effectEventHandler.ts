@@ -7,7 +7,7 @@ import {
   EventHandlerResponse,
   EventHandler,
 } from "h3";
-import { effectType } from "~~/utils/effectType";
+import { effectType } from "sport-reservation-common/utils/effectType";
 import { LineLoginRepository } from "~~/repositories/lineLoginRepository.ts";
 import { lineLoginRepositoryImpl } from "~~/repositories/lineLoginRepositoryImpl.ts";
 
@@ -17,9 +17,7 @@ export class EventContext
     { event: H3Event<EventHandlerRequest> }
   >() {}
 
-const repositoryContext = /*@__PURE__*/ Context.empty().pipe(
-  /*@__PURE__*/ Context.add(LineLoginRepository, lineLoginRepositoryImpl),
-);
+const repositoryLive = /*@__PURE__*/ lineLoginRepositoryImpl;
 
 type EffectEventHandler<
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -51,7 +49,7 @@ export const effectEventHandler = <
           yield* pipe(
             handler,
             Effect.provideService(EventContext, { event }),
-            Effect.provide(repositoryContext),
+            Effect.provide(repositoryLive),
           ),
         );
       }),

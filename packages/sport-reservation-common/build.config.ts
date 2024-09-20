@@ -1,16 +1,53 @@
+import { globSync } from "glob";
+import path from "pathe";
 import { defineBuildConfig } from "unbuild";
-import path from "path";
+import { fileURLToPath } from "url";
 
 export default defineBuildConfig({
   entries: [
     {
       builder: "rollup",
-      input: "./utils/useUrl",
+      input: "./client/client",
     },
+    {
+      builder: "rollup",
+      input: "./client/nitroHooks",
+    },
+    {
+      builder: "rollup",
+      input: "./db/schema",
+    },
+    ...globSync("./models/**/*").map((file) => {
+      return {
+        builder: "rollup" as const,
+        input: fileURLToPath(
+          new URL(
+            file.slice(0, file.length - path.extname(file).length),
+            import.meta.url
+          )
+        ),
+      };
+    }),
+    ...globSync("./utils/**/*").map((file) => {
+      return {
+        builder: "rollup" as const,
+        input: fileURLToPath(
+          new URL(
+            file.slice(0, file.length - path.extname(file).length),
+            import.meta.url
+          )
+        ),
+      };
+    }),
   ],
   declaration: true,
   sourcemap: true,
-  rollup: { inlineDependencies: true, esbuild: { minify: true } },
+  alias: {
+    "~~": path.resolve("./"),
+    "@@": path.resolve("./"),
+  },
+  externals: ["arktype", "effect", "hookable", "nitropack", "pathe", "unbuild"],
+  rollup: { inlineDependencies: true },
   hooks: {
     "rollup:options": (_, options) => {
       options.treeshake = {

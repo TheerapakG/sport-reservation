@@ -1,6 +1,6 @@
 import { type, Type } from "arktype";
 import { Effect } from "effect";
-import { ArktypeError } from "~~/models/errors.ts";
+import { ArktypeError } from "~~/models/errors";
 
 /*@__NO_SIDE_EFFECTS__*/
 export const effectType = <
@@ -8,7 +8,7 @@ export const effectType = <
   T extends Type<unknown, {}> = Type<unknown, {}>,
 >(
   t: T,
-  data: unknown,
+  data: unknown
 ): Effect.Effect<T["infer"], ArktypeError> => {
   return Effect.gen(function* () {
     const result = t(data);

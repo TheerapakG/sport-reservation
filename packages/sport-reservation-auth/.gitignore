@@ -28,5 +28,5 @@ dist-ssr
 *.sln
 *.sw?
 
-routes.ts
+routes.gen.ts
 types

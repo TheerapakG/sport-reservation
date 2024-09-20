@@ -18,7 +18,7 @@ export default defineBuildConfig({
     "@@": path.resolve("./"),
   },
   externals: ["effect", "arktype", "ofetch", "ufo"],
-  rollup: { inlineDependencies: true, esbuild: { minify: true } },
+  rollup: { inlineDependencies: true },
   hooks: {
     "rollup:options": (_, options) => {
       options.treeshake = {
