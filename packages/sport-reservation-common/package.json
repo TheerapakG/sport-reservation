@@ -30,25 +30,37 @@
     "dist"
   ],
   "scripts": {
+    "format": "pnpm prettier -c .",
+    "lint": "pnpm eslint --flag unstable_ts_config .",
+    "typecheck": "pnpm tsc --noEmit",
     "build": "unbuild",
     "generate": "unbuild"
   },
   "dependencies": {
-    "defu": "^6.1.4",
-    "drizzle-orm": "^0.33.0"
+    "defu": "^6.1.4"
   },
   "peerDependencies": {
-    "arktype": "2.0.0-rc.5",
-    "effect": "^3.8.0",
+    "arktype": "catalog:",
+    "drizzle-orm": "catalog:",
+    "effect": "catalog:",
     "hookable": "^5.5.3",
-    "nitropack": "^2.9.7",
-    "ofetch": "^1.3.4",
-    "pathe": "^1.1.2",
-    "ufo": "^1.5.4",
-    "unbuild": "^2.0.0"
+    "nitropack": "catalog:",
+    "ofetch": "catalog:",
+    "pathe": "catalog:",
+    "ufo": "catalog:",
+    "unbuild": "catalog:"
   },
   "devDependencies": {
+    "@eslint/compat": "catalog:",
+    "@eslint/eslintrc": "catalog:",
+    "@eslint/js": "catalog:",
+    "@types/eslint__eslintrc": "catalog:",
+    "@types/eslint__js": "catalog:",
+    "@typescript-eslint/eslint-plugin": "catalog:",
+    "@typescript-eslint/parser": "catalog:",
     "drizzle-kit": "^0.24.2",
-    "glob": "^11.0.0"
+    "eslint": "catalog:",
+    "glob": "^11.0.0",
+    "prettier": "catalog:"
   }
 }

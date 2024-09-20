@@ -11,10 +11,6 @@ export default defineBuildConfig({
     },
     {
       builder: "rollup",
-      input: "./client/hooks",
-    },
-    {
-      builder: "rollup",
       input: "./db/schema",
     },
     ...globSync("./models/**/*").map((file) => {
@@ -23,8 +19,8 @@ export default defineBuildConfig({
         input: fileURLToPath(
           new URL(
             file.slice(0, file.length - path.extname(file).length),
-            import.meta.url
-          )
+            import.meta.url,
+          ),
         ),
       };
     }),
@@ -34,8 +30,8 @@ export default defineBuildConfig({
         input: fileURLToPath(
           new URL(
             file.slice(0, file.length - path.extname(file).length),
-            import.meta.url
-          )
+            import.meta.url,
+          ),
         ),
       };
     }),
@@ -46,7 +42,15 @@ export default defineBuildConfig({
     "~~": path.resolve("./"),
     "@@": path.resolve("./"),
   },
-  externals: ["arktype", "effect", "hookable", "nitropack", "pathe", "unbuild"],
+  externals: [
+    "arktype",
+    "effect",
+    "hookable",
+    "nitropack",
+    "pathe",
+    "ufo",
+    "unbuild",
+  ],
   rollup: { inlineDependencies: true },
   hooks: {
     "rollup:options": (_, options) => {

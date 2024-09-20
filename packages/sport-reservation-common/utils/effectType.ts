@@ -8,7 +8,7 @@ export const effectType = <
   T extends Type<unknown, {}> = Type<unknown, {}>,
 >(
   t: T,
-  data: unknown
+  data: unknown,
 ): Effect.Effect<T["infer"], ArktypeError> => {
   return Effect.gen(function* () {
     const result = t(data);

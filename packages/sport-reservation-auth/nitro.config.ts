@@ -2,7 +2,7 @@ import { defineNitroConfig } from "nitropack/config";
 
 //https://nitro.unjs.io/config
 export default defineNitroConfig({
-  preset: "./preset",
+  extends: "../sport-reservation-common/client/preset",
   srcDir: "server",
   runtimeConfig: {
     postgresUrl: "NITRO_POSTGRES_URL",

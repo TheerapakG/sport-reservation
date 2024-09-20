@@ -47,7 +47,7 @@ export const typedFetch = <
 >(
   { response }: { response?: T; queryParams?: QP; routerParams?: RP },
   request: string,
-  options?: TypedFetchOptions<QP, RP, R>
+  options?: TypedFetchOptions<QP, RP, R>,
 ): Effect.Effect<T["infer"], ArktypeError | FetchError, Fetch> => {
   return Effect.gen(function* () {
     const { fetch } = yield* Fetch;
@@ -66,8 +66,8 @@ export const typedFetch = <
       (response ?? anyObject) as T,
       yield* Effect.mapError(
         Effect.tryPromise(() => fetch(parsedRequest, opts)),
-        (error) => new FetchError(error.error as OFetchError)
-      )
+        (error) => new FetchError(error.error as OFetchError),
+      ),
     );
   });
 };
@@ -79,12 +79,12 @@ export const withMock = <
   R = never,
   Opts extends Record<string, unknown> = Record<string, unknown>,
 >(
-  fetch: (opts: Opts) => Effect.Effect<A, E, R>
+  fetch: (opts: Opts) => Effect.Effect<A, E, R>,
 ) => {
   return (
     opts: Opts & {
       mock?: Effect.Effect<A, E, never>;
-    }
+    },
   ) => {
     const { mock } = opts ?? {};
     return mock ?? fetch(opts);
