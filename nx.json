@@ -5,11 +5,11 @@
       "cache": false
     },
     "lint": {
-      "dependsOn": ["^generate"],
+      "dependsOn": ["generate"],
       "cache": false
     },
     "typecheck": {
-      "dependsOn": ["^generate"],
+      "dependsOn": ["generate"],
       "cache": false
     },
     "generate": {
@@ -23,7 +23,7 @@
       "cache": true
     },
     "build": {
-      "dependsOn": ["^generate"],
+      "dependsOn": ["generate"],
       "outputs": ["{projectRoot}/dist", "{projectRoot}/.output"],
       "cache": true
     }

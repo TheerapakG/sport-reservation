@@ -61,6 +61,7 @@
     "drizzle-kit": "^0.24.2",
     "eslint": "catalog:",
     "glob": "^11.0.0",
+    "globals": "catalog:",
     "prettier": "catalog:"
   }
 }
