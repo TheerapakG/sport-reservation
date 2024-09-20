@@ -30,7 +30,7 @@ jobs:
           cache: "pnpm"
 
       - name: Install Dependencies
-        run: pnpm install --workspace-root
+        run: pnpm install
 
   checks:
     needs: [cache-dependencies]
@@ -52,7 +52,7 @@ jobs:
           cache: "pnpm"
 
       - name: Install Dependencies
-        run: pnpm install --workspace-root
+        run: pnpm install
 
       - name: Run Checks
         run: pnpm nx run-many -t format,lint,typecheck --output-style=stream
@@ -83,7 +83,7 @@ jobs:
           cache: "pnpm"
 
       - name: Install Dependencies
-        run: pnpm install --workspace-root
+        run: pnpm install
 
       - name: Run Build
         run: pnpm nx build sport-reservation-${{ matrix.package }} --output-style=stream
