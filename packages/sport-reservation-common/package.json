@@ -34,6 +34,7 @@
     "generate": "unbuild"
   },
   "dependencies": {
+    "defu": "^6.1.4",
     "drizzle-orm": "^0.33.0"
   },
   "peerDependencies": {

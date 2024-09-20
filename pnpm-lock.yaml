@@ -111,6 +111,9 @@ importers:
       arktype:
         specifier: 2.0.0-rc.5
         version: 2.0.0-rc.5
+      defu:
+        specifier: ^6.1.4
+        version: 6.1.4
       drizzle-orm:
         specifier: ^0.33.0
         version: 0.33.0
