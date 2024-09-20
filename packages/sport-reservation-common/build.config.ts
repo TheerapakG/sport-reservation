@@ -11,7 +11,7 @@ export default defineBuildConfig({
     },
     {
       builder: "rollup",
-      input: "./client/nitroHooks",
+      input: "./client/hooks",
     },
     {
       builder: "rollup",
