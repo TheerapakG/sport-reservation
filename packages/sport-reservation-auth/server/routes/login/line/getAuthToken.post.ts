@@ -8,10 +8,7 @@ import { EventContext } from "sport-reservation-common/utils/effectEventHandler"
 import { noInferOut } from "sport-reservation-common/utils/noInfer";
 import { UserClient } from "sport-reservation-user";
 import { UploadClient } from "sport-reservation-upload";
-import fs from "node:fs";
 import { sign } from "jsonwebtoken";
-
-const authKey = fs.readFileSync("/.secret/auth.key");
 
 export const handlerConfig = defineEventHandlerConfig({
   name: "postGetLineLoginAuthToken",
@@ -78,6 +75,7 @@ export default effectEventHandler({
       },
     );
 
+    const authKey = yield* AuthKey;
     const token = yield* Effect.try(() =>
       sign(profile, authKey, { algorithm: "RS256" }),
     );
