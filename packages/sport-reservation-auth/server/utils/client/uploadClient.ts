@@ -12,7 +12,10 @@ export const uploadClient = _uploadClient.pipe(
       Effect.try(() => {
         const config = useRuntimeConfig();
         return {
-          fetch: createUploadFetch({ baseURL: config.upload.BaseUrl }),
+          fetch: createUploadFetch({
+            baseURL: config.upload.BaseUrl,
+            headers: { Authorization: `Bearer ${config.upload.secret}` },
+          }),
         };
       }),
     ),
