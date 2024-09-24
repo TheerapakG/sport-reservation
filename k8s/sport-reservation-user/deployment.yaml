@@ -40,6 +40,10 @@ spec:
             - name: sport-reservation-user-auth-key
               readOnly: true
               mountPath: "/.secret"
+      volumes:
+        - name: sport-reservation-user-auth-key
+          secret:
+            secretName: sport-reservation-user-auth-key
 ---
 apiVersion: v1
 kind: Service
