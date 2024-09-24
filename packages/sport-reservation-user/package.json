@@ -1,0 +1,65 @@
+{
+  "name": "sport-reservation-user",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "types": "./dist/client/client.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/client/client.d.ts",
+      "import": "./dist/client/client.mjs",
+      "require": "./dist/client/client.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "scripts": "pnpm jiti ./scripts.ts",
+    "format": "pnpm prettier -c .",
+    "lint": "pnpm eslint --flag unstable_ts_config .",
+    "typecheck": "pnpm tsc --noEmit",
+    "build": "pnpm scripts build",
+    "dev": "nitro dev",
+    "generate": "pnpm scripts generate",
+    "preview": "node .output/server/index.mjs"
+  },
+  "dependencies": {
+    "@effect/sql": "^0.12.1",
+    "@effect/sql-drizzle": "^0.10.1",
+    "@effect/sql-pg": "^0.12.1",
+    "jsonwebtoken": "^9.0.2",
+    "unstorage": "^1.10.2",
+    "validator": "^13.12.0"
+  },
+  "peerDependencies": {
+    "arktype": "catalog:",
+    "drizzle-orm": "catalog:",
+    "effect": "catalog:",
+    "h3": "catalog:",
+    "ofetch": "catalog:",
+    "sport-reservation-common": "workspace:*",
+    "ufo": "catalog:"
+  },
+  "devDependencies": {
+    "@eslint/compat": "catalog:",
+    "@eslint/eslintrc": "catalog:",
+    "@eslint/js": "catalog:",
+    "@smithy/types": "^3.4.2",
+    "@types/eslint__eslintrc": "catalog:",
+    "@types/eslint__js": "catalog:",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/lodash-es": "^4.17.12",
+    "@types/validator": "^13.12.1",
+    "@typescript-eslint/eslint-plugin": "catalog:",
+    "@typescript-eslint/parser": "catalog:",
+    "dotenv": "^16.4.5",
+    "eslint": "catalog:",
+    "globals": "catalog:",
+    "jiti": "catalog:",
+    "nitropack": "catalog:",
+    "prettier": "catalog:",
+    "unbuild": "catalog:"
+  }
+}

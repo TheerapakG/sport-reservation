@@ -7,32 +7,24 @@ export default defineBuildConfig({
   entries: [
     {
       builder: "rollup",
-      input: "./client/client",
-    },
-    {
-      builder: "rollup",
       input: "./db/schema",
     },
-    ...globSync("./models/**/*").map((file) => {
+    ...globSync("./models/**/*", { nodir: true }).map((file) => {
       return {
         builder: "rollup" as const,
-        input: fileURLToPath(
-          new URL(
-            file.slice(0, file.length - path.extname(file).length),
-            import.meta.url,
-          ),
-        ),
+        input: fileURLToPath(new URL(file, import.meta.url)),
       };
     }),
-    ...globSync("./utils/**/*").map((file) => {
+    ...globSync("./server/**/*", { nodir: true }).map((file) => {
       return {
         builder: "rollup" as const,
-        input: fileURLToPath(
-          new URL(
-            file.slice(0, file.length - path.extname(file).length),
-            import.meta.url,
-          ),
-        ),
+        input: fileURLToPath(new URL(file, import.meta.url)),
+      };
+    }),
+    ...globSync("./utils/**/*", { nodir: true }).map((file) => {
+      return {
+        builder: "rollup" as const,
+        input: fileURLToPath(new URL(file, import.meta.url)),
       };
     }),
   ],
@@ -45,6 +37,7 @@ export default defineBuildConfig({
   externals: [
     "arktype",
     "effect",
+    "h3",
     "hookable",
     "nitropack",
     "pathe",

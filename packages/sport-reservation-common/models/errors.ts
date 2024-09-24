@@ -10,6 +10,12 @@ export class FetchError {
   constructor(readonly error: OFetchError) {}
 }
 
+export class S3Error {
+  readonly _tag = "S3Error";
+
+  constructor(readonly error: Error) {}
+}
+
 export class ValkeyError {
   readonly _tag = "ValkeyError";
 }

@@ -1,6 +1,12 @@
-import { Context, Effect } from "effect";
-import { ArktypeError, FetchError, ValkeyError } from "~~/models/errors";
+import { Context, Effect, Option } from "effect";
+import {
+  ArktypeError,
+  FetchError,
+  ValkeyError,
+} from "sport-reservation-common/models/errors";
+import { SqlError } from "@effect/sql";
 import { lineAuthToken } from "~~/models/line";
+import { Simplify } from "effect/Types";
 
 export class InvalidLineStateError {
   readonly _tag = "InvalidStateError";
@@ -27,7 +33,7 @@ export class LineLoginRepository
         code: string;
         state: string;
       }) => Effect.Effect<
-        typeof lineAuthToken.infer,
+        Simplify<{ nonce: string } & typeof lineAuthToken.infer>,
         FetchError | ArktypeError | InvalidLineStateError
       >;
       getProfileByAuthToken: (data: {
@@ -37,11 +43,12 @@ export class LineLoginRepository
         { id: string; name: string; avatar: string },
         FetchError | ArktypeError | InvalidLineNonceError
       >;
-      findUserByProfile: (data: { id: string }) => Effect.Effect<unknown>;
-      createUserByProfile: (data: {
-        id: string;
-        name: string;
-        avatar: string;
-      }) => Effect.Effect<unknown>;
+      findUserIdByLineId: (data: {
+        lineId: string;
+      }) => Effect.Effect<Option.Option<{ userId: number }>, SqlError.SqlError>;
+      associateUserIdWithLineId: (data: {
+        userId: number;
+        lineId: string;
+      }) => Effect.Effect<void, SqlError.SqlError>;
     }
   >() {}

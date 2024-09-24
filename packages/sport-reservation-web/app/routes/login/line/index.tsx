@@ -3,13 +3,17 @@ import { createFileRoute } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/start";
 import { Effect } from "effect";
 import { useEffect } from "react";
+import { AuthClient } from "sport-reservation-auth";
 
 const renderIndex = createServerFn("GET", async () => {
   "use server";
   return await Effect.runPromise(
-    Effect.gen(function* () {
-      return yield* (yield* authClient).getGenerateLineLoginRequest({});
-    }),
+    Effect.provide(
+      Effect.gen(function* () {
+        return yield* (yield* AuthClient).getGenerateLineLoginRequest({});
+      }),
+      authClient,
+    ),
   );
 });
 

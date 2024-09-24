@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sport-reservation-upload
+  labels:
+    app: sport-reservation-upload
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sport-reservation-upload
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 5
+  template:
+    metadata:
+      labels:
+        app: sport-reservation-upload
+    spec:
+      containers:
+        - name: sport-reservation-upload
+          image: <IMAGE>
+          ports:
+            - containerPort: 3000
+              name: sp-upload-svc
+          env:
+            - name: NITRO_S3_ORIGIN_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-upload-secret
+                  key: s3OriginEndpoint
+            - name: NITRO_S3_DOMAIN_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-upload-secret
+                  key: s3DomainEndpoint
+            - name: NITRO_S3_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-upload-secret
+                  key: s3Key
+            - name: NITRO_S3_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-upload-secret
+                  key: s3Secret
+            - name: NITRO_S3_BUCKET
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-upload-secret
+                  key: s3Bucket
+            - name: NITRO_UPLOAD_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-upload-secret
+                  key: uploadSecret
+          volumeMounts:
+            - name: sport-reservation-upload-auth-key
+              readOnly: true
+              mountPath": "/.secret"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sport-reservation-upload-service
+spec:
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: sp-upload-svc
+  selector:
+    app: sport-reservation-upload

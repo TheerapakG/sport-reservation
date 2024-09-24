@@ -2,7 +2,7 @@ import * as PgDrizzle from "@effect/sql-drizzle/Pg";
 import { PgClient } from "@effect/sql-pg";
 import { Effect, Layer } from "effect";
 
-export const dbLive = Effect.cached(
+export const dbLive = Layer.unwrapEffect(
   Effect.try(() => {
     const config = useRuntimeConfig();
     const PgLive = PgClient.layer({

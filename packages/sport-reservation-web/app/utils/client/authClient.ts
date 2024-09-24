@@ -1,11 +1,15 @@
 import {
   AuthFetch,
   createAuthFetch,
-  createAuthClient,
+  authClient as _authClient,
 } from "sport-reservation-auth";
 import { config } from "../config";
-import { Effect } from "effect";
+import { Layer } from "effect";
 
-export const authClient = Effect.provideService(createAuthClient(), AuthFetch, {
-  fetch: createAuthFetch({ baseURL: config.authBaseUrl }),
-});
+export const authClient = _authClient.pipe(
+  Layer.provide(
+    Layer.succeed(AuthFetch, {
+      fetch: createAuthFetch({ baseURL: config.authBaseUrl }),
+    }),
+  ),
+);

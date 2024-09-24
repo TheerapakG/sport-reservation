@@ -1,5 +1,7 @@
 .vscode
 .env.secret
+auth.key
+auth.key.pub
 volume.yaml
 
 node_modules

@@ -19,7 +19,7 @@ const linePostIssueAccessTokenResponse = /*@__PURE__*/ type({
   scope: "string",
   token_type: "string",
 });
-export const linePostIssueAccessToken = withMock(
+export const linePostIssueAccessToken = /*@__PURE__*/ withMock(
   ({ code, codeVerifier }: { code: string; codeVerifier: string }) =>
     Effect.provideService(
       Effect.gen(function* () {
@@ -60,7 +60,7 @@ const lineGetUserProfileResponse = /*@__PURE__*/ type({
   "picture?": "string",
   "email?": "string",
 });
-export const linePostGetUserProfile = withMock(
+export const linePostGetUserProfile = /*@__PURE__*/ withMock(
   ({ idToken, nonce }: { idToken: string; nonce: string }) =>
     Effect.provideService(
       Effect.gen(function* () {

@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sport-reservation-user
+  labels:
+    app: sport-reservation-user
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sport-reservation-user
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 5
+  template:
+    metadata:
+      labels:
+        app: sport-reservation-user
+    spec:
+      containers:
+        - name: sport-reservation-user
+          image: <IMAGE>
+          ports:
+            - containerPort: 3000
+              name: sp-user-svc
+          env:
+            - name: NITRO_UPLOAD_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-user-secret
+                  key: uploadSecret
+            - name: NITRO_UPLOAD_BASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-user-secret
+                  key: uploadBaseUrl
+          volumeMounts:
+            - name: sport-reservation-user-auth-key
+              readOnly: true
+              mountPath": "/.secret"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sport-reservation-user-service
+spec:
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: sp-user-svc
+  selector:
+    app: sport-reservation-user
