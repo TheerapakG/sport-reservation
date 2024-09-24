@@ -44,7 +44,7 @@ spec:
           volumeMounts:
             - name: sport-reservation-web-auth-key
               readOnly: true
-              mountPath": "/.secret"
+              mountPath: "/.secret"
 ---
 apiVersion: v1
 kind: Service
