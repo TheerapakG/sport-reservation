@@ -4,6 +4,9 @@ secretGenerator:
   - name: sport-reservation-web-secret
     envs:
       - .env.secret
+  - name: sport-reservation-web-auth-key
+    files:
+      - auth.key.pub
 configMapGenerator:
 generatorOptions:
   disableNameSuffixHash: true

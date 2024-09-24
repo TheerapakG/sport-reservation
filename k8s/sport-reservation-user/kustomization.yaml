@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+secretGenerator:
+  - name: sport-reservation-user-secret
+    envs:
+      - .env.secret
+  - name: sport-reservation-user-auth-key
+    files:
+      - auth.key.pub
+configMapGenerator:
+generatorOptions:
+  disableNameSuffixHash: true
+resources:

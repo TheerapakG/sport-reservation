@@ -1,3 +1,4 @@
 import { type } from "arktype";
 
-export const anyObject = type({});
+export const anyObjectType = type({});
+export const unknownType = type("unknown");

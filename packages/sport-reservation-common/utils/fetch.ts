@@ -4,12 +4,14 @@ import {
   ResponseType,
   FetchOptions,
   FetchError as OFetchError,
+  FetchResponse,
+  MappedResponseType,
 } from "ofetch";
 import { Type } from "arktype";
 import { effectType } from "~~/utils/effectType";
 import { encodePath } from "ufo";
 import { ArktypeError, FetchError } from "~~/models/errors";
-import { anyObject } from "./type";
+import { anyObjectType } from "./type";
 
 export class Fetch
   extends /*@__PURE__*/ Context.Tag("FetchService")<
@@ -17,23 +19,38 @@ export class Fetch
     { fetch: $Fetch }
   >() {}
 
-export type TypedFetchOptions<
+export type TypedFetchParamsOptions<
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   QP extends Type<unknown, {}>,
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  BP extends Type<unknown, {}>,
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   RP extends Type<unknown, {}>,
-  R extends ResponseType = "json",
-> = FetchOptions<R> &
-  (QP["infer"] extends Record<string, unknown>
+> = (QP["infer"] extends Record<string, unknown>
+  ? {
+      query: QP["infer"];
+    }
+  : { query?: Record<string, unknown> }) &
+  (BP["infer"] extends Record<string, unknown>
     ? {
-        query: QP["infer"];
+        body: BP["infer"];
       }
-    : { query?: Record<string, unknown> }) &
+    : { body?: RequestInit["body"] | Record<string, unknown> }) &
   (RP["infer"] extends Record<string, unknown>
     ? {
         router: RP["infer"];
       }
     : { router?: Record<string, unknown> });
+
+export type TypedFetchOptions<
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  QP extends Type<unknown, {}>,
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  BP extends Type<unknown, {}>,
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  RP extends Type<unknown, {}>,
+  R extends ResponseType = "json",
+> = FetchOptions<R> & TypedFetchParamsOptions<QP, BP, RP>;
 
 /*@__NO_SIDE_EFFECTS__*/
 export const typedFetch = <
@@ -42,14 +59,22 @@ export const typedFetch = <
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   QP extends Type<unknown, {}> = Type<unknown, {}>,
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  BP extends Type<unknown, {}> = Type<unknown, {}>,
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   RP extends Type<unknown, {}> = Type<unknown, {}>,
   R extends ResponseType = "json",
 >(
-  { response }: { response?: T; queryParams?: QP; routerParams?: RP },
+  {
+    response,
+  }: { response?: T; queryParams?: QP; bodyParams?: BP; routerParams?: RP },
   request: string,
-  options?: TypedFetchOptions<QP, RP, R>,
-): Effect.Effect<T["infer"], ArktypeError | FetchError, Fetch> => {
-  return Effect.gen(function* () {
+  options?: TypedFetchOptions<QP, BP, RP, R>,
+): Effect.Effect<
+  MappedResponseType<R, T["infer"]>,
+  ArktypeError | FetchError,
+  Fetch
+> =>
+  Effect.gen(function* () {
     const { fetch } = yield* Fetch;
     const { router, ...opts } = options ?? {};
     const parsedRequest = request
@@ -62,15 +87,73 @@ export const typedFetch = <
         return encodePath(JSON.stringify(replace));
       })
       .join("/");
-    return yield* effectType(
-      (response ?? anyObject) as T,
-      yield* Effect.mapError(
-        Effect.tryPromise(() => fetch(parsedRequest, opts)),
-        (error) => new FetchError(error.error as OFetchError),
-      ),
+
+    const fetchResponse = yield* Effect.mapError(
+      Effect.tryPromise(() => fetch(parsedRequest, opts)),
+      (error) => new FetchError(error.error as OFetchError),
     );
+
+    if (
+      ["blob", "text", "arrayBuffer", "stream"].includes(
+        (opts as FetchOptions<R>)?.responseType ?? "json",
+      )
+    )
+      return fetchResponse;
+    return yield* effectType((response ?? anyObjectType) as T, fetchResponse);
   });
-};
+
+/*@__NO_SIDE_EFFECTS__*/
+export const typedRawFetch = <
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  T extends Type<unknown, {}> = Type<unknown, {}>,
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  QP extends Type<unknown, {}> = Type<unknown, {}>,
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  BP extends Type<unknown, {}> = Type<unknown, {}>,
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  RP extends Type<unknown, {}> = Type<unknown, {}>,
+  R extends ResponseType = "json",
+>(
+  { response }: { response?: T; queryParams?: QP; routerParams?: RP },
+  request: string,
+  options?: TypedFetchOptions<QP, BP, RP, R>,
+): Effect.Effect<
+  FetchResponse<MappedResponseType<R, T["infer"]>>,
+  ArktypeError | FetchError,
+  Fetch
+> =>
+  Effect.gen(function* () {
+    const { fetch } = yield* Fetch;
+    const { router, ...opts } = options ?? {};
+    const parsedRequest = request
+      .split("/")
+      .filter(Boolean)
+      .map((s) => {
+        if (!s.startsWith("**") && !s.startsWith(":")) return s;
+        const replace = router?.[s.replace("**", "").replace(":", "")];
+        if (replace === undefined) return s;
+        return encodePath(JSON.stringify(replace));
+      })
+      .join("/");
+
+    const fetchResponse = yield* Effect.mapError(
+      Effect.tryPromise(() => fetch.raw(parsedRequest, opts)),
+      (error) => new FetchError(error.error as OFetchError),
+    );
+
+    if (
+      ["blob", "text", "arrayBuffer", "stream"].includes(
+        (opts as FetchOptions<R>)?.responseType ?? "json",
+      )
+    )
+      return fetchResponse;
+
+    fetchResponse._data = yield* effectType(
+      (response ?? anyObjectType) as T,
+      fetchResponse._data,
+    );
+    return fetchResponse;
+  });
 
 /*@__NO_SIDE_EFFECTS__*/
 export const withMock = <

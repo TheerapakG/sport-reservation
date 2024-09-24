@@ -9,12 +9,11 @@ export const effectType = <
 >(
   t: T,
   data: unknown,
-): Effect.Effect<T["infer"], ArktypeError> => {
-  return Effect.gen(function* () {
+): Effect.Effect<T["infer"], ArktypeError> =>
+  Effect.gen(function* () {
     const result = t(data);
     if (result instanceof type.errors) {
       return yield* Effect.fail(new ArktypeError());
     }
     return result;
   });
-};

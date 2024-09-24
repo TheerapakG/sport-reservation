@@ -60,7 +60,7 @@ jobs:
   build:
     strategy:
       matrix:
-        package: [auth, web]
+        package: [user, auth, upload, web]
     needs: [cache-dependencies, checks]
     runs-on: ubuntu-latest
     defaults:
@@ -105,7 +105,7 @@ jobs:
   deploy:
     strategy:
       matrix:
-        package: [auth, web]
+        package: [user, auth, upload, web]
     needs: [build]
     runs-on: ubuntu-latest
     defaults:

@@ -4,10 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "exports": {
-    "./client/*": {
-      "types": "./dist/client/*.d.ts",
-      "import": "./dist/client/*.mjs",
-      "require": "./dist/client/*.mjs"
+    "./server/*": {
+      "types": "./dist/server/*.d.ts",
+      "import": "./dist/server/*.mjs",
+      "require": "./dist/server/*.mjs"
     },
     "./db/schema": {
       "types": "./dist/db/schema.d.ts",
@@ -37,12 +37,14 @@
     "generate": "unbuild"
   },
   "dependencies": {
+    "citty": "^0.1.6",
     "defu": "^6.1.4"
   },
   "peerDependencies": {
     "arktype": "catalog:",
     "drizzle-orm": "catalog:",
     "effect": "catalog:",
+    "h3": "catalog:",
     "hookable": "^5.5.3",
     "nitropack": "catalog:",
     "ofetch": "catalog:",

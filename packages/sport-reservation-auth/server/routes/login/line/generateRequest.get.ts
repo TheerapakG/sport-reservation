@@ -3,15 +3,15 @@ import { Effect } from "effect";
 import { lineLoginRequest } from "~~/models/line.ts";
 import { LineLoginRepository } from "~~/repositories/lineLoginRepository.ts";
 import { effectEventHandler } from "~~/server/utils/effectEventHandler";
-import { anyObject } from "sport-reservation-common/utils/type";
 import { useUrl } from "sport-reservation-common/utils/useUrl";
+import { defineEventHandlerConfig } from "sport-reservation-common/utils/eventHandlerConfig";
 
-export const handlerName = "getGenerateLineLoginRequest";
-export const handlerType = lineLoginRequest;
-export const handlerQueryParams = anyObject;
-export const handlerRouterParams = anyObject;
+export const handlerConfig = defineEventHandlerConfig({
+  name: "getGenerateLineLoginRequest",
+  response: lineLoginRequest,
+});
 export default effectEventHandler({
-  type: handlerType,
+  config: handlerConfig,
   handler: /*@__PURE__*/ Effect.gen(function* () {
     const config = useRuntimeConfig();
     const lineloginRepository = yield* LineLoginRepository;

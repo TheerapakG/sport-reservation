@@ -26,11 +26,25 @@ spec:
             - containerPort: 3000
               name: sp-web-svc
           env:
+            - name: UPLOAD_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-web-secret
+                  key: uploadSecret
             - name: AUTH_BASE_URL
               valueFrom:
                 secretKeyRef:
                   name: sport-reservation-web-secret
                   key: authBaseUrl
+            - name: UPLOAD_BASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-web-secret
+                  key: uploadBaseUrl
+          volumeMounts:
+            - name: sport-reservation-web-auth-key
+              readOnly: true
+              mountPath": "/.secret"
 ---
 apiVersion: v1
 kind: Service
