@@ -1,11 +1,12 @@
 import { S3 as S3Client } from "@aws-sdk/client-s3";
 import { Context, Effect, Layer } from "effect";
 
-export class S3 extends Context.Tag("S3")<S3, { s3: S3Client }>() {}
+export class S3
+  extends /*@__PURE__*/ Context.Tag("S3")<S3, { s3: S3Client }>() {}
 
-export const s3Live = Layer.effect(
+export const s3Live = /*@__PURE__*/ Layer.effect(
   S3,
-  Effect.gen(function* () {
+  /*@__PURE__*/ Effect.gen(function* () {
     const config = useRuntimeConfig();
     return yield* Effect.tryPromise(async () => {
       return {

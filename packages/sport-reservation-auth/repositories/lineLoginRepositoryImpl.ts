@@ -16,7 +16,7 @@ import { eq } from "drizzle-orm";
 
 export const lineLoginRepositoryImpl = /*@__PURE__*/ Layer.effect(
   LineLoginRepository,
-  Effect.gen(function* () {
+  /*@__PURE__*/ Effect.gen(function* () {
     const db = yield* PgDrizzle;
     return {
       generateRequest: () =>

@@ -26,10 +26,12 @@
     "preview": "node .output/server/index.mjs"
   },
   "dependencies": {
-    "@effect/sql": "^0.12.1",
-    "@effect/sql-drizzle": "^0.10.1",
-    "@effect/sql-pg": "^0.12.1",
-    "jsonwebtoken": "^9.0.2",
+    "@effect/platform": "catalog:",
+    "@effect/platform-node": "catalog:",
+    "@effect/sql": "catalog:",
+    "@effect/sql-drizzle": "catalog:",
+    "@effect/sql-pg": "catalog:",
+    "jsonwebtoken": "catalog:",
     "unstorage": "^1.10.2",
     "validator": "^13.12.0"
   },
