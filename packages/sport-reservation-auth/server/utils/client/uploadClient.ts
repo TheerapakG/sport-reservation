@@ -13,7 +13,7 @@ export const uploadClient = _uploadClient.pipe(
         const config = useRuntimeConfig();
         return {
           fetch: createUploadFetch({
-            baseURL: config.upload.BaseUrl,
+            baseURL: config.upload.baseUrl,
             headers: { Authorization: `Bearer ${config.upload.secret}` },
           }),
         };
