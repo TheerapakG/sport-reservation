@@ -1,6 +1,7 @@
 import { Type } from "arktype";
 import { Context, Effect, Layer } from "effect";
-import { MappedResponseType, ResponseType, ofetch } from "ofetch";
+import { Simplify } from "effect/Types";
+import { FetchOptions, MappedResponseType, ResponseType, ofetch } from "ofetch";
 import { ArktypeError, FetchError } from "~~/models/errors";
 import {
   Fetch,
@@ -12,8 +13,11 @@ import {
 export { Fetch };
 
 /*@__NO_SIDE_EFFECTS__*/
-export const createFetch = ({ baseURL }: { baseURL: string }) =>
-  ofetch.create({ baseURL });
+export const createFetch = (
+  opts: Simplify<
+    Omit<FetchOptions, "baseURL"> & Required<Pick<FetchOptions, "baseURL">>
+  >,
+) => ofetch.create(opts);
 
 type ClientRoutes = {
   [method: string]: {
