@@ -98,8 +98,11 @@ export const typedFetch = <
         (opts as FetchOptions<R>)?.responseType ?? "json",
       )
     )
-      return fetchResponse;
-    return yield* effectType((response ?? anyObjectType) as T, fetchResponse);
+      return fetchResponse as MappedResponseType<R, T["infer"]>;
+    return (yield* effectType(
+      (response ?? anyObjectType) as T,
+      fetchResponse,
+    )) as MappedResponseType<R, T["infer"]>;
   });
 
 /*@__NO_SIDE_EFFECTS__*/
@@ -148,10 +151,10 @@ export const typedRawFetch = <
     )
       return fetchResponse;
 
-    fetchResponse._data = yield* effectType(
+    fetchResponse._data = (yield* effectType(
       (response ?? anyObjectType) as T,
       fetchResponse._data,
-    );
+    )) as MappedResponseType<R, T["infer"]>;
     return fetchResponse;
   });
 
