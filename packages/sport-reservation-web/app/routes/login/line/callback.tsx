@@ -6,7 +6,7 @@ import { type } from "arktype";
 import { Effect } from "effect";
 import { setCookie } from "vinxi/http";
 import { AuthClient } from "sport-reservation-auth";
-import { decode, JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
 const renderCallback = createServerFn(
   "POST",
@@ -26,8 +26,8 @@ const renderCallback = createServerFn(
 
     setCookie("token", token, {
       expires: new Date(
-        ((decode(token, { complete: true })?.payload as JwtPayload)?.exp ?? 0) *
-          1000,
+        ((jwt.decode(token, { complete: true })?.payload as jwt.JwtPayload)
+          ?.exp ?? 0) * 1000,
       ),
       secure: true,
     });

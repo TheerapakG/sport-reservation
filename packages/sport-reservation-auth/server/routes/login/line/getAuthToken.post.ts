@@ -8,7 +8,7 @@ import { EventContext } from "sport-reservation-common/utils/effectEventHandler"
 import { noInferOut } from "sport-reservation-common/utils/noInfer";
 import { UserClient } from "sport-reservation-user";
 import { UploadClient } from "sport-reservation-upload";
-import { sign } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
 export const handlerConfig = defineEventHandlerConfig({
   name: "postGetLineLoginAuthToken",
@@ -77,7 +77,7 @@ export default effectEventHandler({
 
     const authKey = yield* AuthKey;
     const token = yield* Effect.try(() =>
-      sign(profile, authKey, { algorithm: "RS256" }),
+      jwt.sign(profile, authKey, { algorithm: "RS256" }),
     );
 
     return { token };
