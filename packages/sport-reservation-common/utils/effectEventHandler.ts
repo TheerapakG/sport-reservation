@@ -1,4 +1,4 @@
-import { Effect, Context, Exit, Cause, pipe, Layer } from "effect";
+import { Effect, Context, Exit, Cause, pipe } from "effect";
 import {
   eventHandler,
   H3Event,
@@ -22,7 +22,7 @@ export type EffectEventHandler<
   Request extends EventHandlerRequest = EventHandlerRequest,
 > = EventHandler<Request, Promise<T["infer"]>>;
 
-export type InternalEffectEventHandlerOptions<
+export type EffectEventHandlerOptions<
   C extends EventHandlerConfig<string>,
   R = never,
 > = {
@@ -32,7 +32,6 @@ export type InternalEffectEventHandlerOptions<
     unknown,
     EventContext | R
   >;
-  layer: Layer.Layer<R, unknown>;
 };
 
 const effectEventHandler = <
@@ -42,8 +41,7 @@ const effectEventHandler = <
 >({
   config,
   handler,
-  layer,
-}: InternalEffectEventHandlerOptions<C, R>): EffectEventHandler<
+}: EffectEventHandlerOptions<C, R>): EffectEventHandler<
   C["response"],
   Request
 > => {
@@ -55,7 +53,7 @@ const effectEventHandler = <
           yield* pipe(
             handler,
             Effect.provideService(EventContext, { event }),
-            Effect.provide(layer),
+            Effect.provide(event.context.effectContext as Context.Context<R>),
           ),
         );
       }),
@@ -72,17 +70,8 @@ const effectEventHandler = <
   });
 };
 
-export type EffectEventHandlerOptions<
-  C extends EventHandlerConfig<string>,
-  R = never,
-> = Omit<InternalEffectEventHandlerOptions<C, R>, "layer">;
-
 /*@__NO_SIDE_EFFECTS__*/
-export const createEffectEventHandler = <R = never>({
-  layer,
-}: {
-  layer: Layer.Layer<R, unknown>;
-}) => {
+export const createEffectEventHandler = <R = never>() => {
   return <
     C extends EventHandlerConfig<string>,
     Request extends EventHandlerRequest = EventHandlerRequest,
@@ -90,5 +79,5 @@ export const createEffectEventHandler = <R = never>({
     config,
     handler,
   }: EffectEventHandlerOptions<C, R>) =>
-    effectEventHandler<C, Request, R>({ config, handler, layer });
+    effectEventHandler<C, Request, R>({ config, handler });
 };
