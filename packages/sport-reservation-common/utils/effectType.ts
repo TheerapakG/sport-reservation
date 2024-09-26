@@ -13,7 +13,7 @@ export const effectType = <
   Effect.gen(function* () {
     const result = t(data);
     if (result instanceof type.errors) {
-      return yield* Effect.fail(new ArktypeError());
+      return yield* Effect.fail(new ArktypeError(result));
     }
     return result;
   });
