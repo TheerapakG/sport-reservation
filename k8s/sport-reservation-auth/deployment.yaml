@@ -51,6 +51,11 @@ spec:
                 secretKeyRef:
                   name: sport-reservation-auth-secret
                   key: lineClientId
+            - name: NITRO_LINE_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-auth-secret
+                  key: lineClientSecret
             - name: NITRO_LINE_REDIRECT_URI
               valueFrom:
                 secretKeyRef:

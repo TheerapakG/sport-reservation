@@ -22,7 +22,7 @@ export default effectEventHandler({
         baseUrl: "https://access.line.me/oauth2/v2.1/authorize",
         searchParams: {
           response_type: "code",
-          client_id: config.line.clientId as string,
+          client_id: config.line.client.id as string,
           redirect_uri: config.line.redirectUri as string,
           state,
           scope,
