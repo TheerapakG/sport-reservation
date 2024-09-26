@@ -21,20 +21,20 @@ export default effectEventHandler({
       url: useUrl({
         baseUrl: "https://access.line.me/oauth2/v2.1/authorize",
         searchParams: {
-          responseType: "code",
-          clientId: config.line.clientId as string,
-          redirectUri: config.line.redirectUri as string,
+          response_type: "code",
+          client_id: config.line.clientId as string,
+          redirect_uri: config.line.redirectUri as string,
           state,
           scope,
           nonce,
-          codeChallenge: crypto
+          code_challenge: crypto
             .createHash("sha256")
             .update(codeVerifier)
             .digest("base64")
             .replace(/\+/g, "-")
             .replace(/\//g, "_")
             .replace(/=/g, ""),
-          codeChallengeMethod: "S256",
+          code_challenge_method: "S256",
         },
       }).toString(),
     };
