@@ -19,11 +19,11 @@ export default defineNitroConfig({
       redirectUri: "NITRO_LINE_REDIRECT_URI",
     },
     upload: {
-      baseURL: "NITRO_UPLOAD_BASE_URL",
+      baseUrl: "NITRO_UPLOAD_BASE_URL",
       secret: "NITRO_UPLOAD_SECRET",
     },
     user: {
-      baseURL: "NITRO_USER_BASE_URL",
+      baseUrl: "NITRO_USER_BASE_URL",
     },
   },
 });
