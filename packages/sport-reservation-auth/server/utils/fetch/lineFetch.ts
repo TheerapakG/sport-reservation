@@ -13,11 +13,12 @@ export const lineFetch = /*@__PURE__*/ ofetch.create({
 
 const linePostIssueAccessTokenResponse = /*@__PURE__*/ type({
   access_token: "string",
-  expires_in: "string",
+  expires_in: "number",
   id_token: "string",
   refresh_token: "string",
   scope: "string",
   token_type: "string",
+  "[string]": "unknown",
 });
 export const linePostIssueAccessToken = /*@__PURE__*/ withMock(
   ({ code, codeVerifier }: { code: string; codeVerifier: string }) =>
@@ -59,6 +60,7 @@ const lineGetUserProfileResponse = /*@__PURE__*/ type({
   "name?": "string",
   "picture?": "string",
   "email?": "string",
+  "[string]": "unknown",
 });
 export const linePostGetUserProfile = /*@__PURE__*/ withMock(
   ({ idToken, nonce }: { idToken: string; nonce: string }) =>

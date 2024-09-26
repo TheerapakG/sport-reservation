@@ -1,7 +1,10 @@
+import { ArkErrors } from "arktype";
 import { FetchError as OFetchError } from "ofetch";
 
 export class ArktypeError {
   readonly _tag = "TypeError";
+
+  constructor(readonly error: ArkErrors) {}
 }
 
 export class FetchError {
