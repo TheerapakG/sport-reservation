@@ -5,6 +5,7 @@ export default defineNitroConfig({
   extends: "./preset",
   srcDir: "server",
   runtimeConfig: {
+    postgresUrl: "NITRO_POSTGRES_URL",
     s3: {
       originEndpoint: "NITRO_S3_ORIGIN_ENDPOINT",
       domainEndpoint: "NITRO_S3_DOMAIN_ENDPOINT",
