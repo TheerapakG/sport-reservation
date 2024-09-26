@@ -1,4 +1,4 @@
-import { Effect } from "effect";
+import { Console, Effect } from "effect";
 import { ofetch } from "ofetch";
 import {
   Fetch,
@@ -24,6 +24,16 @@ export const linePostIssueAccessToken = /*@__PURE__*/ withMock(
     Effect.provideService(
       Effect.gen(function* () {
         const config = useRuntimeConfig();
+        yield* Console.log(
+          new URLSearchParams({
+            grant_type: "authorization_code",
+            code: code,
+            redirect_uri: config.line.redirectUri,
+            client_id: config.line.clientId,
+            client_secret: config.line.clientSecret,
+            code_verifier: codeVerifier,
+          }).toString(),
+        );
         return yield* typedFetch(
           {
             response: linePostIssueAccessTokenResponse,
@@ -31,9 +41,6 @@ export const linePostIssueAccessToken = /*@__PURE__*/ withMock(
           "/token",
           {
             method: "POST",
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-            },
             body: new URLSearchParams({
               grant_type: "authorization_code",
               code: code,
@@ -75,9 +82,6 @@ export const linePostGetUserProfile = /*@__PURE__*/ withMock(
           "/verify",
           {
             method: "POST",
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-            },
             body: new URLSearchParams({
               id_token: idToken,
               client_id: config.line.clientId,
