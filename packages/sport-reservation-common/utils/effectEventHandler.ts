@@ -62,16 +62,18 @@ const effectEventHandler = <
     if (Exit.isFailure(exit)) {
       const cause = exit.cause;
       if (Cause.isDieType(cause) && Cause.isUnknownException(cause.defect)) {
-        Effect.runSync(Console.log(cause.defect));
+        Effect.runSync(Console.log(event.path, cause.defect));
         throw createError(cause.defect.message);
       } else if (Cause.isFailType(cause)) {
         const error = cause.error;
         if (isArktypeError(error) || isFetchError(error) || isS3Error(error)) {
-          Effect.runSync(Console.log(error.error.message));
+          Effect.runSync(
+            Console.log(event.path, Cause.fail(error.error.message)),
+          );
           throw createError(error.error.message);
         }
       }
-      Effect.runSync(Console.log(cause));
+      Effect.runSync(Console.log(event.path, cause));
       throw createError(exit.toString());
     }
     return exit.value;
