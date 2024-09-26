@@ -12,7 +12,10 @@ export default defineNitroConfig({
       password: "NITRO_VALKEY_PASSWORD",
     },
     line: {
-      clientId: "NITRO_LINE_CLIENT_ID",
+      client: {
+        id: "NITRO_LINE_CLIENT_ID",
+        secret: "NITRO_LINE_CLIENT_SECRET",
+      },
       redirectUri: "NITRO_LINE_REDIRECT_URI",
     },
     upload: {
