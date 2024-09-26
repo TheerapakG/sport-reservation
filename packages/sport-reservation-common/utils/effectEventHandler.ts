@@ -10,6 +10,7 @@ import {
 import { EventHandlerConfig } from "~~/utils/eventHandlerConfig";
 import { effectType } from "~~/utils/effectType";
 import { unknownType } from "./type";
+import { isArktypeError, isFetchError, isS3Error } from "~~/models/errors";
 
 export class EventContext
   extends /*@__PURE__*/ Context.Tag("EventContext")<
@@ -60,12 +61,18 @@ const effectEventHandler = <
     );
     if (Exit.isFailure(exit)) {
       const cause = exit.cause;
-      Effect.runSync(Console.log(cause));
       if (Cause.isDieType(cause) && Cause.isUnknownException(cause.defect)) {
+        Effect.runSync(Console.log(cause.defect));
         throw createError(cause.defect.message);
-      } else {
-        throw createError(exit.toString());
+      } else if (Cause.isFailType(cause)) {
+        const error = cause.error;
+        if (isArktypeError(error) || isFetchError(error) || isS3Error(error)) {
+          Effect.runSync(Console.log(error.error.message));
+          throw createError(error.error.message);
+        }
       }
+      Effect.runSync(Console.log(cause));
+      throw createError(exit.toString());
     }
     return exit.value;
   });
