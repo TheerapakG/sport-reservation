@@ -31,6 +31,9 @@ export const linePostIssueAccessToken = /*@__PURE__*/ withMock(
           "/token",
           {
             method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
             body: new URLSearchParams({
               grant_type: "authorization_code",
               code: code,
@@ -72,6 +75,9 @@ export const linePostGetUserProfile = /*@__PURE__*/ withMock(
           "/verify",
           {
             method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
             body: new URLSearchParams({
               id_token: idToken,
               client_id: config.line.clientId,
