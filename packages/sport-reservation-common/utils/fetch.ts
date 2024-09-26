@@ -26,19 +26,19 @@ export type TypedFetchParamsOptions<
   BP extends Type<unknown, {}>,
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   RP extends Type<unknown, {}>,
-> = (QP["infer"] extends Record<string, unknown>
+> = (QP["inferIn"] extends Record<string, string>
   ? {
-      query: QP["infer"];
+      query: { [K in keyof QP["inferIn"]]: unknown };
     }
   : { query?: Record<string, unknown> }) &
-  (BP["infer"] extends Record<string, unknown>
+  (BP["inferIn"] extends Record<string, unknown>
     ? {
-        body: BP["infer"];
+        body: { [K in keyof BP["inferIn"]]: unknown };
       }
     : { body?: RequestInit["body"] | Record<string, unknown> }) &
-  (RP["infer"] extends Record<string, unknown>
+  (RP["inferIn"] extends Record<string, unknown>
     ? {
-        router: RP["infer"];
+        router: { [K in keyof RP["inferIn"]]: unknown };
       }
     : { router?: Record<string, unknown> });
 

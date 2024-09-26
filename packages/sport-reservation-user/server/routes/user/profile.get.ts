@@ -13,7 +13,7 @@ export const handlerConfig = defineEventHandlerConfig({
   response: userProfile,
   query: noInferOut(
     type({
-      id: "number",
+      id: "string.integer.parse",
     }),
   ),
 });
