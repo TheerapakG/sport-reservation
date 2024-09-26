@@ -60,7 +60,7 @@ const effectEventHandler = <
     );
     if (Exit.isFailure(exit)) {
       const cause = exit.cause;
-      Console.log(cause);
+      Effect.runSync(Console.log(cause));
       if (Cause.isDieType(cause) && Cause.isUnknownException(cause.defect)) {
         throw createError(cause.defect.message);
       } else {
