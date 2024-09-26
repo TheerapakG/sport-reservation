@@ -26,6 +26,11 @@ spec:
             - containerPort: 3000
               name: sp-user-svc
           env:
+            - name: NITRO_POSTGRES_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-user-secret
+                  key: postgresUrl
             - name: NITRO_UPLOAD_SECRET
               valueFrom:
                 secretKeyRef:
