@@ -12,7 +12,7 @@ export const userClient = _userClient.pipe(
       Effect.try(() => {
         const config = useRuntimeConfig();
         return {
-          fetch: createUserFetch({ baseURL: config.user.BaseUrl }),
+          fetch: createUserFetch({ baseURL: config.user.baseUrl }),
         };
       }),
     ),
