@@ -6,6 +6,7 @@ import {
   withMock,
 } from "sport-reservation-common/utils/fetch";
 import { type } from "arktype";
+import { unknownType } from "sport-reservation-common/utils/type";
 
 export const lineFetch = /*@__PURE__*/ ofetch.create({
   baseURL: "https://api.line.me/oauth2/v2.1",
@@ -28,6 +29,7 @@ export const linePostIssueAccessToken = /*@__PURE__*/ withMock(
         return yield* typedFetch(
           {
             response: linePostIssueAccessTokenResponse,
+            bodyParams: unknownType,
           },
           "/token",
           {
@@ -70,6 +72,7 @@ export const linePostGetUserProfile = /*@__PURE__*/ withMock(
         return yield* typedFetch(
           {
             response: lineGetUserProfileResponse,
+            bodyParams: unknownType,
           },
           "/verify",
           {
