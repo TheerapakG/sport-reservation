@@ -7,11 +7,11 @@ import {
   FetchResponse,
   MappedResponseType,
 } from "ofetch";
-import { Type } from "arktype";
 import { effectType } from "~~/utils/effectType";
 import { encodePath } from "ufo";
 import { ArktypeError, FetchError } from "~~/models/errors";
-import { anyObjectType } from "./type";
+import { anyObjectType, unknownType } from "./type";
+import { Simplify } from "drizzle-orm/utils";
 
 export class Fetch
   extends /*@__PURE__*/ Context.Tag("FetchService")<
@@ -20,48 +20,43 @@ export class Fetch
   >() {}
 
 export type TypedFetchParamsOptions<
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  QP extends Type<unknown, {}>,
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  BP extends Type<unknown, {}>,
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  RP extends Type<unknown, {}>,
-> = (QP["inferIn"] extends Record<string, string>
-  ? {
-      query: { [K in keyof QP["inferIn"]]: unknown };
-    }
-  : { query?: Record<string, unknown> }) &
-  (BP["inferIn"] extends Record<string, unknown>
-    ? {
-        body: { [K in keyof BP["inferIn"]]: unknown };
-      }
-    : { body?: RequestInit["body"] | Record<string, unknown> }) &
-  (RP["inferIn"] extends Record<string, unknown>
-    ? {
-        router: { [K in keyof RP["inferIn"]]: unknown };
-      }
-    : { router?: Record<string, unknown> });
+  QP extends typeof unknownType | undefined,
+  BP extends typeof unknownType | undefined,
+  RP extends typeof unknownType | undefined,
+  R extends ResponseType = "json",
+> = Simplify<
+  ([QP] extends [typeof unknownType]
+    ? QP["infer"] extends Record<string, unknown>
+      ? {
+          query: QP["infer"];
+        }
+      : { query?: never }
+    : { query?: never }) &
+    ([BP] extends [typeof unknownType]
+      ? BP["infer"] extends unknown
+        ? { body: Simplify<BP["infer"] & FetchOptions<R>["body"]> }
+        : { body?: never }
+      : { body?: never }) &
+    ([RP] extends [typeof unknownType]
+      ? RP["infer"] extends Record<string, unknown>
+        ? { router: RP["infer"] }
+        : { router?: never }
+      : { router?: never })
+>;
 
 export type TypedFetchOptions<
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  QP extends Type<unknown, {}>,
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  BP extends Type<unknown, {}>,
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  RP extends Type<unknown, {}>,
+  QP extends typeof unknownType | undefined,
+  BP extends typeof unknownType | undefined,
+  RP extends typeof unknownType | undefined,
   R extends ResponseType = "json",
-> = FetchOptions<R> & TypedFetchParamsOptions<QP, BP, RP>;
+> = FetchOptions<R> & TypedFetchParamsOptions<QP, BP, RP, R>;
 
 /*@__NO_SIDE_EFFECTS__*/
 export const typedFetch = <
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  T extends Type<unknown, {}> = Type<unknown, {}>,
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  QP extends Type<unknown, {}> = Type<unknown, {}>,
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  BP extends Type<unknown, {}> = Type<unknown, {}>,
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  RP extends Type<unknown, {}> = Type<unknown, {}>,
+  T extends typeof unknownType,
+  QP extends typeof unknownType | undefined,
+  BP extends typeof unknownType | undefined,
+  RP extends typeof unknownType | undefined,
   R extends ResponseType = "json",
 >(
   {
@@ -107,14 +102,10 @@ export const typedFetch = <
 
 /*@__NO_SIDE_EFFECTS__*/
 export const typedRawFetch = <
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  T extends Type<unknown, {}> = Type<unknown, {}>,
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  QP extends Type<unknown, {}> = Type<unknown, {}>,
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  BP extends Type<unknown, {}> = Type<unknown, {}>,
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  RP extends Type<unknown, {}> = Type<unknown, {}>,
+  T extends typeof unknownType,
+  QP extends typeof unknownType | undefined,
+  BP extends typeof unknownType | undefined,
+  RP extends typeof unknownType | undefined,
   R extends ResponseType = "json",
 >(
   { response }: { response?: T; queryParams?: QP; routerParams?: RP },

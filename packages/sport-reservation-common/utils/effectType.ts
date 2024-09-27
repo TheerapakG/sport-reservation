@@ -1,12 +1,10 @@
-import { type, Type } from "arktype";
+import { type } from "arktype";
 import { Effect } from "effect";
 import { ArktypeError } from "~~/models/errors";
+import { unknownType } from "./type";
 
 /*@__NO_SIDE_EFFECTS__*/
-export const effectType = <
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  T extends Type<unknown, {}> = Type<unknown, {}>,
->(
+export const effectType = <T extends typeof unknownType = typeof unknownType>(
   t: T,
   data: unknown,
 ): Effect.Effect<T["infer"], ArktypeError> =>

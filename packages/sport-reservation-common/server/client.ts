@@ -1,11 +1,19 @@
-import { Type } from "arktype";
 import { Context, Effect, Layer } from "effect";
 import { Simplify } from "effect/Types";
-import { FetchOptions, MappedResponseType, ResponseType, ofetch } from "ofetch";
+import { FetchOptions, MappedResponseType, ofetch } from "ofetch";
 import { ArktypeError, FetchError } from "~~/models/errors";
+import {
+  EventHandlerBody,
+  EventHandlerQuery,
+  EventHandlerResponse,
+  EventHandlerResponseType,
+  EventHandlerRouter,
+  EventHandlerTypeConfig,
+} from "~~/utils/eventHandlerConfig";
 import {
   Fetch,
   typedFetch,
+  TypedFetchOptions,
   TypedFetchParamsOptions,
   withMock,
 } from "~~/utils/fetch";
@@ -19,19 +27,15 @@ export const createFetch = (
   >,
 ) => ofetch.create(opts);
 
-type ClientRoutes = {
-  [method: string]: {
-    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-    response: Type<unknown, {}>;
-    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-    query: Type<unknown, {}>;
-    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-    body: Type<unknown, {}>;
-    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-    router: Type<unknown, {}>;
+type ClientRoute = Simplify<
+  EventHandlerTypeConfig & {
     path: string;
     method: string;
-  };
+  }
+>;
+
+type ClientRoutes = {
+  [name: string]: ClientRoute;
 };
 
 type Method<
@@ -45,49 +49,49 @@ type Method<
   },
 ) => Effect.Effect<A, E, R>;
 
+export type TypedRouteParamsOptions<CR extends ClientRoute> =
+  CR extends infer _CR
+    ? _CR extends ClientRoute
+      ? TypedFetchParamsOptions<_CR["query"], _CR["body"], _CR["router"]>
+      : never
+    : never;
+
 /*@__NO_SIDE_EFFECTS__*/
-const createMethod = <
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  QP extends Type<unknown, {}>,
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  BP extends Type<unknown, {}>,
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  RP extends Type<unknown, {}>,
-  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-  Response extends Type<unknown, {}>,
-  R extends ResponseType = "json",
->({
+const createMethod = <CR extends ClientRoute>({
   fetch,
-  response,
-  query: queryParams,
-  body: bodyParams,
-  router: routerParams,
-  path,
-  method,
+  route: {
+    response,
+    query: queryParams,
+    body: bodyParams,
+    router: routerParams,
+    path,
+    method,
+  },
 }: {
   fetch: Context.Tag.Service<Fetch>;
-  response: Response;
-  query: QP;
-  body: BP;
-  router: RP;
-  path: string;
-  method: string;
+  route: CR;
 }): Method<
-  TypedFetchParamsOptions<QP, BP, RP>,
-  MappedResponseType<R, typeof response.infer>
+  TypedRouteParamsOptions<CR>,
+  MappedResponseType<"json", EventHandlerResponseType<CR>>
 > =>
   withMock(({ query, body, router }) =>
     Effect.provideService(
-      typedFetch<Response, QP, BP, RP, R>(
-        { response, queryParams, bodyParams, routerParams },
-        path,
-        {
-          method,
-          query,
-          body,
-          router,
-        },
-      ),
+      typedFetch<
+        EventHandlerResponse<CR>,
+        EventHandlerQuery<CR>,
+        EventHandlerBody<CR>,
+        EventHandlerRouter<CR>,
+        "json"
+      >({ response, queryParams, bodyParams, routerParams }, path, {
+        method,
+        query,
+        body,
+        router,
+      } as TypedFetchOptions<
+        EventHandlerQuery<CR>,
+        EventHandlerBody<CR>,
+        EventHandlerRouter<CR>
+      >),
       Fetch,
       fetch,
     ),
@@ -95,8 +99,8 @@ const createMethod = <
 
 export type Client<CR extends ClientRoutes> = {
   [K in keyof CR]: Method<
-    TypedFetchParamsOptions<CR[K]["query"], CR[K]["body"], CR[K]["router"]>,
-    CR[K]["response"]["infer"]
+    TypedRouteParamsOptions<CR[K]>,
+    EventHandlerResponseType<CR[K]>
   >;
 };
 
@@ -114,20 +118,13 @@ export const createClient = <
     Effect.gen(function* () {
       const fetch = yield* Fetch;
       return Object.fromEntries(
-        Object.entries(clientRoutes).map(
-          ([name, { response, query, body, router, path, method }]) => [
-            name,
-            createMethod({
-              fetch,
-              response,
-              query,
-              body,
-              router,
-              path,
-              method,
-            }),
-          ],
-        ),
+        Object.entries(clientRoutes).map(([name, route]) => [
+          name,
+          createMethod({
+            fetch,
+            route,
+          }),
+        ]),
       ) as Context.Tag.Service<T>;
     }),
   );
