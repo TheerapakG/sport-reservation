@@ -2,6 +2,7 @@ packages:
   - "packages/**"
 
 catalog:
+  "@ark/util": ^0.15.0
   "@effect/platform": ^0.66.2
   "@effect/platform-node": ^0.61.3
   "@effect/sql": ^0.14.0
@@ -14,7 +15,9 @@ catalog:
   "@types/eslint__js": ^8.42.3
   "@typescript-eslint/eslint-plugin": ^8.6.0
   "@typescript-eslint/parser": ^8.6.0
-  arktype: 2.0.0-rc.12
+  arktype: 2.0.0-rc.13
+  c12: ^1.11.2
+  destr: ^2.0.3
   drizzle-orm: ^0.33.0
   effect: ^3.8.4
   ofetch: ^1.4.0

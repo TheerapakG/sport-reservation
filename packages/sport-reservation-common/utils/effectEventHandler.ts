@@ -12,13 +12,13 @@ import {
   EventHandlerTypeConfig,
 } from "~~/utils/eventHandlerConfig";
 import { effectType } from "~~/utils/effectType";
-import { unknownType } from "./type";
 import { isArktypeError, isFetchError, isS3Error } from "~~/models/errors";
 import {
   effectEventHandlerParams,
   EffectEventHandlerParams,
 } from "./effectEventHandlerParams";
 import { Simplify } from "effect/Types";
+import { type } from "arktype";
 
 export class EventContext
   extends /*@__PURE__*/ Context.Tag("EventContext")<
@@ -46,7 +46,7 @@ export class EventParamsContext
 }
 
 export type EffectEventHandler<
-  T extends typeof unknownType = typeof unknownType,
+  T extends type.Any = type.Any,
   Request extends EventHandlerRequest = EventHandlerRequest,
 > = EventHandler<Request, Promise<T["infer"]>>;
 

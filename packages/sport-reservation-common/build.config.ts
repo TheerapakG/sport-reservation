@@ -35,7 +35,10 @@ export default defineBuildConfig({
     "@@": path.resolve("./"),
   },
   externals: [
+    "@ark/util",
     "arktype",
+    "c12",
+    "destr",
     "effect",
     "h3",
     "hookable",

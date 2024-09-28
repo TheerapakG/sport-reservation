@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { Effect, Layer, Option } from "effect";
+import { Effect, Layer, Option, pipe } from "effect";
 import { PgDrizzle } from "@effect/sql-drizzle/Pg";
 import {
   LineLoginRepository,
@@ -17,6 +17,7 @@ import { eq } from "drizzle-orm";
 export const lineLoginRepositoryImpl = /*@__PURE__*/ Layer.effect(
   LineLoginRepository,
   /*@__PURE__*/ Effect.gen(function* () {
+    const config = yield* RuntimeConfig;
     const db = yield* PgDrizzle;
     return {
       generateRequest: () =>
@@ -64,7 +65,10 @@ export const lineLoginRepositoryImpl = /*@__PURE__*/ Layer.effect(
           );
 
           const { access_token, id_token, refresh_token, token_type } =
-            yield* linePostIssueAccessToken({ code, codeVerifier });
+            yield* pipe(
+              linePostIssueAccessToken({ code, codeVerifier }),
+              Effect.provideService(RuntimeConfig, config),
+            );
 
           return {
             nonce,
@@ -81,10 +85,13 @@ export const lineLoginRepositoryImpl = /*@__PURE__*/ Layer.effect(
             nonce: receivedNonce,
             name,
             picture,
-          } = yield* linePostGetUserProfile({
-            nonce,
-            idToken,
-          });
+          } = yield* pipe(
+            linePostGetUserProfile({
+              nonce,
+              idToken,
+            }),
+            Effect.provideService(RuntimeConfig, config),
+          );
           if (nonce !== receivedNonce)
             return yield* Effect.fail(new InvalidLineNonceError());
           return {

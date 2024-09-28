@@ -26,64 +26,74 @@ spec:
             - containerPort: 3000
               name: sp-auth-svc
           env:
-            - name: NITRO_POSTGRES_URL
+            - name: POSTGRES_URL
               valueFrom:
                 secretKeyRef:
                   name: sport-reservation-auth-secret
                   key: postgresUrl
-            - name: NITRO_VALKEY_HOST
+            - name: VALKEY_HOST
               valueFrom:
                 secretKeyRef:
                   name: sport-reservation-auth-secret
                   key: valkeyHost
-            - name: NITRO_VALKEY_PORT
+            - name: VALKEY_PORT
               valueFrom:
                 secretKeyRef:
                   name: sport-reservation-auth-secret
                   key: valkeyPort
-            - name: NITRO_VALKEY_PASSWORD
+            - name: VALKEY_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: sport-reservation-auth-secret
                   key: valkeyPassword
-            - name: NITRO_LINE_CLIENT_ID
+            - name: LINE_CLIENT_ID
               valueFrom:
                 secretKeyRef:
                   name: sport-reservation-auth-secret
                   key: lineClientId
-            - name: NITRO_LINE_CLIENT_SECRET
+            - name: LINE_CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
                   name: sport-reservation-auth-secret
                   key: lineClientSecret
-            - name: NITRO_LINE_REDIRECT_URI
+            - name: LINE_REDIRECT_URI
               valueFrom:
                 secretKeyRef:
                   name: sport-reservation-auth-secret
                   key: lineRedirectUri
-            - name: NITRO_UPLOAD_SECRET
+            - name: SECRET_PATH
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-auth-secret
+                  key: secretPath
+            - name: AUTH_KEY_FILE
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-auth-secret
+                  key: authKeyFile
+            - name: UPLOAD_SECRET
               valueFrom:
                 secretKeyRef:
                   name: sport-reservation-auth-secret
                   key: uploadSecret
-            - name: NITRO_UPLOAD_BASE_URL
+            - name: UPLOAD_BASE_URL
               valueFrom:
                 secretKeyRef:
                   name: sport-reservation-auth-secret
                   key: uploadBaseUrl
-            - name: NITRO_USER_BASE_URL
+            - name: USER_BASE_URL
               valueFrom:
                 secretKeyRef:
                   name: sport-reservation-auth-secret
                   key: userBaseUrl
           volumeMounts:
-            - name: sport-reservation-auth-auth-key
+            - name: sport-reservation-auth-secret-path
               readOnly: true
               mountPath: "/.secret"
       volumes:
-        - name: sport-reservation-auth-auth-key
+        - name: sport-reservation-auth-secret-path
           secret:
-            secretName: sport-reservation-auth-auth-key
+            secretName: sport-reservation-auth-secret-path
 ---
 apiVersion: v1
 kind: Service

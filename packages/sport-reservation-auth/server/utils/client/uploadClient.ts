@@ -9,11 +9,11 @@ export const uploadClient = _uploadClient.pipe(
   Layer.provide(
     Layer.effect(
       UploadFetch,
-      Effect.try(() => {
-        const config = useRuntimeConfig();
+      Effect.gen(function* () {
+        const config = yield* RuntimeConfig;
         return {
           fetch: createUploadFetch({
-            baseURL: config.upload.baseUrl,
+            baseURL: yield* config.upload.baseUrl,
             headers: { Authorization: `Bearer ${config.upload.secret}` },
           }),
         };
