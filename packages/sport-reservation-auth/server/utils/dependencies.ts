@@ -4,14 +4,29 @@ import { NodeFileSystem } from "@effect/platform-node";
 
 /*@__NO_SIDE_EFFECTS__*/
 const createRepositoryLive = () =>
-  Layer.mergeAll(lineLoginRepositoryImpl.pipe(Layer.provide(dbLive)));
+  Layer.mergeAll(
+    lineLoginRepositoryImpl.pipe(
+      Layer.provide(runtimeConfig),
+      Layer.provide(dbLive.pipe(Layer.provide(runtimeConfig))),
+    ),
+  );
 
 /*@__NO_SIDE_EFFECTS__*/
-const createClientLive = () => Layer.mergeAll(userClient, uploadClient);
+const createClientLive = () =>
+  Layer.mergeAll(
+    userClient.pipe(Layer.provide(runtimeConfig)),
+    uploadClient.pipe(Layer.provide(runtimeConfig)),
+  );
 
 /*@__NO_SIDE_EFFECTS__*/
 const createConfigLive = () =>
-  Layer.mergeAll(authKey.pipe(Layer.provide(NodeFileSystem.layer)));
+  Layer.mergeAll(
+    runtimeConfig,
+    authKey.pipe(
+      Layer.provide(runtimeConfig),
+      Layer.provide(NodeFileSystem.layer),
+    ),
+  );
 
 export const dependenciesLive = /*@__PURE__*/ Layer.mergeAll(
   createRepositoryLive(),

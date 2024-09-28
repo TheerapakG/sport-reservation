@@ -7,6 +7,7 @@ import {
 import { SqlError } from "@effect/sql";
 import { lineAuthToken } from "~~/models/line";
 import { Simplify } from "effect/Types";
+import { ConfigError } from "effect/ConfigError";
 
 export class InvalidLineStateError {
   readonly _tag = "InvalidStateError";
@@ -34,14 +35,14 @@ export class LineLoginRepository
         state: string;
       }) => Effect.Effect<
         Simplify<{ nonce: string } & typeof lineAuthToken.infer>,
-        FetchError | ArktypeError | InvalidLineStateError
+        ConfigError | FetchError | ArktypeError | InvalidLineStateError
       >;
       getProfileByAuthToken: (data: {
         nonce: string;
         idToken: string;
       }) => Effect.Effect<
         { id: string; name: string; avatar: string },
-        FetchError | ArktypeError | InvalidLineNonceError
+        ConfigError | FetchError | ArktypeError | InvalidLineNonceError
       >;
       findUserIdByLineId: (data: {
         lineId: string;

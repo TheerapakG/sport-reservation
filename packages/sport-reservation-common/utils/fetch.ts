@@ -10,8 +10,9 @@ import {
 import { effectType } from "~~/utils/effectType";
 import { encodePath } from "ufo";
 import { ArktypeError, FetchError } from "~~/models/errors";
-import { anyObjectType, unknownType } from "./type";
+import { anyObjectType } from "./type";
 import { Simplify } from "drizzle-orm/utils";
+import { type } from "arktype";
 
 export class Fetch
   extends /*@__PURE__*/ Context.Tag("FetchService")<
@@ -20,24 +21,24 @@ export class Fetch
   >() {}
 
 export type TypedFetchParamsOptions<
-  QP extends typeof unknownType | undefined,
-  BP extends typeof unknownType | undefined,
-  RP extends typeof unknownType | undefined,
+  QP extends type.Any | undefined,
+  BP extends type.Any | undefined,
+  RP extends type.Any | undefined,
   R extends ResponseType = "json",
 > = Simplify<
-  ([QP] extends [typeof unknownType]
+  ([QP] extends [type.Any]
     ? QP["infer"] extends Record<string, unknown>
       ? {
           query: QP["infer"];
         }
       : { query?: never }
     : { query?: never }) &
-    ([BP] extends [typeof unknownType]
+    ([BP] extends [type.Any]
       ? BP["infer"] extends unknown
         ? { body: Simplify<BP["infer"] & FetchOptions<R>["body"]> }
         : { body?: never }
       : { body?: never }) &
-    ([RP] extends [typeof unknownType]
+    ([RP] extends [type.Any]
       ? RP["infer"] extends Record<string, unknown>
         ? { router: RP["infer"] }
         : { router?: never }
@@ -45,18 +46,18 @@ export type TypedFetchParamsOptions<
 >;
 
 export type TypedFetchOptions<
-  QP extends typeof unknownType | undefined,
-  BP extends typeof unknownType | undefined,
-  RP extends typeof unknownType | undefined,
+  QP extends type.Any | undefined,
+  BP extends type.Any | undefined,
+  RP extends type.Any | undefined,
   R extends ResponseType = "json",
 > = FetchOptions<R> & TypedFetchParamsOptions<QP, BP, RP, R>;
 
 /*@__NO_SIDE_EFFECTS__*/
 export const typedFetch = <
-  T extends typeof unknownType,
-  QP extends typeof unknownType | undefined,
-  BP extends typeof unknownType | undefined,
-  RP extends typeof unknownType | undefined,
+  T extends type.Any,
+  QP extends type.Any | undefined,
+  BP extends type.Any | undefined,
+  RP extends type.Any | undefined,
   R extends ResponseType = "json",
 >(
   {
@@ -102,10 +103,10 @@ export const typedFetch = <
 
 /*@__NO_SIDE_EFFECTS__*/
 export const typedRawFetch = <
-  T extends typeof unknownType,
-  QP extends typeof unknownType | undefined,
-  BP extends typeof unknownType | undefined,
-  RP extends typeof unknownType | undefined,
+  T extends type.Any,
+  QP extends type.Any | undefined,
+  BP extends type.Any | undefined,
+  RP extends type.Any | undefined,
   R extends ResponseType = "json",
 >(
   { response }: { response?: T; queryParams?: QP; routerParams?: RP },

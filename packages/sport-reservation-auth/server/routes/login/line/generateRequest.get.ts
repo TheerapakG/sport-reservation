@@ -13,7 +13,7 @@ export const handlerConfig = defineEventHandlerConfig({
 export default effectEventHandler({
   config: handlerConfig,
   handler: /*@__PURE__*/ Effect.gen(function* () {
-    const config = useRuntimeConfig();
+    const config = yield* RuntimeConfig;
     const lineloginRepository = yield* LineLoginRepository;
     const { state, nonce, codeVerifier, scope } =
       yield* lineloginRepository.generateRequest();
@@ -22,8 +22,8 @@ export default effectEventHandler({
         baseUrl: "https://access.line.me/oauth2/v2.1/authorize",
         searchParams: {
           response_type: "code",
-          client_id: config.line.client.id as string,
-          redirect_uri: config.line.redirectUri as string,
+          client_id: yield* config.line.client.id,
+          redirect_uri: yield* config.line.redirectUri,
           state,
           scope,
           nonce,

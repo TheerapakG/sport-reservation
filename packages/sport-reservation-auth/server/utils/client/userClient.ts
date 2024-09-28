@@ -9,10 +9,10 @@ export const userClient = _userClient.pipe(
   Layer.provide(
     Layer.effect(
       UserFetch,
-      Effect.try(() => {
-        const config = useRuntimeConfig();
+      Effect.gen(function* () {
+        const config = yield* RuntimeConfig;
         return {
-          fetch: createUserFetch({ baseURL: config.user.baseUrl }),
+          fetch: createUserFetch({ baseURL: yield* config.user.baseUrl }),
         };
       }),
     ),

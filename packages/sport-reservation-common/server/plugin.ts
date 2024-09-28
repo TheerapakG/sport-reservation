@@ -1,4 +1,4 @@
-import { Effect, Exit, Layer, Scope } from "effect";
+import { Console, Effect, Exit, Layer, Scope } from "effect";
 import { defineNitroPlugin } from "nitropack/runtime";
 
 export const defineEffectContextPlugin = <R = never>({
@@ -14,7 +14,7 @@ export const defineEffectContextPlugin = <R = never>({
       return defineFn(async (nitroApp) => {
         const contextExit = await Effect.runPromiseExit(
           Effect.gen(function* () {
-            console.log("building requirements context...");
+            yield* Console.log("building requirements context...");
             return yield* Layer.buildWithScope(layer, scope);
           }),
         );
@@ -27,8 +27,12 @@ export const defineEffectContextPlugin = <R = never>({
           event.context.effectContext = contextExit.value;
         });
         nitroApp.hooks.hookOnce("close", async () => {
-          console.log("closing requirement context scope...");
-          await Effect.runPromiseExit(Scope.close(scope, Exit.void));
+          await Effect.runPromiseExit(
+            Effect.gen(function* () {
+              yield* Console.log("closing requirement context scope...");
+              yield* Scope.close(scope, Exit.void);
+            }),
+          );
         });
       });
     }),

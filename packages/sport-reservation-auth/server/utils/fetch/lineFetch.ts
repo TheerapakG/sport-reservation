@@ -1,4 +1,4 @@
-import { Effect } from "effect";
+import { Effect, Redacted } from "effect";
 import { ofetch } from "ofetch";
 import {
   Fetch,
@@ -25,7 +25,7 @@ export const linePostIssueAccessToken = /*@__PURE__*/ withMock(
   ({ code, codeVerifier }: { code: string; codeVerifier: string }) =>
     Effect.provideService(
       Effect.gen(function* () {
-        const config = useRuntimeConfig();
+        const config = yield* RuntimeConfig;
         return yield* typedFetch(
           {
             response: linePostIssueAccessTokenResponse,
@@ -37,9 +37,9 @@ export const linePostIssueAccessToken = /*@__PURE__*/ withMock(
             body: new URLSearchParams({
               grant_type: "authorization_code",
               code: code,
-              redirect_uri: config.line.redirectUri,
-              client_id: config.line.client.id,
-              client_secret: config.line.client.secret,
+              redirect_uri: yield* config.line.redirectUri,
+              client_id: yield* config.line.client.id,
+              client_secret: Redacted.value(yield* config.line.client.secret),
               code_verifier: codeVerifier,
             }),
           },
@@ -68,7 +68,7 @@ export const linePostGetUserProfile = /*@__PURE__*/ withMock(
   ({ idToken, nonce }: { idToken: string; nonce: string }) =>
     Effect.provideService(
       Effect.gen(function* () {
-        const config = useRuntimeConfig();
+        const config = yield* RuntimeConfig;
         return yield* typedFetch(
           {
             response: lineGetUserProfileResponse,
@@ -79,7 +79,7 @@ export const linePostGetUserProfile = /*@__PURE__*/ withMock(
             method: "POST",
             body: new URLSearchParams({
               id_token: idToken,
-              client_id: config.line.client.id,
+              client_id: yield* config.line.client.id,
               nonce,
             }),
           },

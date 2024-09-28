@@ -1,10 +1,9 @@
 import { type } from "arktype";
 import { Effect } from "effect";
 import { ArktypeError } from "~~/models/errors";
-import { unknownType } from "./type";
 
 /*@__NO_SIDE_EFFECTS__*/
-export const effectType = <T extends typeof unknownType = typeof unknownType>(
+export const effectType = <T extends type.Any = type.Any>(
   t: T,
   data: unknown,
 ): Effect.Effect<T["infer"], ArktypeError> =>
