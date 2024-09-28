@@ -3,12 +3,11 @@ import { Effect, Option } from "effect";
 import { LineLoginRepository } from "~~/repositories/lineLoginRepository.ts";
 import { effectEventHandler } from "~~/server/utils/effectEventHandler";
 import { defineEventHandlerConfig } from "sport-reservation-common/utils/eventHandlerConfig";
-import { EventContext } from "sport-reservation-common/utils/effectEventHandler";
+import { EventParamsContext } from "sport-reservation-common/utils/effectEventHandler";
 import { noInferOut } from "sport-reservation-common/utils/noInfer";
 import { UserClient } from "sport-reservation-user";
 import { UploadClient } from "sport-reservation-upload";
 import jwt from "jsonwebtoken";
-import { effectEventData } from "sport-reservation-common/utils/effectEventData";
 
 export const handlerConfig = defineEventHandlerConfig({
   name: "postGetLineLoginAuthToken",
@@ -27,15 +26,14 @@ export const handlerConfig = defineEventHandlerConfig({
 export default effectEventHandler({
   config: handlerConfig,
   handler: /*@__PURE__*/ Effect.gen(function* () {
-    const { event } = yield* EventContext;
     const {
-      body: { code, state },
-    } = yield* effectEventData(event, handlerConfig);
+      params: { body },
+    } = yield* EventParamsContext.typed<typeof handlerConfig>();
 
     const lineLoginRepository = yield* LineLoginRepository;
     const { nonce, id: idToken } = yield* lineLoginRepository.getAuthToken({
-      code,
-      state,
+      code: body.code,
+      state: body.state,
     });
     const {
       id: lineId,
