@@ -1,8 +1,8 @@
 import { Effect } from "effect";
 import { ArktypeError } from "~~/models/errors";
 import {
+  EventHandlerTypeConfig,
   EventHandlerBodyType,
-  EventHandlerConfig,
   EventHandlerQueryType,
   EventHandlerRouterType,
 } from "./eventHandlerConfig";
@@ -15,22 +15,24 @@ import {
 } from "h3";
 import { effectType } from "./effectType";
 import destr from "destr";
+import { Simplify } from "effect/Types";
+
+export type EffectEventHandlerParams<
+  C extends EventHandlerTypeConfig = EventHandlerTypeConfig,
+> = {
+  query: EventHandlerQueryType<C>;
+  body: EventHandlerBodyType<C>;
+  router: EventHandlerRouterType<C>;
+};
 
 /*@__NO_SIDE_EFFECTS__*/
-export const effectEventData = <
+export const effectEventHandlerParams = <
   Request extends EventHandlerRequest = EventHandlerRequest,
-  C extends EventHandlerConfig<string> = EventHandlerConfig<string>,
+  C extends EventHandlerTypeConfig = EventHandlerTypeConfig,
 >(
   event: H3Event<Request>,
   { query, body, router }: C,
-): Effect.Effect<
-  {
-    query: EventHandlerQueryType<C>;
-    body: EventHandlerBodyType<C>;
-    router: EventHandlerRouterType<C>;
-  },
-  ArktypeError
-> =>
+): Effect.Effect<Simplify<EffectEventHandlerParams<C>>, ArktypeError> =>
   Effect.gen(function* () {
     return {
       ...((query

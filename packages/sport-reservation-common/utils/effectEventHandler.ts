@@ -7,16 +7,43 @@ import {
   EventHandler,
   createError,
 } from "h3";
-import { EventHandlerConfig } from "~~/utils/eventHandlerConfig";
+import {
+  EventHandlerConfig,
+  EventHandlerTypeConfig,
+} from "~~/utils/eventHandlerConfig";
 import { effectType } from "~~/utils/effectType";
 import { unknownType } from "./type";
 import { isArktypeError, isFetchError, isS3Error } from "~~/models/errors";
+import {
+  effectEventHandlerParams,
+  EffectEventHandlerParams,
+} from "./effectEventHandlerParams";
+import { Simplify } from "effect/Types";
 
 export class EventContext
   extends /*@__PURE__*/ Context.Tag("EventContext")<
     EventContext,
     { event: H3Event<EventHandlerRequest> }
   >() {}
+
+export class EventParamsContext
+  extends /*@__PURE__*/ Context.Tag("EventParamsContext")<
+    EventParamsContext,
+    { params: unknown }
+  >()
+{
+  public static typed<
+    C extends EventHandlerTypeConfig = EventHandlerTypeConfig,
+  >() {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const thisCls = this;
+    return Effect.gen(function* () {
+      return (yield* thisCls) as {
+        params: Simplify<EffectEventHandlerParams<C>>;
+      };
+    });
+  }
+}
 
 export type EffectEventHandler<
   T extends typeof unknownType = typeof unknownType,
@@ -31,7 +58,7 @@ export type EffectEventHandlerOptions<
   handler: Effect.Effect<
     EventHandlerResponse<C["response"]["infer"]>,
     unknown,
-    EventContext | R
+    EventContext | EventParamsContext | R
   >;
 };
 
@@ -54,6 +81,9 @@ const effectEventHandler = <
           yield* pipe(
             handler,
             Effect.provideService(EventContext, { event }),
+            Effect.provideService(EventParamsContext, {
+              params: yield* effectEventHandlerParams(event, config),
+            }),
             Effect.provide(event.context.effectContext as Context.Context<R>),
           ),
         );
