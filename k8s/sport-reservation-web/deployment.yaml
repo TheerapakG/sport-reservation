@@ -42,13 +42,13 @@ spec:
                   name: sport-reservation-web-secret
                   key: uploadBaseUrl
           volumeMounts:
-            - name: sport-reservation-web-auth-key
+            - name: sport-reservation-web-secret-path
               readOnly: true
               mountPath: "/.secret"
       volumes:
-        - name: sport-reservation-web-auth-key
+        - name: sport-reservation-web-secret-path
           secret:
-            secretName: sport-reservation-web-auth-key
+            secretName: sport-reservation-web-secret-path
 ---
 apiVersion: v1
 kind: Service

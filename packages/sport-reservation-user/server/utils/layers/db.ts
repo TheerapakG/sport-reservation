@@ -1,12 +1,13 @@
 import * as PgDrizzle from "@effect/sql-drizzle/Pg";
 import { PgClient } from "@effect/sql-pg";
-import { Config, Effect, Layer, Redacted } from "effect";
+import { Effect, Layer } from "effect";
+import { RuntimeConfig } from "./config";
 
 export const dbLive = /*@__PURE__*/ Layer.unwrapEffect(
-  /*@__PURE__*/ Effect.try(() => {
-    const config = useRuntimeConfig();
+  /*@__PURE__*/ Effect.gen(function* () {
+    const config = yield* RuntimeConfig;
     const PgLive = PgClient.layer({
-      url: Config.succeed(Redacted.make(config.postgresUrl)),
+      url: config.postgresUrl,
     });
     const DrizzleLive = PgDrizzle.layer.pipe(Layer.provide(PgLive));
     return Layer.merge(PgLive, DrizzleLive);

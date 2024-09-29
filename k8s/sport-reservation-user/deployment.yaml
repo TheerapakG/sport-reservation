@@ -26,29 +26,19 @@ spec:
             - containerPort: 3000
               name: sp-user-svc
           env:
-            - name: NITRO_POSTGRES_URL
+            - name: POSTGRES_URL
               valueFrom:
                 secretKeyRef:
                   name: sport-reservation-user-secret
                   key: postgresUrl
-            - name: NITRO_UPLOAD_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: sport-reservation-user-secret
-                  key: uploadSecret
-            - name: NITRO_UPLOAD_BASE_URL
-              valueFrom:
-                secretKeyRef:
-                  name: sport-reservation-user-secret
-                  key: uploadBaseUrl
           volumeMounts:
-            - name: sport-reservation-user-auth-key
+            - name: sport-reservation-user-secret-path
               readOnly: true
               mountPath: "/.secret"
       volumes:
-        - name: sport-reservation-user-auth-key
+        - name: sport-reservation-user-secret-path
           secret:
-            secretName: sport-reservation-user-auth-key
+            secretName: sport-reservation-user-secret-path
 ---
 apiVersion: v1
 kind: Service

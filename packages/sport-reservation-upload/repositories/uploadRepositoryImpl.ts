@@ -7,17 +7,17 @@ import { S3 } from "~/utils/layers/S3";
 export const uploadRepositoryImpl = /*@__PURE__*/ Layer.effect(
   UploadRepository,
   /*@__PURE__*/ Effect.gen(function* () {
+    const config = yield* RuntimeConfig;
     const { s3 } = yield* S3;
 
     return {
       generateUploadToken: () => Effect.succeed({ token: "" }),
       upload: ({ key, stream }) =>
         Effect.gen(function* () {
-          const config = useRuntimeConfig();
           const upload = new Upload({
             client: s3,
             params: {
-              Bucket: config.s3.bucket,
+              Bucket: yield* config.s3.bucket,
               Key: `reservation${key}`,
               Body: stream,
             },
