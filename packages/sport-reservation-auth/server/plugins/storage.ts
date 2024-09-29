@@ -1,5 +1,6 @@
 import { Effect, pipe, Redacted } from "effect";
 import redisDriver from "unstorage/drivers/redis";
+import { runtimeConfig, RuntimeConfig } from "~/layers";
 
 export default defineNitroPlugin(async () => {
   await Effect.runPromise(

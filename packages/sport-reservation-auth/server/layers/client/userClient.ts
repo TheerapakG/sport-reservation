@@ -1,9 +1,10 @@
+import { Effect, Layer } from "effect";
 import {
   UserFetch,
-  createUserFetch,
   userClient as _userClient,
+  createUserFetch,
 } from "sport-reservation-user";
-import { Effect, Layer } from "effect";
+import { RuntimeConfig } from "~/layers/config";
 
 export const userClient = _userClient.pipe(
   Layer.provide(

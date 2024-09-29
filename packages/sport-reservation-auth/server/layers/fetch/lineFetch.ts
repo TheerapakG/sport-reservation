@@ -1,3 +1,4 @@
+import { type } from "arktype";
 import { Effect, Redacted } from "effect";
 import { ofetch } from "ofetch";
 import {
@@ -5,8 +6,8 @@ import {
   typedFetch,
   withMock,
 } from "sport-reservation-common/utils/fetch";
-import { type } from "arktype";
 import { unknownType } from "sport-reservation-common/utils/type";
+import { RuntimeConfig } from "~/layers/config";
 
 export const lineFetch = /*@__PURE__*/ ofetch.create({
   baseURL: "https://api.line.me/oauth2/v2.1",

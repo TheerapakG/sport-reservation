@@ -1,25 +1,26 @@
-import crypto from "crypto";
-import { Effect, Layer, Option, pipe } from "effect";
 import { PgDrizzle } from "@effect/sql-drizzle/Pg";
-import {
-  LineLoginRepository,
-  InvalidLineStateError,
-  InvalidLineNonceError,
-} from "./lineLoginRepository";
+import crypto from "crypto";
+import { eq } from "drizzle-orm";
+import { Context, Effect, Layer, Option, pipe } from "effect";
+import { authUserAuthConnection } from "sport-reservation-common/db/schema";
+import { ValkeyError } from "sport-reservation-common/models/errors";
+import { RuntimeConfig } from "~/layers";
 import {
   linePostGetUserProfile,
   linePostIssueAccessToken,
-} from "~/utils/layers/fetch";
-import { ValkeyError } from "sport-reservation-common/models/errors";
-import { authUserAuthConnection } from "sport-reservation-common/db/schema";
-import { eq } from "drizzle-orm";
+} from "~/layers/fetch";
+import {
+  InvalidLineNonceError,
+  InvalidLineStateError,
+  LineLoginRepository,
+} from "./lineLoginRepository";
 
 export const lineLoginRepositoryImpl = /*@__PURE__*/ Layer.effect(
   LineLoginRepository,
   /*@__PURE__*/ Effect.gen(function* () {
     const config = yield* RuntimeConfig;
     const db = yield* PgDrizzle;
-    return {
+    return <Context.Tag.Service<LineLoginRepository>>{
       generateRequest: () =>
         Effect.gen(function* () {
           const state = crypto.randomBytes(64).toString("hex");

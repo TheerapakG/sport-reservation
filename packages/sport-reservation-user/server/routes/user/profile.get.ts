@@ -1,11 +1,11 @@
 import { type } from "arktype";
 import { Effect } from "effect";
-import { effectEventHandler } from "~~/server/utils/effectEventHandler";
-import { UserRepository } from "~~/repositories/userRepository";
+import { effectEventHandler } from "~/utils/effectEventHandler";
+import { UserRepository } from "~/repositories/userRepository";
 import { defineEventHandlerConfig } from "sport-reservation-common/utils/eventHandlerConfig";
 import { EventParamsContext } from "sport-reservation-common/utils/effectEventHandler";
 import { noInferOut } from "sport-reservation-common/utils/noInfer";
-import { userProfile } from "~~/models/user";
+import { userProfile } from "~/models/user";
 
 export const handlerConfig = defineEventHandlerConfig({
   name: "getUserProfileById",

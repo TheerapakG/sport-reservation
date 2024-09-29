@@ -5,7 +5,7 @@ import {
   ValkeyError,
 } from "sport-reservation-common/models/errors";
 import { SqlError } from "@effect/sql";
-import { lineAuthToken } from "~~/models/line";
+import { lineAuthToken } from "~/models/line";
 import { Simplify } from "effect/Types";
 import { ConfigError } from "effect/ConfigError";
 
