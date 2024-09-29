@@ -1,6 +1,7 @@
 import * as PgDrizzle from "@effect/sql-drizzle/Pg";
 import { PgClient } from "@effect/sql-pg";
 import { Config, Effect, Layer, Redacted } from "effect";
+import { RuntimeConfig } from "./config";
 
 export const dbLive = /*@__PURE__*/ Layer.unwrapEffect(
   /*@__PURE__*/ Effect.gen(function* () {

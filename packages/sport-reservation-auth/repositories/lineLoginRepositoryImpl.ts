@@ -9,7 +9,7 @@ import {
 import {
   linePostGetUserProfile,
   linePostIssueAccessToken,
-} from "~~/server/utils/fetch";
+} from "~/utils/layers/fetch";
 import { ValkeyError } from "sport-reservation-common/models/errors";
 import { authUserAuthConnection } from "sport-reservation-common/db/schema";
 import { eq } from "drizzle-orm";
