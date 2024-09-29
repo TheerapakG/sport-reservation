@@ -26,44 +26,44 @@ spec:
             - containerPort: 3000
               name: sp-upload-svc
           env:
-            - name: NITRO_S3_ORIGIN_ENDPOINT
+            - name: S3_ORIGIN_ENDPOINT
               valueFrom:
                 secretKeyRef:
                   name: sport-reservation-upload-secret
                   key: s3OriginEndpoint
-            - name: NITRO_S3_DOMAIN_ENDPOINT
+            - name: S3_DOMAIN_ENDPOINT
               valueFrom:
                 secretKeyRef:
                   name: sport-reservation-upload-secret
                   key: s3DomainEndpoint
-            - name: NITRO_S3_KEY
+            - name: S3_KEY
               valueFrom:
                 secretKeyRef:
                   name: sport-reservation-upload-secret
                   key: s3Key
-            - name: NITRO_S3_SECRET
+            - name: S3_SECRET
               valueFrom:
                 secretKeyRef:
                   name: sport-reservation-upload-secret
                   key: s3Secret
-            - name: NITRO_S3_BUCKET
+            - name: S3_BUCKET
               valueFrom:
                 secretKeyRef:
                   name: sport-reservation-upload-secret
                   key: s3Bucket
-            - name: NITRO_UPLOAD_SECRET
+            - name: UPLOAD_SECRET
               valueFrom:
                 secretKeyRef:
                   name: sport-reservation-upload-secret
                   key: uploadSecret
           volumeMounts:
-            - name: sport-reservation-upload-auth-key
+            - name: sport-reservation-upload-secret-path
               readOnly: true
               mountPath: "/.secret"
       volumes:
-        - name: sport-reservation-upload-auth-key
+        - name: sport-reservation-upload-secret-path
           secret:
-            secretName: sport-reservation-upload-auth-key
+            secretName: sport-reservation-upload-secret-path
 ---
 apiVersion: v1
 kind: Service

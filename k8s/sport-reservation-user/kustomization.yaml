@@ -4,7 +4,7 @@ secretGenerator:
   - name: sport-reservation-user-secret
     envs:
       - .env.secret
-  - name: sport-reservation-user-auth-key
+  - name: sport-reservation-user-secret-path
     files:
       - auth.key.pub
 configMapGenerator:

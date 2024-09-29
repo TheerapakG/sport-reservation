@@ -13,13 +13,13 @@ const createRepositoryLive = () =>
       Layer.provide(Layer.succeed(Fetch, { fetch: ofetch })),
     ),
     uploadRepositoryImpl.pipe(Layer.provide(s3Live)),
-  );
+  ).pipe(Layer.provide(runtimeConfig));
 
 /*@__NO_SIDE_EFFECTS__*/
 const createClientLive = () => Layer.empty;
 
 /*@__NO_SIDE_EFFECTS__*/
-const createConfigLive = () => Layer.empty;
+const createConfigLive = () => runtimeConfig;
 
 export const dependenciesLive = /*@__PURE__*/ Layer.mergeAll(
   createRepositoryLive(),
