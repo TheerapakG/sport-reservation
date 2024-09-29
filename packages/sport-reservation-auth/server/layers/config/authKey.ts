@@ -8,13 +8,13 @@ export class AuthKey
 export const authKey = Layer.effect(
   AuthKey,
   Effect.gen(function* () {
-    const config = yield* RuntimeConfig;
+    const config = yield* yield* RuntimeConfig;
     const fs = yield* FileSystem.FileSystem;
 
     return Buffer.from(
       yield* fs.readFile(
-        Redacted.value(yield* config.secret.path) +
-          Redacted.value(yield* config.auth.keyFile),
+        Redacted.value(config.secret.path) +
+          Redacted.value(config.auth.keyFile),
       ),
     );
   }),

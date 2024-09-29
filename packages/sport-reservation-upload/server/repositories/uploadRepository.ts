@@ -1,7 +1,6 @@
+import { StreamingBlobPayloadInputTypes } from "@smithy/types";
 import { Context, Effect } from "effect";
 import { S3Error } from "sport-reservation-common/models/errors";
-import { StreamingBlobPayloadInputTypes } from "@smithy/types";
-import { ConfigError } from "effect/ConfigError";
 
 export class UploadRepository
   extends /*@__PURE__*/ Context.Tag("UploadRepository")<
@@ -13,7 +12,7 @@ export class UploadRepository
       upload: (data: {
         key: string;
         stream: StreamingBlobPayloadInputTypes;
-      }) => Effect.Effect<{ url: string }, ConfigError | S3Error>;
+      }) => Effect.Effect<{ url: string }, S3Error>;
       delete: () => Effect.Effect<unknown>;
     }
   >() {}

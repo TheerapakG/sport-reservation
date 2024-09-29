@@ -8,14 +8,14 @@ export class S3
 export const s3Live = /*@__PURE__*/ Layer.effect(
   S3,
   /*@__PURE__*/ Effect.gen(function* () {
-    const config = yield* RuntimeConfig;
+    const config = yield* yield* RuntimeConfig;
     const s3ClientConfig = {
       forcePathStyle: false,
-      endpoint: yield* config.s3.originEndpoint,
+      endpoint: config.s3.originEndpoint,
       region: "us-east-1",
       credentials: {
-        accessKeyId: yield* config.s3.key,
-        secretAccessKey: Redacted.value(yield* config.s3.secret),
+        accessKeyId: config.s3.key,
+        secretAccessKey: Redacted.value(config.s3.secret),
       },
     };
     const s3 = yield* Effect.tryPromise(

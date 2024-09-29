@@ -1,4 +1,4 @@
-import { Effect, Layer } from "effect";
+import { Effect, Layer, Redacted } from "effect";
 import {
   UploadFetch,
   uploadClient as _uploadClient,
@@ -11,11 +11,13 @@ export const uploadClient = _uploadClient.pipe(
     Layer.effect(
       UploadFetch,
       Effect.gen(function* () {
-        const config = yield* RuntimeConfig;
+        const config = yield* yield* RuntimeConfig;
         return {
           fetch: createUploadFetch({
-            baseURL: yield* config.upload.baseUrl,
-            headers: { Authorization: `Bearer ${config.upload.secret}` },
+            baseURL: config.upload.baseUrl,
+            headers: {
+              Authorization: `Bearer ${Redacted.value(config.upload.secret)}`,
+            },
           }),
         };
       }),

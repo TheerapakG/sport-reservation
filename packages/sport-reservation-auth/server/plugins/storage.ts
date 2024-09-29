@@ -6,14 +6,14 @@ export default defineNitroPlugin(async () => {
   await Effect.runPromise(
     pipe(
       Effect.gen(function* () {
-        const config = yield* RuntimeConfig;
+        const config = yield* yield* RuntimeConfig;
         useStorage().mount(
           "valkey",
           redisDriver({
             base: "sport-reservation:auth",
-            host: yield* config.valkey.host,
-            port: yield* config.valkey.port,
-            password: Redacted.value(yield* config.valkey.password),
+            host: config.valkey.host,
+            port: config.valkey.port,
+            password: Redacted.value(config.valkey.password),
           }),
         );
       }),
