@@ -2,7 +2,8 @@ import { Effect, Layer } from "effect";
 import { UploadRepository } from "./uploadRepository";
 import { S3Error } from "sport-reservation-common/models/errors";
 import { Upload } from "@aws-sdk/lib-storage";
-import { S3 } from "~/utils/layers/S3";
+import { S3 } from "~/layers/S3";
+import { RuntimeConfig } from "~/layers";
 
 export const uploadRepositoryImpl = /*@__PURE__*/ Layer.effect(
   UploadRepository,

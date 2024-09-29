@@ -1,5 +1,6 @@
 import { S3 as S3Client } from "@aws-sdk/client-s3";
 import { Context, Effect, Layer, Redacted } from "effect";
+import { RuntimeConfig } from "~/layers/config";
 
 export class S3
   extends /*@__PURE__*/ Context.Tag("S3")<S3, { s3: S3Client }>() {}

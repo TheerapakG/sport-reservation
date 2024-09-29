@@ -6,10 +6,10 @@ import {
 } from "sport-reservation-common/utils/effectEventHandler";
 import { defineEventHandlerConfig } from "sport-reservation-common/utils/eventHandlerConfig";
 import { noInferOut } from "sport-reservation-common/utils/noInfer";
-import { AuthRepository } from "~~/repositories/authRepository";
-import { DownloadRepository } from "~~/repositories/downloadRepository";
-import { UploadRepository } from "~~/repositories/uploadRepository";
-import { effectEventHandler } from "~~/server/utils/effectEventHandler";
+import { AuthRepository } from "~/repositories/authRepository";
+import { DownloadRepository } from "~/repositories/downloadRepository";
+import { UploadRepository } from "~/repositories/uploadRepository";
+import { effectEventHandler } from "~/utils/effectEventHandler";
 
 export const handlerConfig = defineEventHandlerConfig({
   name: "postUploadFromUrl",

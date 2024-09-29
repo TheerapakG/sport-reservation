@@ -1,5 +1,6 @@
 import { Layer } from "effect";
-import { userRepositoryImpl } from "~~/repositories/userRepositoryImpl";
+import { dbLive, runtimeConfig } from "~/layers";
+import { userRepositoryImpl } from "~/repositories/userRepositoryImpl";
 
 /*@__NO_SIDE_EFFECTS__*/
 const createRepositoryLive = () =>
