@@ -1,14 +1,14 @@
-import { Effect, Layer } from "effect";
-import { UploadRepository } from "./uploadRepository";
-import { S3Error } from "sport-reservation-common/models/errors";
 import { Upload } from "@aws-sdk/lib-storage";
-import { S3 } from "~/layers/S3";
+import { Effect, Layer } from "effect";
+import { S3Error } from "sport-reservation-common/models/errors";
 import { RuntimeConfig } from "~/layers";
+import { S3 } from "~/layers/S3";
+import { UploadRepository } from "./uploadRepository";
 
 export const uploadRepositoryImpl = /*@__PURE__*/ Layer.effect(
   UploadRepository,
   /*@__PURE__*/ Effect.gen(function* () {
-    const config = yield* RuntimeConfig;
+    const config = yield* yield* RuntimeConfig;
     const { s3 } = yield* S3;
 
     return {
@@ -18,7 +18,7 @@ export const uploadRepositoryImpl = /*@__PURE__*/ Layer.effect(
           const upload = new Upload({
             client: s3,
             params: {
-              Bucket: yield* config.s3.bucket,
+              Bucket: config.s3.bucket,
               Key: `reservation${key}`,
               Body: stream,
             },

@@ -1,5 +1,4 @@
 import { Context, Effect } from "effect";
-import { ConfigError } from "effect/ConfigError";
 
 export class InvalidSecretError {
   readonly _tag = "InvalidSecretError";
@@ -11,6 +10,6 @@ export class AuthRepository
     {
       checkSecret: (data: {
         secret: string;
-      }) => Effect.Effect<void, ConfigError | InvalidSecretError>;
+      }) => Effect.Effect<void, InvalidSecretError>;
     }
   >() {}

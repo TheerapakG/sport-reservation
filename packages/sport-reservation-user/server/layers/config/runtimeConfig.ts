@@ -1,4 +1,4 @@
-import { Context, Layer } from "effect";
+import { Config, Context, Layer } from "effect";
 import {
   effectConfig,
   InferConfig,
@@ -12,7 +12,7 @@ const configShape = {
 export class RuntimeConfig
   extends /*@__PURE__*/ Context.Tag("RuntimeConfig")<
     RuntimeConfig,
-    InferConfig<typeof configShape>
+    Config.Config<InferConfig<typeof configShape>>
   >() {}
 
 export const runtimeConfig = Layer.effect(
