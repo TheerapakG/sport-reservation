@@ -1,4 +1,3 @@
-import { type } from "arktype";
 import { Context, Layer } from "effect";
 import {
   effectConfig,
