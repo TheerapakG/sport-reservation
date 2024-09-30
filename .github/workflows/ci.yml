@@ -32,12 +32,6 @@ jobs:
       - name: Install Dependencies
         run: pnpm install
 
-      - name: Run Generate
-        run: pnpm nx run sport-reservation-common:generate
-
-      - name: Install Bin
-        run: pnpm install
-
   checks:
     needs: [cache-dependencies]
     runs-on: ubuntu-latest
@@ -58,6 +52,12 @@ jobs:
           cache: "pnpm"
 
       - name: Install Dependencies
+        run: pnpm install
+
+      - name: Run Generate For Common
+        run: pnpm nx run sport-reservation-common:generate
+
+      - name: Install Bin For Common
         run: pnpm install
 
       - name: Run Checks
@@ -89,6 +89,12 @@ jobs:
           cache: "pnpm"
 
       - name: Install Dependencies
+        run: pnpm install
+
+      - name: Run Generate For Common
+        run: pnpm nx run sport-reservation-common:generate
+
+      - name: Install Bin For Common
         run: pnpm install
 
       - name: Run Build
