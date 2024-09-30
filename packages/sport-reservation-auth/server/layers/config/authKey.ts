@@ -5,9 +5,9 @@ import { RuntimeConfig } from "./runtimeConfig";
 export class AuthKey
   extends /*@__PURE__*/ Context.Tag("AuthKey")<AuthKey, Buffer>() {}
 
-export const authKey = Layer.effect(
+export const authKey = /*@__PURE__*/ Layer.effect(
   AuthKey,
-  Effect.gen(function* () {
+  /*@__PURE__*/ Effect.gen(function* () {
     const config = yield* yield* RuntimeConfig;
     const fs = yield* FileSystem.FileSystem;
 

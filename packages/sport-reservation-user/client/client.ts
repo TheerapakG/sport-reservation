@@ -1,11 +1,11 @@
+import { Context } from "effect";
 import {
-  createFetch,
-  createClient,
   Client,
-} from "sport-reservation-common/server/client";
+  createClient,
+  createFetch,
+} from "sport-reservation-common/client/client";
 import { Fetch } from "sport-reservation-common/utils/fetch";
 import { apiRoutes } from "./routes.gen";
-import { Context } from "effect";
 
 export { Fetch as UserFetch };
 

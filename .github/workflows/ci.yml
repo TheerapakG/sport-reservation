@@ -32,6 +32,12 @@ jobs:
       - name: Install Dependencies
         run: pnpm install
 
+      - name: Run Generate
+        run: pnpm nx run-many -t generate --output-style=stream
+
+      - name: Install Bin
+        run: pnpm install
+
   checks:
     needs: [cache-dependencies]
     runs-on: ubuntu-latest

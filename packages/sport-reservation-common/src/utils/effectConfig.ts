@@ -3,7 +3,7 @@ import { loadConfig } from "c12";
 import { Config, Console, Effect, Redacted } from "effect";
 import { Simplify } from "effect/Types";
 import { snakeCase, upperFirst } from "scule";
-import { ArktypeError } from "~~/models/errors";
+import { ArktypeError } from "~~/src/models/errors";
 import { effectType } from "./effectType";
 
 type Apply<T, Arr> = Arr extends [...infer Head, infer Tail]

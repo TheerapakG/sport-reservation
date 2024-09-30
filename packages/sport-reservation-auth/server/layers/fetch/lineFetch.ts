@@ -1,6 +1,10 @@
 import { type } from "arktype";
-import { Effect, Redacted } from "effect";
+import { Context, Effect, Layer, Redacted } from "effect";
 import { ofetch } from "ofetch";
+import {
+  ArktypeError,
+  FetchError,
+} from "sport-reservation-common/models/errors";
 import {
   Fetch,
   typedFetch,
@@ -22,36 +26,8 @@ const linePostIssueAccessTokenResponse = /*@__PURE__*/ type({
   token_type: "string",
   "[string]": "unknown",
 });
-export const linePostIssueAccessToken = /*@__PURE__*/ withMock(
-  ({ code, codeVerifier }: { code: string; codeVerifier: string }) =>
-    Effect.provideService(
-      Effect.gen(function* () {
-        const config = yield* yield* RuntimeConfig;
-        return yield* typedFetch(
-          {
-            response: linePostIssueAccessTokenResponse,
-            bodyParams: unknownType,
-          },
-          "/token",
-          {
-            method: "POST",
-            body: new URLSearchParams({
-              grant_type: "authorization_code",
-              code: code,
-              redirect_uri: config.line.redirectUri,
-              client_id: config.line.client.id,
-              client_secret: Redacted.value(config.line.client.secret),
-              code_verifier: codeVerifier,
-            }),
-          },
-        );
-      }),
-      Fetch,
-      { fetch: lineFetch },
-    ),
-);
 
-const lineGetUserProfileResponse = /*@__PURE__*/ type({
+const linePostGetUserProfileResponse = /*@__PURE__*/ type({
   iss: "string",
   sub: "string",
   aud: "string",
@@ -65,28 +41,84 @@ const lineGetUserProfileResponse = /*@__PURE__*/ type({
   "email?": "string",
   "[string]": "unknown",
 });
-export const linePostGetUserProfile = /*@__PURE__*/ withMock(
-  ({ idToken, nonce }: { idToken: string; nonce: string }) =>
-    Effect.provideService(
-      Effect.gen(function* () {
-        const config = yield* yield* RuntimeConfig;
-        return yield* typedFetch(
-          {
-            response: lineGetUserProfileResponse,
-            bodyParams: unknownType,
-          },
-          "/verify",
-          {
-            method: "POST",
-            body: new URLSearchParams({
-              id_token: idToken,
-              client_id: config.line.client.id,
-              nonce,
+
+export class LineService
+  extends /*@__PURE__*/ Context.Tag("LineService")<
+    LineService,
+    {
+      postIssueAccessToken: (data: {
+        code: string;
+        codeVerifier: string;
+      }) => Effect.Effect<
+        typeof linePostIssueAccessTokenResponse.infer,
+        ArktypeError | FetchError
+      >;
+      postGetUserProfile: (data: {
+        idToken: string;
+        nonce: string;
+      }) => Effect.Effect<
+        typeof linePostGetUserProfileResponse.infer,
+        ArktypeError | FetchError
+      >;
+    }
+  >() {}
+
+export const lineService = /*@__PURE__*/ Layer.effect(
+  LineService,
+  /*@__PURE__*/ Effect.gen(function* () {
+    const config = yield* yield* RuntimeConfig;
+    return {
+      postIssueAccessToken: withMock(
+        ({ code, codeVerifier }: { code: string; codeVerifier: string }) =>
+          Effect.provideService(
+            Effect.gen(function* () {
+              return yield* typedFetch(
+                {
+                  response: linePostIssueAccessTokenResponse,
+                  bodyParams: unknownType,
+                },
+                "/token",
+                {
+                  method: "POST",
+                  body: new URLSearchParams({
+                    grant_type: "authorization_code",
+                    code: code,
+                    redirect_uri: config.line.redirectUri,
+                    client_id: config.line.client.id,
+                    client_secret: Redacted.value(config.line.client.secret),
+                    code_verifier: codeVerifier,
+                  }),
+                },
+              );
             }),
-          },
-        );
-      }),
-      Fetch,
-      { fetch: lineFetch },
-    ),
+            Fetch,
+            { fetch: lineFetch },
+          ),
+      ),
+      postGetUserProfile: withMock(
+        ({ idToken, nonce }: { idToken: string; nonce: string }) =>
+          Effect.provideService(
+            Effect.gen(function* () {
+              return yield* typedFetch(
+                {
+                  response: linePostGetUserProfileResponse,
+                  bodyParams: unknownType,
+                },
+                "/verify",
+                {
+                  method: "POST",
+                  body: new URLSearchParams({
+                    id_token: idToken,
+                    client_id: config.line.client.id,
+                    nonce,
+                  }),
+                },
+              );
+            }),
+            Fetch,
+            { fetch: lineFetch },
+          ),
+      ),
+    };
+  }),
 );
