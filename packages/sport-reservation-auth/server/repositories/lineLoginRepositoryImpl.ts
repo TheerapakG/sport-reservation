@@ -1,14 +1,10 @@
 import { PgDrizzle } from "@effect/sql-drizzle/Pg";
 import crypto from "crypto";
 import { eq } from "drizzle-orm";
-import { Context, Effect, Layer, Option, pipe } from "effect";
+import { Context, Effect, Layer, Option } from "effect";
 import { authUserAuthConnection } from "sport-reservation-common/db/schema";
 import { ValkeyError } from "sport-reservation-common/models/errors";
-import { RuntimeConfig } from "~/layers";
-import {
-  linePostGetUserProfile,
-  linePostIssueAccessToken,
-} from "~/layers/fetch";
+import { LineService } from "~/layers";
 import {
   InvalidLineNonceError,
   InvalidLineStateError,
@@ -18,8 +14,9 @@ import {
 export const lineLoginRepositoryImpl = /*@__PURE__*/ Layer.effect(
   LineLoginRepository,
   /*@__PURE__*/ Effect.gen(function* () {
-    const config = yield* RuntimeConfig;
     const db = yield* PgDrizzle;
+    const lineService = yield* LineService;
+
     return <Context.Tag.Service<LineLoginRepository>>{
       generateRequest: () =>
         Effect.gen(function* () {
@@ -66,10 +63,7 @@ export const lineLoginRepositoryImpl = /*@__PURE__*/ Layer.effect(
           );
 
           const { access_token, id_token, refresh_token, token_type } =
-            yield* pipe(
-              linePostIssueAccessToken({ code, codeVerifier }),
-              Effect.provideService(RuntimeConfig, config),
-            );
+            yield* lineService.postIssueAccessToken({ code, codeVerifier });
 
           return {
             nonce,
@@ -86,13 +80,10 @@ export const lineLoginRepositoryImpl = /*@__PURE__*/ Layer.effect(
             nonce: receivedNonce,
             name,
             picture,
-          } = yield* pipe(
-            linePostGetUserProfile({
-              nonce,
-              idToken,
-            }),
-            Effect.provideService(RuntimeConfig, config),
-          );
+          } = yield* lineService.postGetUserProfile({
+            nonce,
+            idToken,
+          });
           if (nonce !== receivedNonce)
             return yield* Effect.fail(new InvalidLineNonceError());
           return {

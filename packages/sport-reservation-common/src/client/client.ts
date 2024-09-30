@@ -1,7 +1,7 @@
 import { Context, Effect, Layer } from "effect";
 import { Simplify } from "effect/Types";
 import { FetchOptions, MappedResponseType, ofetch } from "ofetch";
-import { ArktypeError, FetchError } from "~~/models/errors";
+import { ArktypeError, FetchError } from "~~/src/models/errors";
 import {
   EventHandlerBody,
   EventHandlerQuery,
@@ -9,14 +9,14 @@ import {
   EventHandlerResponseType,
   EventHandlerRouter,
   EventHandlerTypeConfig,
-} from "~~/utils/eventHandlerConfig";
+} from "~~/src/utils/eventHandlerConfig";
 import {
   Fetch,
   typedFetch,
   TypedFetchOptions,
   TypedFetchParamsOptions,
   withMock,
-} from "~~/utils/fetch";
+} from "~~/src/utils/fetch";
 
 export { Fetch };
 

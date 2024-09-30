@@ -1,11 +1,6 @@
+import destr from "destr";
 import { Effect } from "effect";
-import { ArktypeError } from "~~/models/errors";
-import {
-  EventHandlerTypeConfig,
-  EventHandlerBodyType,
-  EventHandlerQueryType,
-  EventHandlerRouterType,
-} from "./eventHandlerConfig";
+import { Simplify } from "effect/Types";
 import {
   EventHandlerRequest,
   getQuery,
@@ -13,9 +8,14 @@ import {
   H3Event,
   readBody,
 } from "h3";
+import { ArktypeError } from "~~/src/models/errors";
 import { effectType } from "./effectType";
-import destr from "destr";
-import { Simplify } from "effect/Types";
+import {
+  EventHandlerBodyType,
+  EventHandlerQueryType,
+  EventHandlerRouterType,
+  EventHandlerTypeConfig,
+} from "./eventHandlerConfig";
 
 export type EffectEventHandlerParams<
   C extends EventHandlerTypeConfig = EventHandlerTypeConfig,

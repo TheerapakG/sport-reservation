@@ -16,13 +16,12 @@
     "dist"
   ],
   "scripts": {
-    "scripts": "pnpm jiti ./scripts.ts",
     "format": "pnpm prettier -c .",
     "lint": "pnpm eslint --flag unstable_ts_config .",
     "typecheck": "pnpm tsc --noEmit",
-    "build": "pnpm scripts build",
+    "build": "pnpm theestack client build",
     "dev": "nitro dev",
-    "generate": "pnpm scripts generate",
+    "generate": "pnpm theestack client generate",
     "preview": "node .output/server/index.mjs"
   },
   "dependencies": {

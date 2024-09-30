@@ -6,11 +6,11 @@ import {
 } from "sport-reservation-upload";
 import { RuntimeConfig } from "~/layers/config";
 
-export const uploadClient = _uploadClient.pipe(
-  Layer.provide(
-    Layer.effect(
+export const uploadClient = /*@__PURE__*/ _uploadClient.pipe(
+  /*@__PURE__*/ Layer.provide(
+    /*@__PURE__*/ Layer.effect(
       UploadFetch,
-      Effect.gen(function* () {
+      /*@__PURE__*/ Effect.gen(function* () {
         const config = yield* yield* RuntimeConfig;
         return {
           fetch: createUploadFetch({

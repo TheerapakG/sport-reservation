@@ -6,42 +6,45 @@ import {
   redacted,
 } from "sport-reservation-common/utils/effectConfig";
 
-const configShape = {
-  postgresUrl: redacted("string"),
-  valkey: {
-    host: config("string"),
-    port: config("string.integer.parse"),
-    password: redacted("string"),
-  },
-  line: {
-    client: {
-      id: config("string"),
+/*@__NO_SIDE_EFFECTS__*/
+const createConfigShape = () => {
+  return {
+    postgresUrl: redacted("string"),
+    valkey: {
+      host: config("string"),
+      port: config("string.integer.parse"),
+      password: redacted("string"),
+    },
+    line: {
+      client: {
+        id: config("string"),
+        secret: redacted("string"),
+      },
+      redirectUri: config("string"),
+    },
+    secret: {
+      path: redacted("string"),
+    },
+    auth: {
+      keyFile: redacted("string"),
+    },
+    upload: {
+      baseUrl: config("string"),
       secret: redacted("string"),
     },
-    redirectUri: config("string"),
-  },
-  secret: {
-    path: redacted("string"),
-  },
-  auth: {
-    keyFile: redacted("string"),
-  },
-  upload: {
-    baseUrl: config("string"),
-    secret: redacted("string"),
-  },
-  user: {
-    baseUrl: config("string"),
-  },
+    user: {
+      baseUrl: config("string"),
+    },
+  };
 };
 
 export class RuntimeConfig
   extends /*@__PURE__*/ Context.Tag("RuntimeConfig")<
     RuntimeConfig,
-    Config.Config<InferConfig<typeof configShape>>
+    Config.Config<InferConfig<ReturnType<typeof createConfigShape>>>
   >() {}
 
-export const runtimeConfig = Layer.effect(
+export const runtimeConfig = /*@__PURE__*/ Layer.effect(
   RuntimeConfig,
-  effectConfig(configShape),
+  /*@__PURE__*/ effectConfig(createConfigShape()),
 );

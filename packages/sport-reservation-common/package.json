@@ -4,27 +4,15 @@
   "version": "0.0.0",
   "type": "module",
   "exports": {
-    "./server/*": {
-      "types": "./dist/server/*.d.ts",
-      "import": "./dist/server/*.mjs",
-      "require": "./dist/server/*.mjs"
-    },
-    "./db/schema": {
-      "types": "./dist/db/schema.d.ts",
-      "import": "./dist/db/schema.mjs",
-      "require": "./dist/db/schema.mjs"
-    },
-    "./models/*": {
-      "types": "./dist/models/*.d.ts",
-      "import": "./dist/models/*.mjs",
-      "require": "./dist/models/*.mjs"
-    },
-    "./utils/*": {
-      "types": "./dist/utils/*.d.ts",
-      "import": "./dist/utils/*.mjs",
-      "require": "./dist/utils/*.mjs"
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.mjs",
+      "require": "./dist/*.mjs"
     },
     "./package.json": "./package.json"
+  },
+  "bin": {
+    "theestack": "./dist/scripts.mjs"
   },
   "files": [
     "dist"

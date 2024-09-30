@@ -9,19 +9,7 @@ export default defineBuildConfig({
       builder: "rollup",
       input: "./db/schema",
     },
-    ...globSync("./models/**/*", { nodir: true }).map((file) => {
-      return {
-        builder: "rollup" as const,
-        input: fileURLToPath(new URL(file, import.meta.url)),
-      };
-    }),
-    ...globSync("./server/**/*", { nodir: true }).map((file) => {
-      return {
-        builder: "rollup" as const,
-        input: fileURLToPath(new URL(file, import.meta.url)),
-      };
-    }),
-    ...globSync("./utils/**/*", { nodir: true }).map((file) => {
+    ...globSync("./src/**/*", { nodir: true }).map((file) => {
       return {
         builder: "rollup" as const,
         input: fileURLToPath(new URL(file, import.meta.url)),

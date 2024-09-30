@@ -1,6 +1,6 @@
 import { type } from "arktype";
 import { Effect } from "effect";
-import { ArktypeError } from "~~/models/errors";
+import { ArktypeError } from "~~/src/models/errors";
 
 /*@__NO_SIDE_EFFECTS__*/
 export const effectType = <T extends type.Any = type.Any>(

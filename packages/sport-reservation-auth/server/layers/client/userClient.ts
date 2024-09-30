@@ -6,11 +6,11 @@ import {
 } from "sport-reservation-user";
 import { RuntimeConfig } from "~/layers/config";
 
-export const userClient = _userClient.pipe(
-  Layer.provide(
-    Layer.effect(
+export const userClient = /*@__PURE__*/ _userClient.pipe(
+  /*@__PURE__*/ Layer.provide(
+    /*@__PURE__*/ Layer.effect(
       UserFetch,
-      Effect.gen(function* () {
+      /*@__PURE__*/ Effect.gen(function* () {
         const config = yield* yield* RuntimeConfig;
         return {
           fetch: createUserFetch({ baseURL: config.user.baseUrl }),

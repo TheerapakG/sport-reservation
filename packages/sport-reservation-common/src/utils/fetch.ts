@@ -1,18 +1,18 @@
-import { Effect, Context } from "effect";
+import { type } from "arktype";
+import { Simplify } from "drizzle-orm/utils";
+import { Context, Effect } from "effect";
 import {
   $Fetch,
-  ResponseType,
   FetchOptions,
-  FetchError as OFetchError,
   FetchResponse,
   MappedResponseType,
+  FetchError as OFetchError,
+  ResponseType,
 } from "ofetch";
-import { effectType } from "~~/utils/effectType";
 import { encodePath } from "ufo";
-import { ArktypeError, FetchError } from "~~/models/errors";
+import { ArktypeError, FetchError } from "~~/src/models/errors";
+import { effectType } from "~~/src/utils/effectType";
 import { anyObjectType } from "./type";
-import { Simplify } from "drizzle-orm/utils";
-import { type } from "arktype";
 
 export class Fetch
   extends /*@__PURE__*/ Context.Tag("FetchService")<

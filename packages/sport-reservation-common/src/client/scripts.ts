@@ -1,4 +1,4 @@
-import { defineCommand, runMain } from "citty";
+import { defineCommand } from "citty";
 import {
   build as buildNitro,
   copyPublicAssets,
@@ -33,11 +33,9 @@ const generate = defineCommand({
   },
 });
 
-const main = defineCommand({
+export const main = defineCommand({
   subCommands: {
     build,
     generate,
   },
 });
-
-runMain(main);
