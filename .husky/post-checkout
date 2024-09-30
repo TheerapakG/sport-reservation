@@ -1,2 +1,2 @@
-pnpm install --workspace-root
+pnpm install
 pnpm nx run-many -t generate --output-style=stream
