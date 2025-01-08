@@ -5,6 +5,7 @@ import {
   dbLive,
   lineService,
   runtimeConfig,
+  storageService,
   uploadClient,
   userClient,
 } from "~/layers";
@@ -28,7 +29,7 @@ const externalFetchLive = createExternalFetchLive();
 
 /*@__NO_SIDE_EFFECTS__*/
 const createOtherBaseDependenciesLive = () =>
-  dbLive.pipe(Layer.provide(runtimeConfig));
+  Layer.mergeAll(dbLive, storageService).pipe(Layer.provide(runtimeConfig));
 
 const otherBaseDependenciesLive = createOtherBaseDependenciesLive();
 

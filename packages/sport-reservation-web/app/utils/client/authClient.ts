@@ -1,10 +1,10 @@
+import { Layer } from "effect";
 import {
+  authClient as _authClient,
   AuthFetch,
   createAuthFetch,
-  authClient as _authClient,
-} from "sport-reservation-auth";
+} from "sport-reservation-auth/client";
 import { config } from "../config";
-import { Layer } from "effect";
 
 export const authClient = _authClient.pipe(
   Layer.provide(

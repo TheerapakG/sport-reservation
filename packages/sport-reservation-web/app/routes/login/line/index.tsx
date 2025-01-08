@@ -3,10 +3,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/start";
 import { Effect } from "effect";
 import { useEffect } from "react";
-import { AuthClient } from "sport-reservation-auth";
+import { AuthClient } from "sport-reservation-auth/client";
 
-const renderIndex = createServerFn("GET", async () => {
-  "use server";
+const renderIndex = createServerFn({ method: "GET" }).handler(async () => {
   return await Effect.runPromise(
     Effect.provide(
       Effect.gen(function* () {

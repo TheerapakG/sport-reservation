@@ -1,18 +1,26 @@
 import { authClient } from "@/utils/client/authClient";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/start";
-import { arkTypeSearchValidator } from "@tanstack/router-arktype-adapter";
 import { type } from "arktype";
 import { Effect } from "effect";
-import { setCookie } from "vinxi/http";
-import { AuthClient } from "sport-reservation-auth";
 import jwt from "jsonwebtoken";
+import { AuthClient } from "sport-reservation-auth/client";
+import { effectType } from "sport-reservation-common/utils/effectType";
+import { setCookie } from "vinxi/http";
 
-const renderCallback = createServerFn(
-  "POST",
-  async ({ code, state }: { code: string; state: string }) => {
-    "use server";
-
+const renderCallback = createServerFn({ method: "POST" })
+  .validator((data: unknown) =>
+    Effect.runSync(
+      effectType(
+        type({
+          code: "string",
+          state: "string",
+        }),
+        data,
+      ),
+    ),
+  )
+  .handler(async ({ data: { code, state } }) => {
     const { token } = await Effect.runPromise(
       Effect.provide(
         Effect.gen(function* () {
@@ -33,16 +41,9 @@ const renderCallback = createServerFn(
     });
 
     throw redirect({ to: "/" });
-  },
-);
-
-const callbackQueryParams = type({
-  code: "string",
-  state: "string",
-});
+  });
 
 export const Route = createFileRoute("/login/line/callback")({
-  validateSearch: arkTypeSearchValidator(callbackQueryParams),
   loaderDeps: ({ search }) => search,
-  loader: async ({ deps }) => renderCallback(deps),
+  loader: ({ deps }) => renderCallback({ data: deps }),
 });

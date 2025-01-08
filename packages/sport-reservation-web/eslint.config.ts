@@ -1,8 +1,8 @@
-import globals from "globals";
 import { fixupConfigRules, includeIgnoreFile } from "@eslint/compat";
 import { FlatCompat } from "@eslint/eslintrc";
 import js from "@eslint/js";
 import typescriptParser from "@typescript-eslint/parser";
+import globals from "globals";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import * as reactRefresh from "eslint-plugin-react-refresh";
@@ -20,7 +20,11 @@ const compat = new FlatCompat({
 export default [
   includeIgnoreFile(gitignorePath),
   js.configs.recommended,
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   ...fixupConfigRules(compat.extends("plugin:@typescript-eslint/recommended")),
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   ...fixupConfigRules(compat.extends("plugin:react-hooks/recommended")),
   {
     languageOptions: {

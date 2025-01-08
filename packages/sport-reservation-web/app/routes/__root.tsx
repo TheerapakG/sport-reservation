@@ -1,20 +1,20 @@
-import React from "react";
 import {
   createRootRoute,
   Link,
   Outlet,
   ScrollRestoration,
 } from "@tanstack/react-router";
-import { Body, Head, Html, Meta, Scripts } from "@tanstack/start";
+import { Meta, Scripts } from "@tanstack/start";
+import React from "react";
 
-import appCss from "@/styles/app.css?url";
 import {
   NavigationMenu,
-  NavigationMenuList,
   NavigationMenuItem,
   NavigationMenuLink,
+  NavigationMenuList,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
+import appCss from "@/styles/app.css?url";
 
 const TanStackRouterDevtools =
   import.meta.env.MODE === "production"
@@ -27,11 +27,11 @@ const TanStackRouterDevtools =
 
 const RootDocument = ({ children }: { children: React.ReactNode }) => {
   return (
-    <Html>
-      <Head>
+    <html>
+      <head>
         <Meta />
-      </Head>
-      <Body>
+      </head>
+      <body>
         <NavigationMenu>
           <NavigationMenuList>
             <NavigationMenuItem>
@@ -56,8 +56,8 @@ const RootDocument = ({ children }: { children: React.ReactNode }) => {
         <ScrollRestoration />
         <TanStackRouterDevtools position="bottom-right" />
         <Scripts />
-      </Body>
-    </Html>
+      </body>
+    </html>
   );
 };
 
@@ -78,23 +78,25 @@ const NotFoundComponent = () => {
 };
 
 export const Route = createRootRoute({
-  meta: () => [
-    {
-      title:
-        "TanStack Start | Type-Safe, Client-First, Full-Stack React Framework",
-    },
-    {
-      charSet: "UTF-8",
-    },
-    {
-      name: "viewport",
-      content: "width=device-width, initial-scale=1.0",
-    },
-  ],
-  links: () => [
-    { rel: "stylesheet", href: appCss },
-    { rel: "manifest", href: "/manifest.json" },
-  ],
+  head: () => ({
+    meta: [
+      {
+        title:
+          "TanStack Start | Type-Safe, Client-First, Full-Stack React Framework",
+      },
+      {
+        charSet: "UTF-8",
+      },
+      {
+        name: "viewport",
+        content: "width=device-width, initial-scale=1.0",
+      },
+    ],
+    links: [
+      { rel: "stylesheet", href: appCss },
+      { rel: "manifest", href: "/manifest.json" },
+    ],
+  }),
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
 });
