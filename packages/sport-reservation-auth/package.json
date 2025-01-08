@@ -63,6 +63,7 @@
     "globals": "catalog:",
     "jiti": "catalog:",
     "nitropack": "catalog:",
+    "pathe": "catalog:",
     "prettier": "catalog:",
     "vite": "catalog:",
     "vite-plugin-dts": "catalog:"
