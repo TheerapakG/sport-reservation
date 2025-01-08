@@ -3,12 +3,11 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "types": "./dist/client/client.d.ts",
   "exports": {
-    ".": {
-      "types": "./dist/client/client.d.ts",
-      "import": "./dist/client/client.mjs",
-      "require": "./dist/client/client.mjs"
+    "./*": {
+      "types": "./dist/.theestack/*.d.ts",
+      "import": "./dist/*.js",
+      "require": "./dist/*.cjs"
     },
     "./package.json": "./package.json"
   },
@@ -16,19 +15,21 @@
     "dist"
   ],
   "scripts": {
-    "format": "pnpm prettier -c .",
-    "lint": "pnpm eslint --flag unstable_ts_config .",
-    "typecheck": "pnpm tsc --noEmit",
-    "build": "pnpm theestack client build",
+    "format": "prettier -c .",
+    "lint": "eslint --flag unstable_ts_config .",
+    "typecheck": "tsc --noEmit",
+    "build": "theestack client build",
     "dev": "nitro dev",
-    "generate": "pnpm theestack client generate",
+    "generate": "theestack client generate",
     "preview": "node .output/server/index.mjs"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.654.0",
-    "@aws-sdk/lib-storage": "^3.654.0",
+    "@aws-sdk/client-s3": "^3.665.0",
+    "@aws-sdk/lib-storage": "^3.665.0",
+    "@effect/experimental": "catalog:",
     "@effect/platform": "catalog:",
     "@effect/platform-node": "catalog:",
+    "@effect/schema": "catalog:",
     "@effect/sql": "catalog:",
     "@effect/sql-drizzle": "catalog:",
     "@effect/sql-pg": "catalog:",
@@ -49,19 +50,20 @@
     "@eslint/compat": "catalog:",
     "@eslint/eslintrc": "catalog:",
     "@eslint/js": "catalog:",
-    "@smithy/types": "^3.4.2",
+    "@smithy/types": "^3.5.0",
     "@types/eslint__eslintrc": "catalog:",
     "@types/eslint__js": "catalog:",
-    "@types/jsonwebtoken": "^9.0.6",
-    "@types/validator": "^13.12.1",
+    "@types/jsonwebtoken": "catalog:",
+    "@types/validator": "^13.12.2",
     "@typescript-eslint/eslint-plugin": "catalog:",
     "@typescript-eslint/parser": "catalog:",
-    "dotenv": "^16.4.5",
+    "dotenv": "catalog:",
     "eslint": "catalog:",
     "globals": "catalog:",
     "jiti": "catalog:",
     "nitropack": "catalog:",
     "prettier": "catalog:",
-    "unbuild": "catalog:"
+    "vite": "catalog:",
+    "vite-plugin-dts": "catalog:"
   }
 }

@@ -10,11 +10,7 @@ import {
 const createConfigShape = () => {
   return {
     postgresUrl: redacted("string"),
-    valkey: {
-      host: config("string"),
-      port: config("string.integer.parse"),
-      password: redacted("string"),
-    },
+    valkeyUrl: redacted("string"),
     line: {
       client: {
         id: config("string"),

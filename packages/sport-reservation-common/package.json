@@ -18,9 +18,9 @@
     "dist"
   ],
   "scripts": {
-    "format": "pnpm prettier -c .",
-    "lint": "pnpm eslint --flag unstable_ts_config .",
-    "typecheck": "pnpm tsc --noEmit",
+    "format": "prettier -c .",
+    "lint": "eslint --flag unstable_ts_config .",
+    "typecheck": "tsc --noEmit",
     "build": "unbuild",
     "generate": "unbuild"
   },
@@ -42,7 +42,9 @@
     "ofetch": "catalog:",
     "pathe": "catalog:",
     "ufo": "catalog:",
-    "unbuild": "catalog:"
+    "unbuild": "catalog:",
+    "vite": "catalog:",
+    "vitest": "catalog:"
   },
   "devDependencies": {
     "@eslint/compat": "catalog:",

@@ -1,5 +1,6 @@
 import { type } from "arktype";
 import { Effect } from "effect";
+import { getHeader } from "h3";
 import {
   EventContext,
   EventParamsContext,

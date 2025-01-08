@@ -5,6 +5,8 @@ import {
 } from "sport-reservation-common/utils/effectEventHandler";
 import { EventHandlerConfig } from "sport-reservation-common/utils/eventHandlerConfig";
 
+import { dependenciesLive } from "./dependencies";
+
 const _effectEventHandler =
   /*@__PURE__*/ createEffectEventHandler<
     Layer.Layer.Success<typeof dependenciesLive>

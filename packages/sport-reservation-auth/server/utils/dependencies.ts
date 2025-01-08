@@ -8,7 +8,8 @@ import {
   uploadClient,
   userClient,
 } from "~/layers";
-import { lineLoginRepositoryImpl } from "~/repositories/lineLoginRepositoryImpl";
+import { lineLoginApiRepositoryImpl } from "~/repositories/lineLoginApiRepositoryImpl";
+import { lineLoginDbRepositoryImpl } from "~/repositories/lineLoginDbRepositoryImpl";
 
 /*@__NO_SIDE_EFFECTS__*/
 const createConfigLive = () =>
@@ -39,7 +40,9 @@ const baseDependenciesLive = /*@__PURE__*/ Layer.mergeAll(
 
 /*@__NO_SIDE_EFFECTS__*/
 const createRepositoryLive = () =>
-  lineLoginRepositoryImpl.pipe(Layer.provide(baseDependenciesLive));
+  Layer.mergeAll(lineLoginApiRepositoryImpl, lineLoginDbRepositoryImpl).pipe(
+    Layer.provide(baseDependenciesLive),
+  );
 
 /*@__NO_SIDE_EFFECTS__*/
 const createClientLive = () =>

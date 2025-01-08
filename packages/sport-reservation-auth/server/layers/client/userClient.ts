@@ -3,7 +3,7 @@ import {
   UserFetch,
   userClient as _userClient,
   createUserFetch,
-} from "sport-reservation-user";
+} from "sport-reservation-user/client";
 import { RuntimeConfig } from "~/layers/config";
 
 export const userClient = /*@__PURE__*/ _userClient.pipe(

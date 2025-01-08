@@ -1,14 +1,15 @@
 import { type } from "arktype";
 import { Effect, Option } from "effect";
-import { LineLoginRepository } from "~/repositories/lineLoginRepository";
-import { effectEventHandler } from "~/utils/effectEventHandler";
-import { defineEventHandlerConfig } from "sport-reservation-common/utils/eventHandlerConfig";
-import { EventParamsContext } from "sport-reservation-common/utils/effectEventHandler";
-import { noInferOut } from "sport-reservation-common/utils/noInfer";
-import { UserClient } from "sport-reservation-user";
-import { UploadClient } from "sport-reservation-upload";
 import jwt from "jsonwebtoken";
+import { EventParamsContext } from "sport-reservation-common/utils/effectEventHandler";
+import { defineEventHandlerConfig } from "sport-reservation-common/utils/eventHandlerConfig";
+import { noInferOut } from "sport-reservation-common/utils/noInfer";
+import { UploadClient } from "sport-reservation-upload/client";
+import { UserClient } from "sport-reservation-user/client";
 import { AuthKey } from "~/layers";
+import { LineLoginApiRepository } from "~/repositories/lineLoginApiRepository";
+import { LineLoginDbRepository } from "~/repositories/lineLoginDbRepository";
+import { effectEventHandler } from "~/utils/effectEventHandler";
 
 export const handlerConfig = defineEventHandlerConfig({
   name: "postGetLineLoginAuthToken",
@@ -31,8 +32,9 @@ export default effectEventHandler({
       params: { body },
     } = yield* EventParamsContext.typed<typeof handlerConfig>();
 
-    const lineLoginRepository = yield* LineLoginRepository;
-    const { nonce, id: idToken } = yield* lineLoginRepository.getAuthToken({
+    const lineLoginApiRepository = yield* LineLoginApiRepository;
+    const lineLoginDbRepository = yield* LineLoginDbRepository;
+    const { nonce, id: idToken } = yield* lineLoginApiRepository.getAuthToken({
       code: body.code,
       state: body.state,
     });
@@ -40,11 +42,11 @@ export default effectEventHandler({
       id: lineId,
       name: lineName,
       avatar: lineAvatar,
-    } = yield* lineLoginRepository.getProfileByAuthToken({ nonce, idToken });
+    } = yield* lineLoginApiRepository.getProfileByAuthToken({ nonce, idToken });
 
     const userClient = yield* UserClient;
     const profile = yield* Option.match(
-      yield* lineLoginRepository.findUserIdByLineId({ lineId }),
+      yield* lineLoginDbRepository.findUserIdByLineId({ lineId }),
       {
         onSome: ({ userId }) =>
           Effect.gen(function* () {
@@ -64,7 +66,7 @@ export default effectEventHandler({
             const profile = yield* userClient.postUpdateUserProfile({
               body: { id: userId, avatar },
             });
-            yield* lineLoginRepository.associateUserIdWithLineId({
+            yield* lineLoginDbRepository.associateUserIdWithLineId({
               userId,
               lineId,
             });

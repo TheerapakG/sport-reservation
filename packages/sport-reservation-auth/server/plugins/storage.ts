@@ -11,9 +11,7 @@ export default defineNitroPlugin(async () => {
           "valkey",
           redisDriver({
             base: "sport-reservation:auth",
-            host: config.valkey.host,
-            port: config.valkey.port,
-            password: Redacted.value(config.valkey.password),
+            url: Redacted.value(config.valkeyUrl),
           }),
         );
       }),

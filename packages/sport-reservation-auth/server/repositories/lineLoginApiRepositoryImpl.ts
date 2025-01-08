@@ -1,23 +1,20 @@
-import { PgDrizzle } from "@effect/sql-drizzle/Pg";
 import crypto from "crypto";
-import { eq } from "drizzle-orm";
 import { Context, Effect, Layer, Option } from "effect";
-import { authUserAuthConnection } from "sport-reservation-common/db/schema";
 import { ValkeyError } from "sport-reservation-common/models/errors";
-import { LineService } from "~/layers";
+import { LineService, StorageService } from "~/layers";
 import {
   InvalidLineNonceError,
   InvalidLineStateError,
-  LineLoginRepository,
-} from "./lineLoginRepository";
+  LineLoginApiRepository,
+} from "./lineLoginApiRepository";
 
-export const lineLoginRepositoryImpl = /*@__PURE__*/ Layer.effect(
-  LineLoginRepository,
+export const lineLoginApiRepositoryImpl = /*@__PURE__*/ Layer.effect(
+  LineLoginApiRepository,
   /*@__PURE__*/ Effect.gen(function* () {
-    const db = yield* PgDrizzle;
+    const { storage } = yield* StorageService;
     const lineService = yield* LineService;
 
-    return <Context.Tag.Service<LineLoginRepository>>{
+    return <Context.Tag.Service<LineLoginApiRepository>>{
       generateRequest: () =>
         Effect.gen(function* () {
           const state = crypto.randomBytes(64).toString("hex");
@@ -26,11 +23,11 @@ export const lineLoginRepositoryImpl = /*@__PURE__*/ Layer.effect(
 
           yield* Effect.mapError(
             Effect.tryPromise(async () => {
-              await useStorage().setItem<{
+              await storage.setItem<{
                 nonce: string;
                 codeVerifier: string;
               }>(
-                `valkey:request:line:${state}`,
+                `request:line:${state}`,
                 { nonce, codeVerifier },
                 { ttl: 600 },
               );
@@ -46,11 +43,11 @@ export const lineLoginRepositoryImpl = /*@__PURE__*/ Layer.effect(
             Option.fromNullable(
               yield* Effect.orElseSucceed(
                 Effect.tryPromise(async () => {
-                  const requestData = await useStorage().getItem<{
+                  const requestData = await storage.getItem<{
                     nonce: string;
                     codeVerifier: string;
-                  }>(`valkey:request:line:${state}`);
-                  await useStorage().removeItem(`valkey:request:line:${state}`);
+                  }>(`request:line:${state}`);
+                  await storage.removeItem(`request:line:${state}`);
                   return requestData;
                 }),
                 () => null,
@@ -91,29 +88,6 @@ export const lineLoginRepositoryImpl = /*@__PURE__*/ Layer.effect(
             name: name ?? "",
             avatar: picture ?? "",
           };
-        }),
-      findUserIdByLineId: ({ lineId }) =>
-        Effect.gen(function* () {
-          const users = yield* db
-            .select()
-            .from(authUserAuthConnection)
-            .where(eq(authUserAuthConnection.lineId, lineId))
-            .limit(1);
-
-          if (users.length === 0) return Option.none();
-
-          return Option.some({ userId: users[0].userId });
-        }),
-      associateUserIdWithLineId: ({ userId, lineId }) =>
-        Effect.gen(function* () {
-          yield* db
-            .insert(authUserAuthConnection)
-            .values({ userId, lineId })
-            .onConflictDoUpdate({
-              target: authUserAuthConnection.userId,
-              set: { lineId },
-              setWhere: eq(authUserAuthConnection.userId, userId),
-            });
         }),
     };
   }),

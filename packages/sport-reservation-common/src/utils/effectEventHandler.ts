@@ -98,9 +98,12 @@ const effectEventHandler = <
         const error = cause.error;
         if (isArktypeError(error) || isFetchError(error) || isS3Error(error)) {
           Effect.runSync(
-            Console.log(event.path, Cause.fail(error.error.message)),
+            Console.log(
+              event.path,
+              Cause.fail(error.error?.message ?? "unknown error cause"),
+            ),
           );
-          throw createError(error.error.message);
+          throw createError(error.error?.message ?? "unknown error cause");
         }
       }
       Effect.runSync(Console.log(event.path, cause));

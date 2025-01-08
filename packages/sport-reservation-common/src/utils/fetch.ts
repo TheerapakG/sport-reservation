@@ -149,22 +149,3 @@ export const typedRawFetch = <
     )) as MappedResponseType<R, T["infer"]>;
     return fetchResponse;
   });
-
-/*@__NO_SIDE_EFFECTS__*/
-export const withMock = <
-  A,
-  E,
-  R = never,
-  Opts extends Record<string, unknown> = Record<string, unknown>,
->(
-  fetch: (opts: Opts) => Effect.Effect<A, E, R>,
-) => {
-  return (
-    opts: Opts & {
-      mock?: Effect.Effect<A, E, never>;
-    },
-  ) => {
-    const { mock } = opts ?? {};
-    return mock ?? fetch(opts);
-  };
-};

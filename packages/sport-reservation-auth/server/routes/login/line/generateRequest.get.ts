@@ -4,7 +4,7 @@ import { defineEventHandlerConfig } from "sport-reservation-common/utils/eventHa
 import { useUrl } from "sport-reservation-common/utils/useUrl";
 import { RuntimeConfig } from "~/layers";
 import { lineLoginRequest } from "~/models/line.ts";
-import { LineLoginRepository } from "~/repositories/lineLoginRepository";
+import { LineLoginApiRepository } from "~/repositories/lineLoginApiRepository";
 import { effectEventHandler } from "~/utils/effectEventHandler";
 
 export const handlerConfig = defineEventHandlerConfig({
@@ -15,9 +15,9 @@ export default effectEventHandler({
   config: handlerConfig,
   handler: /*@__PURE__*/ Effect.gen(function* () {
     const config = yield* yield* RuntimeConfig;
-    const lineloginRepository = yield* LineLoginRepository;
+    const lineloginApiRepository = yield* LineLoginApiRepository;
     const { state, nonce, codeVerifier, scope } =
-      yield* lineloginRepository.generateRequest();
+      yield* lineloginApiRepository.generateRequest();
     return {
       url: useUrl({
         baseUrl: "https://access.line.me/oauth2/v2.1/authorize",

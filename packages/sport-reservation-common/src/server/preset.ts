@@ -1,20 +1,13 @@
+import { Effect, SynchronizedRef } from "effect";
 import type { NitroPreset } from "nitropack";
-import { Effect } from "effect";
-import fsp from "node:fs/promises";
-import { dirname } from "pathe";
-import { build } from "unbuild";
-
-async function writeFile(file: string, contents: Buffer | string) {
-  await fsp.mkdir(dirname(file), { recursive: true });
-  await fsp.writeFile(
-    file,
-    contents,
-    typeof contents === "string" ? "utf8" : undefined,
-  );
-}
+import { build } from "vite";
+import { writeFile } from "~~/src/utils/writeFile";
 
 export const createPreset = () => {
+  const ranViteWatcher = Effect.runSync(SynchronizedRef.make(false));
+
   return {
+    ignore: ["**/*.test.ts"],
     hooks: {
       "types:extend": async (types) => {
         const metadata = Object.entries(types.routes).flatMap(
@@ -32,7 +25,7 @@ export const createPreset = () => {
         );
 
         await writeFile(
-          "./client/routes.gen.ts",
+          "./.theestack/routes.gen.ts",
           [
             ...metadata.map(
               ({ importPath }, i) =>
@@ -58,7 +51,14 @@ export const createPreset = () => {
       compiled: async (nitro) => {
         if (nitro.options.dev)
           await Effect.runPromiseExit(
-            Effect.tryPromise(async () => build(".", false)),
+            SynchronizedRef.updateEffect(ranViteWatcher, (ran) =>
+              Effect.try(() => {
+                if (!ran) {
+                  build({ build: { watch: {} }, mode: "development" });
+                }
+                return true;
+              }),
+            ),
           );
       },
     },

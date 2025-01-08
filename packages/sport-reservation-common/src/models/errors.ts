@@ -4,7 +4,7 @@ import { FetchError as OFetchError } from "ofetch";
 export class ArktypeError {
   readonly _tag = "ArktypeError";
 
-  constructor(readonly error: ArkErrors) {}
+  constructor(readonly error?: ArkErrors) {}
 }
 
 export const isArktypeError = (error: unknown): error is ArktypeError => {
@@ -19,7 +19,7 @@ export const isArktypeError = (error: unknown): error is ArktypeError => {
 export class FetchError {
   readonly _tag = "FetchError";
 
-  constructor(readonly error: OFetchError) {}
+  constructor(readonly error?: OFetchError) {}
 }
 
 export const isFetchError = (error: unknown): error is FetchError => {
@@ -34,7 +34,7 @@ export const isFetchError = (error: unknown): error is FetchError => {
 export class S3Error {
   readonly _tag = "S3Error";
 
-  constructor(readonly error: Error) {}
+  constructor(readonly error?: Error) {}
 }
 
 export const isS3Error = (error: unknown): error is S3Error => {

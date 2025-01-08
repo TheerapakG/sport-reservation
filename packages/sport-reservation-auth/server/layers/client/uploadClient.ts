@@ -3,7 +3,7 @@ import {
   UploadFetch,
   uploadClient as _uploadClient,
   createUploadFetch,
-} from "sport-reservation-upload";
+} from "sport-reservation-upload/client";
 import { RuntimeConfig } from "~/layers/config";
 
 export const uploadClient = /*@__PURE__*/ _uploadClient.pipe(
