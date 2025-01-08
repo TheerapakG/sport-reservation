@@ -13,6 +13,7 @@ dist-ssr
 *.local
 .data
 .nitro
+.theestack
 .cache
 .output
 .env
@@ -28,5 +29,4 @@ dist-ssr
 *.sln
 *.sw?
 
-routes.gen.ts
 types
