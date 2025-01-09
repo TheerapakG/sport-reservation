@@ -30,7 +30,7 @@ function IndexComponent() {
   );
 }
 
-export const Route = createFileRoute("/login/line/")({
+export const Route = createFileRoute("/_layout/login/line/")({
   loader: async () => renderIndex(),
   component: IndexComponent,
 });
