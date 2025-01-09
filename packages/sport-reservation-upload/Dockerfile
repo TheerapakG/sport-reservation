@@ -8,4 +8,4 @@ RUN update-ca-certificates
 
 COPY ./.output ./.output
 
-CMD [ "node", ".output/server/index.mjs" ]
+CMD [ "node", "--use-openssl-ca", ".output/server/index.mjs" ]
