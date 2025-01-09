@@ -7,14 +7,14 @@ import {
 import { Meta, Scripts } from "@tanstack/start";
 import React from "react";
 
+import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
+import appCss from "@/styles/app.css?url";
 import {
   NavigationMenu,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-  navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu";
-import appCss from "@/styles/app.css?url";
+} from "@radix-ui/react-navigation-menu";
 
 const TanStackRouterDevtools =
   import.meta.env.MODE === "production"
@@ -71,9 +71,9 @@ const RootComponent = () => {
 
 const NotFoundComponent = () => {
   return (
-    <RootDocument>
+    <div className="p-2">
       <h3>Not Found!</h3>
-    </RootDocument>
+    </div>
   );
 };
 
