@@ -31,21 +31,11 @@ spec:
                 secretKeyRef:
                   name: sport-reservation-auth-secret
                   key: postgresUrl
-            - name: VALKEY_HOST
+            - name: VALKEY_URL
               valueFrom:
                 secretKeyRef:
                   name: sport-reservation-auth-secret
-                  key: valkeyHost
-            - name: VALKEY_PORT
-              valueFrom:
-                secretKeyRef:
-                  name: sport-reservation-auth-secret
-                  key: valkeyPort
-            - name: VALKEY_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: sport-reservation-auth-secret
-                  key: valkeyPassword
+                  key: valkeyUrl
             - name: LINE_CLIENT_ID
               valueFrom:
                 secretKeyRef:
