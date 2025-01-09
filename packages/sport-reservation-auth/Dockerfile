@@ -4,7 +4,7 @@ RUN apt update
 RUN apt install -y libargon2-1
 
 COPY ./cert/ca-certificate.crt /usr/local/share/ca-certificates/
-RUN update-ca-certificatess
+RUN update-ca-certificates
 
 COPY ./.output ./.output
 
