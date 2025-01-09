@@ -8,6 +8,7 @@ export const dbLive = /*@__PURE__*/ Layer.unwrapEffect(
     const config = yield* RuntimeConfig;
     const PgLive = PgClient.layer({
       url: Config.map(config, ({ postgresUrl }) => postgresUrl),
+      ssl: Config.succeed(true),
     });
     const DrizzleLive = PgDrizzle.layer.pipe(Layer.provide(PgLive));
     return Layer.merge(PgLive, DrizzleLive);
