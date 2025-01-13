@@ -56,11 +56,16 @@ spec:
                 secretKeyRef:
                   name: sport-reservation-auth-secret
                   key: secretPath
-            - name: AUTH_KEY_FILE
+            - name: AUTH_KEY_FILE_PRIVATE
               valueFrom:
                 secretKeyRef:
                   name: sport-reservation-auth-secret
-                  key: authKeyFile
+                  key: authKeyFilePrivate
+            - name: AUTH_KEY_FILE_PUBLIC
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-auth-secret
+                  key: authKeyFilePublic
             - name: UPLOAD_SECRET
               valueFrom:
                 secretKeyRef:

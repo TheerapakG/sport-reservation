@@ -3,7 +3,10 @@ import { Context, Effect, Layer, Redacted } from "effect";
 import { RuntimeConfig } from "./runtimeConfig";
 
 export class AuthKey
-  extends /*@__PURE__*/ Context.Tag("AuthKey")<AuthKey, Buffer>() {}
+  extends /*@__PURE__*/ Context.Tag("AuthKey")<
+    AuthKey,
+    { private: Buffer; public: Buffer }
+  >() {}
 
 export const authKey = /*@__PURE__*/ Layer.effect(
   AuthKey,
@@ -11,11 +14,19 @@ export const authKey = /*@__PURE__*/ Layer.effect(
     const config = yield* yield* RuntimeConfig;
     const fs = yield* FileSystem.FileSystem;
 
-    return Buffer.from(
-      yield* fs.readFile(
-        Redacted.value(config.secret.path) +
-          Redacted.value(config.auth.keyFile),
+    return {
+      private: Buffer.from(
+        yield* fs.readFile(
+          Redacted.value(config.secret.path) +
+            Redacted.value(config.auth.keyFile.private),
+        ),
       ),
-    );
+      public: Buffer.from(
+        yield* fs.readFile(
+          Redacted.value(config.secret.path) +
+            Redacted.value(config.auth.keyFile.public),
+        ),
+      ),
+    };
   }),
 );

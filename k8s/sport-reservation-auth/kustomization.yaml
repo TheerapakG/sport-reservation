@@ -7,6 +7,7 @@ secretGenerator:
   - name: sport-reservation-auth-secret-path
     files:
       - auth.key
+      - auth.key.pub
 configMapGenerator:
 generatorOptions:
   disableNameSuffixHash: true

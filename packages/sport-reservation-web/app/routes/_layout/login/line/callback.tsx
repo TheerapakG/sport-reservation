@@ -1,49 +1,33 @@
-import { authClient } from '@/utils/client/authClient'
-import { createFileRoute, redirect } from '@tanstack/react-router'
-import { createServerFn } from '@tanstack/start'
-import { type } from 'arktype'
-import { Effect } from 'effect'
-import jwt from 'jsonwebtoken'
-import { AuthClient } from 'sport-reservation-auth/client'
-import { effectType } from 'sport-reservation-common/utils/effectType'
-import { setCookie } from 'vinxi/http'
+import { authKeys, lineLoginAuthTokenQueryOptions } from "@/api/auth";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { type } from "arktype";
+import { Effect } from "effect";
+import { effectTypeCheck } from "sport-reservation-common/utils/effectType";
 
-const renderCallback = createServerFn({ method: 'POST' })
-  .validator((data: unknown) =>
-    Effect.runSync(
-      effectType(
-        type({
-          code: 'string',
-          state: 'string',
-        }),
-        data,
-      ),
-    ),
-  )
-  .handler(async ({ data: { code, state } }) => {
-    const { token } = await Effect.runPromise(
-      Effect.provide(
-        Effect.gen(function* () {
-          return yield* (yield* AuthClient).postGetLineLoginAuthToken({
-            body: { code, state },
-          })
-        }),
-        authClient,
-      ),
-    )
+const CallbackComponent = () => {
+  return (
+    <div className="p-2">
+      <h3>Redirecting...</h3>
+    </div>
+  );
+};
 
-    setCookie('token', token, {
-      expires: new Date(
-        ((jwt.decode(token, { complete: true })?.payload as jwt.JwtPayload)
-          ?.exp ?? 0) * 1000,
-      ),
-      secure: true,
-    })
+const validateSearch = type({ code: "string", state: "string" });
 
-    throw redirect({ to: '/' })
-  })
-
-export const Route = createFileRoute('/_layout/login/line/callback')({
+export const Route = createFileRoute("/_layout/login/line/callback")({
+  validateSearch,
   loaderDeps: ({ search }) => search,
-  loader: ({ deps }) => renderCallback({ data: deps }),
-})
+  loader: async ({ deps, context: { queryClient } }) => {
+    const { code, state } = Effect.runSync(effectTypeCheck(deps));
+    await queryClient.ensureQueryData(
+      lineLoginAuthTokenQueryOptions({ code, state }),
+    );
+    await queryClient.invalidateQueries({
+      queryKey: authKeys.token.all(),
+    });
+    throw redirect({
+      to: "/",
+    });
+  },
+  component: CallbackComponent,
+});

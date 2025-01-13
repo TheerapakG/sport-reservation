@@ -10,6 +10,7 @@ export default defineConfig({
       entry: {
         client: "./.theestack/client",
         mock: "./.theestack/mock",
+        models: "./.theestack/models",
       },
     },
     rollupOptions: {
@@ -38,7 +39,12 @@ export default defineConfig({
   },
   plugins: [
     dts({
-      include: ["./.theestack/client.ts", "./.theestack/mock.ts"],
+      include: [
+        "./.theestack/client.ts",
+        "./.theestack/mock.ts",
+        "./.theestack/models.ts",
+        "./server/models/*.ts",
+      ],
     }),
   ],
 });

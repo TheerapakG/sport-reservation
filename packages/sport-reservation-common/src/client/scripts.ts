@@ -55,8 +55,31 @@ const writeMock = async (config: TheeStackConfig) => {
       `import { ${pascalCase(`${config.name}_client`)} } from "./client";`,
       `import { apiRoutes } from "./routes.gen";`,
       ``,
-      `export const ${camelCase(`create_mock_${config.name}_client`)}= () =>`,
+      `export const ${camelCase(`create_mock_${config.name}_client`)} = () =>`,
       `  createMockClient(${pascalCase(`${config.name}_client`)}, apiRoutes);`,
+    ].join("\n"),
+  );
+};
+
+const writeModels = async (config: TheeStackConfig) => {
+  await writeFile(
+    ".theestack/models.ts",
+    [
+      `export * from "../server/models";`,
+      `import { getClientResponseType, getClientQueryType, getClientBodyType, getClientRouterType } from "sport-reservation-common/client/client";`,
+      `import { apiRoutes } from "./routes.gen";`,
+      ``,
+      `export const ${camelCase(`get_${config.name}_client_response_type`)} = <K extends keyof typeof apiRoutes>(name: K) =>`,
+      `  getClientResponseType(apiRoutes, name);`,
+      ``,
+      `export const ${camelCase(`get_${config.name}_client_query_type`)} = <K extends keyof typeof apiRoutes>(name: K) =>`,
+      `  getClientQueryType(apiRoutes, name);`,
+      ``,
+      `export const ${camelCase(`get_${config.name}_client_body_type`)} = <K extends keyof typeof apiRoutes>(name: K) =>`,
+      `  getClientBodyType(apiRoutes, name);`,
+      ``,
+      `export const ${camelCase(`get_${config.name}_client_router_type`)} = <K extends keyof typeof apiRoutes>(name: K) =>`,
+      `  getClientRouterType(apiRoutes, name);`,
     ].join("\n"),
   );
 };
@@ -66,6 +89,7 @@ const build = defineCommand({
     const config = await loadTheeStackConfig();
     await writeClient(config);
     await writeMock(config);
+    await writeModels(config);
     const nitro = await createNitro({ rootDir: ".", dev: false });
     await prepare(nitro);
     await copyPublicAssets(nitro);
@@ -81,6 +105,7 @@ const generate = defineCommand({
     const config = await loadTheeStackConfig();
     await writeClient(config);
     await writeMock(config);
+    await writeModels(config);
     const nitro = await createNitro({ rootDir: ".", dev: false });
     await prepare(nitro);
     await scanHandlers(nitro);

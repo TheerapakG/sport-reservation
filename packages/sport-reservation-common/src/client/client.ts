@@ -195,3 +195,37 @@ export const createMockClient = async <
     ),
   };
 };
+
+export const getClientResponseType = <
+  CR extends ClientRoutes,
+  K extends keyof CR,
+>(
+  clientRoutes: CR,
+  name: K,
+): CR[K]["response"] => {
+  return clientRoutes[name].response;
+};
+
+export const getClientQueryType = <CR extends ClientRoutes, K extends keyof CR>(
+  clientRoutes: CR,
+  name: K,
+): CR[K]["query"] => {
+  return clientRoutes[name].query;
+};
+
+export const getClientBodyType = <CR extends ClientRoutes, K extends keyof CR>(
+  clientRoutes: CR,
+  name: K,
+): CR[K]["body"] => {
+  return clientRoutes[name].body;
+};
+
+export const getClientRouterType = <
+  CR extends ClientRoutes,
+  K extends keyof CR,
+>(
+  clientRoutes: CR,
+  name: K,
+): CR[K]["router"] => {
+  return clientRoutes[name].router;
+};

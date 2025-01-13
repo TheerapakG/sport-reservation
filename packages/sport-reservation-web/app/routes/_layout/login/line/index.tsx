@@ -1,27 +1,14 @@
-import { authClient } from "@/utils/client/authClient";
+import { authKeys, lineLoginRequestQueryOptions } from "@/api/auth";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { createServerFn } from "@tanstack/start";
-import { Effect } from "effect";
 import { useEffect } from "react";
-import { AuthClient } from "sport-reservation-auth/client";
-
-const renderIndex = createServerFn({ method: "GET" }).handler(async () => {
-  return await Effect.runPromise(
-    Effect.provide(
-      Effect.gen(function* () {
-        return yield* (yield* AuthClient).getGenerateLineLoginRequest({});
-      }),
-      authClient,
-    ),
-  );
-});
 
 function IndexComponent() {
-  const { url } = Route.useLoaderData();
+  const loginRequest = useSuspenseQuery(lineLoginRequestQueryOptions());
 
   useEffect(() => {
-    window.location.replace(url);
-  }, [url]);
+    window.location.replace(loginRequest.data.url);
+  }, [loginRequest]);
 
   return (
     <div className="p-2">
@@ -31,6 +18,9 @@ function IndexComponent() {
 }
 
 export const Route = createFileRoute("/_layout/login/line/")({
-  loader: async () => renderIndex(),
+  loader: async ({ context: { queryClient } }) => {
+    await queryClient.invalidateQueries({ queryKey: authKeys.line.all() });
+    queryClient.prefetchQuery(lineLoginRequestQueryOptions());
+  },
   component: IndexComponent,
 });

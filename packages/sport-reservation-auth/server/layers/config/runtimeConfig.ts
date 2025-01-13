@@ -22,7 +22,10 @@ const createConfigShape = () => {
       path: redacted("string"),
     },
     auth: {
-      keyFile: redacted("string"),
+      keyFile: {
+        private: redacted("string"),
+        public: redacted("string"),
+      },
     },
     upload: {
       baseUrl: config("string"),
