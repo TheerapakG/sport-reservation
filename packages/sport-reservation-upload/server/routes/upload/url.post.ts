@@ -38,6 +38,7 @@ export default effectEventHandler({
     });
 
     const downloadRepository = yield* DownloadRepository;
+    console.log(body.url);
     const stream = yield* downloadRepository.downloadUrl({ url: body.url });
     const uploadRepository = yield* UploadRepository;
     const { url: resultUrl } = yield* uploadRepository.upload({
