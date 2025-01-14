@@ -77,7 +77,10 @@ export default effectEventHandler({
 
     const authKey = yield* AuthKey;
     const token = yield* Effect.try(() =>
-      jwt.sign(profile, authKey.private, { algorithm: "RS256" }),
+      jwt.sign(profile, authKey.private, {
+        algorithm: "RS256",
+        expiresIn: "7d",
+      }),
     );
 
     return { token };
