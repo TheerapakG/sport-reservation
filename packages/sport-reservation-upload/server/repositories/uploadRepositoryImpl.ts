@@ -15,11 +15,6 @@ export const uploadRepositoryImpl = /*@__PURE__*/ Layer.effect(
       generateUploadToken: () => Effect.succeed({ token: "" }),
       upload: ({ key, stream }) =>
         Effect.gen(function* () {
-          console.log(
-            config.s3.originEndpoint,
-            config.s3.bucket,
-            `reservation${key}`,
-          );
           const upload = new Upload({
             client: s3,
             params: {
@@ -31,11 +26,6 @@ export const uploadRepositoryImpl = /*@__PURE__*/ Layer.effect(
           yield* Effect.mapError(
             Effect.tryPromise(async () => await upload.done()),
             (error) => new S3Error(error.error as Error),
-          );
-          console.log(
-            config.s3.originEndpoint,
-            config.s3.bucket,
-            `reservation${key}`,
           );
           return { url: `${config.s3.domainEndpoint}/reservation${key}` };
         }),
