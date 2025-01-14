@@ -96,7 +96,7 @@ export const lineService = /*@__PURE__*/ Layer.effect(
           }),
           Fetch,
           { fetch: lineFetch },
-        ),
+        ).pipe(Effect.withSpan("lineService.postIssueAccessToken")),
       postGetUserProfile: ({
         idToken,
         nonce,
@@ -124,7 +124,7 @@ export const lineService = /*@__PURE__*/ Layer.effect(
           }),
           Fetch,
           { fetch: lineFetch },
-        ),
+        ).pipe(Effect.withSpan("lineService.postGetUserProfile")),
     };
   }),
 );

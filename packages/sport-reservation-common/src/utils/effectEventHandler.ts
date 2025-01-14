@@ -76,10 +76,14 @@ const effectEventHandler = <
   return eventHandler(async (event) => {
     const exit = await Effect.runPromiseExit(
       Effect.gen(function* () {
+        const wrappedHandler = Effect.functionWithSpan({
+          body: () => handler,
+          options: () => ({ name: config.name }),
+        });
         return yield* effectType(
           config.response,
           yield* pipe(
-            handler,
+            wrappedHandler(),
             Effect.provideService(EventContext, { event }),
             Effect.provideService(EventParamsContext, {
               params: yield* effectEventHandlerParams(event, config),
@@ -92,21 +96,22 @@ const effectEventHandler = <
     if (Exit.isFailure(exit)) {
       const cause = exit.cause;
       if (Cause.isDieType(cause) && Cause.isUnknownException(cause.defect)) {
-        Effect.runSync(Console.log(event.path, cause.defect));
+        Effect.runSync(
+          Console.log("[die]", event.path, Cause.prettyErrors(cause)),
+        );
         throw createError(cause.defect.message);
       } else if (Cause.isFailType(cause)) {
         const error = cause.error;
         if (isArktypeError(error) || isFetchError(error) || isS3Error(error)) {
           Effect.runSync(
-            Console.log(
-              event.path,
-              Cause.fail(error.error?.message ?? "unknown error cause"),
-            ),
+            Console.log("[fail]", event.path, Cause.prettyErrors(cause)),
           );
           throw createError(error.error?.message ?? "unknown error cause");
         }
       }
-      Effect.runSync(Console.log(event.path, cause));
+      Effect.runSync(
+        Console.log("[fail]", event.path, Cause.prettyErrors(cause)),
+      );
       throw createError(exit.toString());
     }
     return exit.value;

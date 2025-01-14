@@ -21,7 +21,9 @@ export const lineLoginDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
           if (users.length === 0) return Option.none();
 
           return Option.some({ userId: users[0].userId });
-        }),
+        }).pipe(
+          Effect.withSpan("lineLoginDbRepositoryImpl.findUserIdByLineId"),
+        ),
       associateUserIdWithLineId: ({ userId, lineId }) =>
         Effect.gen(function* () {
           yield* db
@@ -32,7 +34,11 @@ export const lineLoginDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
               set: { lineId },
               setWhere: eq(authUserAuthConnection.userId, userId),
             });
-        }),
+        }).pipe(
+          Effect.withSpan(
+            "lineLoginDbRepositoryImpl.associateUserIdWithLineId",
+          ),
+        ),
     };
   }),
 );

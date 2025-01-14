@@ -36,7 +36,7 @@ export const lineLoginApiRepositoryImpl = /*@__PURE__*/ Layer.effect(
           );
 
           return { state, nonce, codeVerifier, scope: "profile openid" };
-        }),
+        }).pipe(Effect.withSpan("lineLoginApiRepositoryImpl.generateRequest")),
       getAuthToken: ({ code, state }) =>
         Effect.gen(function* () {
           const { nonce, codeVerifier } = yield* Option.match(
@@ -69,7 +69,7 @@ export const lineLoginApiRepositoryImpl = /*@__PURE__*/ Layer.effect(
             refresh: refresh_token,
             type: token_type,
           };
-        }),
+        }).pipe(Effect.withSpan("lineLoginApiRepositoryImpl.getAuthToken")),
       getProfileByAuthToken: ({ nonce, idToken }) =>
         Effect.gen(function* () {
           const {
@@ -88,7 +88,9 @@ export const lineLoginApiRepositoryImpl = /*@__PURE__*/ Layer.effect(
             name: name ?? "",
             avatar: picture ?? "",
           };
-        }),
+        }).pipe(
+          Effect.withSpan("lineLoginApiRepositoryImpl.getProfileByAuthToken"),
+        ),
     };
   }),
 );

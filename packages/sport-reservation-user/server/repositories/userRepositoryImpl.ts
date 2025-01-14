@@ -1,8 +1,8 @@
-import { Effect, Layer, Option } from "effect";
 import { PgDrizzle } from "@effect/sql-drizzle/Pg";
-import { UserRepository } from "./userRepository";
-import { userUserProfile } from "sport-reservation-common/db/schema";
 import { eq } from "drizzle-orm";
+import { Effect, Layer, Option } from "effect";
+import { userUserProfile } from "sport-reservation-common/db/schema";
+import { UserRepository } from "./userRepository";
 
 export const userRepositoryImpl = /*@__PURE__*/ Layer.effect(
   UserRepository,
@@ -17,7 +17,7 @@ export const userRepositoryImpl = /*@__PURE__*/ Layer.effect(
             .returning();
           if (users.length === 0) return Option.none();
           return Option.some(users[0]);
-        }),
+        }).pipe(Effect.withSpan("userRepositoryImpl.createUserProfile")),
       updateUserProfile: ({ id, ...data }) =>
         Effect.gen(function* () {
           const users = yield* db
@@ -27,7 +27,7 @@ export const userRepositoryImpl = /*@__PURE__*/ Layer.effect(
             .returning();
           if (users.length === 0) return Option.none();
           return Option.some(users[0]);
-        }),
+        }).pipe(Effect.withSpan("userRepositoryImpl.updateUserProfile")),
       findUserProfileById: ({ id }) =>
         Effect.gen(function* () {
           const users = yield* db
@@ -37,7 +37,7 @@ export const userRepositoryImpl = /*@__PURE__*/ Layer.effect(
             .limit(1);
           if (users.length === 0) return Option.none();
           return Option.some(users[0]);
-        }),
+        }).pipe(Effect.withSpan("userRepositoryImpl.findUserProfileById")),
     };
   }),
 );

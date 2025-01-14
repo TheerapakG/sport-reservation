@@ -12,7 +12,10 @@ export const uploadRepositoryImpl = /*@__PURE__*/ Layer.effect(
     const { s3 } = yield* S3;
 
     return {
-      generateUploadToken: () => Effect.succeed({ token: "" }),
+      generateUploadToken: () =>
+        Effect.succeed({ token: "" }).pipe(
+          Effect.withSpan("uploadRepositoryImpl.generateUploadToken"),
+        ),
       upload: ({ key, stream }) =>
         Effect.gen(function* () {
           const upload = new Upload({
@@ -28,8 +31,11 @@ export const uploadRepositoryImpl = /*@__PURE__*/ Layer.effect(
             (error) => new S3Error(error.error as Error),
           );
           return { url: `${config.s3.domainEndpoint}/reservation${key}` };
-        }),
-      delete: () => Effect.gen(function* () {}),
+        }).pipe(Effect.withSpan("uploadRepositoryImpl.upload")),
+      delete: () =>
+        Effect.gen(function* () {}).pipe(
+          Effect.withSpan("uploadRepositoryImpl.delete"),
+        ),
     };
   }),
 );

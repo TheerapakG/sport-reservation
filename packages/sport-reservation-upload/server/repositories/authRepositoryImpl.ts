@@ -11,7 +11,7 @@ export const authRepositoryImpl = /*@__PURE__*/ Layer.effect(
         Effect.gen(function* () {
           if (secret !== Redacted.value(config.upload.secret))
             return yield* Effect.fail(new InvalidSecretError());
-        }),
+        }).pipe(Effect.withSpan("authRepositoryImpl.checkSecret")),
     };
   }),
 );

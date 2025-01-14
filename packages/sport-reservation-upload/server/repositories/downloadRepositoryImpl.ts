@@ -1,8 +1,7 @@
 import { Effect, Layer } from "effect";
-import { DownloadRepository } from "./downloadRepository";
-import { typedFetch } from "sport-reservation-common/utils/fetch";
+import { Fetch, typedFetch } from "sport-reservation-common/utils/fetch";
 import { unknownType } from "sport-reservation-common/utils/type";
-import { Fetch } from "sport-reservation-common/utils/fetch";
+import { DownloadRepository } from "./downloadRepository";
 
 export const downloadRepositoryImpl = /*@__PURE__*/ Layer.effect(
   DownloadRepository,
@@ -19,7 +18,7 @@ export const downloadRepositoryImpl = /*@__PURE__*/ Layer.effect(
           }),
           Fetch,
           { fetch },
-        );
+        ).pipe(Effect.withSpan("downloadRepositoryImpl.downloadUrl"));
       },
     };
   }),
