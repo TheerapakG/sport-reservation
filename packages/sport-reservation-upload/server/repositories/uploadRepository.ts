@@ -12,6 +12,9 @@ export class UploadRepository
       upload: (data: {
         key: string;
         stream: StreamingBlobPayloadInputTypes;
+      }) => Effect.Effect<{ key: string }, S3Error>;
+      getPresignedUrl: (data: {
+        key: string;
       }) => Effect.Effect<{ url: string }, S3Error>;
       delete: () => Effect.Effect<unknown>;
     }

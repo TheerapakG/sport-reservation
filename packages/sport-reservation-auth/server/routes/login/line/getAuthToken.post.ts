@@ -60,11 +60,11 @@ export default effectEventHandler({
             const { id: userId } = yield* userClient.postCreateUserProfile({
               body: { name: lineName },
             });
-            const { url: avatar } = yield* uploadClient.postUploadFromUrl({
+            const { key: avatarKey } = yield* uploadClient.postUploadFromUrl({
               body: { key: `/user/avatar/${userId}`, url: lineAvatar },
             });
             const profile = yield* userClient.postUpdateUserProfile({
-              body: { id: userId, avatar },
+              body: { id: userId, avatar: avatarKey },
             });
             yield* lineLoginDbRepository.associateUserIdWithLineId({
               userId,

@@ -1,21 +1,29 @@
 import { Config, Context, Layer } from "effect";
 import {
+  config,
   effectConfig,
   InferConfig,
   redacted,
 } from "sport-reservation-common/utils/effectConfig";
 
-const configShape = {
-  postgresUrl: redacted("string"),
+/*@__NO_SIDE_EFFECTS__*/
+const createConfigShape = () => {
+  return {
+    postgresUrl: redacted("string"),
+    upload: {
+      baseUrl: config("string"),
+      secret: redacted("string"),
+    },
+  };
 };
 
 export class RuntimeConfig
   extends /*@__PURE__*/ Context.Tag("RuntimeConfig")<
     RuntimeConfig,
-    Config.Config<InferConfig<typeof configShape>>
+    Config.Config<InferConfig<ReturnType<typeof createConfigShape>>>
   >() {}
 
-export const runtimeConfig = Layer.effect(
+export const runtimeConfig = /*@__PURE__*/ Layer.effect(
   RuntimeConfig,
-  effectConfig(configShape),
+  /*@__PURE__*/ effectConfig(createConfigShape()),
 );

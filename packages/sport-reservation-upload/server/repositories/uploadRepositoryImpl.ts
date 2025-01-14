@@ -1,4 +1,6 @@
+import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Effect, Layer } from "effect";
 import { S3Error } from "sport-reservation-common/models/errors";
 import { RuntimeConfig } from "~/layers";
@@ -30,8 +32,23 @@ export const uploadRepositoryImpl = /*@__PURE__*/ Layer.effect(
             Effect.tryPromise(async () => await upload.done()),
             (error) => new S3Error(error.error as Error),
           );
-          return { url: `${config.s3.domainEndpoint}/reservation${key}` };
+          return { key };
         }).pipe(Effect.withSpan("uploadRepositoryImpl.upload")),
+      getPresignedUrl: ({ key }) =>
+        Effect.gen(function* () {
+          const command = new GetObjectCommand({
+            Bucket: config.s3.bucket,
+            Key: `reservation${key}`,
+          });
+          const url = yield* Effect.mapError(
+            Effect.tryPromise(
+              async () =>
+                await getSignedUrl(s3, command, { expiresIn: 60 * 60 * 24 }),
+            ),
+            (error) => new S3Error(error.error as Error),
+          );
+          return { url };
+        }).pipe(Effect.withSpan("uploadRepositoryImpl.getPresignedUrl")),
       delete: () =>
         Effect.gen(function* () {}).pipe(
           Effect.withSpan("uploadRepositoryImpl.delete"),

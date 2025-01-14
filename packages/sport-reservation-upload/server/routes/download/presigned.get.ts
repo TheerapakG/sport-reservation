@@ -8,19 +8,17 @@ import {
 import { defineEventHandlerConfig } from "sport-reservation-common/utils/eventHandlerConfig";
 import { noInferOut } from "sport-reservation-common/utils/noInfer";
 import { AuthRepository } from "~/repositories/authRepository";
-import { DownloadRepository } from "~/repositories/downloadRepository";
 import { UploadRepository } from "~/repositories/uploadRepository";
 import { effectEventHandler } from "~/utils/effectEventHandler";
 
 export const handlerConfig = defineEventHandlerConfig({
-  name: "postUploadFromUrl",
+  name: "getDownloadPresignedUrl",
   response: type({
-    key: "string",
+    url: "string",
   }),
-  body: noInferOut(
+  query: noInferOut(
     type({
       key: "string",
-      url: "string",
     }),
   ),
 });
@@ -29,7 +27,7 @@ export default effectEventHandler({
   handler: /*@__PURE__*/ Effect.gen(function* () {
     const { event } = yield* EventContext;
     const {
-      params: { body },
+      params: { query },
     } = yield* EventParamsContext.typed<typeof handlerConfig>();
 
     const authRepository = yield* AuthRepository;
@@ -37,14 +35,11 @@ export default effectEventHandler({
       secret: getHeader(event, "authorization")?.split(" ", 2)[1] ?? "",
     });
 
-    const downloadRepository = yield* DownloadRepository;
-    const stream = yield* downloadRepository.downloadUrl({ url: body.url });
     const uploadRepository = yield* UploadRepository;
-    const { key: resultKey } = yield* uploadRepository.upload({
-      key: body.key,
-      stream,
+    const { url: resultUrl } = yield* uploadRepository.getPresignedUrl({
+      key: query.key,
     });
 
-    return { key: resultKey };
+    return { url: resultUrl };
   }),
 });
