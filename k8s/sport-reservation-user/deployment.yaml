@@ -31,6 +31,16 @@ spec:
                 secretKeyRef:
                   name: sport-reservation-user-secret
                   key: postgresUrl
+            - name: UPLOAD_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-user-secret
+                  key: uploadSecret
+            - name: UPLOAD_BASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-user-secret
+                  key: uploadBaseUrl
           volumeMounts:
             - name: sport-reservation-user-secret-path
               readOnly: true
