@@ -65,17 +65,16 @@ export const lineLoginAuthTokenQueryOptions = ({
 export const lineLoginRequestServerFn = createServerFn({
   method: "GET",
 }).handler(async () => {
-  return {
-    success: true,
-    ...(await Effect.runPromise(
-      Effect.provide(
-        Effect.gen(function* () {
-          return yield* (yield* AuthClient).getGenerateLineLoginRequest({});
-        }),
-        authClient,
-      ),
-    )),
-  };
+  const request = await Effect.runPromise(
+    Effect.provide(
+      Effect.gen(function* () {
+        return yield* (yield* AuthClient).getGenerateLineLoginRequest({});
+      }),
+      authClient,
+    ),
+  );
+
+  return { success: true, request };
 });
 
 export const lineLoginRequestQueryOptions = () =>
@@ -84,28 +83,28 @@ export const lineLoginRequestQueryOptions = () =>
     queryFn: () => lineLoginRequestServerFn(),
   });
 
-export const userProfileServerFn = createServerFn({ method: "POST" }).handler(
-  async () => {
-    const token = getCookie("token");
-    const profile = token
-      ? await Effect.runPromise(
-          Effect.provide(
-            Effect.gen(function* () {
-              return yield* (yield* AuthClient).getUserProfile({
-                query: { token },
-              });
-            }),
-            authClient,
-          ),
-        )
-      : undefined;
+export const currentUserProfileServerFn = createServerFn({
+  method: "POST",
+}).handler(async () => {
+  const token = getCookie("token");
+  const profile = token
+    ? await Effect.runPromise(
+        Effect.provide(
+          Effect.gen(function* () {
+            return yield* (yield* AuthClient).getUserProfile({
+              query: { token },
+            });
+          }),
+          authClient,
+        ),
+      )
+    : undefined;
 
-    return { success: true, ...profile };
-  },
-);
+  return { success: true, profile };
+});
 
-export const userProfileQueryOptions = () =>
+export const currentUserProfileQueryOptions = () =>
   queryOptions({
     queryKey: authKeys.token.profile(),
-    queryFn: () => userProfileServerFn(),
+    queryFn: () => currentUserProfileServerFn(),
   });

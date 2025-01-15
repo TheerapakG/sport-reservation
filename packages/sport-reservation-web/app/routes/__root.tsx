@@ -2,7 +2,6 @@ import { Outlet, ScrollRestoration } from "@tanstack/react-router";
 import { Meta, Scripts } from "@tanstack/start";
 import React from "react";
 
-import { userProfileQueryOptions } from "@/api/auth";
 import appCss from "@/styles/app.css?url";
 import { QueryClient } from "@tanstack/react-query";
 import { createRootRouteWithContext } from "@tanstack/react-router";
@@ -63,9 +62,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         { rel: "manifest", href: "/manifest.json" },
       ],
     }),
-    loader: async ({ context: { queryClient } }) => {
-      queryClient.prefetchQuery(userProfileQueryOptions());
-    },
     component: RootComponent,
   },
 );

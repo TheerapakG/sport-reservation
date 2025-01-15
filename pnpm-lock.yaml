@@ -142,13 +142,13 @@ importers:
         version: 0.75.5(effect@3.12.1)
       '@effect/sql':
         specifier: 'catalog:'
-        version: 0.15.1(@effect/experimental@0.28.1(@effect/platform-node@0.62.1(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(effect@3.12.1))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)(ioredis@5.4.1)(ws@8.18.0))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)
+        version: 0.15.1(@effect/experimental@0.28.1(@effect/platform-node@0.62.1(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(effect@3.12.1))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)(ws@8.18.0))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)
       '@effect/sql-drizzle':
         specifier: 'catalog:'
-        version: 0.13.0(@effect/sql@0.15.1(@effect/experimental@0.28.1(@effect/platform-node@0.62.1(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(effect@3.12.1))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)(ioredis@5.4.1)(ws@8.18.0))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(drizzle-orm@0.33.0(@types/react@18.3.18)(postgres@3.4.4)(react@18.3.1))(effect@3.12.1)
+        version: 0.13.0(@effect/sql@0.15.1(@effect/experimental@0.28.1(@effect/platform-node@0.62.1(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(effect@3.12.1))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)(ws@8.18.0))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(drizzle-orm@0.33.0(@types/react@18.3.18)(postgres@3.4.4)(react@18.3.1))(effect@3.12.1)
       '@effect/sql-pg':
         specifier: 'catalog:'
-        version: 0.15.2(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/sql@0.15.1(@effect/experimental@0.28.1(@effect/platform-node@0.62.1(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(effect@3.12.1))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)(ioredis@5.4.1)(ws@8.18.0))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(effect@3.12.1)
+        version: 0.15.2(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/sql@0.15.1(@effect/experimental@0.28.1(@effect/platform-node@0.62.1(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(effect@3.12.1))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)(ws@8.18.0))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(effect@3.12.1)
       arktype:
         specifier: 'catalog:'
         version: 2.0.0-rc.14
@@ -363,13 +363,13 @@ importers:
         version: 0.75.5(effect@3.12.1)
       '@effect/sql':
         specifier: 'catalog:'
-        version: 0.15.1(@effect/experimental@0.28.1(@effect/platform-node@0.62.1(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(effect@3.12.1))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)(ioredis@5.4.1)(ws@8.18.0))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)
+        version: 0.15.1(@effect/experimental@0.28.1(@effect/platform-node@0.62.1(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(effect@3.12.1))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)(ws@8.18.0))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)
       '@effect/sql-drizzle':
         specifier: 'catalog:'
-        version: 0.13.0(@effect/sql@0.15.1(@effect/experimental@0.28.1(@effect/platform-node@0.62.1(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(effect@3.12.1))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)(ioredis@5.4.1)(ws@8.18.0))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(drizzle-orm@0.33.0(@types/react@18.3.18)(postgres@3.4.4)(react@18.3.1))(effect@3.12.1)
+        version: 0.13.0(@effect/sql@0.15.1(@effect/experimental@0.28.1(@effect/platform-node@0.62.1(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(effect@3.12.1))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)(ws@8.18.0))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(drizzle-orm@0.33.0(@types/react@18.3.18)(postgres@3.4.4)(react@18.3.1))(effect@3.12.1)
       '@effect/sql-pg':
         specifier: 'catalog:'
-        version: 0.15.2(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/sql@0.15.1(@effect/experimental@0.28.1(@effect/platform-node@0.62.1(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(effect@3.12.1))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)(ioredis@5.4.1)(ws@8.18.0))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(effect@3.12.1)
+        version: 0.15.2(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/sql@0.15.1(@effect/experimental@0.28.1(@effect/platform-node@0.62.1(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(effect@3.12.1))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)(ws@8.18.0))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(effect@3.12.1)
       arktype:
         specifier: 'catalog:'
         version: 2.0.0-rc.14
@@ -475,13 +475,13 @@ importers:
         version: 0.75.5(effect@3.12.1)
       '@effect/sql':
         specifier: 'catalog:'
-        version: 0.15.1(@effect/experimental@0.28.1(@effect/platform-node@0.62.1(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(effect@3.12.1))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)(ioredis@5.4.1)(ws@8.18.0))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)
+        version: 0.15.1(@effect/experimental@0.28.1(@effect/platform-node@0.62.1(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(effect@3.12.1))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)(ws@8.18.0))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)
       '@effect/sql-drizzle':
         specifier: 'catalog:'
-        version: 0.13.0(@effect/sql@0.15.1(@effect/experimental@0.28.1(@effect/platform-node@0.62.1(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(effect@3.12.1))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)(ioredis@5.4.1)(ws@8.18.0))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(drizzle-orm@0.33.0(@types/react@18.3.18)(postgres@3.4.4)(react@18.3.1))(effect@3.12.1)
+        version: 0.13.0(@effect/sql@0.15.1(@effect/experimental@0.28.1(@effect/platform-node@0.62.1(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(effect@3.12.1))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)(ws@8.18.0))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(drizzle-orm@0.33.0(@types/react@18.3.18)(postgres@3.4.4)(react@18.3.1))(effect@3.12.1)
       '@effect/sql-pg':
         specifier: 'catalog:'
-        version: 0.15.2(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/sql@0.15.1(@effect/experimental@0.28.1(@effect/platform-node@0.62.1(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(effect@3.12.1))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)(ioredis@5.4.1)(ws@8.18.0))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(effect@3.12.1)
+        version: 0.15.2(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/sql@0.15.1(@effect/experimental@0.28.1(@effect/platform-node@0.62.1(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(effect@3.12.1))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)(ws@8.18.0))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(effect@3.12.1)
       arktype:
         specifier: 'catalog:'
         version: 2.0.0-rc.14
@@ -750,6 +750,9 @@ importers:
       sport-reservation-common:
         specifier: workspace:*
         version: link:../sport-reservation-common
+      sport-reservation-user:
+        specifier: workspace:*
+        version: link:../sport-reservation-user
       tailwind-merge:
         specifier: ^2.5.3
         version: 2.6.0
@@ -8718,21 +8721,21 @@ snapshots:
       effect: 3.12.1
       fast-check: 3.22.0
 
-  '@effect/sql-drizzle@0.13.0(@effect/sql@0.15.1(@effect/experimental@0.28.1(@effect/platform-node@0.62.1(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(effect@3.12.1))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)(ioredis@5.4.1)(ws@8.18.0))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(drizzle-orm@0.33.0(@types/react@18.3.18)(postgres@3.4.4)(react@18.3.1))(effect@3.12.1)':
+  '@effect/sql-drizzle@0.13.0(@effect/sql@0.15.1(@effect/experimental@0.28.1(@effect/platform-node@0.62.1(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(effect@3.12.1))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)(ws@8.18.0))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(drizzle-orm@0.33.0(@types/react@18.3.18)(postgres@3.4.4)(react@18.3.1))(effect@3.12.1)':
     dependencies:
-      '@effect/sql': 0.15.1(@effect/experimental@0.28.1(@effect/platform-node@0.62.1(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(effect@3.12.1))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)(ioredis@5.4.1)(ws@8.18.0))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)
+      '@effect/sql': 0.15.1(@effect/experimental@0.28.1(@effect/platform-node@0.62.1(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(effect@3.12.1))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)(ws@8.18.0))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)
       drizzle-orm: 0.33.0(@types/react@18.3.18)(postgres@3.4.4)(react@18.3.1)
       effect: 3.12.1
 
-  '@effect/sql-pg@0.15.2(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/sql@0.15.1(@effect/experimental@0.28.1(@effect/platform-node@0.62.1(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(effect@3.12.1))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)(ioredis@5.4.1)(ws@8.18.0))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(effect@3.12.1)':
+  '@effect/sql-pg@0.15.2(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/sql@0.15.1(@effect/experimental@0.28.1(@effect/platform-node@0.62.1(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(effect@3.12.1))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)(ws@8.18.0))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(effect@3.12.1)':
     dependencies:
       '@effect/platform': 0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)
-      '@effect/sql': 0.15.1(@effect/experimental@0.28.1(@effect/platform-node@0.62.1(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(effect@3.12.1))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)(ioredis@5.4.1)(ws@8.18.0))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)
+      '@effect/sql': 0.15.1(@effect/experimental@0.28.1(@effect/platform-node@0.62.1(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(effect@3.12.1))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)(ws@8.18.0))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)
       '@opentelemetry/semantic-conventions': 1.27.0
       effect: 3.12.1
       postgres: 3.4.4
 
-  '@effect/sql@0.15.1(@effect/experimental@0.28.1(@effect/platform-node@0.62.1(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(effect@3.12.1))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)(ioredis@5.4.1)(ws@8.18.0))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)':
+  '@effect/sql@0.15.1(@effect/experimental@0.28.1(@effect/platform-node@0.62.1(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(effect@3.12.1))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)(ws@8.18.0))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)':
     dependencies:
       '@effect/experimental': 0.28.1(@effect/platform-node@0.62.1(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(effect@3.12.1))(@effect/platform@0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1))(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)(ioredis@5.4.1)(ws@8.18.0)
       '@effect/platform': 0.67.1(@effect/schema@0.75.5(effect@3.12.1))(effect@3.12.1)

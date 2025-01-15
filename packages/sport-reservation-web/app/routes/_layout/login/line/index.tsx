@@ -7,7 +7,7 @@ function IndexComponent() {
   const loginRequest = useSuspenseQuery(lineLoginRequestQueryOptions());
 
   useEffect(() => {
-    window.location.replace(loginRequest.data.url);
+    window.location.replace(loginRequest.data.request.url);
   }, [loginRequest]);
 
   return (

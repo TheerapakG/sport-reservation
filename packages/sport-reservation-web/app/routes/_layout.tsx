@@ -1,4 +1,4 @@
-import { Avatar } from "@/components/avatar";
+import { currentUserProfileQueryOptions } from "@/api/auth";
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -6,6 +6,7 @@ import {
   NavigationMenuList,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
+import { NavUserAvatar } from "@/components/userAvatar";
 import {
   CatchBoundary,
   createFileRoute,
@@ -93,7 +94,7 @@ const WrappingLayoutComponent = ({
                 </NavigationMenuItem>
               </NavigationMenuList>
             </NavigationMenu>
-            <Avatar />
+            <NavUserAvatar />
           </div>
         </div>
       </header>
@@ -130,6 +131,9 @@ function NotFoundLayoutComponent() {
 }
 
 export const Route = createFileRoute("/_layout")({
+  loader: async ({ context: { queryClient } }) => {
+    queryClient.prefetchQuery(currentUserProfileQueryOptions());
+  },
   component: LayoutComponent,
   notFoundComponent: NotFoundLayoutComponent,
 });

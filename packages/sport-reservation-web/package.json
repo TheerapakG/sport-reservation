@@ -76,6 +76,7 @@
     "effect": "catalog:",
     "h3": "catalog:",
     "sport-reservation-auth": "workspace:*",
+    "sport-reservation-user": "workspace:*",
     "sport-reservation-common": "workspace:*"
   },
   "devDependencies": {
