@@ -1,7 +1,7 @@
 import { SqlError } from "@effect/sql";
 import { Context, Effect, Option } from "effect";
 import { Simplify } from "effect/Types";
-import { userUserProfile } from "sport-reservation-common/db/schema";
+import { userUserProfile } from "sport-reservation-db/schema";
 
 export class UserRepository
   extends /*@__PURE__*/ Context.Tag("UserRepository")<

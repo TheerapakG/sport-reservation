@@ -1,6 +1,6 @@
 import { ArkErrors, type } from "arktype";
-import { defineConfig } from "drizzle-kit";
 import "dotenv/config";
+import { defineConfig } from "drizzle-kit";
 
 const env = type({ POSTGRES_URL: "string" })(process.env);
 if (env instanceof ArkErrors) {
@@ -8,7 +8,7 @@ if (env instanceof ArkErrors) {
   throw env;
 }
 export default defineConfig({
-  schema: "./db/schema.ts",
+  schema: "./src/schema.ts",
   dialect: "postgresql",
   dbCredentials: {
     url: env.POSTGRES_URL,

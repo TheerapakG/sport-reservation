@@ -1,11 +1,42 @@
-import { Simplify } from "effect/Types";
 import { type } from "arktype";
+
+type IsAny<T> = boolean extends (T extends never ? true : false) ? true : false;
+
+export type ExtendedTypeConfigIn<
+  T extends type.Any = type.Any,
+  D extends boolean = true,
+> = {
+  type: T;
+  decode?: D;
+};
+
+export type ExtendedTypeConfig<
+  T extends type.Any = type.Any,
+  D extends boolean = boolean,
+> = {
+  __type: "ExtendedHandlerConfigType";
+  type: T;
+  decode: D;
+};
+
+/*@__NO_SIDE_EFFECTS__*/ export const defineExtendedTypeConfig = <
+  T extends type.Any,
+  D extends boolean,
+>(
+  config: ExtendedTypeConfigIn<T, D>,
+): ExtendedTypeConfig<T, D> => {
+  return {
+    decode: true as D,
+    ...config,
+    __type: "ExtendedHandlerConfigType",
+  };
+};
 
 export type EventHandlerTypeConfigIn<
   Response extends type.Any = type.Any,
-  Q extends type.Any | undefined = undefined,
-  B extends type.Any | undefined = undefined,
-  R extends type.Any | undefined = undefined,
+  Q extends ExtendedTypeConfig | type.Any = any,
+  B extends ExtendedTypeConfig | type.Any = any,
+  R extends ExtendedTypeConfig | type.Any = any,
 > = {
   response: Response;
   query?: Q;
@@ -14,10 +45,10 @@ export type EventHandlerTypeConfigIn<
 };
 
 export type EventHandlerTypeConfig<
-  Response extends type.Any = type.Any,
-  Q extends type.Any | undefined = type.Any | undefined,
-  B extends type.Any | undefined = type.Any | undefined,
-  R extends type.Any | undefined = type.Any | undefined,
+  Response extends type.Any = any,
+  Q extends ExtendedTypeConfig | undefined = any,
+  B extends ExtendedTypeConfig | undefined = any,
+  R extends ExtendedTypeConfig | undefined = any,
 > = {
   response: Response;
   query: Q;
@@ -28,51 +59,72 @@ export type EventHandlerTypeConfig<
 export type EventHandlerConfigIn<
   Name extends string,
   Response extends type.Any = type.Any,
-  Q extends type.Any | undefined = type.Any | undefined,
-  B extends type.Any | undefined = type.Any | undefined,
-  R extends type.Any | undefined = type.Any | undefined,
-> = Simplify<
-  {
-    name: Name;
-  } & EventHandlerTypeConfigIn<Response, Q, B, R>
->;
+  Q extends ExtendedTypeConfig | type.Any = any,
+  B extends ExtendedTypeConfig | type.Any = any,
+  R extends ExtendedTypeConfig | type.Any = any,
+> = {
+  name: Name;
+  response: Response;
+  query?: Q;
+  body?: B;
+  router?: R;
+};
 
 export type EventHandlerConfig<
   Name extends string,
-  Response extends type.Any = type.Any,
-  Q extends type.Any | undefined = type.Any | undefined,
-  B extends type.Any | undefined = type.Any | undefined,
-  R extends type.Any | undefined = type.Any | undefined,
-> = Simplify<
-  {
-    name: Name;
-  } & EventHandlerTypeConfig<Response, Q, B, R>
->;
+  Response extends type.Any = any,
+  Q extends ExtendedTypeConfig | undefined = any,
+  B extends ExtendedTypeConfig | undefined = any,
+  R extends ExtendedTypeConfig | undefined = any,
+> = {
+  name: Name;
+  response: Response;
+  query: Q;
+  body: B;
+  router: R;
+};
 
-export type EventHandlerResponse<C extends EventHandlerTypeConfig> =
-  C["response"];
-export type EventHandlerQuery<C extends EventHandlerTypeConfig> = C["query"];
-export type EventHandlerBody<C extends EventHandlerTypeConfig> = C["body"];
-export type EventHandlerRouter<C extends EventHandlerTypeConfig> = C["router"];
+export type EventHandlerResponseValidatorType<
+  C extends EventHandlerTypeConfig,
+> = C["response"];
+export type EventHandlerQueryValidatorType<C extends EventHandlerTypeConfig> =
+  C["query"]["type"];
+export type EventHandlerBodyValidatorType<C extends EventHandlerTypeConfig> =
+  C["body"]["type"];
+export type EventHandlerRouterValidatorType<C extends EventHandlerTypeConfig> =
+  C["router"]["type"];
+
+export type EventHandlerClientResponseType<C extends EventHandlerTypeConfig> =
+  EventHandlerResponseValidatorType<C>["infer"];
+export type EventHandlerClientQueryType<C extends EventHandlerTypeConfig> =
+  EventHandlerQueryValidatorType<C> extends type.Any
+    ? EventHandlerQueryValidatorType<C>["infer"]
+    : never;
+export type EventHandlerClientBodyType<C extends EventHandlerTypeConfig> =
+  EventHandlerBodyValidatorType<C> extends type.Any
+    ? EventHandlerBodyValidatorType<C>["infer"]
+    : never;
+export type EventHandlerClientRouterType<C extends EventHandlerTypeConfig> =
+  EventHandlerRouterValidatorType<C> extends type.Any
+    ? EventHandlerRouterValidatorType<C>["infer"]
+    : never;
 
 export type EventHandlerResponseType<C extends EventHandlerTypeConfig> =
-  EventHandlerResponse<C>["infer"];
+  EventHandlerClientResponseType<C>;
 export type EventHandlerQueryType<C extends EventHandlerTypeConfig> =
-  EventHandlerQuery<C> extends type.Any ? EventHandlerQuery<C>["infer"] : never;
+  C["query"]["decode"] extends true ? EventHandlerClientQueryType<C> : never;
 export type EventHandlerBodyType<C extends EventHandlerTypeConfig> =
-  EventHandlerBody<C> extends type.Any ? EventHandlerBody<C>["infer"] : never;
+  C["body"]["decode"] extends true ? EventHandlerClientBodyType<C> : never;
 export type EventHandlerRouterType<C extends EventHandlerTypeConfig> =
-  EventHandlerRouter<C> extends type.Any
-    ? EventHandlerRouter<C>["infer"]
-    : never;
+  C["router"]["decode"] extends true ? EventHandlerClientRouterType<C> : never;
 
 /*@__NO_SIDE_EFFECTS__*/
 export const defineEventHandlerConfig = <
   Name extends string,
   Response extends type.Any,
-  Q extends type.Any | undefined = undefined,
-  B extends type.Any | undefined = undefined,
-  R extends type.Any | undefined = undefined,
+  Q extends ExtendedTypeConfig | type.Any = any,
+  B extends ExtendedTypeConfig | type.Any = any,
+  R extends ExtendedTypeConfig | type.Any = any,
 >({
   name,
   response,
@@ -82,15 +134,63 @@ export const defineEventHandlerConfig = <
 }: EventHandlerConfigIn<Name, Response, Q, B, R>): EventHandlerConfig<
   Name,
   Response,
-  [Q] extends [type.Any] ? Q : undefined,
-  [B] extends [type.Any] ? B : undefined,
-  [R] extends [type.Any] ? R : undefined
+  true extends IsAny<Q>
+    ? undefined
+    : [Q] extends [ExtendedTypeConfig]
+      ? Q
+      : [Q] extends [type.Any]
+        ? ExtendedTypeConfig<Q, true>
+        : undefined,
+  true extends IsAny<B>
+    ? undefined
+    : [B] extends [ExtendedTypeConfig]
+      ? B
+      : [B] extends [type.Any]
+        ? ExtendedTypeConfig<B, true>
+        : undefined,
+  true extends IsAny<R>
+    ? undefined
+    : [R] extends [ExtendedTypeConfig]
+      ? R
+      : [R] extends [type.Any]
+        ? ExtendedTypeConfig<R, true>
+        : undefined
 > => {
   return {
     name,
     response,
-    query: query as [Q] extends [type.Any] ? Q : undefined,
-    body: body as [B] extends [type.Any] ? B : undefined,
-    router: router as [R] extends [type.Any] ? R : undefined,
+    query: (query
+      ? "__type" in query
+        ? query
+        : defineExtendedTypeConfig({ type: query })
+      : undefined) as true extends IsAny<Q>
+      ? undefined
+      : [Q] extends [ExtendedTypeConfig]
+        ? Q
+        : [Q] extends [type.Any]
+          ? ExtendedTypeConfig<Q, true>
+          : undefined,
+    body: (body
+      ? "__type" in body
+        ? body
+        : defineExtendedTypeConfig({ type: body })
+      : undefined) as true extends IsAny<B>
+      ? undefined
+      : [B] extends [ExtendedTypeConfig]
+        ? B
+        : [B] extends [type.Any]
+          ? ExtendedTypeConfig<B, true>
+          : undefined,
+    router: (router
+      ? "__type" in router
+        ? router
+        : defineExtendedTypeConfig({ type: router })
+      : undefined) as true extends IsAny<R>
+      ? undefined
+      : [R] extends [ExtendedTypeConfig]
+        ? R
+        : [R] extends [type.Any]
+          ? ExtendedTypeConfig<R, true>
+          : undefined,
   };
 };

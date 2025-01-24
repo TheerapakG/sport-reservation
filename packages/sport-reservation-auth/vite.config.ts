@@ -36,6 +36,7 @@ export default defineConfig({
       "@": path.resolve("./server"),
       "~~": path.resolve("./"),
       "@@": path.resolve("./"),
+      $: path.resolve("./.theestack"),
     },
   },
   plugins: [

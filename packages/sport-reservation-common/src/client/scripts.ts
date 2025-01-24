@@ -15,11 +15,13 @@ import { TheeStackConfig } from "~~/src/utils/theeStackConfig";
 import { writeFile } from "~~/src/utils/writeFile";
 
 const loadTheeStackConfig = async () => {
-  const { config } = await loadConfig<TheeStackConfig>({ name: "theestack" });
+  const { config } = await loadConfig<TheeStackConfig<never>>({
+    name: "theestack",
+  });
   return config;
 };
 
-const writeClient = async (config: TheeStackConfig) => {
+const writeClient = async (config: TheeStackConfig<never>) => {
   await writeFile(
     ".theestack/client.ts",
     [
@@ -30,7 +32,7 @@ const writeClient = async (config: TheeStackConfig) => {
       `  createFetch,`,
       `} from "sport-reservation-common/client/client";`,
       `import { Fetch } from "sport-reservation-common/utils/fetch";`,
-      `import { apiRoutes } from "./routes.gen";`,
+      `import { apiRoutes } from "./routes";`,
       ``,
       `export { Fetch as ${pascalCase(`${config.name}_fetch`)} };`,
       ``,
@@ -47,13 +49,13 @@ const writeClient = async (config: TheeStackConfig) => {
   );
 };
 
-const writeMock = async (config: TheeStackConfig) => {
+const writeMock = async (config: TheeStackConfig<never>) => {
   await writeFile(
     ".theestack/mock.ts",
     [
       `import { createMockClient } from "sport-reservation-common/client/client";`,
       `import { ${pascalCase(`${config.name}_client`)} } from "./client";`,
-      `import { apiRoutes } from "./routes.gen";`,
+      `import { apiRoutes } from "./routes";`,
       ``,
       `export const ${camelCase(`create_mock_${config.name}_client`)} = () =>`,
       `  createMockClient(${pascalCase(`${config.name}_client`)}, apiRoutes);`,
@@ -61,13 +63,13 @@ const writeMock = async (config: TheeStackConfig) => {
   );
 };
 
-const writeModels = async (config: TheeStackConfig) => {
+const writeModels = async (config: TheeStackConfig<never>) => {
   await writeFile(
     ".theestack/models.ts",
     [
-      `export * from "../server/models";`,
+      `export * from "~/models";`,
       `import { getClientResponseType, getClientQueryType, getClientBodyType, getClientRouterType } from "sport-reservation-common/client/client";`,
-      `import { apiRoutes } from "./routes.gen";`,
+      `import { apiRoutes } from "./routes";`,
       ``,
       `export const ${camelCase(`get_${config.name}_client_response_type`)} = <K extends keyof typeof apiRoutes>(name: K) =>`,
       `  getClientResponseType(apiRoutes, name);`,
@@ -84,12 +86,90 @@ const writeModels = async (config: TheeStackConfig) => {
   );
 };
 
+const writeRuntimeConfig = async () => {
+  await writeFile(
+    ".theestack/layers/config/runtimeConfig.ts",
+    [
+      `import { Config, Context, Layer } from "effect";`,
+      `import {`,
+      `  effectConfig,`,
+      `  InferConfig,`,
+      `} from "sport-reservation-common/utils/effectConfig";`,
+      `import { default as theeStackConfig } from "~~/theestack.config.ts";`,
+      ``,
+      `/*@__NO_SIDE_EFFECTS__*/`,
+      `const createConfigShape = () => {`,
+      `  return theeStackConfig.runtimeConfig;`,
+      `};`,
+      ``,
+      `export class RuntimeConfig`,
+      `  extends /*@__PURE__*/ Context.Tag("RuntimeConfig")<`,
+      `    RuntimeConfig,`,
+      `    Config.Config<InferConfig<ReturnType<typeof createConfigShape>>>`,
+      `  >() {}`,
+      ``,
+      `export const runtimeConfig = /*@__PURE__*/ Layer.effect(`,
+      `  RuntimeConfig,`,
+      `  /*@__PURE__*/ effectConfig(createConfigShape()),`,
+      `);`,
+    ].join("\n"),
+  );
+};
+
+const writeLayers = async () => {
+  await writeFile(
+    ".theestack/layers/index.ts",
+    [`export * from "./config/runtimeConfig";`].join("\n"),
+  );
+};
+
+const writeEffectEventHandler = async () => {
+  await writeFile(
+    ".theestack/effectEventHandler.ts",
+    [
+      `import { Layer } from "effect";`,
+      `import {`,
+      `  createEffectEventHandler,`,
+      `  EffectEventHandlerOptions,`,
+      `} from "sport-reservation-common/utils/effectEventHandler";`,
+      `import { EventHandlerConfig } from "sport-reservation-common/utils/eventHandlerConfig";`,
+      `export { EventContext, EventParamsContext } from "sport-reservation-common/utils/effectEventHandler";`,
+      ``,
+      `import { dependenciesLive } from "~/layers/dependencies";`,
+      ``,
+      `const _effectEventHandler =`,
+      `  /*@__PURE__*/ createEffectEventHandler<`,
+      `    Layer.Layer.Success<typeof dependenciesLive>`,
+      `  >();`,
+      ``,
+      `/*@__NO_SIDE_EFFECTS__*/`,
+      `export const effectEventHandler = <C extends EventHandlerConfig<string>>(`,
+      `  opts: EffectEventHandlerOptions<`,
+      `    C,`,
+      `    Layer.Layer.Success<typeof dependenciesLive>`,
+      `  >,`,
+      `) => _effectEventHandler(opts);`,
+    ].join("\n"),
+  );
+};
+
+const writeIndex = async () => {
+  await writeFile(
+    ".theestack/index.ts",
+    [`export * from "./.theestack/effectEventHandler";`].join("\n"),
+  );
+};
+
 const build = defineCommand({
   run: async () => {
     const config = await loadTheeStackConfig();
     await writeClient(config);
     await writeMock(config);
     await writeModels(config);
+    await writeRuntimeConfig();
+    await writeLayers();
+    await writeEffectEventHandler();
+    await writeIndex();
     const nitro = await createNitro({ rootDir: ".", dev: false });
     await prepare(nitro);
     await copyPublicAssets(nitro);
@@ -106,6 +186,10 @@ const generate = defineCommand({
     await writeClient(config);
     await writeMock(config);
     await writeModels(config);
+    await writeRuntimeConfig();
+    await writeLayers();
+    await writeEffectEventHandler();
+    await writeIndex();
     const nitro = await createNitro({ rootDir: ".", dev: false });
     await prepare(nitro);
     await scanHandlers(nitro);

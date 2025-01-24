@@ -1,6 +1,6 @@
+import { RuntimeConfig } from "$/layers";
 import { FileSystem } from "@effect/platform";
 import { Context, Effect, Layer, Redacted } from "effect";
-import { RuntimeConfig } from "./runtimeConfig";
 
 export class AuthKey
   extends /*@__PURE__*/ Context.Tag("AuthKey")<

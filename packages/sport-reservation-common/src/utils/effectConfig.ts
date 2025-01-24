@@ -17,16 +17,17 @@ type Unmark<T> = T extends Mark<infer U, infer Arr> ? Apply<U, Arr> : T;
 type SimplifyStringObject<T> =
   T extends Record<string, unknown> ? Simplify<T> : T;
 
-type ConfigShape = {
-  [key: string]: type.Any<Mark<unknown, unknown>> | ConfigShape;
+export type RuntimeConfigShape = {
+  [key: string]: type.Any<Mark<unknown, unknown>> | RuntimeConfigShape;
 };
-export type InferConfig<Shape extends ConfigShape> = SimplifyStringObject<{
-  [K in keyof Shape]: Shape[K] extends ConfigShape
-    ? InferConfig<Shape[K]>
-    : Unmark<Shape[K]["infer"]>;
-}>;
+export type InferConfig<Shape extends RuntimeConfigShape> =
+  SimplifyStringObject<{
+    [K in keyof Shape]: Shape[K] extends RuntimeConfigShape
+      ? InferConfig<Shape[K]>
+      : Unmark<Shape[K]["infer"]>;
+  }>;
 
-const _configShapeToArray = <Shape extends ConfigShape>(
+const _configShapeToArray = <Shape extends RuntimeConfigShape>(
   shape: Shape,
   prefix: string = "",
 ): [string, type.Any<Mark<unknown, unknown>>][] => {
@@ -44,7 +45,7 @@ const _configShapeToArray = <Shape extends ConfigShape>(
     .flat();
 };
 
-const configShapeToEnvShape = <Shape extends ConfigShape>(
+const configShapeToEnvShape = <Shape extends RuntimeConfigShape>(
   shape: Shape,
 ): Type<Record<string, Config.Config<unknown>>> => {
   return type(
@@ -59,7 +60,7 @@ const configShapeToEnvShape = <Shape extends ConfigShape>(
   );
 };
 
-const _effectConfig = <Shape extends ConfigShape>(
+const _effectConfig = <Shape extends RuntimeConfigShape>(
   shape: Shape,
   typedEnv: Record<string, Config.Config<unknown>>,
   prefix: string = "",
@@ -84,7 +85,7 @@ const _effectConfig = <Shape extends ConfigShape>(
 };
 
 /*@__NO_SIDE_EFFECTS__*/
-export const effectConfig = <Shape extends ConfigShape>(
+export const effectConfig = <Shape extends RuntimeConfigShape>(
   shape: Shape,
 ): Effect.Effect<
   Config.Config<SimplifyStringObject<InferConfig<Shape>>>,

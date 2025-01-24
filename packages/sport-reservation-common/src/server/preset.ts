@@ -25,7 +25,7 @@ export const createPreset = () => {
         );
 
         await writeFile(
-          "./.theestack/routes.gen.ts",
+          "./.theestack/routes.ts",
           [
             ...metadata.map(
               ({ importPath }, i) =>

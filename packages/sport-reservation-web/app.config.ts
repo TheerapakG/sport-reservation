@@ -14,4 +14,9 @@ export default defineConfig({
     static: false,
     preset: "node-server",
   },
+  react: {
+    babel: {
+      plugins: [["babel-plugin-react-compiler", {}]],
+    },
+  },
 });

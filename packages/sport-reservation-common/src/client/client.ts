@@ -5,11 +5,11 @@ import type { Mock } from "vitest";
 import { ArktypeError, FetchError } from "~~/src/models/errors";
 import { effectType } from "~~/src/utils/effectType";
 import {
-  EventHandlerBody,
-  EventHandlerQuery,
-  EventHandlerResponse,
-  EventHandlerResponseType,
-  EventHandlerRouter,
+  EventHandlerBodyValidatorType,
+  EventHandlerClientResponseType,
+  EventHandlerQueryValidatorType,
+  EventHandlerResponseValidatorType,
+  EventHandlerRouterValidatorType,
   EventHandlerTypeConfig,
 } from "~~/src/utils/eventHandlerConfig";
 import {
@@ -49,7 +49,11 @@ type Method<
 export type TypedRouteParamsOptions<CR extends ClientRoute> =
   CR extends infer _CR
     ? _CR extends ClientRoute
-      ? TypedFetchParamsOptions<_CR["query"], _CR["body"], _CR["router"]>
+      ? TypedFetchParamsOptions<
+          EventHandlerQueryValidatorType<_CR>,
+          EventHandlerBodyValidatorType<_CR>,
+          EventHandlerRouterValidatorType<_CR>
+        >
       : never
     : never;
 
@@ -70,15 +74,15 @@ const createMethod =
     route: CR;
   }): Method<
     TypedRouteParamsOptions<CR>,
-    MappedResponseType<"json", EventHandlerResponseType<CR>>
+    MappedResponseType<"json", EventHandlerClientResponseType<CR>>
   > =>
   ({ query, body, router }) =>
     Effect.provideService(
       typedFetch<
-        EventHandlerResponse<CR>,
-        EventHandlerQuery<CR>,
-        EventHandlerBody<CR>,
-        EventHandlerRouter<CR>,
+        EventHandlerResponseValidatorType<CR>,
+        EventHandlerQueryValidatorType<CR>,
+        EventHandlerBodyValidatorType<CR>,
+        EventHandlerRouterValidatorType<CR>,
         "json"
       >({ response, queryParams, bodyParams, routerParams }, path, {
         method,
@@ -86,9 +90,9 @@ const createMethod =
         body,
         router,
       } as TypedFetchOptions<
-        EventHandlerQuery<CR>,
-        EventHandlerBody<CR>,
-        EventHandlerRouter<CR>
+        EventHandlerQueryValidatorType<CR>,
+        EventHandlerBodyValidatorType<CR>,
+        EventHandlerRouterValidatorType<CR>
       >),
       Fetch,
       fetch,
@@ -103,12 +107,12 @@ const createMockMethod = async <CR extends ClientRoute>({
   mock: Mock<
     Method<
       TypedRouteParamsOptions<CR>,
-      MappedResponseType<"json", EventHandlerResponseType<CR>>
+      MappedResponseType<"json", EventHandlerClientResponseType<CR>>
     >
   >;
   method: Method<
     TypedRouteParamsOptions<CR>,
-    MappedResponseType<"json", EventHandlerResponseType<CR>>
+    MappedResponseType<"json", EventHandlerClientResponseType<CR>>
   >;
 }> => {
   const { vi } = await import("vitest");
@@ -116,7 +120,7 @@ const createMockMethod = async <CR extends ClientRoute>({
   const mock = vi.fn() as Mock<
     Method<
       TypedRouteParamsOptions<CR>,
-      MappedResponseType<"json", EventHandlerResponseType<CR>>
+      MappedResponseType<"json", EventHandlerClientResponseType<CR>>
     >
   >;
   return { mock, method: (opts) => effectType(response, mock(opts)) };
@@ -124,14 +128,17 @@ const createMockMethod = async <CR extends ClientRoute>({
 
 export type Mocks<CR extends ClientRoutes> = {
   [K in keyof CR]: Mock<
-    Method<TypedRouteParamsOptions<CR[K]>, EventHandlerResponseType<CR[K]>>
+    Method<
+      TypedRouteParamsOptions<CR[K]>,
+      EventHandlerClientResponseType<CR[K]>
+    >
   >;
 };
 
 export type Client<CR extends ClientRoutes> = {
   [K in keyof CR]: Method<
     TypedRouteParamsOptions<CR[K]>,
-    EventHandlerResponseType<CR[K]>
+    EventHandlerClientResponseType<CR[K]>
   >;
 };
 
@@ -202,22 +209,22 @@ export const getClientResponseType = <
 >(
   clientRoutes: CR,
   name: K,
-): CR[K]["response"] => {
+): EventHandlerResponseValidatorType<CR[K]> => {
   return clientRoutes[name].response;
 };
 
 export const getClientQueryType = <CR extends ClientRoutes, K extends keyof CR>(
   clientRoutes: CR,
   name: K,
-): CR[K]["query"] => {
-  return clientRoutes[name].query;
+): EventHandlerQueryValidatorType<CR[K]> => {
+  return clientRoutes[name].query.type;
 };
 
 export const getClientBodyType = <CR extends ClientRoutes, K extends keyof CR>(
   clientRoutes: CR,
   name: K,
-): CR[K]["body"] => {
-  return clientRoutes[name].body;
+): EventHandlerBodyValidatorType<CR[K]> => {
+  return clientRoutes[name].body.type;
 };
 
 export const getClientRouterType = <
@@ -226,6 +233,6 @@ export const getClientRouterType = <
 >(
   clientRoutes: CR,
   name: K,
-): CR[K]["router"] => {
-  return clientRoutes[name].router;
+): EventHandlerRouterValidatorType<CR[K]> => {
+  return clientRoutes[name].router.type;
 };

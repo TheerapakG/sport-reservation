@@ -1,10 +1,10 @@
+import { runtimeConfig } from "$/layers";
 import { NodeFileSystem } from "@effect/platform-node";
 import { Layer } from "effect";
 import {
   authKey,
   dbLive,
   lineService,
-  runtimeConfig,
   storageService,
   uploadClient,
   userClient,

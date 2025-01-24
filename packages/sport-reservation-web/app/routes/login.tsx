@@ -10,7 +10,7 @@ function LoginComponent() {
           anytime... We believe in data, not destiny!
         </p>
       </div>
-      <div className="flex max-w-screen-sm flex-1 flex-col items-center p-2 2xl:max-w-none">
+      <div className="flex max-w-(--breakpoint-sm) flex-1 flex-col items-center p-2 2xl:max-w-none">
         <h1>Welcome back!</h1>
         <div className="flex w-full items-center gap-x-1 p-2">
           <hr className="flex-1" />
@@ -29,7 +29,7 @@ function LoginComponent() {
                   <span>Log in with LINE</span>
                 </div>
               </div>
-              <div className="absolute inset-0 bg-[#000000] bg-opacity-0 group-hover:bg-opacity-10 group-focus:bg-opacity-30"></div>
+              <div className="absolute inset-0 bg-[#000000] opacity-0 group-hover:opacity-10 group-focus:opacity-30"></div>
             </div>
           </Link>
         </div>

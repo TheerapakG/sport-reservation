@@ -1,5 +1,5 @@
+import { RuntimeConfig } from "$/layers";
 import { Effect, Layer, Redacted } from "effect";
-import { RuntimeConfig } from "~/layers";
 import { AuthRepository, InvalidSecretError } from "./authRepository";
 
 export const authRepositoryImpl = /*@__PURE__*/ Layer.effect(

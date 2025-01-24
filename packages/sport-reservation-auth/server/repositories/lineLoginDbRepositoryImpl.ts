@@ -1,7 +1,7 @@
 import { PgDrizzle } from "@effect/sql-drizzle/Pg";
 import { eq } from "drizzle-orm";
 import { Context, Effect, Layer, Option } from "effect";
-import { authUserAuthConnection } from "sport-reservation-common/db/schema";
+import { authUserAuthConnection } from "sport-reservation-db/schema";
 import { LineLoginDbRepository } from "./lineLoginDbRepository";
 
 export const lineLoginDbRepositoryImpl = /*@__PURE__*/ Layer.effect(

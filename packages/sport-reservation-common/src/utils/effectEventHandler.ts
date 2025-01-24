@@ -6,7 +6,6 @@ import {
   eventHandler,
   EventHandler,
   EventHandlerRequest,
-  EventHandlerResponse,
   H3Event,
 } from "h3";
 import { isArktypeError, isFetchError, isS3Error } from "~~/src/models/errors";
@@ -17,6 +16,8 @@ import {
 import { effectType } from "~~/src/utils/effectType";
 import {
   EventHandlerConfig,
+  EventHandlerResponseType,
+  EventHandlerResponseValidatorType,
   EventHandlerTypeConfig,
 } from "~~/src/utils/eventHandlerConfig";
 
@@ -56,7 +57,7 @@ export type EffectEventHandlerOptions<
 > = {
   config: C;
   handler: Effect.Effect<
-    EventHandlerResponse<C["response"]["infer"]>,
+    EventHandlerResponseType<C>,
     unknown,
     EventContext | EventParamsContext | R
   >;
@@ -70,7 +71,7 @@ const effectEventHandler = <
   config,
   handler,
 }: EffectEventHandlerOptions<C, R>): EffectEventHandler<
-  C["response"],
+  EventHandlerResponseValidatorType<C>,
   Request
 > => {
   return eventHandler(async (event) => {

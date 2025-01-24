@@ -1,3 +1,4 @@
+import { RuntimeConfig } from "$/layers";
 import { type } from "arktype";
 import { Context, Effect, Layer, Redacted } from "effect";
 import { ofetch } from "ofetch";
@@ -9,7 +10,6 @@ import { effectType } from "sport-reservation-common/utils/effectType";
 import { Fetch, typedFetch } from "sport-reservation-common/utils/fetch";
 import { unknownType } from "sport-reservation-common/utils/type";
 import type { Mock } from "vitest";
-import { RuntimeConfig } from "~/layers/config";
 
 export const lineFetch = /*@__PURE__*/ ofetch.create({
   baseURL: "https://api.line.me/oauth2/v2.1",

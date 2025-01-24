@@ -1,5 +1,6 @@
+import { runtimeConfig } from "$/layers";
 import { Layer } from "effect";
-import { dbLive, runtimeConfig, uploadClient } from "~/layers";
+import { dbLive, uploadClient } from "~/layers";
 import { userRepositoryImpl } from "~/repositories/userRepositoryImpl";
 
 /*@__NO_SIDE_EFFECTS__*/

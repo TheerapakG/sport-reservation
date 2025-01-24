@@ -28,6 +28,3 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-
-routes.gen.ts
-types

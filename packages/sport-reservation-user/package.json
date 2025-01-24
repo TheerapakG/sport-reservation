@@ -42,6 +42,7 @@
     "h3": "catalog:",
     "ofetch": "catalog:",
     "sport-reservation-common": "workspace:*",
+    "sport-reservation-db": "workspace:*",
     "sport-reservation-upload": "workspace:*",
     "ufo": "catalog:"
   },

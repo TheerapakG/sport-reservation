@@ -24,9 +24,9 @@
     "preview": "node .output/server/index.mjs"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.665.0",
-    "@aws-sdk/lib-storage": "^3.665.0",
-    "@aws-sdk/s3-request-presigner": "^3.726.1",
+    "@aws-sdk/client-s3": "^3.733.0",
+    "@aws-sdk/lib-storage": "^3.733.0",
+    "@aws-sdk/s3-request-presigner": "^3.733.0",
     "@effect/experimental": "catalog:",
     "@effect/platform": "catalog:",
     "@effect/platform-node": "catalog:",
@@ -35,7 +35,7 @@
     "@effect/sql-drizzle": "catalog:",
     "@effect/sql-pg": "catalog:",
     "jsonwebtoken": "catalog:",
-    "unstorage": "^1.10.2",
+    "unstorage": "^1.14.4",
     "validator": "^13.12.0"
   },
   "peerDependencies": {
@@ -51,7 +51,7 @@
     "@eslint/compat": "catalog:",
     "@eslint/eslintrc": "catalog:",
     "@eslint/js": "catalog:",
-    "@smithy/types": "^3.5.0",
+    "@smithy/types": "^4.1.0",
     "@types/eslint__eslintrc": "catalog:",
     "@types/eslint__js": "catalog:",
     "@types/jsonwebtoken": "catalog:",

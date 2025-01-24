@@ -1,0 +1,40 @@
+{
+  "name": "sport-reservation-db",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.js",
+      "require": "./dist/*.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "format": "prettier -c .",
+    "lint": "eslint --flag unstable_ts_config .",
+    "typecheck": "tsc --noEmit",
+    "build": "vite build",
+    "generate": "vite build"
+  },
+  "peerDependencies": {
+    "drizzle-orm": "catalog:"
+  },
+  "devDependencies": {
+    "@eslint/compat": "catalog:",
+    "@eslint/eslintrc": "catalog:",
+    "@eslint/js": "catalog:",
+    "@types/eslint__eslintrc": "catalog:",
+    "@types/eslint__js": "catalog:",
+    "@typescript-eslint/eslint-plugin": "catalog:",
+    "@typescript-eslint/parser": "catalog:",
+    "drizzle-kit": "^0.30.2",
+    "eslint": "catalog:",
+    "prettier": "catalog:",
+    "vite-plugin-dts": "catalog:"
+  }
+}

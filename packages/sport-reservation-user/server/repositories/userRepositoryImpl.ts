@@ -1,7 +1,7 @@
 import { PgDrizzle } from "@effect/sql-drizzle/Pg";
 import { eq } from "drizzle-orm";
 import { Effect, Layer, Option } from "effect";
-import { userUserProfile } from "sport-reservation-common/db/schema";
+import { userUserProfile } from "sport-reservation-db/schema";
 import { UserRepository } from "./userRepository";
 
 export const userRepositoryImpl = /*@__PURE__*/ Layer.effect(

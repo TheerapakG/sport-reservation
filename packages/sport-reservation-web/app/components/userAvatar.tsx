@@ -76,7 +76,7 @@ const NavUserAvatarImage = () => {
   return currentUserProfileQuery.data.profile ? (
     <UserAvatarImageBase profile={currentUserProfileQuery.data.profile} />
   ) : (
-    <Link to="/login">
+    <Link to="/login" className="h-full w-full">
       <AvatarFallback />
     </Link>
   );
