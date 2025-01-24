@@ -4,14 +4,6 @@
   "compilerOptions": {
     "strict": true,
     "skipLibCheck": true,
-    "allowImportingTsExtensions": true,
-    "paths": {
-      "#imports": ["./.nitro/types/nitro-imports"],
-      "~/*": ["./server/*"],
-      "@/*": ["./server/*"],
-      "~~/*": ["./*"],
-      "@@/*": ["./*"],
-      "$/*": ["./.theestack/*"]
-    }
+    "allowImportingTsExtensions": true
   }
 }

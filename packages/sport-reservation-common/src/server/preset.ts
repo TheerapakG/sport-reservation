@@ -1,13 +1,26 @@
 import { Effect, SynchronizedRef } from "effect";
 import type { NitroPreset } from "nitropack";
+import path from "pathe";
 import { build } from "vite";
 import { writeFile } from "~~/src/utils/writeFile";
 
-export const createPreset = () => {
+export const createPreset = (rootDir: string) => {
   const ranViteWatcher = Effect.runSync(SynchronizedRef.make(false));
 
   return {
     ignore: ["**/*.test.ts"],
+    alias: {
+      $: path.resolve(rootDir, "./.theestack"),
+    },
+    typescript: {
+      tsConfig: {
+        compilerOptions: {
+          paths: {
+            "$/*": [path.resolve(rootDir, "./.theestack/*")],
+          },
+        },
+      },
+    },
     hooks: {
       "types:extend": async (types) => {
         const metadata = Object.entries(types.routes).flatMap(
@@ -25,7 +38,7 @@ export const createPreset = () => {
         );
 
         await writeFile(
-          "./.theestack/routes.ts",
+          path.resolve(rootDir, "./.theestack/routes.ts"),
           [
             ...metadata.map(
               ({ importPath }, i) =>
