@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { type } from "arktype";
 import { Effect } from "effect";
-import { use } from "react";
+import { useEffect } from "react";
 import { effectTypeCheck } from "sport-reservation-common/utils/effectType";
 
 const authAndRedirect = async ({
@@ -29,7 +29,9 @@ const CallbackComponent = () => {
 
   const queryClient = useQueryClient();
   const router = useRouter();
-  const _ = use(authAndRedirect({ queryClient, router, code, state }));
+  useEffect(() => {
+    authAndRedirect({ queryClient, router, code, state });
+  });
 
   return (
     <div className="p-2">
