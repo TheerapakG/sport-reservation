@@ -15,9 +15,7 @@ export const authUserAuthConnection = pgTable(
       nulls: "distinct",
     }),
   },
-  (_table) => {
-    return {};
-  },
+  (_table) => [],
 );
 
 export const userUserProfile = pgTable(
@@ -27,9 +25,7 @@ export const userUserProfile = pgTable(
     name: varchar("name", {}),
     avatar: varchar("avatar", {}),
   },
-  (_table) => {
-    return {};
-  },
+  (_table) => [],
 );
 
 export const userUserGroupType = pgEnum("user_user_group_type", [
@@ -48,9 +44,7 @@ export const userUserGroup = pgTable(
     creatorId: integer("creator_id").notNull(),
     type: userUserGroupType("type").notNull(),
   },
-  (_table) => {
-    return {};
-  },
+  (_table) => [],
 );
 
 export const userUserGroupMemberStatus = pgEnum(
@@ -65,11 +59,9 @@ export const userUserGroupMember = pgTable(
     userId: integer("user_id").notNull(),
     status: userUserGroupMemberStatus("status").notNull(),
   },
-  (table) => {
-    return {
-      userUserGroupMemberPk: primaryKey({
-        columns: [table.groupId, table.userId],
-      }),
-    };
-  },
+  (table) => [
+    primaryKey({
+      columns: [table.groupId, table.userId],
+    }),
+  ],
 );

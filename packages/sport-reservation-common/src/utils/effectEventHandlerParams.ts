@@ -38,7 +38,7 @@ export const effectEventHandlerParams = <
       ...((query && query.decode
         ? {
             query: yield* effectType(
-              query,
+              query.type,
               Object.fromEntries(
                 Object.entries(getQuery(event)).map(([key, value]) => [
                   key,
@@ -51,7 +51,7 @@ export const effectEventHandlerParams = <
       ...((body && body.decode
         ? {
             body: yield* effectType(
-              body,
+              body.type,
               yield* Effect.promise(async () => await readBody(event)),
             ),
           }
@@ -59,7 +59,7 @@ export const effectEventHandlerParams = <
       ...((router && router.decode
         ? {
             router: yield* effectType(
-              router,
+              router.type,
               getRouterParams(event, { decode: true }),
             ),
           }

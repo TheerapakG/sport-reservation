@@ -88,14 +88,7 @@ const mergeOptions = <CR extends ClientRoute, R extends ResponseType = "json">(
 const createMethod =
   <CR extends ClientRoute>({
     fetch,
-    route: {
-      response: responseType,
-      query: queryType,
-      body: bodyType,
-      router: routerType,
-      path,
-      method,
-    },
+    route: { response: responseType, query, body, router, path, method },
   }: {
     fetch: Context.Tag.Service<Fetch>;
     route: CR;
@@ -112,7 +105,16 @@ const createMethod =
         EventHandlerRouterValidatorType<CR>,
         "json"
       >(
-        { responseType, queryType, bodyType, routerType },
+        {
+          responseType,
+          queryType: query?.type as
+            | EventHandlerQueryValidatorType<CR>
+            | undefined,
+          bodyType: body?.type as EventHandlerBodyValidatorType<CR> | undefined,
+          routerType: router?.type as
+            | EventHandlerRouterValidatorType<CR>
+            | undefined,
+        },
         path,
         mergeOptions({ method }, params),
       ),
@@ -239,14 +241,16 @@ export const getClientQueryType = <CR extends ClientRoutes, K extends keyof CR>(
   clientRoutes: CR,
   name: K,
 ): EventHandlerQueryValidatorType<CR[K]> => {
-  return clientRoutes[name].query.type;
+  return clientRoutes[name].query?.type as EventHandlerQueryValidatorType<
+    CR[K]
+  >;
 };
 
 export const getClientBodyType = <CR extends ClientRoutes, K extends keyof CR>(
   clientRoutes: CR,
   name: K,
 ): EventHandlerBodyValidatorType<CR[K]> => {
-  return clientRoutes[name].body.type;
+  return clientRoutes[name].body?.type as EventHandlerBodyValidatorType<CR[K]>;
 };
 
 export const getClientRouterType = <
@@ -256,5 +260,7 @@ export const getClientRouterType = <
   clientRoutes: CR,
   name: K,
 ): EventHandlerRouterValidatorType<CR[K]> => {
-  return clientRoutes[name].router.type;
+  return clientRoutes[name].router?.type as EventHandlerRouterValidatorType<
+    CR[K]
+  >;
 };
