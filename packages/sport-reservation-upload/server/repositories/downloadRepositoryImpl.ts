@@ -12,7 +12,7 @@ export const downloadRepositoryImpl = /*@__PURE__*/ Layer.effect(
       downloadUrl: ({ url }) => {
         return Effect.provideService(
           Effect.gen(function* () {
-            return yield* typedFetch({ response: unknownType }, url, {
+            return yield* typedFetch({ responseType: unknownType }, url, {
               responseType: "stream",
             });
           }),

@@ -1,6 +1,6 @@
 import { Context, Effect, Layer } from "effect";
 import { Simplify } from "effect/Types";
-import { FetchOptions, MappedResponseType, ofetch } from "ofetch";
+import { FetchOptions, MappedResponseType, ofetch, ResponseType } from "ofetch";
 import type { Mock } from "vitest";
 import { ArktypeError, FetchError } from "~~/src/models/errors";
 import { effectType } from "~~/src/utils/effectType";
@@ -46,26 +46,53 @@ type Method<
   R = never,
 > = (opts: Opts) => Effect.Effect<A, E | FetchError | ArktypeError, R>;
 
-export type TypedRouteParamsOptions<CR extends ClientRoute> =
-  CR extends infer _CR
-    ? _CR extends ClientRoute
-      ? TypedFetchParamsOptions<
-          EventHandlerQueryValidatorType<_CR>,
-          EventHandlerBodyValidatorType<_CR>,
-          EventHandlerRouterValidatorType<_CR>
-        >
-      : never
-    : never;
+export type TypedRouteParamsOptions<
+  CR extends ClientRoute,
+  R extends ResponseType = "json",
+> = CR extends infer _CR
+  ? _CR extends ClientRoute
+    ? TypedFetchParamsOptions<
+        EventHandlerQueryValidatorType<_CR>,
+        EventHandlerBodyValidatorType<_CR>,
+        EventHandlerRouterValidatorType<_CR>,
+        R
+      >
+    : never
+  : never;
+
+export type TypedRouteOptions<
+  CR extends ClientRoute,
+  R extends ResponseType = "json",
+> = CR extends infer _CR
+  ? _CR extends ClientRoute
+    ? TypedFetchOptions<
+        EventHandlerQueryValidatorType<_CR>,
+        EventHandlerBodyValidatorType<_CR>,
+        EventHandlerRouterValidatorType<_CR>,
+        R
+      >
+    : never
+  : never;
+
+const mergeOptions = <CR extends ClientRoute, R extends ResponseType = "json">(
+  opts: FetchOptions<R>,
+  params: TypedRouteParamsOptions<CR>,
+): TypedRouteOptions<CR, R> => {
+  return {
+    ...opts,
+    ...params,
+  };
+};
 
 /*@__NO_SIDE_EFFECTS__*/
 const createMethod =
   <CR extends ClientRoute>({
     fetch,
     route: {
-      response,
-      query: queryParams,
-      body: bodyParams,
-      router: routerParams,
+      response: responseType,
+      query: queryType,
+      body: bodyType,
+      router: routerType,
       path,
       method,
     },
@@ -76,7 +103,7 @@ const createMethod =
     TypedRouteParamsOptions<CR>,
     MappedResponseType<"json", EventHandlerClientResponseType<CR>>
   > =>
-  ({ query, body, router }) =>
+  (params: TypedRouteParamsOptions<CR>) =>
     Effect.provideService(
       typedFetch<
         EventHandlerResponseValidatorType<CR>,
@@ -84,16 +111,11 @@ const createMethod =
         EventHandlerBodyValidatorType<CR>,
         EventHandlerRouterValidatorType<CR>,
         "json"
-      >({ response, queryParams, bodyParams, routerParams }, path, {
-        method,
-        query,
-        body,
-        router,
-      } as TypedFetchOptions<
-        EventHandlerQueryValidatorType<CR>,
-        EventHandlerBodyValidatorType<CR>,
-        EventHandlerRouterValidatorType<CR>
-      >),
+      >(
+        { responseType, queryType, bodyType, routerType },
+        path,
+        mergeOptions({ method }, params),
+      ),
       Fetch,
       fetch,
     );

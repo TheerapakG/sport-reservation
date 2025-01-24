@@ -77,8 +77,8 @@ export const lineService = /*@__PURE__*/ Layer.effect(
           Effect.gen(function* () {
             return yield* typedFetch(
               {
-                response: linePostIssueAccessTokenResponse,
-                bodyParams: unknownType,
+                responseType: linePostIssueAccessTokenResponse,
+                bodyType: unknownType,
               },
               "/token",
               {
@@ -108,8 +108,8 @@ export const lineService = /*@__PURE__*/ Layer.effect(
           Effect.gen(function* () {
             return yield* typedFetch(
               {
-                response: linePostGetUserProfileResponse,
-                bodyParams: unknownType,
+                responseType: linePostGetUserProfileResponse,
+                bodyType: unknownType,
               },
               "/verify",
               {

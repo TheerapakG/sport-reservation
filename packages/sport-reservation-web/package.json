@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "format": "prettier -c .",
-    "lint": "eslint --flag unstable_ts_config .",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "build": "vinxi build",
     "dev": "vinxi dev",

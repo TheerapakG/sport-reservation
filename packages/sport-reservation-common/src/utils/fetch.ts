@@ -1,6 +1,6 @@
 import { type } from "arktype";
-import { Simplify } from "drizzle-orm/utils";
 import { Context, Effect } from "effect";
+import { Simplify } from "effect/Types";
 import {
   $Fetch,
   FetchOptions,
@@ -61,8 +61,13 @@ export const typedFetch = <
   R extends ResponseType = "json",
 >(
   {
-    response,
-  }: { response?: T; queryParams?: QP; bodyParams?: BP; routerParams?: RP },
+    responseType,
+  }: {
+    responseType?: T;
+    queryType?: QP;
+    bodyType?: BP;
+    routerType?: RP;
+  },
   request: string,
   options?: TypedFetchOptions<QP, BP, RP, R>,
 ): Effect.Effect<
@@ -72,7 +77,7 @@ export const typedFetch = <
 > =>
   Effect.gen(function* () {
     const { fetch } = yield* Fetch;
-    const { router, ...opts } = options ?? {};
+    const { router, ...opts } = { router: undefined, ...options };
     const parsedRequest = request
       .split("/")
       .filter(Boolean)
@@ -96,7 +101,7 @@ export const typedFetch = <
     )
       return fetchResponse as MappedResponseType<R, T["infer"]>;
     return (yield* effectType(
-      (response ?? anyObjectType) as T,
+      (responseType ?? anyObjectType) as T,
       fetchResponse,
     )) as MappedResponseType<R, T["infer"]>;
   });
@@ -109,7 +114,14 @@ export const typedRawFetch = <
   RP extends type.Any | undefined,
   R extends ResponseType = "json",
 >(
-  { response }: { response?: T; queryParams?: QP; routerParams?: RP },
+  {
+    responseType,
+  }: {
+    responseType?: T;
+    queryType?: QP;
+    bodyType?: BP;
+    routerType?: RP;
+  },
   request: string,
   options?: TypedFetchOptions<QP, BP, RP, R>,
 ): Effect.Effect<
@@ -119,7 +131,7 @@ export const typedRawFetch = <
 > =>
   Effect.gen(function* () {
     const { fetch } = yield* Fetch;
-    const { router, ...opts } = options ?? {};
+    const { router, ...opts } = { router: undefined, ...options };
     const parsedRequest = request
       .split("/")
       .filter(Boolean)
@@ -144,7 +156,7 @@ export const typedRawFetch = <
       return fetchResponse;
 
     fetchResponse._data = (yield* effectType(
-      (response ?? anyObjectType) as T,
+      (responseType ?? anyObjectType) as T,
       fetchResponse._data,
     )) as MappedResponseType<R, T["infer"]>;
     return fetchResponse;

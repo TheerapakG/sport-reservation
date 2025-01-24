@@ -11,29 +11,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  cache-dependencies:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 9
-
-      - name: Setup node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "20"
-          cache: "pnpm"
-
-      - name: Install Dependencies
-        run: pnpm install
-
   checks:
-    needs: [cache-dependencies]
     runs-on: ubuntu-latest
 
     steps:
@@ -67,7 +45,7 @@ jobs:
     strategy:
       matrix:
         package: [user, auth, upload, web]
-    needs: [cache-dependencies, checks]
+    needs: [checks]
     runs-on: ubuntu-latest
     defaults:
       run:
