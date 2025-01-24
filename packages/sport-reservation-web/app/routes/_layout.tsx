@@ -21,14 +21,14 @@ const WrappingLayoutComponent = ({
 }) => {
   return (
     <>
-      <header className="border-grid sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-sm supports-backdrop-filter:bg-background/60">
+      <header className="border-grid bg-background/95 supports-backdrop-filter:bg-background/60 sticky top-0 z-50 w-full border-b backdrop-blur-sm">
         <div className="container flex h-14 items-center px-4">
           <div className="flex items-center justify-start space-x-1">
             <NavigationMenu>
               <NavigationMenuList>
                 <NavigationMenuItem>
                   <NavigationMenuLink
-                    className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-xl font-bold"
+                    className="group bg-background inline-flex h-10 w-max items-center justify-center rounded-md px-4 py-2 text-xl font-bold"
                     asChild
                   >
                     <Link
