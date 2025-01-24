@@ -43,7 +43,7 @@ export type EventHandlerTypeConfigIn<
 };
 
 export type EventHandlerTypeConfig<
-  Response extends type.Any = any,
+  Response extends type.Any = type.Any,
   Q extends ExtendedTypeConfig | undefined = ExtendedTypeConfig | undefined,
   B extends ExtendedTypeConfig | undefined = ExtendedTypeConfig | undefined,
   R extends ExtendedTypeConfig | undefined = ExtendedTypeConfig | undefined,
