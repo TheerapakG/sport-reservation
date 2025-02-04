@@ -1,8 +1,5 @@
 import { Context, Effect } from "effect";
-import {
-  ArktypeError,
-  FetchError,
-} from "sport-reservation-common/models/errors";
+import { ArktypeError, FetchError } from "tiara-stack/models/errors";
 
 export class DownloadRepository
   extends /*@__PURE__*/ Context.Tag("DownloadRepository")<

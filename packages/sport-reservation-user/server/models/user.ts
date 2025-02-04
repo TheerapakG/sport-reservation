@@ -5,14 +5,8 @@ export const userProfileCreate = /*@__PURE__*/ type({
   "avatar?": "string",
 });
 
-export const userProfileUpdate = /*@__PURE__*/ type({
-  id: "number",
-  "name?": "string",
-  "avatar?": "string",
-});
-
 export const userProfile = /*@__PURE__*/ type({
-  id: "number",
+  id: "string",
   "name?": "string",
   "avatar?": "string",
 });

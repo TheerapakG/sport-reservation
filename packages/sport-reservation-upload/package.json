@@ -5,7 +5,7 @@
   "type": "module",
   "exports": {
     "./*": {
-      "types": "./dist/.theestack/*.d.ts",
+      "types": "./dist/.tiara/*.d.ts",
       "import": "./dist/*.js",
       "require": "./dist/*.cjs"
     },
@@ -18,9 +18,9 @@
     "format": "prettier -c .",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "build": "theestack client build",
+    "build": "tiara client build",
     "dev": "nitro dev",
-    "generate": "theestack client generate",
+    "generate": "tiara client generate",
     "preview": "node .output/server/index.mjs"
   },
   "dependencies": {
@@ -44,7 +44,7 @@
     "effect": "catalog:",
     "h3": "catalog:",
     "ofetch": "catalog:",
-    "sport-reservation-common": "workspace:*",
+    "tiara-stack": "workspace:*",
     "ufo": "catalog:"
   },
   "devDependencies": {

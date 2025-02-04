@@ -1,0 +1,132 @@
+import { type } from "arktype";
+import { Cause, Console, Context, Effect, Exit, pipe } from "effect";
+import { Simplify } from "effect/Types";
+import {
+  createError,
+  eventHandler,
+  EventHandler,
+  EventHandlerRequest,
+  H3Event,
+} from "h3";
+import {
+  EventHandlerConfig,
+  EventHandlerResponseType,
+  EventHandlerResponseValidatorType,
+  EventHandlerTypeConfig,
+} from "~~/src/config/eventHandlerConfig";
+import { isArktypeError, isFetchError, isS3Error } from "~~/src/models/errors";
+import {
+  effectEventHandlerParams,
+  EffectEventHandlerParams,
+} from "~~/src/utils/effectEventHandlerParams";
+import { effectType } from "~~/src/utils/effectType";
+
+export class EventContext
+  extends /*@__PURE__*/ Context.Tag("EventContext")<
+    EventContext,
+    { event: H3Event<EventHandlerRequest> }
+  >() {}
+
+export class EventParamsContext
+  extends /*@__PURE__*/ Context.Tag("EventParamsContext")<
+    EventParamsContext,
+    { params: unknown }
+  >()
+{
+  public static typed<
+    C extends EventHandlerTypeConfig = EventHandlerTypeConfig,
+  >() {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const thisCls = this;
+    return Effect.gen(function* () {
+      return (yield* thisCls) as {
+        params: Simplify<EffectEventHandlerParams<C>>;
+      };
+    });
+  }
+}
+
+export type EffectEventHandler<
+  T extends type.Any = type.Any,
+  Request extends EventHandlerRequest = EventHandlerRequest,
+> = EventHandler<Request, Promise<T["infer"]>>;
+
+export type EffectEventHandlerOptions<
+  C extends EventHandlerConfig<string>,
+  R = never,
+> = {
+  config: C;
+  handler: Effect.Effect<
+    EventHandlerResponseType<C>,
+    unknown,
+    EventContext | EventParamsContext | R
+  >;
+};
+
+const effectEventHandler = <
+  C extends EventHandlerConfig<string>,
+  Request extends EventHandlerRequest = EventHandlerRequest,
+  R = never,
+>({
+  config,
+  handler,
+}: EffectEventHandlerOptions<C, R>): EffectEventHandler<
+  EventHandlerResponseValidatorType<C>,
+  Request
+> => {
+  return eventHandler(async (event) => {
+    const exit = await Effect.runPromiseExit(
+      Effect.gen(function* () {
+        const wrappedHandler = Effect.functionWithSpan({
+          body: () => handler,
+          options: () => ({ name: config.name }),
+        });
+        return yield* effectType(
+          config.response,
+          yield* pipe(
+            wrappedHandler(),
+            Effect.provideService(EventContext, { event }),
+            Effect.provideService(EventParamsContext, {
+              params: yield* effectEventHandlerParams(event, config),
+            }),
+            Effect.provide(event.context.effectContext as Context.Context<R>),
+          ),
+        );
+      }),
+    );
+    if (Exit.isFailure(exit)) {
+      const cause = exit.cause;
+      if (Cause.isDieType(cause) && Cause.isUnknownException(cause.defect)) {
+        Effect.runSync(
+          Console.log("[die]", event.path, Cause.prettyErrors(cause)),
+        );
+        throw createError(cause.defect.message);
+      } else if (Cause.isFailType(cause)) {
+        const error = cause.error;
+        if (isArktypeError(error) || isFetchError(error) || isS3Error(error)) {
+          Effect.runSync(
+            Console.log("[fail]", event.path, Cause.prettyErrors(cause)),
+          );
+          throw createError(error.error?.message ?? "unknown error cause");
+        }
+      }
+      Effect.runSync(
+        Console.log("[fail]", event.path, Cause.prettyErrors(cause)),
+      );
+      throw createError(exit.toString());
+    }
+    return exit.value;
+  });
+};
+
+/*@__NO_SIDE_EFFECTS__*/
+export const createEffectEventHandler = <R = never>() => {
+  return <
+    C extends EventHandlerConfig<string>,
+    Request extends EventHandlerRequest = EventHandlerRequest,
+  >({
+    config,
+    handler,
+  }: EffectEventHandlerOptions<C, R>) =>
+    effectEventHandler<C, Request, R>({ config, handler });
+};

@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { Context, Effect, Layer, Option } from "effect";
-import { ValkeyError } from "sport-reservation-common/models/errors";
+import { ValkeyError } from "tiara-stack/models/errors";
 import { LineService, StorageService } from "~/layers";
 import {
   InvalidLineNonceError,

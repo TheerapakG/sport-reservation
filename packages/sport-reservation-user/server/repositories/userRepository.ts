@@ -8,22 +8,24 @@ export class UserRepository
     UserRepository,
     {
       createUserProfile: (
-        data: Simplify<Omit<typeof userUserProfile.$inferInsert, "id">>,
+        data: Simplify<
+          Omit<typeof userUserProfile.$inferInsert, "id" | "publicId">
+        >,
       ) => Effect.Effect<
         Option.Option<typeof userUserProfile.$inferSelect>,
         SqlError.SqlError
       >;
       updateUserProfile: (
         data: Simplify<
-          Omit<typeof userUserProfile.$inferInsert, "id"> &
-            Required<Pick<typeof userUserProfile.$inferInsert, "id">>
+          Omit<typeof userUserProfile.$inferInsert, "id" | "publicId"> &
+            Required<Pick<typeof userUserProfile.$inferInsert, "publicId">>
         >,
       ) => Effect.Effect<
         Option.Option<typeof userUserProfile.$inferSelect>,
         SqlError.SqlError
       >;
       findUserProfileById: (data: {
-        id: number;
+        publicId: string;
       }) => Effect.Effect<
         Option.Option<typeof userUserProfile.$inferSelect>,
         SqlError.SqlError

@@ -31,6 +31,16 @@ spec:
                 secretKeyRef:
                   name: sport-reservation-user-secret
                   key: postgresUrl
+            - name: SECRET_PATH
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-auth-secret
+                  key: secretPath
+            - name: AUTH_KEY_FILE_PUBLIC
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-auth-secret
+                  key: authKeyFilePublic
             - name: UPLOAD_SECRET
               valueFrom:
                 secretKeyRef:

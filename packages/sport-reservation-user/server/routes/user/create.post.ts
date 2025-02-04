@@ -1,7 +1,7 @@
 import { EventParamsContext, effectEventHandler } from "$/effectEventHandler";
 import { Effect } from "effect";
-import { defineEventHandlerConfig } from "sport-reservation-common/utils/eventHandlerConfig";
 import { UploadClient } from "sport-reservation-upload/client";
+import { defineEventHandlerConfig } from "tiara-stack/config";
 import { userProfile, userProfileCreate } from "~/models/user";
 import { UserRepository } from "~/repositories/userRepository";
 
@@ -19,7 +19,7 @@ export default effectEventHandler({
 
     const userRepository = yield* UserRepository;
     const {
-      id,
+      publicId,
       name,
       avatar: avatarKey,
     } = yield* yield* userRepository.createUserProfile({
@@ -32,10 +32,12 @@ export default effectEventHandler({
       ? yield* uploadClient.getDownloadPresignedUrl({
           query: { key: avatarKey },
         })
-      : {};
+      : {
+          url: undefined,
+        };
 
     return {
-      id,
+      id: publicId,
       ...(name ? { name } : {}),
       ...(avatar ? { avatar } : {}),
     };

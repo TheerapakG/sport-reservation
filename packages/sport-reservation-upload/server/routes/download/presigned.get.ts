@@ -6,8 +6,8 @@ import {
 import { type } from "arktype";
 import { Effect } from "effect";
 import { getHeader } from "h3";
-import { defineEventHandlerConfig } from "sport-reservation-common/utils/eventHandlerConfig";
-import { noInferOut } from "sport-reservation-common/utils/noInfer";
+import { defineEventHandlerConfig } from "tiara-stack/config";
+import { noInferOut } from "tiara-stack/utils/noInfer";
 import { AuthRepository } from "~/repositories/authRepository";
 import { UploadRepository } from "~/repositories/uploadRepository";
 

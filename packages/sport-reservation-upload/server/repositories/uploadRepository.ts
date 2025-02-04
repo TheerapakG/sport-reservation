@@ -1,6 +1,6 @@
 import { StreamingBlobPayloadInputTypes } from "@smithy/types";
 import { Context, Effect } from "effect";
-import { S3Error } from "sport-reservation-common/models/errors";
+import { S3Error } from "tiara-stack/models/errors";
 
 export class UploadRepository
   extends /*@__PURE__*/ Context.Tag("UploadRepository")<

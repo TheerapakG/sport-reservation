@@ -4,7 +4,7 @@ import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { type } from "arktype";
 import { Effect } from "effect";
 import { useEffect } from "react";
-import { effectTypeCheck } from "sport-reservation-common/utils/effectType";
+import { effectTypeCheck } from "tiara-stack/utils/effectType";
 
 const authAndRedirect = async ({
   queryClient,

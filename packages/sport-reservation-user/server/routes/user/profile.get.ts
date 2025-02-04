@@ -1,9 +1,9 @@
 import { EventParamsContext, effectEventHandler } from "$/effectEventHandler";
 import { type } from "arktype";
 import { Effect } from "effect";
-import { defineEventHandlerConfig } from "sport-reservation-common/utils/eventHandlerConfig";
-import { noInferOut } from "sport-reservation-common/utils/noInfer";
 import { UploadClient } from "sport-reservation-upload/client";
+import { defineEventHandlerConfig } from "tiara-stack/config";
+import { noInferOut } from "tiara-stack/utils/noInfer";
 import { userProfile } from "~/models/user";
 import { UserRepository } from "~/repositories/userRepository";
 
@@ -12,7 +12,7 @@ export const handlerConfig = defineEventHandlerConfig({
   response: userProfile,
   query: noInferOut(
     type({
-      id: "number.integer",
+      id: "string",
     }),
   ),
 });
@@ -27,20 +27,20 @@ export default effectEventHandler({
 
     const userRepository = yield* UserRepository;
     const {
-      id: userProfileId,
+      publicId,
       name,
       avatar: avatarKey,
-    } = yield* yield* userRepository.findUserProfileById({ id });
+    } = yield* yield* userRepository.findUserProfileById({ publicId: id });
 
     const uploadClient = yield* UploadClient;
     const { url: avatar } = avatarKey
       ? yield* uploadClient.getDownloadPresignedUrl({
           query: { key: avatarKey },
         })
-      : {};
+      : { url: undefined };
 
     return {
-      id: userProfileId,
+      id: publicId,
       ...(name ? { name } : {}),
       ...(avatar ? { avatar } : {}),
     };

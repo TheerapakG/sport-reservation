@@ -2,10 +2,10 @@ import { EventParamsContext, effectEventHandler } from "$/effectEventHandler";
 import { type } from "arktype";
 import { Effect, Option } from "effect";
 import jwt from "jsonwebtoken";
-import { defineEventHandlerConfig } from "sport-reservation-common/utils/eventHandlerConfig";
-import { noInferOut } from "sport-reservation-common/utils/noInfer";
 import { UploadClient } from "sport-reservation-upload/client";
 import { UserClient } from "sport-reservation-user/client";
+import { defineEventHandlerConfig } from "tiara-stack/config";
+import { noInferOut } from "tiara-stack/utils/noInfer";
 import { AuthKey } from "~/layers";
 import { LineLoginApiRepository } from "~/repositories/lineLoginApiRepository";
 import { LineLoginDbRepository } from "~/repositories/lineLoginDbRepository";
@@ -56,17 +56,32 @@ export default effectEventHandler({
         onNone: () =>
           Effect.gen(function* () {
             const uploadClient = yield* UploadClient;
-            const { id: userId } = yield* userClient.postCreateUserProfile({
+            const partialProfile = yield* userClient.postCreateUserProfile({
               body: { name: lineName },
             });
             const { key: avatarKey } = yield* uploadClient.postUploadFromUrl({
-              body: { key: `/user/avatar/${userId}`, url: lineAvatar },
+              body: {
+                key: `/user/avatar/${partialProfile.id}`,
+                url: lineAvatar,
+              },
             });
             const profile = yield* userClient.postUpdateUserProfile({
-              body: { id: userId, avatar: avatarKey },
+              headers: {
+                Authorization: `Bearer ${jwt.sign(
+                  partialProfile,
+                  authKey.private,
+                  {
+                    algorithm: "RS256",
+                    expiresIn: "7d",
+                  },
+                )}`,
+              },
+              body: {
+                avatar: avatarKey,
+              },
             });
             yield* lineLoginDbRepository.associateUserIdWithLineId({
-              userId,
+              userId: profile.id,
               lineId,
             });
             return profile;

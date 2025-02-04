@@ -17,7 +17,7 @@
       "outputs": [
         "{projectRoot}/dist",
         "{projectRoot}/.nitro",
-        "{projectRoot}/.theestack",
+        "{projectRoot}/.tiara",
         "{projectRoot}/app/routeTree.gen.ts"
       ],
       "cache": true

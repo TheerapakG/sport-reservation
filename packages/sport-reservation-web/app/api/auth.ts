@@ -5,7 +5,7 @@ import { Effect } from "effect";
 import jwt from "jsonwebtoken";
 import { AuthClient } from "sport-reservation-auth/client";
 import { getAuthClientBodyType } from "sport-reservation-auth/models";
-import { effectType } from "sport-reservation-common/utils/effectType";
+import { effectType } from "tiara-stack/utils/effectType";
 import { getCookie, setCookie } from "vinxi/http";
 
 export const authKeys = {

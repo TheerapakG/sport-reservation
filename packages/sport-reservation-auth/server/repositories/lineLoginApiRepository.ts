@@ -5,7 +5,7 @@ import {
   ArktypeError,
   FetchError,
   ValkeyError,
-} from "sport-reservation-common/models/errors";
+} from "tiara-stack/models/errors";
 import { lineAuthToken } from "~/models/line";
 
 export class InvalidLineStateError {
@@ -27,7 +27,7 @@ export class LineLoginApiRepository
           codeVerifier: string;
           scope: string;
         },
-        FetchError | ValkeyError
+        ValkeyError
       >;
       getAuthToken: (data: {
         code: string;

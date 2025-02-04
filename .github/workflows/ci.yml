@@ -32,10 +32,10 @@ jobs:
       - name: Install Dependencies
         run: pnpm install
 
-      - name: Run Generate For Common
-        run: pnpm nx run sport-reservation-common:generate
+      - name: Run Generate For TiaraStack
+        run: pnpm nx run tiara-stack:generate
 
-      - name: Install Bin For Common
+      - name: Install Bin For TiaraStack
         run: pnpm install
 
       - name: Run Checks
@@ -44,7 +44,7 @@ jobs:
   build:
     strategy:
       matrix:
-        package: [user, auth, upload, web]
+        package: [user, auth, upload, chat, web]
     needs: [checks]
     runs-on: ubuntu-latest
     defaults:
@@ -69,10 +69,10 @@ jobs:
       - name: Install Dependencies
         run: pnpm install
 
-      - name: Run Generate For Common
-        run: pnpm nx run sport-reservation-common:generate
+      - name: Run Generate For TiaraStack
+        run: pnpm nx run tiara-stack:generate
 
-      - name: Install Bin For Common
+      - name: Install Bin For TiaraStack
         run: pnpm install
 
       - name: Run Build

@@ -1,16 +1,20 @@
 import { builtinModules } from "module";
 import path from "pathe";
+import { fileURLToPath } from "url";
 import { defineConfig } from "vite";
 import dts from "vite-plugin-dts";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export default defineConfig({
   build: {
     target: "node20",
     lib: {
       entry: {
-        client: "./.theestack/client",
-        mock: "./.theestack/mock",
-        models: "./.theestack/models",
+        client: "./.tiara/client",
+        mock: "./.tiara/mock",
+        models: "./.tiara/models",
       },
     },
     rollupOptions: {
@@ -30,20 +34,21 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "#imports": path.resolve(".nitro/types/nitro-imports"),
-      "~": path.resolve("./server"),
-      "@": path.resolve("./server"),
-      "~~": path.resolve("./"),
-      "@@": path.resolve("./"),
-      $: path.resolve("./.theestack"),
+      "#imports": path.resolve(__dirname, ".nitro/types/nitro-imports"),
+      "~": path.resolve(__dirname, "./server"),
+      "@": path.resolve(__dirname, "./server"),
+      "~~": path.resolve(__dirname, "./"),
+      "@@": path.resolve(__dirname, "./"),
+      $: path.resolve(__dirname, "./.tiara"),
     },
   },
   plugins: [
     dts({
       include: [
-        "./.theestack/client.ts",
-        "./.theestack/mock.ts",
-        "./.theestack/models.ts",
+        "./.tiara/serverRoutes.ts",
+        "./.tiara/client.ts",
+        "./.tiara/mock.ts",
+        "./.tiara/models.ts",
         "./server/models/*.ts",
       ],
     }),

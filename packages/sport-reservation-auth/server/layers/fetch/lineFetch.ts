@@ -2,13 +2,10 @@ import { RuntimeConfig } from "$/layers";
 import { type } from "arktype";
 import { Context, Effect, Layer, Redacted } from "effect";
 import { ofetch } from "ofetch";
-import {
-  ArktypeError,
-  FetchError,
-} from "sport-reservation-common/models/errors";
-import { effectType } from "sport-reservation-common/utils/effectType";
-import { Fetch, typedFetch } from "sport-reservation-common/utils/fetch";
-import { unknownType } from "sport-reservation-common/utils/type";
+import { ArktypeError, FetchError } from "tiara-stack/models/errors";
+import { effectType } from "tiara-stack/utils/effectType";
+import { Fetch, typedFetch } from "tiara-stack/utils/fetch";
+import { unknownType } from "tiara-stack/utils/type";
 import type { Mock } from "vitest";
 
 export const lineFetch = /*@__PURE__*/ ofetch.create({

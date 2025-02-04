@@ -2,8 +2,8 @@ import { effectEventHandler } from "$/effectEventHandler";
 import { RuntimeConfig } from "$/layers";
 import crypto from "crypto";
 import { Effect } from "effect";
-import { defineEventHandlerConfig } from "sport-reservation-common/utils/eventHandlerConfig";
-import { useUrl } from "sport-reservation-common/utils/useUrl";
+import { defineEventHandlerConfig } from "tiara-stack/config";
+import { useUrl } from "tiara-stack/utils/useUrl";
 import { lineLoginRequest } from "~/models/line.ts";
 import { LineLoginApiRepository } from "~/repositories/lineLoginApiRepository";
 

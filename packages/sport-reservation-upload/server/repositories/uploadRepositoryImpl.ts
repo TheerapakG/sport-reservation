@@ -3,7 +3,7 @@ import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Effect, Layer } from "effect";
-import { S3Error } from "sport-reservation-common/models/errors";
+import { S3Error } from "tiara-stack/models/errors";
 import { S3 } from "~/layers/S3";
 import { UploadRepository } from "./uploadRepository";
 

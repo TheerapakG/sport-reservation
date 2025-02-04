@@ -1,6 +1,6 @@
 import { Effect, Layer } from "effect";
-import { Fetch, typedFetch } from "sport-reservation-common/utils/fetch";
-import { unknownType } from "sport-reservation-common/utils/type";
+import { Fetch, typedFetch } from "tiara-stack/utils/fetch";
+import { unknownType } from "tiara-stack/utils/type";
 import { DownloadRepository } from "./downloadRepository";
 
 export const downloadRepositoryImpl = /*@__PURE__*/ Layer.effect(

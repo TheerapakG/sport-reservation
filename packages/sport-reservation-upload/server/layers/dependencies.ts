@@ -1,7 +1,7 @@
 import { runtimeConfig } from "$/layers";
 import { Layer } from "effect";
 import { ofetch } from "ofetch";
-import { Fetch } from "sport-reservation-common/utils/fetch";
+import { Fetch } from "tiara-stack/utils/fetch";
 import { s3Live } from "~/layers";
 import { authRepositoryImpl } from "~/repositories/authRepositoryImpl";
 import { downloadRepositoryImpl } from "~/repositories/downloadRepositoryImpl";

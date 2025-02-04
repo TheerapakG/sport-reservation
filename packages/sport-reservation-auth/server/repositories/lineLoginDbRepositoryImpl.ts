@@ -1,5 +1,5 @@
 import { PgDrizzle } from "@effect/sql-drizzle/Pg";
-import { eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { Context, Effect, Layer, Option } from "effect";
 import { authUserAuthConnection } from "sport-reservation-db/schema";
 import { LineLoginDbRepository } from "./lineLoginDbRepository";
@@ -15,7 +15,12 @@ export const lineLoginDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
           const users = yield* db
             .select()
             .from(authUserAuthConnection)
-            .where(eq(authUserAuthConnection.lineId, lineId))
+            .where(
+              and(
+                isNull(authUserAuthConnection.deletedAt),
+                eq(authUserAuthConnection.lineId, lineId),
+              ),
+            )
             .limit(1);
 
           if (users.length === 0) return Option.none();

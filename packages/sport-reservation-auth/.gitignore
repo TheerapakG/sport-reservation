@@ -13,7 +13,7 @@ dist-ssr
 *.local
 .data
 .nitro
-.theestack
+.tiara
 .cache
 .output
 .env

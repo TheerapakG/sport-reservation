@@ -1,0 +1,68 @@
+import destr from "destr";
+import { Effect } from "effect";
+import { Simplify } from "effect/Types";
+import {
+  EventHandlerRequest,
+  getQuery,
+  getRouterParams,
+  H3Event,
+  readBody,
+} from "h3";
+import { ArktypeError } from "~~/src/models/errors";
+import {
+  EventHandlerBodyType,
+  EventHandlerQueryType,
+  EventHandlerRouterType,
+  EventHandlerTypeConfig,
+} from "../config/eventHandlerConfig";
+import { effectType } from "./effectType";
+
+export type EffectEventHandlerParams<
+  C extends EventHandlerTypeConfig = EventHandlerTypeConfig,
+> = {
+  query: EventHandlerQueryType<C>;
+  body: EventHandlerBodyType<C>;
+  router: EventHandlerRouterType<C>;
+};
+
+/*@__NO_SIDE_EFFECTS__*/
+export const effectEventHandlerParams = <
+  Request extends EventHandlerRequest = EventHandlerRequest,
+  C extends EventHandlerTypeConfig = EventHandlerTypeConfig,
+>(
+  event: H3Event<Request>,
+  { query, body, router }: C,
+): Effect.Effect<Simplify<EffectEventHandlerParams<C>>, ArktypeError> =>
+  Effect.gen(function* () {
+    return {
+      ...((query && query.decode
+        ? {
+            query: yield* effectType(
+              query.type,
+              Object.fromEntries(
+                Object.entries(getQuery(event)).map(([key, value]) => [
+                  key,
+                  Array.isArray(value) ? value.map(destr) : destr(value),
+                ]),
+              ),
+            ),
+          }
+        : {}) as { query: EventHandlerQueryType<C> }),
+      ...((body && body.decode
+        ? {
+            body: yield* effectType(
+              body.type,
+              yield* Effect.promise(async () => await readBody(event)),
+            ),
+          }
+        : {}) as { body: EventHandlerBodyType<C> }),
+      ...((router && router.decode
+        ? {
+            router: yield* effectType(
+              router.type,
+              getRouterParams(event, { decode: true }),
+            ),
+          }
+        : {}) as { router: EventHandlerRouterType<C> }),
+    };
+  });

@@ -7,9 +7,9 @@ export class LineLoginDbRepository
     {
       findUserIdByLineId: (data: {
         lineId: string;
-      }) => Effect.Effect<Option.Option<{ userId: number }>, SqlError.SqlError>;
+      }) => Effect.Effect<Option.Option<{ userId: string }>, SqlError.SqlError>;
       associateUserIdWithLineId: (data: {
-        userId: number;
+        userId: string;
         lineId: string;
       }) => Effect.Effect<void, SqlError.SqlError>;
     }

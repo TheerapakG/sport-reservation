@@ -5,12 +5,12 @@ import {
 } from "$/effectEventHandler";
 import { type } from "arktype";
 import { Effect } from "effect";
-import { getHeader, getRequestWebStream } from "h3";
+import { getHeader, readMultipartFormData } from "h3";
 import {
   defineEventHandlerConfig,
   defineExtendedTypeConfig,
-} from "sport-reservation-common/utils/eventHandlerConfig";
-import { noInferOut } from "sport-reservation-common/utils/noInfer";
+} from "tiara-stack/config";
+import { noInferOut } from "tiara-stack/utils/noInfer";
 import { AuthRepository } from "~/repositories/authRepository";
 import { UploadRepository } from "~/repositories/uploadRepository";
 
@@ -41,11 +41,13 @@ export default effectEventHandler({
     yield* authRepository.checkSecret({
       secret: getHeader(event, "authorization")?.split(" ", 2)[1] ?? "",
     });
-    const body = getRequestWebStream(event) ?? "";
+    const fileData = Effect.tryPromise(
+      async () => (await readMultipartFormData(event))?.[0].data,
+    );
     const uploadRepository = yield* UploadRepository;
     const { key: resultKey } = yield* uploadRepository.upload({
       key: query.key,
-      stream: body,
+      stream: (yield* fileData) ?? "",
     });
 
     return { key: resultKey };
