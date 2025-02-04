@@ -10,7 +10,7 @@ import { defineEventHandlerConfig } from "tiara-stack/config";
 import { noInferOut } from "tiara-stack/utils/noInfer";
 import { AuthKey } from "~/layers";
 import { FriendRepository } from "~/repositories/friendRepository";
-import getUserProfile from "~~/dist/packages/sport-reservation-user/client/methods/getUserProfile";
+import getUserProfile from "~~/client/methods/getUserProfile";
 
 export const handlerConfig = defineEventHandlerConfig({
   name: "postCreateFriendRequest",
