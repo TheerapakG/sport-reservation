@@ -182,12 +182,6 @@ importers:
       sport-reservation-oauth-common:
         specifier: workspace:*
         version: link:../sport-reservation-oauth-common
-      sport-reservation-upload:
-        specifier: workspace:*
-        version: link:../sport-reservation-upload
-      sport-reservation-user:
-        specifier: workspace:*
-        version: link:../sport-reservation-user
       tiara-stack:
         specifier: workspace:*
         version: link:../tiara-stack
@@ -770,6 +764,9 @@ importers:
       '@effect/sql-pg':
         specifier: 'catalog:'
         version: 0.29.1(@effect/experimental@0.39.1(@effect/platform-node@0.71.1(@effect/platform@0.75.1(effect@3.12.7))(effect@3.12.7))(@effect/platform@0.75.1(effect@3.12.7))(effect@3.12.7)(ws@8.18.0))(@effect/platform@0.75.1(effect@3.12.7))(@effect/sql@0.28.1(@effect/experimental@0.39.1(@effect/platform-node@0.71.1(@effect/platform@0.75.1(effect@3.12.7))(effect@3.12.7))(@effect/platform@0.75.1(effect@3.12.7))(effect@3.12.7)(ws@8.18.0))(@effect/platform@0.75.1(effect@3.12.7))(effect@3.12.7))(effect@3.12.7)
+      '@openauthjs/openauth':
+        specifier: 'catalog:'
+        version: 0.3.7(arctic@2.3.4)(hono@4.6.20)
       arktype:
         specifier: 'catalog:'
         version: 2.0.0
@@ -791,6 +788,9 @@ importers:
       sport-reservation-db:
         specifier: workspace:*
         version: link:../sport-reservation-db
+      sport-reservation-oauth-common:
+        specifier: workspace:*
+        version: link:../sport-reservation-oauth-common
       sport-reservation-upload:
         specifier: workspace:*
         version: link:../sport-reservation-upload
