@@ -36,6 +36,11 @@ spec:
                 secretKeyRef:
                   name: sport-reservation-oauth-secret
                   key: valkeyUrl
+            - name: ALLOW_CLIENT_IDS
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-oauth-secret
+                  key: allowClientIds
             - name: AUTH_BASE_URL
               valueFrom:
                 secretKeyRef:

@@ -1,6 +1,6 @@
 import { EventContext, effectEventHandler } from "$/effectEventHandler";
 import { type } from "arktype";
-import { Console, Effect } from "effect";
+import { Effect } from "effect";
 import { sendWebResponse, toWebRequest } from "h3";
 import { defineEventHandlerConfig } from "tiara-stack/config";
 import { Issuer } from "../layers/issuer";
@@ -14,7 +14,6 @@ export default effectEventHandler({
   handler: /*@__PURE__*/ Effect.gen(function* () {
     const { event } = yield* EventContext;
     const request = toWebRequest(event);
-    yield* Console.log("request", request.url);
     const { issuer } = yield* Issuer;
     const response = yield* Effect.promise(
       async () => await issuer.fetch(request),
