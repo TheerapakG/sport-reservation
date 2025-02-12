@@ -38,15 +38,15 @@
     "validator": "^13.12.0"
   },
   "peerDependencies": {
+    "@openauthjs/openauth": "catalog:",
     "arktype": "catalog:",
     "drizzle-orm": "catalog:",
     "effect": "catalog:",
     "h3": "catalog:",
     "ofetch": "catalog:",
-    "tiara-stack": "workspace:*",
+    "sport-reservation-oauth-common": "workspace:*",
     "sport-reservation-db": "workspace:*",
-    "sport-reservation-upload": "workspace:*",
-    "sport-reservation-user": "workspace:*",
+    "tiara-stack": "workspace:*",
     "ufo": "catalog:",
     "vitest": "catalog:"
   },

@@ -44,7 +44,7 @@ jobs:
   build:
     strategy:
       matrix:
-        package: [user, auth, upload, chat, web]
+        package: [oauth, user, auth, upload, chat, web]
     needs: [checks]
     runs-on: ubuntu-latest
     defaults:
@@ -95,7 +95,7 @@ jobs:
   deploy:
     strategy:
       matrix:
-        package: [user, auth, upload, web]
+        package: [oauth,user, auth, upload, chat, web]
     needs: [build]
     runs-on: ubuntu-latest
     defaults:

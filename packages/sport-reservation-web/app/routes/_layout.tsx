@@ -1,4 +1,4 @@
-import { currentUserProfileQueryOptions } from "@/api/auth";
+import { currentUserProfileQueryOptions } from "@/api/oauth";
 import {
   NavigationMenu,
   NavigationMenuItem,

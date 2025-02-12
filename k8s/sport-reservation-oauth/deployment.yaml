@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sport-reservation-oauth
+  labels:
+    app: sport-reservation-oauth
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sport-reservation-oauth
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 5
+  template:
+    metadata:
+      labels:
+        app: sport-reservation-oauth
+    spec:
+      containers:
+        - name: sport-reservation-oauth
+          image: <IMAGE>
+          ports:
+            - containerPort: 3000
+              name: sp-oauth-svc
+          env:
+            - name: POSTGRES_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-oauth-secret
+                  key: postgresUrl
+            - name: VALKEY_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-oauth-secret
+                  key: valkeyUrl
+            - name: AUTH_BASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-oauth-secret
+                  key: authBaseUrl
+            - name: AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-oauth-secret
+                  key: authSecret
+            - name: UPLOAD_BASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-oauth-secret
+                  key: uploadBaseUrl
+            - name: UPLOAD_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-oauth-secret
+                  key: uploadSecret
+            - name: USER_BASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-oauth-secret
+                  key: userBaseUrl
+            - name: USER_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-oauth-secret
+                  key: userSecret
+            - name: LINE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-oauth-secret
+                  key: lineClientId
+            - name: LINE_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-oauth-secret
+                  key: lineClientSecret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sport-reservation-oauth-service
+spec:
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: sp-oauth-svc
+  selector:
+    app: sport-reservation-oauth

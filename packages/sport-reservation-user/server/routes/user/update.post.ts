@@ -4,21 +4,24 @@ import {
   effectEventHandler,
 } from "$/effectEventHandler";
 import { type } from "arktype";
-import { Effect } from "effect";
-import { getHeader } from "h3";
+import { Effect, Option, pipe } from "effect";
+import { getHeader, parseCookies } from "h3";
+import { getSubjectTypeFromToken } from "sport-reservation-oauth-common/subjects";
 import { UploadClient } from "sport-reservation-upload/client";
 import { defineEventHandlerConfig } from "tiara-stack/config";
+import { OAuthError } from "tiara-stack/models/errors";
 import { noInferOut } from "tiara-stack/utils/noInfer";
-import { AuthKey } from "~/layers";
+import { OAuthClient } from "~/layers";
 import { userProfile } from "~/models/user";
+import { AuthRepository } from "~/repositories/authRepository";
 import { UserRepository } from "~/repositories/userRepository";
-import getUserProfile from "~~/client/methods/getUserProfile";
 
 export const handlerConfig = defineEventHandlerConfig({
   name: "postUpdateUserProfile",
   response: userProfile,
   body: noInferOut(
     type({
+      "id?": "string",
       "name?": "string",
       "avatar?": "string",
     }),
@@ -32,11 +35,37 @@ export default effectEventHandler({
       params: { body },
     } = yield* EventParamsContext.typed<typeof handlerConfig>();
 
-    const authKey = yield* AuthKey;
-    const { id } = yield* getUserProfile({
-      token: getHeader(event, "authorization")?.split(" ", 2)[1] ?? "",
-      authKey,
-    });
+    const id = yield* pipe(
+      Option.fromNullable(body.id),
+      Option.match({
+        onSome: (id) =>
+          Effect.gen(function* () {
+            const authRepository = yield* AuthRepository;
+            yield* authRepository.checkSecret({
+              secret: getHeader(event, "authorization")?.split(" ", 2)[1] ?? "",
+            });
+            return id;
+          }),
+        onNone: () =>
+          pipe(
+            Effect.gen(function* () {
+              const { client: oauthClient } = yield* OAuthClient;
+              const { access_token: accessToken } = parseCookies(event);
+              return yield* Effect.promise(() =>
+                getSubjectTypeFromToken({
+                  type: "user",
+                  client: oauthClient,
+                  accessToken,
+                  refreshToken: undefined,
+                }),
+              );
+            }),
+            Effect.flatMap((user) =>
+              user ? Effect.succeed(user.id) : Effect.fail(new OAuthError()),
+            ),
+          ),
+      }),
+    );
 
     const userRepository = yield* UserRepository;
     const {

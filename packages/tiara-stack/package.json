@@ -39,6 +39,7 @@
   },
   "peerDependencies": {
     "@ark/util": "catalog:",
+    "@openauthjs/openauth": "catalog:",
     "arktype": "catalog:",
     "c12": "catalog:",
     "destr": "catalog:",

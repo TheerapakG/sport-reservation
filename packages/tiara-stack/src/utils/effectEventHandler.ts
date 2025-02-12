@@ -1,5 +1,13 @@
 import { type } from "arktype";
-import { Cause, Console, Context, Effect, Exit, pipe } from "effect";
+import {
+  Cause,
+  Console,
+  Context,
+  Effect,
+  Exit,
+  pipe,
+  SynchronizedRef,
+} from "effect";
 import { Simplify } from "effect/Types";
 import {
   createError,
@@ -14,6 +22,10 @@ import {
   EventHandlerResponseValidatorType,
   EventHandlerTypeConfig,
 } from "~~/src/config/eventHandlerConfig";
+import {
+  EffectContext,
+  effectContextLive,
+} from "~~/src/internal/effectContext";
 import { isArktypeError, isFetchError, isS3Error } from "~~/src/models/errors";
 import {
   effectEventHandlerParams,
@@ -63,6 +75,13 @@ export type EffectEventHandlerOptions<
   >;
 };
 
+const getEffectContext = <R = never>() =>
+  Effect.gen(function* () {
+    const { latch, ref } = yield* EffectContext.typed<R>();
+    yield* latch.await;
+    return (yield* SynchronizedRef.get(ref)).context;
+  });
+
 const effectEventHandler = <
   C extends EventHandlerConfig<string>,
   Request extends EventHandlerRequest = EventHandlerRequest,
@@ -89,7 +108,12 @@ const effectEventHandler = <
             Effect.provideService(EventParamsContext, {
               params: yield* effectEventHandlerParams(event, config),
             }),
-            Effect.provide(event.context.effectContext as Context.Context<R>),
+            Effect.provide(
+              yield* pipe(
+                getEffectContext<R>(),
+                Effect.provide(effectContextLive),
+              ),
+            ),
           ),
         );
       }),

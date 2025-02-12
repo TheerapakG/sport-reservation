@@ -7,13 +7,15 @@ export default defineTiaraConfig({
     secret: {
       path: redacted("string"),
     },
-    auth: {
-      keyFile: {
-        public: redacted("string"),
-      },
+    oauth: {
+      clientId: config("string"),
+      issuer: config("string"),
     },
     upload: {
       baseUrl: config("string"),
+      secret: redacted("string"),
+    },
+    user: {
       secret: redacted("string"),
     },
   },

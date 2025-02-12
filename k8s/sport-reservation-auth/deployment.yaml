@@ -31,64 +31,21 @@ spec:
                 secretKeyRef:
                   name: sport-reservation-auth-secret
                   key: postgresUrl
-            - name: VALKEY_URL
+            - name: OAUTH_CLIENT_ID
               valueFrom:
                 secretKeyRef:
                   name: sport-reservation-auth-secret
-                  key: valkeyUrl
-            - name: LINE_CLIENT_ID
+                  key: oauthClientId
+            - name: OAUTH_ISSUER
               valueFrom:
                 secretKeyRef:
                   name: sport-reservation-auth-secret
-                  key: lineClientId
-            - name: LINE_CLIENT_SECRET
+                  key: oauthIssuer
+            - name: AUTH_SECRET
               valueFrom:
                 secretKeyRef:
                   name: sport-reservation-auth-secret
-                  key: lineClientSecret
-            - name: LINE_REDIRECT_URI
-              valueFrom:
-                secretKeyRef:
-                  name: sport-reservation-auth-secret
-                  key: lineRedirectUri
-            - name: SECRET_PATH
-              valueFrom:
-                secretKeyRef:
-                  name: sport-reservation-auth-secret
-                  key: secretPath
-            - name: AUTH_KEY_FILE_PRIVATE
-              valueFrom:
-                secretKeyRef:
-                  name: sport-reservation-auth-secret
-                  key: authKeyFilePrivate
-            - name: AUTH_KEY_FILE_PUBLIC
-              valueFrom:
-                secretKeyRef:
-                  name: sport-reservation-auth-secret
-                  key: authKeyFilePublic
-            - name: UPLOAD_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: sport-reservation-auth-secret
-                  key: uploadSecret
-            - name: UPLOAD_BASE_URL
-              valueFrom:
-                secretKeyRef:
-                  name: sport-reservation-auth-secret
-                  key: uploadBaseUrl
-            - name: USER_BASE_URL
-              valueFrom:
-                secretKeyRef:
-                  name: sport-reservation-auth-secret
-                  key: userBaseUrl
-          volumeMounts:
-            - name: sport-reservation-auth-secret-path
-              readOnly: true
-              mountPath: "/.secret"
-      volumes:
-        - name: sport-reservation-auth-secret-path
-          secret:
-            secretName: sport-reservation-auth-secret-path
+                  key: authSecret
 ---
 apiVersion: v1
 kind: Service

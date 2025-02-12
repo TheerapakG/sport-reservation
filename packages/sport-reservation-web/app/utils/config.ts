@@ -1,3 +1,5 @@
 export const config = {
-  authBaseUrl: process.env.AUTH_BASE_URL ?? "AUTH_BASE_URL",
+  oauth: {
+    issuer: process.env.OAUTH_ISSUER ?? "OAUTH_ISSUER",
+  },
 };

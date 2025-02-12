@@ -4,29 +4,15 @@ export default defineTiaraConfig({
   name: "auth",
   runtimeConfig: {
     postgresUrl: redacted("string"),
-    valkeyUrl: redacted("string"),
-    line: {
-      client: {
-        id: config("string"),
-        secret: redacted("string"),
-      },
-      redirectUri: config("string"),
-    },
     secret: {
       path: redacted("string"),
     },
+    oauth: {
+      clientId: config("string"),
+      issuer: config("string"),
+    },
     auth: {
-      keyFile: {
-        private: redacted("string"),
-        public: redacted("string"),
-      },
-    },
-    upload: {
-      baseUrl: config("string"),
       secret: redacted("string"),
-    },
-    user: {
-      baseUrl: config("string"),
     },
   },
 });

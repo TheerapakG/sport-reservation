@@ -31,16 +31,16 @@ spec:
                 secretKeyRef:
                   name: sport-reservation-user-secret
                   key: postgresUrl
-            - name: SECRET_PATH
+            - name: OAUTH_CLIENT_ID
               valueFrom:
                 secretKeyRef:
-                  name: sport-reservation-auth-secret
-                  key: secretPath
-            - name: AUTH_KEY_FILE_PUBLIC
+                  name: sport-reservation-user-secret
+                  key: oauthClientId
+            - name: OAUTH_ISSUER
               valueFrom:
                 secretKeyRef:
-                  name: sport-reservation-auth-secret
-                  key: authKeyFilePublic
+                  name: sport-reservation-user-secret
+                  key: oauthIssuer
             - name: UPLOAD_SECRET
               valueFrom:
                 secretKeyRef:
@@ -51,14 +51,11 @@ spec:
                 secretKeyRef:
                   name: sport-reservation-user-secret
                   key: uploadBaseUrl
-          volumeMounts:
-            - name: sport-reservation-user-secret-path
-              readOnly: true
-              mountPath: "/.secret"
-      volumes:
-        - name: sport-reservation-user-secret-path
-          secret:
-            secretName: sport-reservation-user-secret-path
+            - name: userSecret
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-user-secret
+                  key: userSecret
 ---
 apiVersion: v1
 kind: Service

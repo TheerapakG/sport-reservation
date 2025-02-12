@@ -1,0 +1,76 @@
+{
+  "name": "sport-reservation-oauth",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    "./*": {
+      "types": "./dist/.tiara/*.d.ts",
+      "import": "./dist/*.js",
+      "require": "./dist/*.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "format": "prettier -c .",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "build": "tiara client build",
+    "dev": "nitro dev",
+    "generate": "tiara client generate",
+    "preview": "node .output/server/index.mjs"
+  },
+  "dependencies": {
+    "@effect/experimental": "catalog:",
+    "@effect/platform": "catalog:",
+    "@effect/platform-node": "catalog:",
+    "@effect/schema": "catalog:",
+    "@effect/sql": "catalog:",
+    "@effect/sql-drizzle": "catalog:",
+    "@effect/sql-pg": "catalog:",
+    "@effect/vitest": "^0.17.3",
+    "@hono/node-server": "^1.13.8",
+    "hono": "^4.6.20",
+    "unstorage": "^1.12.0",
+    "validator": "^13.12.0"
+  },
+  "peerDependencies": {
+    "@openauthjs/openauth": "catalog:",
+    "arktype": "catalog:",
+    "drizzle-orm": "catalog:",
+    "effect": "catalog:",
+    "h3": "catalog:",
+    "ofetch": "catalog:",
+    "sport-reservation-oauth-common": "workspace:*",
+    "sport-reservation-auth": "workspace:*",
+    "sport-reservation-db": "workspace:*",
+    "sport-reservation-user": "workspace:*",
+    "tiara-stack": "workspace:*",
+    "ufo": "catalog:",
+    "vitest": "catalog:"
+  },
+  "devDependencies": {
+    "@eslint/compat": "catalog:",
+    "@eslint/eslintrc": "catalog:",
+    "@eslint/js": "catalog:",
+    "@types/eslint__eslintrc": "catalog:",
+    "@types/eslint__js": "catalog:",
+    "@types/jsonwebtoken": "catalog:",
+    "@types/validator": "^13.12.2",
+    "@typescript-eslint/eslint-plugin": "catalog:",
+    "@typescript-eslint/parser": "catalog:",
+    "dotenv": "catalog:",
+    "eslint": "catalog:",
+    "globals": "catalog:",
+    "jiti": "catalog:",
+    "nitropack": "catalog:",
+    "pathe": "catalog:",
+    "prettier": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-dts": "catalog:"
+  }
+}

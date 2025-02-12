@@ -56,14 +56,6 @@ spec:
                 secretKeyRef:
                   name: sport-reservation-upload-secret
                   key: uploadSecret
-          volumeMounts:
-            - name: sport-reservation-upload-secret-path
-              readOnly: true
-              mountPath: "/.secret"
-      volumes:
-        - name: sport-reservation-upload-secret-path
-          secret:
-            secretName: sport-reservation-upload-secret-path
 ---
 apiVersion: v1
 kind: Service

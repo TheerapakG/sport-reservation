@@ -1,12 +1,12 @@
 import { runtimeConfig } from "$/layers";
 import { NodeFileSystem } from "@effect/platform-node";
 import { Layer } from "effect";
-import { authKey, dbLive } from "~/layers";
+import { dbLive } from "~/layers";
 import { chatRepositoryImpl } from "~/repositories/chatRepositoryImpl";
 
 /*@__NO_SIDE_EFFECTS__*/
 const createConfigLive = () =>
-  Layer.mergeAll(runtimeConfig, authKey).pipe(
+  Layer.mergeAll(runtimeConfig).pipe(
     Layer.provide(runtimeConfig),
     Layer.provide(NodeFileSystem.layer),
   );

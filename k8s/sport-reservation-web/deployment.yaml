@@ -26,29 +26,21 @@ spec:
             - containerPort: 3000
               name: sp-web-svc
           env:
+            - name: OAUTH_ISSUER
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-web-secret
+                  key: oauthIssuer
             - name: UPLOAD_SECRET
               valueFrom:
                 secretKeyRef:
                   name: sport-reservation-web-secret
                   key: uploadSecret
-            - name: AUTH_BASE_URL
-              valueFrom:
-                secretKeyRef:
-                  name: sport-reservation-web-secret
-                  key: authBaseUrl
             - name: UPLOAD_BASE_URL
               valueFrom:
                 secretKeyRef:
                   name: sport-reservation-web-secret
                   key: uploadBaseUrl
-          volumeMounts:
-            - name: sport-reservation-web-secret-path
-              readOnly: true
-              mountPath: "/.secret"
-      volumes:
-        - name: sport-reservation-web-secret-path
-          secret:
-            secretName: sport-reservation-web-secret-path
 ---
 apiVersion: v1
 kind: Service

@@ -1,6 +1,12 @@
 import { ArkErrors } from "arktype";
 import { FetchError as OFetchError } from "ofetch";
 
+export class OAuthError {
+  readonly _tag = "OAuthError";
+
+  constructor(readonly error?: Error) {}
+}
+
 export class ArktypeError {
   readonly _tag = "ArktypeError";
 

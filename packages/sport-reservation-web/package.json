@@ -73,10 +73,11 @@
     "vinxi": "^0.5.1"
   },
   "peerDependencies": {
+    "@openauthjs/openauth": "catalog:",
     "arktype": "catalog:",
     "effect": "catalog:",
     "h3": "catalog:",
-    "sport-reservation-auth": "workspace:*",
+    "sport-reservation-oauth-common": "workspace:*",
     "tiara-stack": "workspace:*",
     "sport-reservation-user": "workspace:*"
   },

@@ -1,0 +1,50 @@
+{
+  "name": "sport-reservation-oauth-common",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.js",
+      "require": "./dist/*.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "format": "prettier -c .",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "build": "vite build",
+    "generate": "vite build"
+  },
+  "dependencies": {},
+  "peerDependencies": {
+    "@openauthjs/openauth": "catalog:",
+    "arktype": "catalog:",
+    "vitest": "catalog:"
+  },
+  "devDependencies": {
+    "@eslint/compat": "catalog:",
+    "@eslint/eslintrc": "catalog:",
+    "@eslint/js": "catalog:",
+    "@types/eslint__eslintrc": "catalog:",
+    "@types/eslint__js": "catalog:",
+    "@types/jsonwebtoken": "catalog:",
+    "@types/validator": "^13.12.2",
+    "@typescript-eslint/eslint-plugin": "catalog:",
+    "@typescript-eslint/parser": "catalog:",
+    "dotenv": "catalog:",
+    "eslint": "catalog:",
+    "globals": "catalog:",
+    "jiti": "catalog:",
+    "pathe": "catalog:",
+    "prettier": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-dts": "catalog:"
+  }
+}

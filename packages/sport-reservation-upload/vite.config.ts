@@ -27,9 +27,6 @@ export default defineConfig({
         "ufo",
         "vitest",
       ],
-      output: {
-        preserveModules: true,
-      },
     },
   },
   resolve: {

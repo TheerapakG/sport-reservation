@@ -32,6 +32,7 @@ export default defineConfig({
         ...builtinModules,
         /^node:/,
         "@ark/util",
+        "@openauthjs/openauth",
         "arktype",
         "c12",
         "destr",
