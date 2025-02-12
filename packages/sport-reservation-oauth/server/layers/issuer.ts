@@ -28,7 +28,7 @@ export const issuerLive = Layer.effect(
       issuer: issuer({
         subjects,
         allow: async ({ clientID }) =>
-          config.allow.clientIDs.split(":").includes(clientID),
+          config.allow.clientIds.split(":").includes(clientID),
         storage: {
           get: async (key) =>
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
