@@ -5,7 +5,12 @@ import { type } from "arktype";
 import { Effect } from "effect";
 import { subjects } from "sport-reservation-oauth-common/subjects";
 import { effectType } from "tiara-stack/utils/effectType";
-import { getRequestHeaders, parseCookies, setCookie } from "vinxi/http";
+import {
+  getRequestHost,
+  getRequestProtocol,
+  parseCookies,
+  setCookie,
+} from "vinxi/http";
 
 export const oauthKeys = {
   all: () => ["oauth"] as const,
@@ -57,17 +62,12 @@ export const loginServerFn = createServerFn({ method: "POST" })
     Effect.runSync(effectType(type({ "provider?": "string" }), data)),
   )
   .handler(async ({ data: { provider } }) => {
-    const headers = await Effect.runPromise(
-      Effect.promise(async () => await getRequestHeaders()),
-    );
-    const host = headers["Host"];
-    const protocol = host?.includes("localhost") ? "http" : "https";
     const { url } = await Effect.runPromise(
       Effect.gen(function* () {
         const oauthClient = yield* OAuthClient;
         return yield* Effect.promise(() =>
           oauthClient.authorize(
-            `${protocol}://${host}/login/callback`,
+            `${getRequestProtocol()}://${getRequestHost()}/login/callback`,
             "code",
             { provider },
           ),
@@ -89,16 +89,14 @@ export const exchangeServerFn = createServerFn({ method: "POST" })
     Effect.runSync(effectType(type({ code: "string" }), data)),
   )
   .handler(async ({ data: { code } }) => {
-    const headers = await Effect.runPromise(
-      Effect.promise(async () => await getRequestHeaders()),
-    );
-    const host = headers["Host"];
-    const protocol = host?.includes("localhost") ? "http" : "https";
     const exchanged = await Effect.runPromise(
       Effect.gen(function* () {
         const oauthClient = yield* OAuthClient;
         return yield* Effect.promise(() =>
-          oauthClient.exchange(code, `${protocol}://${host}/login/callback`),
+          oauthClient.exchange(
+            code,
+            `${getRequestProtocol()}://${getRequestHost()}/login/callback`,
+          ),
         );
       }).pipe(Effect.provide(oAuthClient)),
     );
