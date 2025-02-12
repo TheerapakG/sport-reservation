@@ -48,6 +48,7 @@
     "sport-reservation-oauth-common": "workspace:*",
     "sport-reservation-auth": "workspace:*",
     "sport-reservation-db": "workspace:*",
+    "sport-reservation-upload": "workspace:*",
     "sport-reservation-user": "workspace:*",
     "tiara-stack": "workspace:*",
     "ufo": "catalog:",

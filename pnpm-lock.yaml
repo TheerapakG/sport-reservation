@@ -482,6 +482,9 @@ importers:
       sport-reservation-oauth-common:
         specifier: workspace:*
         version: link:../sport-reservation-oauth-common
+      sport-reservation-upload:
+        specifier: workspace:*
+        version: link:../sport-reservation-upload
       sport-reservation-user:
         specifier: workspace:*
         version: link:../sport-reservation-user
