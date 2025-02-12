@@ -6,7 +6,7 @@ export default defineTiaraConfig({
     postgresUrl: redacted("string"),
     valkeyUrl: redacted("string"),
     allow: {
-      clientIDs: config("string"),
+      clientIds: config("string"),
     },
     auth: {
       baseUrl: config("string"),
