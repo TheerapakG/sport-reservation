@@ -64,13 +64,14 @@ export const issuerLive = Layer.effect(
           }),
         },
         success: async (ctx, value) => {
-          console.log(value);
           switch (value.provider) {
             case "line":
               return ctx.subject(
                 "user",
                 await Effect.runPromise(
                   Effect.gen(function* () {
+                    console.log(value.tokenset.raw.id_token);
+
                     const {
                       sub: lineId,
                       name: lineName,
@@ -78,6 +79,8 @@ export const issuerLive = Layer.effect(
                     } = yield* lineService.postGetUserProfile({
                       idToken: value.tokenset.raw.id_token,
                     });
+
+                    console.log(lineId, lineName, lineAvatar);
 
                     return yield* Option.match(
                       Option.fromNullable(
