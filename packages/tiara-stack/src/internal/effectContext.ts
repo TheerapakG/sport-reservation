@@ -30,22 +30,22 @@ export class EffectContext
   }
 }
 
-const cachedEffectContext = Effect.cached(
-  Effect.gen(function* () {
-    yield* Console.log("creating effect context...");
-    return {
-      latch: yield* Effect.makeLatch(),
-      ref: yield* SynchronizedRef.make({
-        scope: yield* Scope.make(),
-        context: Context.empty() as Context.Context<unknown>,
-      }),
-    };
-  }),
+const cachedEffectContext = Effect.runSync(
+  Effect.cached(
+    Effect.gen(function* () {
+      yield* Console.log("creating effect context...");
+      return {
+        latch: yield* Effect.makeLatch(),
+        ref: yield* SynchronizedRef.make({
+          scope: yield* Scope.make(),
+          context: Context.empty() as Context.Context<unknown>,
+        }),
+      };
+    }),
+  ),
 );
 
 export const effectContextLive = Layer.effect(
   EffectContext,
-  Effect.gen(function* () {
-    return yield* yield* cachedEffectContext;
-  }),
+  cachedEffectContext,
 );
