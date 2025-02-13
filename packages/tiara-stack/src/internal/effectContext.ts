@@ -1,4 +1,11 @@
-import { Context, Effect, Layer, Scope, SynchronizedRef } from "effect";
+import {
+  Console,
+  Context,
+  Effect,
+  Layer,
+  Scope,
+  SynchronizedRef,
+} from "effect";
 
 type EffectContextServices<Services> = {
   latch: Effect.Latch;
@@ -25,6 +32,7 @@ export class EffectContext
 
 const cachedEffectContext = Effect.cached(
   Effect.gen(function* () {
+    yield* Console.log("creating effect context...");
     return {
       latch: yield* Effect.makeLatch(),
       ref: yield* SynchronizedRef.make({
