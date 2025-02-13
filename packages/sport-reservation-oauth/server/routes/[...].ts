@@ -11,16 +11,17 @@ export const handlerConfig = defineEventHandlerConfig({
 });
 export default effectEventHandler({
   config: handlerConfig,
-  handler: /*@__PURE__*/ Effect.gen(function* () {
-    console.log("handler");
-    const { event } = yield* EventContext;
-    const request = toWebRequest(event);
-    console.log(request);
-    const { issuer } = yield* Issuer;
-    const response = yield* Effect.promise(
-      async () => await issuer.fetch(request),
-    );
-    yield* Effect.promise(async () => await sendWebResponse(event, response));
-    return undefined;
-  }),
+  handler: () =>
+    /*@__PURE__*/ Effect.gen(function* () {
+      console.log("handler");
+      const { event } = yield* EventContext;
+      const request = toWebRequest(event);
+      console.log(request);
+      const { issuer } = yield* Issuer;
+      const response = yield* Effect.promise(
+        async () => await issuer.fetch(request),
+      );
+      yield* Effect.promise(async () => await sendWebResponse(event, response));
+      return undefined;
+    }),
 });

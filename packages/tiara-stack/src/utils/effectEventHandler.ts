@@ -69,7 +69,7 @@ export type EffectEventHandlerOptions<
   R = never,
 > = {
   config: C;
-  handler: Effect.Effect<
+  handler: () => Effect.Effect<
     EventHandlerResponseType<C>,
     unknown,
     EventContext | EventParamsContext | R
@@ -103,7 +103,7 @@ const effectEventHandler = <
           event.path,
         );
         const wrappedHandler = Effect.functionWithSpan({
-          body: () => handler,
+          body: handler,
           options: () => ({ name: config.name }),
         });
         return yield* effectType(

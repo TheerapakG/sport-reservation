@@ -21,22 +21,23 @@ export const handlerConfig = defineEventHandlerConfig({
 
 export default effectEventHandler({
   config: handlerConfig,
-  handler: /*@__PURE__*/ Effect.gen(function* () {
-    const { event } = yield* EventContext;
-    const { access_token: accessToken } = parseCookies(event);
+  handler: () =>
+    /*@__PURE__*/ Effect.gen(function* () {
+      const { event } = yield* EventContext;
+      const { access_token: accessToken } = parseCookies(event);
 
-    const { client: oauthClient } = yield* OAuthClient;
+      const { client: oauthClient } = yield* OAuthClient;
 
-    const user = yield* Effect.promise(async () =>
-      getSubjectTypeFromToken({
-        type: "user",
-        client: oauthClient,
-        accessToken,
-        refreshToken: undefined,
-      }),
-    );
+      const user = yield* Effect.promise(async () =>
+        getSubjectTypeFromToken({
+          type: "user",
+          client: oauthClient,
+          accessToken,
+          refreshToken: undefined,
+        }),
+      );
 
-    const friendRepository = yield* FriendRepository;
-    return yield* friendRepository.getFriendRequests(user?.id ?? "");
-  }),
+      const friendRepository = yield* FriendRepository;
+      return yield* friendRepository.getFriendRequests(user?.id ?? "");
+    }),
 });
