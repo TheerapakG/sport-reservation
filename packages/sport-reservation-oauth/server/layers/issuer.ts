@@ -64,6 +64,7 @@ export const issuerLive = Layer.effect(
           }),
         },
         success: async (ctx, value) => {
+          console.log(value);
           switch (value.provider) {
             case "line":
               return ctx.subject(
