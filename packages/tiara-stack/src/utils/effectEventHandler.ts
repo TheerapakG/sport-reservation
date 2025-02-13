@@ -14,6 +14,7 @@ import {
   eventHandler,
   EventHandler,
   EventHandlerRequest,
+  getRequestIP,
   H3Event,
 } from "h3";
 import {
@@ -96,6 +97,11 @@ const effectEventHandler = <
   return eventHandler(async (event) => {
     const exit = await Effect.runPromiseExit(
       Effect.gen(function* () {
+        yield* Console.log(
+          `[${event.method}]`,
+          getRequestIP(event),
+          event.path,
+        );
         const wrappedHandler = Effect.functionWithSpan({
           body: () => handler,
           options: () => ({ name: config.name }),
