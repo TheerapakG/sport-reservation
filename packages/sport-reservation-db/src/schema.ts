@@ -23,6 +23,9 @@ export const authUserAuthConnection = pgTable(
     lineId: varchar("line_id", { length: 64 }).unique(undefined, {
       nulls: "distinct",
     }),
+    googleId: varchar("google_id", { length: 64 }).unique(undefined, {
+      nulls: "distinct",
+    }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -36,6 +39,7 @@ export const authUserAuthConnection = pgTable(
     uniqueIndex("auth_user_auth_connection_user_id_idx").on(table.userId),
     uniqueIndex("auth_user_auth_connection_email_id_idx").on(table.emailId),
     uniqueIndex("auth_user_auth_connection_line_id_idx").on(table.lineId),
+    uniqueIndex("auth_user_auth_connection_google_id_idx").on(table.googleId),
   ],
 );
 

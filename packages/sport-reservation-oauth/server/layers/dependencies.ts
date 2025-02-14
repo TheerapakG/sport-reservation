@@ -1,6 +1,6 @@
 import { runtimeConfig } from "$/layers";
 import { Layer } from "effect";
-import { dbLive, lineService, mockStorageService } from ".";
+import { dbLive, googleService, lineService, mockStorageService } from ".";
 import { authClient, uploadClient, userClient } from "./client";
 import { issuerLive } from "./issuer";
 
@@ -11,7 +11,7 @@ const configLive = createConfigLive();
 
 /*@__NO_SIDE_EFFECTS__*/
 const createExternalFetchLive = () =>
-  lineService.pipe(Layer.provide(runtimeConfig));
+  Layer.mergeAll(lineService, googleService).pipe(Layer.provide(runtimeConfig));
 
 const externalFetchLive = createExternalFetchLive();
 

@@ -7,7 +7,7 @@ import { AuthClient } from "sport-reservation-auth/client";
 import { subjects } from "sport-reservation-oauth-common/subjects";
 import { UploadClient } from "sport-reservation-upload/client";
 import { UserClient } from "sport-reservation-user/client";
-import { LineService } from "./fetch";
+import { GoogleService, LineService } from "./fetch";
 import { StorageService } from "./storage";
 
 export class Issuer extends Context.Tag("Issuer")<
@@ -24,7 +24,7 @@ export const issuerLive = Layer.effect(
     const userClient = yield* UserClient;
     const uploadClient = yield* UploadClient;
     const lineService = yield* LineService;
-
+    const googleService = yield* GoogleService;
     return {
       issuer: issuer({
         subjects,
@@ -135,8 +135,65 @@ export const issuerLive = Layer.effect(
                 ),
               );
             case "google":
-              console.log(value.tokenset.raw);
-              throw new Error("Invalid provider");
+              return ctx.subject(
+                "user",
+                await Effect.runPromise(
+                  Effect.gen(function* () {
+                    const {
+                      sub: googleId,
+                      name: googleName,
+                      picture: googleAvatar,
+                    } = yield* googleService.verifyIdToken({
+                      idToken: value.tokenset.raw.id_token,
+                    });
+
+                    return yield* Option.match(
+                      Option.fromNullable(
+                        (yield* authClient.getIdByGoogleId({
+                          query: { googleId },
+                        })).id,
+                      ),
+                      {
+                        onSome: (id) =>
+                          Effect.gen(function* () {
+                            return yield* userClient.getUserProfileById({
+                              query: { id },
+                            });
+                          }),
+                        onNone: () =>
+                          Effect.gen(function* () {
+                            const partialProfile =
+                              yield* userClient.postCreateUserProfile({
+                                body: { name: googleName },
+                              });
+                            yield* authClient.postAssociateGoogleId({
+                              body: {
+                                id: partialProfile.id,
+                                googleId,
+                              },
+                            });
+
+                            if (!googleAvatar) return partialProfile;
+
+                            const { key: avatarKey } =
+                              yield* uploadClient.postUploadFromUrl({
+                                body: {
+                                  key: `/user/avatar/${partialProfile.id}`,
+                                  url: googleAvatar,
+                                },
+                              });
+                            return yield* userClient.postUpdateUserProfile({
+                              body: {
+                                id: partialProfile.id,
+                                avatar: avatarKey,
+                              },
+                            });
+                          }),
+                      },
+                    );
+                  }),
+                ),
+              );
             default:
               throw new Error("Invalid provider");
           }

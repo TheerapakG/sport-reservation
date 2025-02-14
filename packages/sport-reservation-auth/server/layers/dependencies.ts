@@ -3,6 +3,7 @@ import { NodeFileSystem } from "@effect/platform-node";
 import { Layer } from "effect";
 import { dbLive, oAuthClient } from "~/layers";
 import { authRepositoryImpl } from "~/repositories/authRepositoryImpl";
+import { googleLoginDbRepositoryImpl } from "~/repositories/googleLoginDbRepositoryImpl";
 import { lineLoginDbRepositoryImpl } from "~/repositories/lineLoginDbRepositoryImpl";
 
 /*@__NO_SIDE_EFFECTS__*/
@@ -27,9 +28,11 @@ const baseDependenciesLive = /*@__PURE__*/ Layer.mergeAll(
 
 /*@__NO_SIDE_EFFECTS__*/
 const createRepositoryLive = () =>
-  Layer.mergeAll(authRepositoryImpl, lineLoginDbRepositoryImpl).pipe(
-    Layer.provide(baseDependenciesLive),
-  );
+  Layer.mergeAll(
+    authRepositoryImpl,
+    googleLoginDbRepositoryImpl,
+    lineLoginDbRepositoryImpl,
+  ).pipe(Layer.provide(baseDependenciesLive));
 
 /*@__NO_SIDE_EFFECTS__*/
 const createClientLive = () =>
