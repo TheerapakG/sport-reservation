@@ -4,8 +4,7 @@ on:
   push:
     paths:
       - ".github/workflows/ci.yml"
-      - "k8s/sport-reservation-auth/deployment.yaml"
-      - "k8s/sport-reservation-web/deployment.yaml"
+      - "k8s/**"
       - "packages/**"
     branches: ["main"]
   workflow_dispatch:
