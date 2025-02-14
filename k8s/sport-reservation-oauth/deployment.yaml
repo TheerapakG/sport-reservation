@@ -81,6 +81,16 @@ spec:
                 secretKeyRef:
                   name: sport-reservation-oauth-secret
                   key: lineClientSecret
+            - name: GOOGLE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-oauth-secret
+                  key: googleClientId
+            - name: GOOGLE_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-oauth-secret
+                  key: googleClientSecret
 ---
 apiVersion: v1
 kind: Service
