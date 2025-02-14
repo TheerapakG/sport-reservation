@@ -26,5 +26,11 @@ export default defineTiaraConfig({
         secret: redacted("string"),
       },
     },
+    google: {
+      client: {
+        id: config("string"),
+        secret: redacted("string"),
+      },
+    },
   },
 });

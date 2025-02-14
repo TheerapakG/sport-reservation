@@ -1,5 +1,6 @@
 import { RuntimeConfig } from "$/layers";
 import { issuer } from "@openauthjs/openauth";
+import { GoogleProvider } from "@openauthjs/openauth/provider/google";
 import { Oauth2Provider } from "@openauthjs/openauth/provider/oauth2";
 import { Context, Effect, Layer, Option, Redacted } from "effect";
 import { AuthClient } from "sport-reservation-auth/client";
@@ -61,6 +62,14 @@ export const issuerLive = Layer.effect(
               authorization: "https://access.line.me/oauth2/v2.1/authorize",
               token: "https://api.line.me/oauth2/v2.1/token",
             },
+          }),
+          google: GoogleProvider({
+            clientID: config.google.client.id,
+            clientSecret: Redacted.value(config.google.client.secret),
+            scopes: [
+              "https://www.googleapis.com/auth/userinfo.profile",
+              "openid",
+            ],
           }),
         },
         success: async (ctx, value) => {
@@ -125,6 +134,9 @@ export const issuerLive = Layer.effect(
                   }),
                 ),
               );
+            case "google":
+              console.log(value.tokenset.raw);
+              throw new Error("Invalid provider");
             default:
               throw new Error("Invalid provider");
           }
