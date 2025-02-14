@@ -4,9 +4,6 @@ export default defineTiaraConfig({
   name: "user",
   runtimeConfig: {
     postgresUrl: redacted("string"),
-    secret: {
-      path: redacted("string"),
-    },
     oauth: {
       clientId: config("string"),
       issuer: config("string"),
