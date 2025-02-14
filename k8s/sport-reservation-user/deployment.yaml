@@ -51,7 +51,7 @@ spec:
                 secretKeyRef:
                   name: sport-reservation-user-secret
                   key: uploadBaseUrl
-            - name: userSecret
+            - name: USER_SECRET
               valueFrom:
                 secretKeyRef:
                   name: sport-reservation-user-secret
