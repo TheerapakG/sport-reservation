@@ -1,5 +1,6 @@
 import { RuntimeConfig } from "$/layers";
 import { issuer } from "@openauthjs/openauth";
+import { FacebookProvider } from "@openauthjs/openauth/provider/facebook";
 import { GoogleProvider } from "@openauthjs/openauth/provider/google";
 import { Oauth2Provider } from "@openauthjs/openauth/provider/oauth2";
 import { Context, Effect, Layer, Option, Redacted } from "effect";
@@ -7,7 +8,7 @@ import { AuthClient } from "sport-reservation-auth/client";
 import { subjects } from "sport-reservation-oauth-common/subjects";
 import { UploadClient } from "sport-reservation-upload/client";
 import { UserClient } from "sport-reservation-user/client";
-import { GoogleService, LineService } from "./fetch";
+import { FacebookService, GoogleService, LineService } from "./fetch";
 import { StorageService } from "./storage";
 
 export class Issuer extends Context.Tag("Issuer")<
@@ -25,6 +26,8 @@ export const issuerLive = Layer.effect(
     const uploadClient = yield* UploadClient;
     const lineService = yield* LineService;
     const googleService = yield* GoogleService;
+    const facebookService = yield* FacebookService;
+
     return {
       issuer: issuer({
         subjects,
@@ -70,6 +73,11 @@ export const issuerLive = Layer.effect(
               "https://www.googleapis.com/auth/userinfo.profile",
               "openid",
             ],
+          }),
+          facebook: FacebookProvider({
+            clientID: config.facebook.client.id,
+            clientSecret: Redacted.value(config.facebook.client.secret),
+            scopes: ["public_profile"],
           }),
         },
         success: async (ctx, value) => {
@@ -180,6 +188,69 @@ export const issuerLive = Layer.effect(
                                 body: {
                                   key: `/user/avatar/${partialProfile.id}`,
                                   url: googleAvatar,
+                                },
+                              });
+                            return yield* userClient.postUpdateUserProfile({
+                              body: {
+                                id: partialProfile.id,
+                                avatar: avatarKey,
+                              },
+                            });
+                          }),
+                      },
+                    );
+                  }),
+                ),
+              );
+
+            case "facebook":
+              return ctx.subject(
+                "user",
+                await Effect.runPromise(
+                  Effect.gen(function* () {
+                    const {
+                      id: facebookId,
+                      name: facebookName,
+                      picture: {
+                        data: { url: facebookAvatar },
+                      },
+                    } = yield* facebookService.getUserProfile({
+                      accessToken: value.tokenset.access,
+                    });
+
+                    return yield* Option.match(
+                      Option.fromNullable(
+                        (yield* authClient.getIdByFacebookId({
+                          query: { facebookId },
+                        })).id,
+                      ),
+                      {
+                        onSome: (id) =>
+                          Effect.gen(function* () {
+                            return yield* userClient.getUserProfileById({
+                              query: { id },
+                            });
+                          }),
+                        onNone: () =>
+                          Effect.gen(function* () {
+                            const partialProfile =
+                              yield* userClient.postCreateUserProfile({
+                                body: { name: facebookName },
+                              });
+                            yield* authClient.postAssociateFacebookId({
+                              body: {
+                                id: partialProfile.id,
+                                facebookId,
+                              },
+                            });
+
+                            if (!facebookAvatar) return partialProfile;
+
+                            const { key: avatarKey } =
+                              yield* uploadClient.postUploadFromUrl({
+                                body: {
+                                  key: `/user/avatar/${partialProfile.id}`,
+                                  url: facebookAvatar,
                                 },
                               });
                             return yield* userClient.postUpdateUserProfile({

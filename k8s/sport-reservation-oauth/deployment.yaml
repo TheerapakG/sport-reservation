@@ -91,6 +91,16 @@ spec:
                 secretKeyRef:
                   name: sport-reservation-oauth-secret
                   key: googleClientSecret
+            - name: FACEBOOK_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-oauth-secret
+                  key: facebookClientId
+            - name: FACEBOOK_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-oauth-secret
+                  key: facebookClientSecret
 ---
 apiVersion: v1
 kind: Service

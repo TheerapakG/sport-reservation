@@ -32,5 +32,11 @@ export default defineTiaraConfig({
         secret: redacted("string"),
       },
     },
+    facebook: {
+      client: {
+        id: config("string"),
+        secret: redacted("string"),
+      },
+    },
   },
 });
