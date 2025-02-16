@@ -3,6 +3,7 @@ import { NodeFileSystem } from "@effect/platform-node";
 import { Layer } from "effect";
 import { dbLive, oAuthClient } from "~/layers";
 import { authRepositoryImpl } from "~/repositories/authRepositoryImpl";
+import { facebookLoginDbRepositoryImpl } from "~/repositories/facebookLoginDbRepositoryImpl";
 import { googleLoginDbRepositoryImpl } from "~/repositories/googleLoginDbRepositoryImpl";
 import { lineLoginDbRepositoryImpl } from "~/repositories/lineLoginDbRepositoryImpl";
 
@@ -32,6 +33,7 @@ const createRepositoryLive = () =>
     authRepositoryImpl,
     googleLoginDbRepositoryImpl,
     lineLoginDbRepositoryImpl,
+    facebookLoginDbRepositoryImpl,
   ).pipe(Layer.provide(baseDependenciesLive));
 
 /*@__NO_SIDE_EFFECTS__*/
