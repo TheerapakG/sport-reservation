@@ -20,7 +20,7 @@ export const handlerConfig = defineEventHandlerConfig({
   body: noInferOut(
     type({
       "id?": "string",
-      facebookId: "string",
+      facebookId: "number |string",
     }),
   ),
 });
@@ -69,7 +69,7 @@ export default effectEventHandler({
       const facebookLoginDbRepository = yield* FacebookLoginDbRepository;
       yield* facebookLoginDbRepository.associateUserIdWithFacebookId({
         userId: id,
-        facebookId: body.facebookId,
+        facebookId: body.facebookId.toString(),
       });
 
       return {};
