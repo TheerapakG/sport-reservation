@@ -1,7 +1,7 @@
 import { PgDrizzle } from "@effect/sql-drizzle/Pg";
 import { and, eq, isNull } from "drizzle-orm";
 import { Context, Effect, Layer, Option } from "effect";
-import { authUserAuthConnection } from "sport-reservation-db/schema";
+import { authUserLineConnection } from "sport-reservation-db/schema";
 import { LineLoginDbRepository } from "./lineLoginDbRepository";
 
 export const lineLoginDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
@@ -14,11 +14,11 @@ export const lineLoginDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
         Effect.gen(function* () {
           const users = yield* db
             .select()
-            .from(authUserAuthConnection)
+            .from(authUserLineConnection)
             .where(
               and(
-                isNull(authUserAuthConnection.deletedAt),
-                eq(authUserAuthConnection.lineId, lineId),
+                isNull(authUserLineConnection.deletedAt),
+                eq(authUserLineConnection.lineId, lineId),
               ),
             )
             .limit(1);
@@ -32,12 +32,12 @@ export const lineLoginDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
       associateUserIdWithLineId: ({ userId, lineId }) =>
         Effect.gen(function* () {
           yield* db
-            .insert(authUserAuthConnection)
+            .insert(authUserLineConnection)
             .values({ userId, lineId })
             .onConflictDoUpdate({
-              target: authUserAuthConnection.userId,
+              target: authUserLineConnection.userId,
               set: { lineId },
-              setWhere: eq(authUserAuthConnection.userId, userId),
+              setWhere: eq(authUserLineConnection.userId, userId),
             });
         }).pipe(
           Effect.withSpan(

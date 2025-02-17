@@ -1,7 +1,7 @@
 import { PgDrizzle } from "@effect/sql-drizzle/Pg";
 import { and, eq, isNull } from "drizzle-orm";
 import { Context, Effect, Layer, Option } from "effect";
-import { authUserAuthConnection } from "sport-reservation-db/schema";
+import { authUserGoogleConnection } from "sport-reservation-db/schema";
 import { GoogleLoginDbRepository } from "./googleLoginDbRepository";
 
 export const googleLoginDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
@@ -14,11 +14,11 @@ export const googleLoginDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
         Effect.gen(function* () {
           const users = yield* db
             .select()
-            .from(authUserAuthConnection)
+            .from(authUserGoogleConnection)
             .where(
               and(
-                isNull(authUserAuthConnection.deletedAt),
-                eq(authUserAuthConnection.googleId, googleId),
+                isNull(authUserGoogleConnection.deletedAt),
+                eq(authUserGoogleConnection.googleId, googleId),
               ),
             )
             .limit(1);
@@ -32,12 +32,12 @@ export const googleLoginDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
       associateUserIdWithGoogleId: ({ userId, googleId }) =>
         Effect.gen(function* () {
           yield* db
-            .insert(authUserAuthConnection)
+            .insert(authUserGoogleConnection)
             .values({ userId, googleId })
             .onConflictDoUpdate({
-              target: authUserAuthConnection.userId,
+              target: authUserGoogleConnection.userId,
               set: { googleId },
-              setWhere: eq(authUserAuthConnection.userId, userId),
+              setWhere: eq(authUserGoogleConnection.userId, userId),
             });
         }).pipe(
           Effect.withSpan(

@@ -1,7 +1,7 @@
 import { PgDrizzle } from "@effect/sql-drizzle/Pg";
 import { and, eq, isNull } from "drizzle-orm";
 import { Context, Effect, Layer, Option } from "effect";
-import { authUserAuthConnection } from "sport-reservation-db/schema";
+import { authUserFacebookConnection } from "sport-reservation-db/schema";
 import { FacebookLoginDbRepository } from "./facebookLoginDbRepository";
 
 export const facebookLoginDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
@@ -14,11 +14,11 @@ export const facebookLoginDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
         Effect.gen(function* () {
           const users = yield* db
             .select()
-            .from(authUserAuthConnection)
+            .from(authUserFacebookConnection)
             .where(
               and(
-                isNull(authUserAuthConnection.deletedAt),
-                eq(authUserAuthConnection.facebookId, facebookId),
+                isNull(authUserFacebookConnection.deletedAt),
+                eq(authUserFacebookConnection.facebookId, facebookId),
               ),
             )
             .limit(1);
@@ -34,12 +34,12 @@ export const facebookLoginDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
       associateUserIdWithFacebookId: ({ userId, facebookId }) =>
         Effect.gen(function* () {
           yield* db
-            .insert(authUserAuthConnection)
+            .insert(authUserFacebookConnection)
             .values({ userId, facebookId })
             .onConflictDoUpdate({
-              target: authUserAuthConnection.userId,
+              target: authUserFacebookConnection.userId,
               set: { facebookId },
-              setWhere: eq(authUserAuthConnection.userId, userId),
+              setWhere: eq(authUserFacebookConnection.userId, userId),
             });
         }).pipe(
           Effect.withSpan(

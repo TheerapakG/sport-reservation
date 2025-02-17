@@ -53,6 +53,7 @@ export const authUserEmailConnection = pgTable(
   "auth_user_email_connection",
   {
     id: serial("id").primaryKey(),
+    userId: uuid("user_id").notNull(),
     email: varchar("email", { length: 255 }).notNull(),
     passwordHash: varchar("password_hash", { length: 255 }).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
@@ -65,10 +66,76 @@ export const authUserEmailConnection = pgTable(
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
   },
   (table) => [
+    index("auth_user_email_connection_user_id_idx").on(table.userId),
     uniqueIndex("auth_user_email_connection_email_idx").on(table.email),
     uniqueIndex("auth_user_email_connection_email_password_idx").on(
       table.email,
       table.passwordHash,
+    ),
+  ],
+);
+
+export const authUserLineConnection = pgTable(
+  "auth_user_line_connection",
+  {
+    id: serial("id").primaryKey(),
+    userId: uuid("user_id").notNull(),
+    lineId: varchar("line_id", { length: 64 }).notNull().unique(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  },
+  (table) => [
+    index("auth_user_line_connection_user_id_idx").on(table.userId),
+    uniqueIndex("auth_user_line_connection_line_id_idx").on(table.lineId),
+  ],
+);
+
+export const authUserGoogleConnection = pgTable(
+  "auth_user_google_connection",
+  {
+    id: serial("id").primaryKey(),
+    userId: uuid("user_id").notNull(),
+    googleId: varchar("google_id", { length: 64 }).notNull().unique(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  },
+  (table) => [
+    index("auth_user_google_connection_user_id_idx").on(table.userId),
+    uniqueIndex("auth_user_google_connection_google_id_idx").on(table.googleId),
+  ],
+);
+
+export const authUserFacebookConnection = pgTable(
+  "auth_user_facebook_connection",
+  {
+    id: serial("id").primaryKey(),
+    userId: uuid("user_id").notNull(),
+    facebookId: varchar("facebook_id", { length: 64 }).notNull().unique(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  },
+  (table) => [
+    index("auth_user_facebook_connection_user_id_idx").on(table.userId),
+    uniqueIndex("auth_user_facebook_connection_facebook_id_idx").on(
+      table.facebookId,
     ),
   ],
 );
