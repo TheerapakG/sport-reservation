@@ -18,7 +18,7 @@ export const handlerConfig = defineEventHandlerConfig({
   }),
   query: noInferOut(
     type({
-      facebookId: "string",
+      facebookId: "number | string",
     }),
   ),
 });
@@ -39,7 +39,7 @@ export default effectEventHandler({
       const facebookLoginDbRepository = yield* FacebookLoginDbRepository;
       const { userId } = Option.getOrUndefined(
         yield* facebookLoginDbRepository.findUserIdByFacebookId({
-          facebookId: query.facebookId,
+          facebookId: query.facebookId.toString(),
         }),
       ) ?? { userId: undefined };
 
