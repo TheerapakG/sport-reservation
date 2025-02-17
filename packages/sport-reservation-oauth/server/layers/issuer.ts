@@ -3,6 +3,7 @@ import { issuer } from "@openauthjs/openauth";
 import { FacebookProvider } from "@openauthjs/openauth/provider/facebook";
 import { GoogleProvider } from "@openauthjs/openauth/provider/google";
 import { Oauth2Provider } from "@openauthjs/openauth/provider/oauth2";
+import { THEME_OPENAUTH } from "@openauthjs/openauth/ui/theme";
 import { Context, Effect, Layer, Option, Redacted } from "effect";
 import { AuthClient } from "sport-reservation-auth/client";
 import { subjects } from "sport-reservation-oauth-common/subjects";
@@ -30,6 +31,7 @@ export const issuerLive = Layer.effect(
 
     return {
       issuer: issuer({
+        theme: THEME_OPENAUTH,
         subjects,
         allow: async ({ clientID }) =>
           config.allow.clientIds.split(":").includes(clientID),

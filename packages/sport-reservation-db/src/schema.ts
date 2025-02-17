@@ -12,43 +12,6 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 
-export const authUserAuthConnection = pgTable(
-  "auth_user_auth_connection",
-  {
-    id: serial("id").primaryKey(),
-    userId: uuid("user_id").notNull(),
-    emailId: integer("email_id").unique(undefined, {
-      nulls: "distinct",
-    }),
-    lineId: varchar("line_id", { length: 64 }).unique(undefined, {
-      nulls: "distinct",
-    }),
-    googleId: varchar("google_id", { length: 64 }).unique(undefined, {
-      nulls: "distinct",
-    }),
-    facebookId: varchar("facebook_id", { length: 64 }).unique(undefined, {
-      nulls: "distinct",
-    }),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .defaultNow()
-      .notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true })
-      .defaultNow()
-      .notNull()
-      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
-    deletedAt: timestamp("deleted_at", { withTimezone: true }),
-  },
-  (table) => [
-    uniqueIndex("auth_user_auth_connection_user_id_idx").on(table.userId),
-    uniqueIndex("auth_user_auth_connection_email_id_idx").on(table.emailId),
-    uniqueIndex("auth_user_auth_connection_line_id_idx").on(table.lineId),
-    uniqueIndex("auth_user_auth_connection_google_id_idx").on(table.googleId),
-    uniqueIndex("auth_user_auth_connection_facebook_id_idx").on(
-      table.facebookId,
-    ),
-  ],
-);
-
 export const authUserEmailConnection = pgTable(
   "auth_user_email_connection",
   {
