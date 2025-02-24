@@ -39,6 +39,12 @@ import {
 } from "~~/src/utils/effectEventHandlerParams";
 import { effectType } from "~~/src/utils/effectType";
 
+export class EventAbort
+  extends /*@__PURE__*/ Context.Tag("EventAbort")<
+    EventAbort,
+    { abort: Effect.Latch }
+  >() {}
+
 export class EventContext
   extends /*@__PURE__*/ Context.Tag("EventContext")<
     EventContext,
@@ -99,7 +105,7 @@ export type EffectStreamEventHandlerOptions<
   handler: () => Stream.Stream<
     EventHandlerResponseType<C>,
     unknown,
-    EventContext | EventParamsContext | R
+    EventAbort | EventContext | EventParamsContext | R
   >;
 };
 
@@ -148,6 +154,8 @@ const effectEventHandler = <
   } = config;
   return stream
     ? (eventHandler(async (event) => {
+        const transformStream = new TransformStream<Uint8Array, Uint8Array>();
+
         setResponseHeader(event, "Content-Type", "application/vnd.msgpack");
         setResponseHeader(event, "Transfer-Encoding", "chunked");
 
@@ -158,6 +166,12 @@ const effectEventHandler = <
               getRequestIP(event),
               event.path,
             );
+
+            const abort = yield* Effect.makeLatch();
+            transformStream.writable
+              .getWriter()
+              .closed.then(() => Effect.runPromise(abort.open));
+
             const wrappedHandler = Effect.functionWithSpan({
               body: () =>
                 Stream.toReadableStreamEffect(
@@ -165,7 +179,7 @@ const effectEventHandler = <
                     handler as () => Stream.Stream<
                       EventHandlerResponseType<Opts["config"]>,
                       unknown,
-                      EventContext | EventParamsContext | R
+                      EventAbort | EventContext | EventParamsContext | R
                     >
                   )().pipe(
                     Stream.flatMap((item) =>
@@ -181,6 +195,7 @@ const effectEventHandler = <
             });
             return yield* pipe(
               wrappedHandler(),
+              Effect.provideService(EventAbort, { abort }),
               Effect.provideService(EventContext, { event }),
               Effect.provideService(EventParamsContext, {
                 params: yield* effectEventHandlerParams(event, config),
@@ -222,7 +237,8 @@ const effectEventHandler = <
           );
           throw createError(exit.toString());
         }
-        return exit.value;
+
+        return exit.value.pipeThrough(transformStream);
       }) as EffectStreamEventHandler<Request>)
     : (eventHandler(async (event) => {
         const exit = await Effect.runPromiseExit(

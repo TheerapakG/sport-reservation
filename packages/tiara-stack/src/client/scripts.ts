@@ -91,6 +91,7 @@ const createTiaraContents = (config: TiaraConfig<never>): TiaraContentMap => {
       `) => _effectEventHandler(opts);`,
       ``,
       `export {`,
+      `  EventAbort,`,
       `  EventContext,`,
       `  EventParamsContext,`,
       `} from "tiara-stack/utils/effectEventHandler";      `,
