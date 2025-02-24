@@ -171,7 +171,10 @@ const effectEventHandler = <
                     Stream.flatMap((item) =>
                       Stream.fromEffect(effectType(config.response.type, item)),
                     ),
-                    Stream.map((item) => encode(item)),
+                    Stream.map((item) => {
+                      console.log(item);
+                      return encode(item);
+                    }),
                   ),
                 ),
               options: () => ({ name }),
