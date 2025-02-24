@@ -65,22 +65,24 @@ const _effectConfig = <Shape extends RuntimeConfigShape>(
   typedEnv: Record<string, Config.Config<unknown>>,
   prefix: string = "",
 ): Config.Config<SimplifyStringObject<InferConfig<Shape>>> => {
-  return Config.all(
-    Object.fromEntries(
-      Object.entries(shape).map(([key, value]) => {
-        if (value instanceof Type) {
-          return [
-            key,
-            typedEnv[snakeCase(`${prefix}${upperFirst(key)}`).toUpperCase()],
-          ];
-        } else {
-          return [
-            key,
-            _effectConfig(value, typedEnv, `${prefix}${upperFirst(key)}`),
-          ];
-        }
-      }),
-    ),
+  const entries = Object.entries(shape).map(([key, value]) => {
+    if (value instanceof Type) {
+      return [
+        key,
+        typedEnv[snakeCase(`${prefix}${upperFirst(key)}`).toUpperCase()],
+      ];
+    } else {
+      return [
+        key,
+        _effectConfig(value, typedEnv, `${prefix}${upperFirst(key)}`),
+      ];
+    }
+  });
+
+  return (
+    entries.length === 0
+      ? Config.succeed({})
+      : Config.all(Object.fromEntries(entries))
   ) as Config.Config<SimplifyStringObject<InferConfig<Shape>>>;
 };
 

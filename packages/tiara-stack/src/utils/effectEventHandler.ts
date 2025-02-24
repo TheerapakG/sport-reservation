@@ -154,9 +154,8 @@ const effectEventHandler = <
   } = config;
   return stream
     ? (eventHandler(async (event) => {
-        const transformStream = new TransformStream<Uint8Array, Uint8Array>();
-
-        setResponseHeader(event, "Content-Type", "application/vnd.msgpack");
+        setResponseHeader(event, "Content-Type", "application/octet-stream");
+        setResponseHeader(event, "Cache-Control", "no-cache");
         setResponseHeader(event, "Transfer-Encoding", "chunked");
 
         const exit = await Effect.runPromiseExit(
@@ -168,9 +167,9 @@ const effectEventHandler = <
             );
 
             const abort = yield* Effect.makeLatch();
-            transformStream.writable
-              .getWriter()
-              .closed.then(() => Effect.runPromise(abort.open));
+            event.node.req.on("close", () => {
+              Effect.runPromise(abort.open);
+            });
 
             const wrappedHandler = Effect.functionWithSpan({
               body: () =>
@@ -185,10 +184,7 @@ const effectEventHandler = <
                     Stream.flatMap((item) =>
                       Stream.fromEffect(effectType(config.response.type, item)),
                     ),
-                    Stream.map((item) => {
-                      console.log(item);
-                      return encode(item);
-                    }),
+                    Stream.map((item) => encode(item)),
                   ),
                 ),
               options: () => ({ name }),
@@ -238,7 +234,7 @@ const effectEventHandler = <
           throw createError(exit.toString());
         }
 
-        return exit.value.pipeThrough(transformStream);
+        return exit.value;
       }) as EffectStreamEventHandler<Request>)
     : (eventHandler(async (event) => {
         const exit = await Effect.runPromiseExit(
