@@ -1,14 +1,14 @@
 import { EventParamsContext, effectEventHandler } from "$/effectEventHandler";
 import { Effect } from "effect";
 import { UploadClient } from "sport-reservation-upload/client";
-import { defineEventHandlerConfig } from "tiara-stack/config";
+import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
 import { userProfile, userProfileCreate } from "~/models/user";
 import { UserRepository } from "~/repositories/userRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
   name: "postCreateUserProfile",
-  response: userProfile,
-  body: userProfileCreate,
+  response: response(userProfile, { stream: false }),
+  body: params(userProfileCreate),
 });
 export default effectEventHandler({
   config: handlerConfig,

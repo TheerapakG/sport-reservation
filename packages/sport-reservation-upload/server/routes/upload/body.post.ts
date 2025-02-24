@@ -6,28 +6,24 @@ import {
 import { type } from "arktype";
 import { Effect } from "effect";
 import { getHeader, readMultipartFormData } from "h3";
-import {
-  defineEventHandlerConfig,
-  defineExtendedTypeConfig,
-} from "tiara-stack/config";
-import { noInferOut } from "tiara-stack/utils/noInfer";
+import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
 import { AuthRepository } from "~/repositories/authRepository";
 import { UploadRepository } from "~/repositories/uploadRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
   name: "postUploadFromBody",
-  response: type({
-    key: "string",
-  }),
-  query: noInferOut(
+  response: response(
+    type({
+      key: "string",
+    }),
+    { stream: false },
+  ),
+  query: params(
     type({
       key: "string",
     }),
   ),
-  body: defineExtendedTypeConfig({
-    type: type("unknown"),
-    decode: false as const,
-  }),
+  body: params(type("unknown"), { decode: false }),
 });
 export default effectEventHandler({
   config: handlerConfig,

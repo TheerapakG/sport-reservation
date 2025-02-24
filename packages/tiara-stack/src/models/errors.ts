@@ -7,6 +7,15 @@ export class OAuthError {
   constructor(readonly error?: Error) {}
 }
 
+export const isOAuthError = (error: unknown): error is OAuthError => {
+  return Boolean(
+    typeof error === "object" &&
+      error &&
+      "_tag" in error &&
+      error._tag === "OAuthError",
+  );
+};
+
 export class ArktypeError {
   readonly _tag = "ArktypeError";
 
@@ -19,6 +28,21 @@ export const isArktypeError = (error: unknown): error is ArktypeError => {
       error &&
       "_tag" in error &&
       error._tag === "ArktypeError",
+  );
+};
+
+export class MsgpackError {
+  readonly _tag = "MsgpackError";
+
+  constructor(readonly error?: Error) {}
+}
+
+export const isMsgpackError = (error: unknown): error is MsgpackError => {
+  return Boolean(
+    typeof error === "object" &&
+      error &&
+      "_tag" in error &&
+      error._tag === "MsgpackError",
   );
 };
 

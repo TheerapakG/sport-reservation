@@ -1,4 +1,5 @@
-import { Context, Effect, Layer } from "effect";
+import { decodeMultiStream } from "@msgpack/msgpack";
+import { Context, Effect, Layer, Stream } from "effect";
 import { Simplify } from "effect/Types";
 import { FetchOptions, MappedResponseType, ofetch, ResponseType } from "ofetch";
 import type { Mock } from "vitest";
@@ -10,7 +11,7 @@ import {
   EventHandlerRouterValidatorType,
   EventHandlerTypeConfig,
 } from "~~/src/config/eventHandlerConfig";
-import { ArktypeError, FetchError } from "~~/src/models/errors";
+import { ArktypeError, FetchError, MsgpackError } from "~~/src/models/errors";
 import { effectType } from "~~/src/utils/effectType";
 import {
   Fetch,
@@ -56,6 +57,12 @@ type ServerMethod<
   E = FetchError | ArktypeError,
   R = never,
 > = (opts: Opts) => Effect.Effect<A, E | FetchError | ArktypeError, R>;
+type StreamServerMethod<
+  Opts extends Record<string, unknown> = Record<string, unknown>,
+  A = unknown,
+  E = FetchError | ArktypeError | MsgpackError,
+  R = never,
+> = (opts: Opts) => Stream.Stream<A, E | FetchError | ArktypeError, R>;
 
 export type TypedRouteParamsOptions<SR extends ServerRoute> =
   SR extends infer _SR
@@ -83,8 +90,8 @@ export type TypedRouteOptions<
   : never;
 
 const mergeOptions = <SR extends ServerRoute, R extends ResponseType = "json">(
-  opts: Pick<TypedRouteOptions<SR, R>, "method">,
-  params: Omit<TypedRouteOptions<SR, R>, "method">,
+  opts: Pick<TypedRouteOptions<SR, R>, "method" | "responseType">,
+  params: Omit<TypedRouteOptions<SR, R>, "method" | "responseType">,
 ): TypedRouteOptions<SR, R> => {
   return {
     ...opts,
@@ -97,7 +104,12 @@ const createServerMethod =
   <SR extends ServerRoute>({
     fetch,
     route: {
-      config: { response: responseType, query, body, router },
+      config: {
+        response: { type: responseType },
+        query,
+        body,
+        router,
+      },
       path,
       method,
     },
@@ -105,10 +117,10 @@ const createServerMethod =
     fetch: Context.Tag.Service<Fetch>;
     route: SR;
   }): ServerMethod<
-    Omit<TypedRouteOptions<SR, "json">, "method">,
+    Omit<TypedRouteOptions<SR, "json">, "method" | "responseType">,
     MappedResponseType<"json", EventHandlerClientResponseType<SR["config"]>>
   > =>
-  (params: Omit<TypedRouteOptions<SR, "json">, "method">) =>
+  (params: Omit<TypedRouteOptions<SR, "json">, "method" | "responseType">) =>
     Effect.provideService(
       typedFetch<
         EventHandlerResponseValidatorType<SR["config"]>,
@@ -130,8 +142,74 @@ const createServerMethod =
             | undefined,
         },
         path,
-        mergeOptions({ method }, params),
+        mergeOptions({ method, responseType: "json" }, params),
       ),
+      Fetch,
+      fetch,
+    );
+
+/*@__NO_SIDE_EFFECTS__*/
+const createStreamServerMethod =
+  <SR extends ServerRoute>({
+    fetch,
+    route: {
+      config: {
+        response: { type: responseType },
+        query,
+        body,
+        router,
+      },
+      path,
+      method,
+    },
+  }: {
+    fetch: Context.Tag.Service<Fetch>;
+    route: SR;
+  }): StreamServerMethod<
+    Omit<TypedRouteOptions<SR, "stream">, "method" | "responseType">,
+    MappedResponseType<"stream", EventHandlerClientResponseType<SR["config"]>>
+  > =>
+  (params: Omit<TypedRouteOptions<SR, "stream">, "method" | "responseType">) =>
+    Stream.provideService(
+      Stream.fromEffect(
+        typedFetch<
+          EventHandlerResponseValidatorType<SR["config"]>,
+          EventHandlerQueryValidatorType<SR["config"]>,
+          EventHandlerBodyValidatorType<SR["config"]>,
+          EventHandlerRouterValidatorType<SR["config"]>,
+          "stream"
+        >(
+          {
+            responseType,
+            queryType: query?.type as
+              | EventHandlerQueryValidatorType<SR["config"]>
+              | undefined,
+            bodyType: body?.type as
+              | EventHandlerBodyValidatorType<SR["config"]>
+              | undefined,
+            routerType: router?.type as
+              | EventHandlerRouterValidatorType<SR["config"]>
+              | undefined,
+          },
+          path,
+          mergeOptions({ method, responseType: "stream" }, params),
+        ),
+      )
+        .pipe(
+          Stream.flatMap((stream) =>
+            Stream.fromAsyncIterable(
+              (async function* () {
+                for await (const item of decodeMultiStream(stream)) {
+                  yield effectType<
+                    EventHandlerResponseValidatorType<SR["config"]>
+                  >(responseType, item);
+                }
+              })(),
+              (e) => new MsgpackError(e as Error),
+            ),
+          ),
+        )
+        .pipe(Stream.flatMap((effect) => Stream.fromEffect(effect))),
       Fetch,
       fetch,
     );
@@ -139,7 +217,9 @@ const createServerMethod =
 /*@__NO_SIDE_EFFECTS__*/
 const createMockMethod = async <SR extends ServerRoute>({
   route: {
-    config: { response },
+    config: {
+      response: { type: responseType },
+    },
   },
 }: {
   route: SR;
@@ -163,7 +243,39 @@ const createMockMethod = async <SR extends ServerRoute>({
       MappedResponseType<"json", EventHandlerClientResponseType<SR["config"]>>
     >
   >;
-  return { mock, method: (opts) => effectType(response, mock(opts)) };
+  return { mock, method: (opts) => effectType(responseType, mock(opts)) };
+};
+
+/*@__NO_SIDE_EFFECTS__*/
+const createMockStreamMethod = async <SR extends ServerRoute>({
+  route: {
+    config: {
+      response: { type: responseType },
+    },
+  },
+}: {
+  route: SR;
+}): Promise<{
+  mock: Mock<
+    StreamServerMethod<
+      TypedRouteParamsOptions<SR>,
+      MappedResponseType<"stream", EventHandlerClientResponseType<SR["config"]>>
+    >
+  >;
+  method: StreamServerMethod<
+    TypedRouteParamsOptions<SR>,
+    MappedResponseType<"stream", EventHandlerClientResponseType<SR["config"]>>
+  >;
+}> => {
+  const { vi } = await import("vitest");
+
+  const mock = vi.fn() as Mock<
+    StreamServerMethod<
+      TypedRouteParamsOptions<SR>,
+      MappedResponseType<"stream", EventHandlerClientResponseType<SR["config"]>>
+    >
+  >;
+  return { mock, method: (opts) => effectType(responseType, mock(opts)) };
 };
 
 export type Mocks<SR extends ServerRoutes> = {
@@ -180,10 +292,15 @@ export type Client<
   CM extends ClientMethods,
 > = Simplify<
   {
-    [K in keyof SR]: ServerMethod<
-      Omit<TypedRouteOptions<SR[K], "json">, "method">,
-      EventHandlerClientResponseType<SR[K]["config"]>
-    >;
+    [K in keyof SR]: SR[K]["config"]["response"]["config"]["stream"] extends true
+      ? StreamServerMethod<
+          Omit<TypedRouteOptions<SR[K], "stream">, "method">,
+          EventHandlerClientResponseType<SR[K]["config"]>
+        >
+      : ServerMethod<
+          Omit<TypedRouteOptions<SR[K], "json">, "method">,
+          EventHandlerClientResponseType<SR[K]["config"]>
+        >;
   } & {
     [K in keyof CM]: CM[K]["method"];
   }
@@ -207,10 +324,15 @@ export const createClient = <
       return Object.fromEntries([
         ...Object.entries(serverRoutes).map(([name, route]) => [
           name,
-          createServerMethod({
-            fetch,
-            route,
-          }),
+          route.config.response.config.stream
+            ? createStreamServerMethod({
+                fetch,
+                route,
+              })
+            : createServerMethod({
+                fetch,
+                route,
+              }),
         ]),
         ...Object.entries(clientMethods).map(([name, method]) => [
           name,
@@ -237,9 +359,13 @@ export const createMockClient = async <
         async ([name, route]) =>
           [
             name,
-            await createMockMethod({
-              route,
-            }),
+            route.config.response.config.stream
+              ? await createMockStreamMethod({
+                  route,
+                })
+              : await createMockMethod({
+                  route,
+                }),
           ] as const,
       ),
     ),
@@ -272,7 +398,7 @@ export const getClientResponseType = <
   serverRoutes: SR,
   name: K,
 ): EventHandlerResponseValidatorType<SR[K]["config"]> => {
-  return serverRoutes[name].config.response;
+  return serverRoutes[name].config.response.type;
 };
 
 export const getClientQueryType = <SR extends ServerRoutes, K extends keyof SR>(

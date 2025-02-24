@@ -6,18 +6,20 @@ import {
 import { type } from "arktype";
 import { Effect } from "effect";
 import { getHeader } from "h3";
-import { defineEventHandlerConfig } from "tiara-stack/config";
-import { noInferOut } from "tiara-stack/utils/noInfer";
+import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
 import { AuthRepository } from "~/repositories/authRepository";
 import { DownloadRepository } from "~/repositories/downloadRepository";
 import { UploadRepository } from "~/repositories/uploadRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
   name: "postUploadFromUrl",
-  response: type({
-    key: "string",
-  }),
-  body: noInferOut(
+  response: response(
+    type({
+      key: "string",
+    }),
+    { stream: false },
+  ),
+  body: params(
     type({
       key: "string",
       url: "string",

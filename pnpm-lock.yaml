@@ -6,9 +6,6 @@ settings:
 
 catalogs:
   default:
-    '@ark/util':
-      specifier: ^0.35.0
-      version: 0.35.0
     '@effect/experimental':
       specifier: ^0.39.1
       version: 0.39.1
@@ -60,12 +57,6 @@ catalogs:
     arktype:
       specifier: ^2.0.0
       version: 2.0.0
-    c12:
-      specifier: ^2.0.1
-      version: 2.0.1
-    destr:
-      specifier: ^2.0.3
-      version: 2.0.3
     dotenv:
       specifier: ^16.4.7
       version: 16.4.7
@@ -1147,6 +1138,9 @@ importers:
       '@ark/util':
         specifier: 'catalog:'
         version: 0.35.0
+      '@msgpack/msgpack':
+        specifier: ^3.1.0
+        version: 3.1.0
       '@openauthjs/openauth':
         specifier: 'catalog:'
         version: 0.3.7(arctic@2.3.4)(hono@4.6.20)
@@ -2468,6 +2462,10 @@ packages:
 
   '@microsoft/tsdoc@0.15.1':
     resolution: {integrity: sha512-4aErSrCR/On/e5G2hDP0wjooqDdauzEbIq8hIkIe5pXV0rtWJZvdCEKL0ykZxex+IxIwBp0eGeV48hQN07dXtw==}
+
+  '@msgpack/msgpack@3.1.0':
+    resolution: {integrity: sha512-igBxaq5JHWdJ0lDyKkCo00pDu+bNVuBAs/cHra6a3ndCw6vlZK9BGLuG7Fvmar/DXK2uJ25zvgcAZEl+AvLpjQ==}
+    engines: {node: '>= 18'}
 
   '@msgpackr-extract/msgpackr-extract-darwin-arm64@3.0.3':
     resolution: {integrity: sha512-QZHtlVgbAdy2zAqNA9Gu1UpIuI8Xvsd1v8ic6B2pZmeFnFcMWiPLfWXh7TVw4eGEZ/C9TH281KwhVoeQUKbyjw==}
@@ -8550,6 +8548,8 @@ snapshots:
       resolve: 1.22.8
 
   '@microsoft/tsdoc@0.15.1': {}
+
+  '@msgpack/msgpack@3.1.0': {}
 
   '@msgpackr-extract/msgpackr-extract-darwin-arm64@3.0.3':
     optional: true

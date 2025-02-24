@@ -285,6 +285,9 @@ export const chatChatMessage = pgTable(
   },
   (table) => [
     index("chat_chat_message_chat_id_idx").on(table.chatId),
-    index("chat_chat_message_sender_id_idx").on(table.senderId),
+    index("chat_chat_message_chat_id_created_at_idx").on(
+      table.chatId,
+      table.createdAt.desc(),
+    ),
   ],
 );

@@ -6,17 +6,19 @@ import {
 import { type } from "arktype";
 import { Effect, Option } from "effect";
 import { getHeader } from "h3";
-import { defineEventHandlerConfig } from "tiara-stack/config";
-import { noInferOut } from "tiara-stack/utils/noInfer";
+import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
 import { AuthRepository } from "~/repositories/authRepository";
 import { GoogleLoginDbRepository } from "~/repositories/googleLoginDbRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
   name: "getIdByGoogleId",
-  response: type({
-    id: "string?",
-  }),
-  query: noInferOut(
+  response: response(
+    type({
+      id: "string?",
+    }),
+    { stream: false },
+  ),
+  query: params(
     type({
       googleId: "string",
     }),

@@ -78,7 +78,10 @@ function LoginComponent() {
                   src="https://cdn.theerapakg.moe/reservation/asset/login/line.png"
                 ></img>
                 <div className="flex h-full flex-1 items-center justify-center text-[#ffffff]">
-                  <span>Log in with LINE</span>
+                  <span className="hidden text-center sm:inline">
+                    Log in with LINE
+                  </span>
+                  <span className="inline text-center sm:hidden">LINE</span>
                 </div>
               </div>
               <div className="absolute inset-0 bg-[#000000] opacity-0 group-hover:opacity-10 group-focus:opacity-30"></div>
@@ -89,7 +92,10 @@ function LoginComponent() {
               <div className="flex h-full items-center divide-x divide-[#000000]/[0.08]">
                 <Google className="h-12 w-12 flex-none p-2" />
                 <div className="flex h-full flex-1 items-center justify-center text-[#000000]">
-                  <span>Log in with Google</span>
+                  <span className="hidden text-center sm:inline">
+                    Log in with Google
+                  </span>
+                  <span className="inline text-center sm:hidden">Google</span>
                 </div>
               </div>
               <div className="absolute inset-0 bg-[#000000] opacity-0 group-hover:opacity-10 group-focus:opacity-30"></div>
@@ -100,7 +106,10 @@ function LoginComponent() {
               <div className="flex h-full items-center divide-x divide-[#000000]/[0.08]">
                 <Facebook className="h-12 w-12 flex-none p-2" />
                 <div className="flex h-full flex-1 items-center justify-center text-[#000000]">
-                  <span>Log in with Facebook</span>
+                  <span className="hidden text-center sm:inline">
+                    Log in with Facebook
+                  </span>
+                  <span className="inline text-center sm:hidden">Facebook</span>
                 </div>
               </div>
               <div className="absolute inset-0 bg-[#000000] opacity-0 group-hover:opacity-10 group-focus:opacity-30"></div>

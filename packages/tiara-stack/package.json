@@ -30,6 +30,7 @@
     "generate": "vite build"
   },
   "dependencies": {
+    "@msgpack/msgpack": "^3.1.0",
     "chokidar": "^4.0.3",
     "citty": "^0.1.6",
     "consola": "^3.4.0",

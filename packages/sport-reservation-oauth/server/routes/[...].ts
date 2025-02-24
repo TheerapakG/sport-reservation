@@ -2,12 +2,12 @@ import { EventContext, effectEventHandler } from "$/effectEventHandler";
 import { type } from "arktype";
 import { Effect } from "effect";
 import { sendWebResponse, toWebRequest } from "h3";
-import { defineEventHandlerConfig } from "tiara-stack/config";
+import { defineEventHandlerConfig, response } from "tiara-stack/config";
 import { Issuer } from "../layers/issuer";
 
 export const handlerConfig = defineEventHandlerConfig({
   name: "oauth",
-  response: type("unknown"),
+  response: response(type("unknown"), { stream: false }),
 });
 export default effectEventHandler({
   config: handlerConfig,

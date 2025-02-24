@@ -8,9 +8,8 @@ import { Effect, Option, pipe } from "effect";
 import { getHeader, parseCookies } from "h3";
 import { getSubjectTypeFromToken } from "sport-reservation-oauth-common/subjects";
 import { UploadClient } from "sport-reservation-upload/client";
-import { defineEventHandlerConfig } from "tiara-stack/config";
+import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
 import { OAuthError } from "tiara-stack/models/errors";
-import { noInferOut } from "tiara-stack/utils/noInfer";
 import { OAuthClient } from "~/layers";
 import { userProfile } from "~/models/user";
 import { AuthRepository } from "~/repositories/authRepository";
@@ -18,8 +17,8 @@ import { UserRepository } from "~/repositories/userRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
   name: "postUpdateUserProfile",
-  response: userProfile,
-  body: noInferOut(
+  response: response(userProfile, { stream: false }),
+  body: params(
     type({
       "id?": "string",
       "name?": "string",

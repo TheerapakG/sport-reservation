@@ -1,3 +1,4 @@
+import { encode } from "@msgpack/msgpack";
 import { type } from "arktype";
 import {
   Cause,
@@ -6,6 +7,7 @@ import {
   Effect,
   Exit,
   pipe,
+  Stream,
   SynchronizedRef,
 } from "effect";
 import { Simplify } from "effect/Types";
@@ -16,8 +18,11 @@ import {
   EventHandlerRequest,
   getRequestIP,
   H3Event,
+  setResponseHeader,
 } from "h3";
+import { ReadableStream } from "node:stream/web";
 import {
+  CoercedResponseType,
   EventHandlerConfig,
   EventHandlerResponseType,
   EventHandlerResponseValidatorType,
@@ -64,12 +69,34 @@ export type EffectEventHandler<
   Request extends EventHandlerRequest = EventHandlerRequest,
 > = EventHandler<Request, Promise<T["infer"]>>;
 
+export type EffectStreamEventHandler<
+  Request extends EventHandlerRequest = EventHandlerRequest,
+> = EventHandler<Request, Promise<ReadableStream<Uint8Array>>>;
+
 export type EffectEventHandlerOptions<
-  C extends EventHandlerConfig<string>,
+  C extends EventHandlerConfig<
+    string,
+    CoercedResponseType<type.Any, { stream: false }>
+  >,
   R = never,
 > = {
   config: C;
   handler: () => Effect.Effect<
+    EventHandlerResponseType<C>,
+    unknown,
+    EventContext | EventParamsContext | R
+  >;
+};
+
+export type EffectStreamEventHandlerOptions<
+  C extends EventHandlerConfig<
+    string,
+    CoercedResponseType<type.Any, { stream: true }>
+  >,
+  R = never,
+> = {
+  config: C;
+  handler: () => Stream.Stream<
     EventHandlerResponseType<C>,
     unknown,
     EventContext | EventParamsContext | R
@@ -84,79 +111,206 @@ const getEffectContext = <R = never>() =>
   });
 
 const effectEventHandler = <
-  C extends EventHandlerConfig<string>,
+  Stream extends boolean,
+  Opts extends Stream extends true
+    ? EffectStreamEventHandlerOptions<
+        EventHandlerConfig<
+          string,
+          CoercedResponseType<type.Any, { stream: Stream }>
+        >,
+        R
+      >
+    : Stream extends false
+      ? EffectEventHandlerOptions<
+          EventHandlerConfig<
+            string,
+            CoercedResponseType<type.Any, { stream: Stream }>
+          >,
+          R
+        >
+      : never,
   Request extends EventHandlerRequest = EventHandlerRequest,
   R = never,
 >({
   config,
   handler,
-}: EffectEventHandlerOptions<C, R>): EffectEventHandler<
-  EventHandlerResponseValidatorType<C>,
-  Request
-> => {
-  return eventHandler(async (event) => {
-    const exit = await Effect.runPromiseExit(
-      Effect.gen(function* () {
-        yield* Console.log(
-          `[${event.method}]`,
-          getRequestIP(event),
-          event.path,
-        );
-        const wrappedHandler = Effect.functionWithSpan({
-          body: handler,
-          options: () => ({ name: config.name }),
-        });
-        return yield* effectType(
-          config.response,
-          yield* pipe(
-            wrappedHandler(),
-            Effect.provideService(EventContext, { event }),
-            Effect.provideService(EventParamsContext, {
-              params: yield* effectEventHandlerParams(event, config),
-            }),
-            Effect.provide(
+}: Opts): Stream extends true
+  ? EffectStreamEventHandler<Request>
+  : EffectEventHandler<
+      EventHandlerResponseValidatorType<Opts["config"]>,
+      Request
+    > => {
+  const {
+    name,
+    response: {
+      config: { stream },
+    },
+  } = config;
+  return stream
+    ? (eventHandler(async (event) => {
+        setResponseHeader(event, "Content-Type", "application/vnd.msgpack");
+        setResponseHeader(event, "Transfer-Encoding", "chunked");
+
+        const exit = await Effect.runPromiseExit(
+          Effect.gen(function* () {
+            yield* Console.log(
+              `[${event.method}]`,
+              getRequestIP(event),
+              event.path,
+            );
+            const wrappedHandler = Effect.functionWithSpan({
+              body: () =>
+                Stream.toReadableStreamEffect(
+                  (
+                    handler as () => Stream.Stream<
+                      EventHandlerResponseType<Opts["config"]>,
+                      unknown,
+                      EventContext | EventParamsContext | R
+                    >
+                  )().pipe(Stream.map((item) => encode(item))),
+                ),
+              options: () => ({ name }),
+            });
+            return yield* effectType(
+              config.response.type,
               yield* pipe(
-                getEffectContext<R>(),
-                Effect.provide(effectContextLive),
+                wrappedHandler(),
+                Effect.provideService(EventContext, { event }),
+                Effect.provideService(EventParamsContext, {
+                  params: yield* effectEventHandlerParams(event, config),
+                }),
+                Effect.provide(
+                  yield* pipe(
+                    getEffectContext<R>(),
+                    Effect.provide(effectContextLive),
+                  ),
+                ),
               ),
-            ),
-          ),
+            );
+          }),
         );
-      }),
-    );
-    if (Exit.isFailure(exit)) {
-      const cause = exit.cause;
-      if (Cause.isDieType(cause) && Cause.isUnknownException(cause.defect)) {
-        Effect.runSync(
-          Console.log("[die]", event.path, Cause.prettyErrors(cause)),
-        );
-        throw createError(cause.defect.message);
-      } else if (Cause.isFailType(cause)) {
-        const error = cause.error;
-        if (isArktypeError(error) || isFetchError(error) || isS3Error(error)) {
+        if (Exit.isFailure(exit)) {
+          const cause = exit.cause;
+          if (
+            Cause.isDieType(cause) &&
+            Cause.isUnknownException(cause.defect)
+          ) {
+            Effect.runSync(
+              Console.log("[die]", event.path, Cause.prettyErrors(cause)),
+            );
+            throw createError(cause.defect.message);
+          } else if (Cause.isFailType(cause)) {
+            const error = cause.error;
+            if (
+              isArktypeError(error) ||
+              isFetchError(error) ||
+              isS3Error(error)
+            ) {
+              Effect.runSync(
+                Console.log("[fail]", event.path, Cause.prettyErrors(cause)),
+              );
+              throw createError(error.error?.message ?? "unknown error cause");
+            }
+          }
           Effect.runSync(
             Console.log("[fail]", event.path, Cause.prettyErrors(cause)),
           );
-          throw createError(error.error?.message ?? "unknown error cause");
+          throw createError(exit.toString());
         }
-      }
-      Effect.runSync(
-        Console.log("[fail]", event.path, Cause.prettyErrors(cause)),
-      );
-      throw createError(exit.toString());
-    }
-    return exit.value;
-  });
+        return exit.value;
+      }) as EffectStreamEventHandler<Request>)
+    : (eventHandler(async (event) => {
+        const exit = await Effect.runPromiseExit(
+          Effect.gen(function* () {
+            yield* Console.log(
+              `[${event.method}]`,
+              getRequestIP(event),
+              event.path,
+            );
+            const wrappedHandler = Effect.functionWithSpan({
+              body: handler as () => Effect.Effect<
+                EventHandlerResponseType<Opts["config"]>,
+                unknown,
+                EventContext | EventParamsContext | R
+              >,
+              options: () => ({ name }),
+            });
+            return yield* effectType(
+              config.response.type,
+              yield* pipe(
+                wrappedHandler(),
+                Effect.provideService(EventContext, { event }),
+                Effect.provideService(EventParamsContext, {
+                  params: yield* effectEventHandlerParams(event, config),
+                }),
+                Effect.provide(
+                  yield* pipe(
+                    getEffectContext<R>(),
+                    Effect.provide(effectContextLive),
+                  ),
+                ),
+              ),
+            );
+          }),
+        );
+        if (Exit.isFailure(exit)) {
+          const cause = exit.cause;
+          if (
+            Cause.isDieType(cause) &&
+            Cause.isUnknownException(cause.defect)
+          ) {
+            Effect.runSync(
+              Console.log("[die]", event.path, Cause.prettyErrors(cause)),
+            );
+            throw createError(cause.defect.message);
+          } else if (Cause.isFailType(cause)) {
+            const error = cause.error;
+            if (
+              isArktypeError(error) ||
+              isFetchError(error) ||
+              isS3Error(error)
+            ) {
+              Effect.runSync(
+                Console.log("[fail]", event.path, Cause.prettyErrors(cause)),
+              );
+              throw createError(error.error?.message ?? "unknown error cause");
+            }
+          }
+          Effect.runSync(
+            Console.log("[fail]", event.path, Cause.prettyErrors(cause)),
+          );
+          throw createError(exit.toString());
+        }
+        return exit.value;
+      }) as EffectEventHandler<
+        EventHandlerResponseValidatorType<Opts["config"]>,
+        Request
+      >);
 };
 
 /*@__NO_SIDE_EFFECTS__*/
 export const createEffectEventHandler = <R = never>() => {
   return <
-    C extends EventHandlerConfig<string>,
+    Stream extends boolean,
+    Opts extends Stream extends true
+      ? EffectStreamEventHandlerOptions<
+          EventHandlerConfig<
+            string,
+            CoercedResponseType<type.Any, { stream: Stream }>
+          >,
+          R
+        >
+      : Stream extends false
+        ? EffectEventHandlerOptions<
+            EventHandlerConfig<
+              string,
+              CoercedResponseType<type.Any, { stream: Stream }>
+            >,
+            R
+          >
+        : never,
     Request extends EventHandlerRequest = EventHandlerRequest,
-  >({
-    config,
-    handler,
-  }: EffectEventHandlerOptions<C, R>) =>
-    effectEventHandler<C, Request, R>({ config, handler });
+  >(
+    options: Opts,
+  ) => effectEventHandler<Stream, Opts, Request, R>(options);
 };

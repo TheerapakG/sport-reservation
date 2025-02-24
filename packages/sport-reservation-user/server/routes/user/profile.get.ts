@@ -2,15 +2,14 @@ import { EventParamsContext, effectEventHandler } from "$/effectEventHandler";
 import { type } from "arktype";
 import { Effect } from "effect";
 import { UploadClient } from "sport-reservation-upload/client";
-import { defineEventHandlerConfig } from "tiara-stack/config";
-import { noInferOut } from "tiara-stack/utils/noInfer";
+import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
 import { userProfile } from "~/models/user";
 import { UserRepository } from "~/repositories/userRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
   name: "getUserProfileById",
-  response: userProfile,
-  query: noInferOut(
+  response: response(userProfile, { stream: false }),
+  query: params(
     type({
       id: "string",
     }),

@@ -119,3 +119,35 @@ export const redacted = generic(["T", "unknown"])(
   (args) => args.T.pipe((v) => Config.succeed(Redacted.make(v))),
   RedactedHkt,
 );
+
+type ResponseConfig = { stream?: boolean };
+export type ResponseType<T extends type.Any, C extends ResponseConfig> = {
+  kind: "response";
+  type: T;
+  config?: C;
+};
+
+export const response = <T extends type.Any, C extends ResponseConfig>(
+  type: T,
+  config?: C,
+): NoInfer<ResponseType<T, C>> => ({
+  kind: "response",
+  type,
+  config,
+});
+
+type ParamsConfig = { decode?: boolean };
+export type ParamsType<T extends type.Any, C extends ParamsConfig> = {
+  kind: "params";
+  type: T;
+  config?: C;
+};
+
+export const params = <T extends type.Any, C extends ParamsConfig>(
+  type: T,
+  config?: C,
+): NoInfer<ParamsType<T, C>> => ({
+  kind: "params",
+  type,
+  config,
+});

@@ -7,20 +7,19 @@ import { type } from "arktype";
 import { Effect, Option, pipe } from "effect";
 import { getHeader, parseCookies } from "h3";
 import { getSubjectTypeFromToken } from "sport-reservation-oauth-common/subjects";
-import { defineEventHandlerConfig } from "tiara-stack/config";
+import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
 import { OAuthError } from "tiara-stack/models/errors";
-import { noInferOut } from "tiara-stack/utils/noInfer";
 import { OAuthClient } from "~/layers";
 import { AuthRepository } from "~/repositories/authRepository";
 import { FacebookLoginDbRepository } from "~/repositories/facebookLoginDbRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
   name: "postAssociateFacebookId",
-  response: type({}),
-  body: noInferOut(
+  response: response(type({}), { stream: false }),
+  body: params(
     type({
       "id?": "string",
-      facebookId: "number |string",
+      facebookId: "number | string",
     }),
   ),
 });

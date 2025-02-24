@@ -1,40 +1,33 @@
 import { type } from "arktype";
+import { ParamsType, ResponseType } from "./effectConfig";
 
-export type ExtendedTypeConfigIn<
-  T extends type.Any = type.Any,
-  D extends boolean = true,
-> = {
-  type: T;
-  decode?: D;
-};
-
-export type ExtendedTypeConfig<
-  T extends type.Any = type.Any,
-  D extends boolean = boolean,
-> = {
-  __type: "ExtendedHandlerConfigType";
-  type: T;
-  decode: D;
-};
-
-/*@__NO_SIDE_EFFECTS__*/ export const defineExtendedTypeConfig = <
+export type CoercedResponseType<
   T extends type.Any,
-  D extends boolean,
->(
-  config: ExtendedTypeConfigIn<T, D>,
-): ExtendedTypeConfig<T, D> => {
-  return {
-    decode: true as D,
-    ...config,
-    __type: "ExtendedHandlerConfigType",
-  };
+  C extends { stream: boolean },
+> = {
+  kind: "response";
+  type: T;
+  config: C;
 };
+type CoercedParamsType<T extends type.Any, C extends { decode: boolean }> = {
+  kind: "params";
+  type: T;
+  config: C;
+};
+
+type AnyResponseType = ResponseType<type.Any, { stream?: boolean }>;
+type AnyCoercedResponseType = CoercedResponseType<
+  type.Any,
+  { stream: boolean }
+>;
+type AnyParamsType = ParamsType<type.Any, { decode?: boolean }>;
+type AnyCoercedParamsType = CoercedParamsType<type.Any, { decode: boolean }>;
 
 export type EventHandlerTypeConfigIn<
-  Response extends type.Any = type.Any,
-  Q extends ExtendedTypeConfig | type.Any | undefined = undefined,
-  B extends ExtendedTypeConfig | type.Any | undefined = undefined,
-  R extends ExtendedTypeConfig | type.Any | undefined = undefined,
+  Response extends AnyResponseType = AnyResponseType,
+  Q extends AnyParamsType | undefined = undefined,
+  B extends AnyParamsType | undefined = undefined,
+  R extends AnyParamsType | undefined = undefined,
 > = {
   response: Response;
   query?: Q;
@@ -43,10 +36,10 @@ export type EventHandlerTypeConfigIn<
 };
 
 export type EventHandlerTypeConfig<
-  Response extends type.Any = type.Any,
-  Q extends ExtendedTypeConfig | undefined = ExtendedTypeConfig | undefined,
-  B extends ExtendedTypeConfig | undefined = ExtendedTypeConfig | undefined,
-  R extends ExtendedTypeConfig | undefined = ExtendedTypeConfig | undefined,
+  Response extends AnyCoercedResponseType = AnyCoercedResponseType,
+  Q extends AnyCoercedParamsType | undefined = AnyCoercedParamsType | undefined,
+  B extends AnyCoercedParamsType | undefined = AnyCoercedParamsType | undefined,
+  R extends AnyCoercedParamsType | undefined = AnyCoercedParamsType | undefined,
 > = {
   response: Response;
   query: Q;
@@ -56,10 +49,10 @@ export type EventHandlerTypeConfig<
 
 export type EventHandlerConfigIn<
   Name extends string,
-  Response extends type.Any = type.Any,
-  Q extends ExtendedTypeConfig | type.Any | undefined = undefined,
-  B extends ExtendedTypeConfig | type.Any | undefined = undefined,
-  R extends ExtendedTypeConfig | type.Any | undefined = undefined,
+  Response extends AnyResponseType = AnyResponseType,
+  Q extends AnyParamsType | undefined = undefined,
+  B extends AnyParamsType | undefined = undefined,
+  R extends AnyParamsType | undefined = undefined,
 > = {
   name: Name;
   response: Response;
@@ -70,10 +63,10 @@ export type EventHandlerConfigIn<
 
 export type EventHandlerConfig<
   Name extends string,
-  Response extends type.Any = type.Any,
-  Q extends ExtendedTypeConfig | undefined = ExtendedTypeConfig | undefined,
-  B extends ExtendedTypeConfig | undefined = ExtendedTypeConfig | undefined,
-  R extends ExtendedTypeConfig | undefined = ExtendedTypeConfig | undefined,
+  Response extends AnyCoercedResponseType = AnyCoercedResponseType,
+  Q extends AnyCoercedParamsType | undefined = AnyCoercedParamsType | undefined,
+  B extends AnyCoercedParamsType | undefined = AnyCoercedParamsType | undefined,
+  R extends AnyCoercedParamsType | undefined = AnyCoercedParamsType | undefined,
 > = {
   name: Name;
   response: Response;
@@ -84,22 +77,22 @@ export type EventHandlerConfig<
 
 export type EventHandlerResponseValidatorType<
   C extends EventHandlerTypeConfig,
-> = C["response"];
+> = C["response"]["type"];
 export type EventHandlerQueryValidatorType<C extends EventHandlerTypeConfig> =
   C["query"] extends infer Q
-    ? Q extends ExtendedTypeConfig
+    ? Q extends AnyCoercedParamsType
       ? Q["type"]
       : undefined
     : undefined;
 export type EventHandlerBodyValidatorType<C extends EventHandlerTypeConfig> =
   C["body"] extends infer B
-    ? B extends ExtendedTypeConfig
+    ? B extends AnyCoercedParamsType
       ? B["type"]
       : undefined
     : undefined;
 export type EventHandlerRouterValidatorType<C extends EventHandlerTypeConfig> =
   C["router"] extends infer R
-    ? R extends ExtendedTypeConfig
+    ? R extends AnyCoercedParamsType
       ? R["type"]
       : undefined
     : undefined;
@@ -123,36 +116,58 @@ export type EventHandlerResponseType<C extends EventHandlerTypeConfig> =
   EventHandlerClientResponseType<C>;
 export type EventHandlerQueryType<C extends EventHandlerTypeConfig> =
   C["query"] extends infer Q
-    ? Q extends ExtendedTypeConfig
-      ? Q["decode"] extends true
+    ? Q extends AnyCoercedParamsType
+      ? Q["config"]["decode"] extends true
         ? EventHandlerClientQueryType<C>
         : never
       : never
     : never;
 export type EventHandlerBodyType<C extends EventHandlerTypeConfig> =
   C["body"] extends infer B
-    ? B extends ExtendedTypeConfig
-      ? B["decode"] extends true
+    ? B extends AnyCoercedParamsType
+      ? B["config"]["decode"] extends true
         ? EventHandlerClientBodyType<C>
         : never
       : never
     : never;
 export type EventHandlerRouterType<C extends EventHandlerTypeConfig> =
   C["router"] extends infer R
-    ? R extends ExtendedTypeConfig
-      ? R["decode"] extends true
+    ? R extends AnyCoercedParamsType
+      ? R["config"]["decode"] extends true
         ? EventHandlerClientRouterType<C>
         : never
       : never
     : never;
 
+type ToCoercedResponseType<T extends AnyResponseType> = CoercedResponseType<
+  T["type"],
+  {
+    stream: NonNullable<NonNullable<T["config"]>["stream"]> extends true
+      ? true
+      : false;
+  }
+>;
+
+type ToCoercedParamsType<T extends AnyParamsType | undefined> = [T] extends [
+  AnyParamsType,
+]
+  ? CoercedParamsType<
+      T["type"],
+      {
+        decode: NonNullable<NonNullable<T["config"]>["decode"]> extends false
+          ? false
+          : true;
+      }
+    >
+  : undefined;
+
 /*@__NO_SIDE_EFFECTS__*/
 export const defineEventHandlerConfig = <
   Name extends string,
-  Response extends type.Any,
-  Q extends ExtendedTypeConfig | type.Any | undefined = undefined,
-  B extends ExtendedTypeConfig | type.Any | undefined = undefined,
-  R extends ExtendedTypeConfig | type.Any | undefined = undefined,
+  Response extends AnyResponseType,
+  Q extends AnyParamsType | undefined = undefined,
+  B extends AnyParamsType | undefined = undefined,
+  R extends AnyParamsType | undefined = undefined,
 >({
   name,
   response,
@@ -161,52 +176,38 @@ export const defineEventHandlerConfig = <
   router,
 }: EventHandlerConfigIn<Name, Response, Q, B, R>): EventHandlerConfig<
   Name,
-  Response,
-  [Q] extends [ExtendedTypeConfig]
-    ? Q
-    : [Q] extends [type.Any]
-      ? ExtendedTypeConfig<Q, true>
-      : undefined,
-  [B] extends [ExtendedTypeConfig]
-    ? B
-    : [B] extends [type.Any]
-      ? ExtendedTypeConfig<B, true>
-      : undefined,
-  [R] extends [ExtendedTypeConfig]
-    ? R
-    : [R] extends [type.Any]
-      ? ExtendedTypeConfig<R, true>
-      : undefined
+  ToCoercedResponseType<Response>,
+  ToCoercedParamsType<Q>,
+  ToCoercedParamsType<B>,
+  ToCoercedParamsType<R>
 > => {
   return {
     name,
-    response,
-    query: (query
-      ? "__type" in query
-        ? query
-        : defineExtendedTypeConfig({ type: query })
-      : undefined) as [Q] extends [ExtendedTypeConfig]
-      ? Q
-      : [Q] extends [type.Any]
-        ? ExtendedTypeConfig<Q, true>
-        : undefined,
-    body: (body
-      ? "__type" in body
-        ? body
-        : defineExtendedTypeConfig({ type: body })
-      : undefined) as [B] extends [ExtendedTypeConfig]
-      ? B
-      : [B] extends [type.Any]
-        ? ExtendedTypeConfig<B, true>
-        : undefined,
-    router: (router
-      ? "__type" in router
-        ? router
-        : defineExtendedTypeConfig({ type: router })
-      : undefined) as [R] extends [ExtendedTypeConfig]
-      ? R
-      : [R] extends [type.Any]
-        ? ExtendedTypeConfig<R, true>
-        : undefined,
+    response: {
+      kind: "response",
+      type: response.type,
+      config: { stream: response.config?.stream ?? false },
+    } as ToCoercedResponseType<Response>,
+    query: query
+      ? ({
+          kind: "params",
+          type: query.type,
+          config: { decode: query.config?.decode ?? true },
+        } as ToCoercedParamsType<Q>)
+      : (undefined as ToCoercedParamsType<Q>),
+    body: body
+      ? ({
+          kind: "params",
+          type: body.type,
+          config: { decode: body.config?.decode ?? true },
+        } as ToCoercedParamsType<B>)
+      : (undefined as ToCoercedParamsType<B>),
+    router: router
+      ? ({
+          kind: "params",
+          type: router.type,
+          config: { decode: router.config?.decode ?? true },
+        } as ToCoercedParamsType<R>)
+      : (undefined as ToCoercedParamsType<R>),
   };
 };

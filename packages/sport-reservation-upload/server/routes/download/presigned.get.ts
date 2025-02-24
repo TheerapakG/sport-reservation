@@ -6,17 +6,19 @@ import {
 import { type } from "arktype";
 import { Effect } from "effect";
 import { getHeader } from "h3";
-import { defineEventHandlerConfig } from "tiara-stack/config";
-import { noInferOut } from "tiara-stack/utils/noInfer";
+import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
 import { AuthRepository } from "~/repositories/authRepository";
 import { UploadRepository } from "~/repositories/uploadRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
   name: "getDownloadPresignedUrl",
-  response: type({
-    url: "string",
-  }),
-  query: noInferOut(
+  response: response(
+    type({
+      url: "string",
+    }),
+    { stream: false },
+  ),
+  query: params(
     type({
       key: "string",
     }),

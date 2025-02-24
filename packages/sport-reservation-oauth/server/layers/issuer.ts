@@ -60,6 +60,7 @@ export const issuerLive = Layer.effect(
         },
         providers: {
           line: Oauth2Provider({
+            type: "line",
             clientID: config.line.client.id,
             clientSecret: Redacted.value(config.line.client.secret),
             scopes: ["profile", "openid"],

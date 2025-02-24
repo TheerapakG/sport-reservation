@@ -7,22 +7,24 @@ import { type } from "arktype";
 import { Effect } from "effect";
 import { parseCookies } from "h3";
 import { getSubjectTypeFromToken } from "sport-reservation-oauth-common/subjects";
-import { defineEventHandlerConfig } from "tiara-stack/config";
-import { noInferOut } from "tiara-stack/utils/noInfer";
+import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
 import { OAuthClient } from "~/layers";
 import { FriendRepository } from "~/repositories/friendRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
   name: "postRejectFriendRequest",
-  response: type(
-    {
-      groupId: "string",
-      userId: "string",
-      status: "string",
-    },
-    "[]",
+  response: response(
+    type(
+      {
+        groupId: "string",
+        userId: "string",
+        status: "string",
+      },
+      "[]",
+    ),
+    { stream: false },
   ),
-  body: noInferOut(
+  body: params(
     type({
       fromUserId: "string",
     }),
