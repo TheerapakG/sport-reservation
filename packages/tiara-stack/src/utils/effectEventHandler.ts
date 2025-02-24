@@ -167,23 +167,25 @@ const effectEventHandler = <
                       unknown,
                       EventContext | EventParamsContext | R
                     >
-                  )().pipe(Stream.map((item) => encode(item))),
+                  )().pipe(
+                    Stream.flatMap((item) =>
+                      Stream.fromEffect(effectType(config.response.type, item)),
+                    ),
+                    Stream.map((item) => encode(item)),
+                  ),
                 ),
               options: () => ({ name }),
             });
-            return yield* effectType(
-              config.response.type,
-              yield* pipe(
-                wrappedHandler(),
-                Effect.provideService(EventContext, { event }),
-                Effect.provideService(EventParamsContext, {
-                  params: yield* effectEventHandlerParams(event, config),
-                }),
-                Effect.provide(
-                  yield* pipe(
-                    getEffectContext<R>(),
-                    Effect.provide(effectContextLive),
-                  ),
+            return yield* pipe(
+              wrappedHandler(),
+              Effect.provideService(EventContext, { event }),
+              Effect.provideService(EventParamsContext, {
+                params: yield* effectEventHandlerParams(event, config),
+              }),
+              Effect.provide(
+                yield* pipe(
+                  getEffectContext<R>(),
+                  Effect.provide(effectContextLive),
                 ),
               ),
             );
@@ -228,26 +230,30 @@ const effectEventHandler = <
               event.path,
             );
             const wrappedHandler = Effect.functionWithSpan({
-              body: handler as () => Effect.Effect<
-                EventHandlerResponseType<Opts["config"]>,
-                unknown,
-                EventContext | EventParamsContext | R
-              >,
+              body: () =>
+                (
+                  handler as () => Effect.Effect<
+                    EventHandlerResponseType<Opts["config"]>,
+                    unknown,
+                    EventContext | EventParamsContext | R
+                  >
+                )().pipe(
+                  Effect.flatMap((item) =>
+                    effectType(config.response.type, item),
+                  ),
+                ),
               options: () => ({ name }),
             });
-            return yield* effectType(
-              config.response.type,
-              yield* pipe(
-                wrappedHandler(),
-                Effect.provideService(EventContext, { event }),
-                Effect.provideService(EventParamsContext, {
-                  params: yield* effectEventHandlerParams(event, config),
-                }),
-                Effect.provide(
-                  yield* pipe(
-                    getEffectContext<R>(),
-                    Effect.provide(effectContextLive),
-                  ),
+            return yield* pipe(
+              wrappedHandler(),
+              Effect.provideService(EventContext, { event }),
+              Effect.provideService(EventParamsContext, {
+                params: yield* effectEventHandlerParams(event, config),
+              }),
+              Effect.provide(
+                yield* pipe(
+                  getEffectContext<R>(),
+                  Effect.provide(effectContextLive),
                 ),
               ),
             );
