@@ -31,34 +31,32 @@ export const handlerConfig = defineEventHandlerConfig({
   ),
 });
 
-export default effectEventHandler({
-  config: handlerConfig,
-  handler: () =>
-    /*@__PURE__*/ Effect.gen(function* () {
-      const { event } = yield* EventContext;
-      const { access_token: accessToken } = parseCookies(event);
-      const {
-        params: {
-          body: { friendId },
-        },
-      } = yield* EventParamsContext.typed<typeof handlerConfig>();
+export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
+  Effect.gen(function* () {
+    const { event } = yield* EventContext;
+    const { access_token: accessToken } = parseCookies(event);
+    const {
+      params: {
+        body: { friendId },
+      },
+    } = yield* EventParamsContext.typed<typeof handlerConfig>();
 
-      const { client: oauthClient } = yield* OAuthClient;
+    const { client: oauthClient } = yield* OAuthClient;
 
-      const user = yield* Effect.promise(async () =>
-        getSubjectTypeFromToken({
-          type: "user",
-          client: oauthClient,
-          accessToken,
-          refreshToken: undefined,
-        }),
-      );
+    const user = yield* Effect.promise(async () =>
+      getSubjectTypeFromToken({
+        type: "user",
+        client: oauthClient,
+        accessToken,
+        refreshToken: undefined,
+      }),
+    );
 
-      const friendRepository = yield* FriendRepository;
-      const members = yield* friendRepository.removeFriend(
-        user?.id ?? "",
-        friendId,
-      );
-      return members;
-    }),
-});
+    const friendRepository = yield* FriendRepository;
+    const members = yield* friendRepository.removeFriend(
+      user?.id ?? "",
+      friendId,
+    );
+    return members;
+  }),
+);

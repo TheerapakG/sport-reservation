@@ -1,4 +1,5 @@
 import { type } from "arktype";
+import { Simplify } from "effect/Types";
 import { ParamsType, ResponseType } from "./effectConfig";
 
 export type CoercedResponseType<
@@ -113,51 +114,84 @@ export type EventHandlerClientRouterType<C extends EventHandlerTypeConfig> =
     : never;
 
 export type EventHandlerResponseType<C extends EventHandlerTypeConfig> =
-  EventHandlerClientResponseType<C>;
-export type EventHandlerQueryType<C extends EventHandlerTypeConfig> =
+  Simplify<EventHandlerClientResponseType<C>>;
+export type EventHandlerQueryType<C extends EventHandlerTypeConfig> = Simplify<
   C["query"] extends infer Q
     ? Q extends AnyCoercedParamsType
       ? Q["config"]["decode"] extends true
         ? EventHandlerClientQueryType<C>
         : never
       : never
-    : never;
-export type EventHandlerBodyType<C extends EventHandlerTypeConfig> =
+    : never
+>;
+export type EventHandlerBodyType<C extends EventHandlerTypeConfig> = Simplify<
   C["body"] extends infer B
     ? B extends AnyCoercedParamsType
       ? B["config"]["decode"] extends true
         ? EventHandlerClientBodyType<C>
         : never
       : never
-    : never;
-export type EventHandlerRouterType<C extends EventHandlerTypeConfig> =
+    : never
+>;
+export type EventHandlerRouterType<C extends EventHandlerTypeConfig> = Simplify<
   C["router"] extends infer R
     ? R extends AnyCoercedParamsType
       ? R["config"]["decode"] extends true
         ? EventHandlerClientRouterType<C>
         : never
       : never
-    : never;
+    : never
+>;
 
-type ToCoercedResponseType<T extends AnyResponseType> = CoercedResponseType<
-  T["type"],
-  {
-    stream: NonNullable<NonNullable<T["config"]>["stream"]> extends true
-      ? true
-      : false;
-  }
+export type EventHandlerResponseConfig<C extends EventHandlerTypeConfig> =
+  Simplify<C["response"]["config"]>;
+export type EventHandlerQueryConfig<C extends EventHandlerTypeConfig> =
+  Simplify<
+    C["query"] extends infer Q
+      ? Q extends AnyCoercedParamsType
+        ? Q["config"]
+        : undefined
+      : undefined
+  >;
+export type EventHandlerBodyConfig<C extends EventHandlerTypeConfig> = Simplify<
+  C["body"] extends infer B
+    ? B extends AnyCoercedParamsType
+      ? B["config"]
+      : undefined
+    : undefined
+>;
+export type EventHandlerRouterConfig<C extends EventHandlerTypeConfig> =
+  Simplify<
+    C["router"] extends infer R
+      ? R extends AnyCoercedParamsType
+        ? R["config"]
+        : undefined
+      : undefined
+  >;
+
+type ToCoercedResponseType<T extends AnyResponseType> = Simplify<
+  CoercedResponseType<
+    T["type"],
+    {
+      stream: NonNullable<NonNullable<T["config"]>["stream"]> extends true
+        ? true
+        : false;
+    }
+  >
 >;
 
 type ToCoercedParamsType<T extends AnyParamsType | undefined> = [T] extends [
   AnyParamsType,
 ]
-  ? CoercedParamsType<
-      T["type"],
-      {
-        decode: NonNullable<NonNullable<T["config"]>["decode"]> extends false
-          ? false
-          : true;
-      }
+  ? Simplify<
+      CoercedParamsType<
+        T["type"],
+        {
+          decode: NonNullable<NonNullable<T["config"]>["decode"]> extends false
+            ? false
+            : true;
+        }
+      >
     >
   : undefined;
 

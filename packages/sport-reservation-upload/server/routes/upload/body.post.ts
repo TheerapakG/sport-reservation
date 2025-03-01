@@ -25,28 +25,26 @@ export const handlerConfig = defineEventHandlerConfig({
   ),
   body: params(type("unknown"), { decode: false }),
 });
-export default effectEventHandler({
-  config: handlerConfig,
-  handler: () =>
-    /*@__PURE__*/ Effect.gen(function* () {
-      const { event } = yield* EventContext;
-      const {
-        params: { query },
-      } = yield* EventParamsContext.typed<typeof handlerConfig>();
+export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
+  Effect.gen(function* () {
+    const { event } = yield* EventContext;
+    const {
+      params: { query },
+    } = yield* EventParamsContext.typed<typeof handlerConfig>();
 
-      const authRepository = yield* AuthRepository;
-      yield* authRepository.checkSecret({
-        secret: getHeader(event, "authorization")?.split(" ", 2)[1] ?? "",
-      });
-      const fileData = Effect.tryPromise(
-        async () => (await readMultipartFormData(event))?.[0].data,
-      );
-      const uploadRepository = yield* UploadRepository;
-      const { key: resultKey } = yield* uploadRepository.upload({
-        key: query.key,
-        stream: (yield* fileData) ?? "",
-      });
+    const authRepository = yield* AuthRepository;
+    yield* authRepository.checkSecret({
+      secret: getHeader(event, "authorization")?.split(" ", 2)[1] ?? "",
+    });
+    const fileData = Effect.tryPromise(
+      async () => (await readMultipartFormData(event))?.[0].data,
+    );
+    const uploadRepository = yield* UploadRepository;
+    const { key: resultKey } = yield* uploadRepository.upload({
+      key: query.key,
+      stream: (yield* fileData) ?? "",
+    });
 
-      return { key: resultKey };
-    }),
-});
+    return { key: resultKey };
+  }),
+);

@@ -4,6 +4,11 @@ secretGenerator:
   - name: sport-reservation-chat-secret
     envs:
       - .env.secret
+  - name: sport-reservation-auth-secret-path
+    files:
+      - user-access-key.key
+      - user-access-certificate.crt
+      - ca-certificate.crt
 configMapGenerator:
 generatorOptions:
   disableNameSuffixHash: true

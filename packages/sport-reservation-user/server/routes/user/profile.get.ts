@@ -15,34 +15,32 @@ export const handlerConfig = defineEventHandlerConfig({
     }),
   ),
 });
-export default effectEventHandler({
-  config: handlerConfig,
-  handler: () =>
-    /*@__PURE__*/ Effect.gen(function* () {
-      const {
-        params: {
-          query: { id },
-        },
-      } = yield* EventParamsContext.typed<typeof handlerConfig>();
+export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
+  Effect.gen(function* () {
+    const {
+      params: {
+        query: { id },
+      },
+    } = yield* EventParamsContext.typed<typeof handlerConfig>();
 
-      const userRepository = yield* UserRepository;
-      const {
-        publicId,
-        name,
-        avatar: avatarKey,
-      } = yield* yield* userRepository.findUserProfileById({ publicId: id });
+    const userRepository = yield* UserRepository;
+    const {
+      publicId,
+      name,
+      avatar: avatarKey,
+    } = yield* yield* userRepository.findUserProfileById({ publicId: id });
 
-      const uploadClient = yield* UploadClient;
-      const { url: avatar } = avatarKey
-        ? yield* uploadClient.getDownloadPresignedUrl({
-            query: { key: avatarKey },
-          })
-        : { url: undefined };
+    const uploadClient = yield* UploadClient;
+    const { url: avatar } = avatarKey
+      ? yield* uploadClient.getDownloadPresignedUrl({
+          query: { key: avatarKey },
+        })
+      : { url: undefined };
 
-      return {
-        id: publicId,
-        ...(name ? { name } : {}),
-        ...(avatar ? { avatar } : {}),
-      };
-    }),
-});
+    return {
+      id: publicId,
+      ...(name ? { name } : {}),
+      ...(avatar ? { avatar } : {}),
+    };
+  }),
+);

@@ -26,11 +26,41 @@ spec:
             - containerPort: 3000
               name: sp-chat-svc
           env:
+            - name: SECRET_PATH
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-auth-secret
+                  key: secretPath
             - name: POSTGRES_URL
               valueFrom:
                 secretKeyRef:
                   name: sport-reservation-chat-secret
                   key: postgresUrls
+            - name: VALKEY_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-chat-secret
+                  key: valkeyUrl
+            - name: KAFKA_BOOTSTRAP_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-chat-secret
+                  key: kafkaBootstrapUrl
+            - name: KAFKA_SSL_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-auth-secret
+                  key: kafkaSslKey
+            - name: KAFKA_SSL_CERT
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-auth-secret
+                  key: kafkaSslCert
+            - name: KAFKA_SSL_CA
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-auth-secret
+                  key: kafkaSslCa
             - name: UPLOAD_SECRET
               valueFrom:
                 secretKeyRef:
@@ -40,7 +70,16 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: sport-reservation-chat-secret
-                  key: uploadBaseUrl
+                  key: uploadBaseUrls
+          volumeMounts:
+            - name: sport-reservation-auth-secret-path
+              readOnly: true
+              mountPath: "/.secret"
+      volumes:
+        - name: sport-reservation-auth-secret-path
+          secret:
+            secretName: sport-reservation-auth-secret-path
+
 ---
 apiVersion: v1
 kind: Service

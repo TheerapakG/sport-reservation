@@ -23,54 +23,51 @@ export const handlerConfig = defineEventHandlerConfig({
     }),
   ),
 });
-export default effectEventHandler({
-  config: handlerConfig,
-  handler: () =>
-    /*@__PURE__*/ Effect.gen(function* () {
-      const { event } = yield* EventContext;
-      const {
-        params: { body },
-      } = yield* EventParamsContext.typed<typeof handlerConfig>();
+export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
+  Effect.gen(function* () {
+    const { event } = yield* EventContext;
+    const {
+      params: { body },
+    } = yield* EventParamsContext.typed<typeof handlerConfig>();
 
-      const id = yield* pipe(
-        Option.fromNullable(body.id),
-        Option.match({
-          onSome: (id) =>
+    const id = yield* pipe(
+      Option.fromNullable(body.id),
+      Option.match({
+        onSome: (id) =>
+          Effect.gen(function* () {
+            const authRepository = yield* AuthRepository;
+            yield* authRepository.checkSecret({
+              secret: getHeader(event, "authorization")?.split(" ", 2)[1] ?? "",
+            });
+            return id;
+          }),
+        onNone: () =>
+          pipe(
             Effect.gen(function* () {
-              const authRepository = yield* AuthRepository;
-              yield* authRepository.checkSecret({
-                secret:
-                  getHeader(event, "authorization")?.split(" ", 2)[1] ?? "",
-              });
-              return id;
+              const { client: oauthClient } = yield* OAuthClient;
+              const { access_token: accessToken } = parseCookies(event);
+              return yield* Effect.promise(() =>
+                getSubjectTypeFromToken({
+                  type: "user",
+                  client: oauthClient,
+                  accessToken,
+                  refreshToken: undefined,
+                }),
+              );
             }),
-          onNone: () =>
-            pipe(
-              Effect.gen(function* () {
-                const { client: oauthClient } = yield* OAuthClient;
-                const { access_token: accessToken } = parseCookies(event);
-                return yield* Effect.promise(() =>
-                  getSubjectTypeFromToken({
-                    type: "user",
-                    client: oauthClient,
-                    accessToken,
-                    refreshToken: undefined,
-                  }),
-                );
-              }),
-              Effect.flatMap((user) =>
-                user ? Effect.succeed(user.id) : Effect.fail(new OAuthError()),
-              ),
+            Effect.flatMap((user) =>
+              user ? Effect.succeed(user.id) : Effect.fail(new OAuthError()),
             ),
-        }),
-      );
+          ),
+      }),
+    );
 
-      const googleLoginDbRepository = yield* GoogleLoginDbRepository;
-      yield* googleLoginDbRepository.associateUserIdWithGoogleId({
-        userId: id,
-        googleId: body.googleId,
-      });
+    const googleLoginDbRepository = yield* GoogleLoginDbRepository;
+    yield* googleLoginDbRepository.associateUserIdWithGoogleId({
+      userId: id,
+      googleId: body.googleId,
+    });
 
-      return {};
-    }),
-});
+    return {};
+  }),
+);

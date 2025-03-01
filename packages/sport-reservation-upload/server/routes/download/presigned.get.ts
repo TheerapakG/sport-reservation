@@ -24,25 +24,23 @@ export const handlerConfig = defineEventHandlerConfig({
     }),
   ),
 });
-export default effectEventHandler({
-  config: handlerConfig,
-  handler: () =>
-    /*@__PURE__*/ Effect.gen(function* () {
-      const { event } = yield* EventContext;
-      const {
-        params: { query },
-      } = yield* EventParamsContext.typed<typeof handlerConfig>();
+export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
+  Effect.gen(function* () {
+    const { event } = yield* EventContext;
+    const {
+      params: { query },
+    } = yield* EventParamsContext.typed<typeof handlerConfig>();
 
-      const authRepository = yield* AuthRepository;
-      yield* authRepository.checkSecret({
-        secret: getHeader(event, "authorization")?.split(" ", 2)[1] ?? "",
-      });
+    const authRepository = yield* AuthRepository;
+    yield* authRepository.checkSecret({
+      secret: getHeader(event, "authorization")?.split(" ", 2)[1] ?? "",
+    });
 
-      const uploadRepository = yield* UploadRepository;
-      const { url: resultUrl } = yield* uploadRepository.getPresignedUrl({
-        key: query.key,
-      });
+    const uploadRepository = yield* UploadRepository;
+    const { url: resultUrl } = yield* uploadRepository.getPresignedUrl({
+      key: query.key,
+    });
 
-      return { url: resultUrl };
-    }),
-});
+    return { url: resultUrl };
+  }),
+);

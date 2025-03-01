@@ -270,6 +270,7 @@ export const chatChatMessage = pgTable(
   "chat_chat_message",
   {
     id: serial("id").primaryKey(),
+    publicId: uuid("public_id").defaultRandom().notNull(),
     chatId: uuid("chat_id").notNull(),
     senderId: uuid("sender_id").notNull(),
     message: varchar("message", {}),
@@ -284,10 +285,33 @@ export const chatChatMessage = pgTable(
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
   },
   (table) => [
+    uniqueIndex("chat_chat_message_public_id_idx").on(table.publicId),
     index("chat_chat_message_chat_id_idx").on(table.chatId),
     index("chat_chat_message_chat_id_created_at_idx").on(
       table.chatId,
       table.createdAt.desc(),
     ),
+  ],
+);
+
+export const chatChatSubscription = pgTable(
+  "chat_chat_subscription",
+  {
+    id: serial("id").primaryKey(),
+    publicId: uuid("public_id").defaultRandom().notNull(),
+    userId: uuid("user_id").notNull(),
+    partition: integer("partition").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  },
+  (table) => [
+    uniqueIndex("chat_chat_subscription_public_id_idx").on(table.publicId),
+    index("chat_chat_subscription_user_id_idx").on(table.userId),
   ],
 );

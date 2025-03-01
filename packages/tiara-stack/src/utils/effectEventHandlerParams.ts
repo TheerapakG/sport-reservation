@@ -1,4 +1,4 @@
-import destr from "destr";
+import { destr } from "destr";
 import { Effect } from "effect";
 import { Simplify } from "effect/Types";
 import {

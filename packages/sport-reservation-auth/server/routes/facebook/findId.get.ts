@@ -24,29 +24,27 @@ export const handlerConfig = defineEventHandlerConfig({
     }),
   ),
 });
-export default effectEventHandler({
-  config: handlerConfig,
-  handler: () =>
-    /*@__PURE__*/ Effect.gen(function* () {
-      const { event } = yield* EventContext;
-      const {
-        params: { query },
-      } = yield* EventParamsContext.typed<typeof handlerConfig>();
+export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
+  Effect.gen(function* () {
+    const { event } = yield* EventContext;
+    const {
+      params: { query },
+    } = yield* EventParamsContext.typed<typeof handlerConfig>();
 
-      const authRepository = yield* AuthRepository;
-      yield* authRepository.checkSecret({
-        secret: getHeader(event, "authorization")?.split(" ", 2)[1] ?? "",
-      });
+    const authRepository = yield* AuthRepository;
+    yield* authRepository.checkSecret({
+      secret: getHeader(event, "authorization")?.split(" ", 2)[1] ?? "",
+    });
 
-      const facebookLoginDbRepository = yield* FacebookLoginDbRepository;
-      const { userId } = Option.getOrUndefined(
-        yield* facebookLoginDbRepository.findUserIdByFacebookId({
-          facebookId: query.facebookId.toString(),
-        }),
-      ) ?? { userId: undefined };
+    const facebookLoginDbRepository = yield* FacebookLoginDbRepository;
+    const { userId } = Option.getOrUndefined(
+      yield* facebookLoginDbRepository.findUserIdByFacebookId({
+        facebookId: query.facebookId.toString(),
+      }),
+    ) ?? { userId: undefined };
 
-      return {
-        id: userId,
-      };
-    }),
-});
+    return {
+      id: userId,
+    };
+  }),
+);
