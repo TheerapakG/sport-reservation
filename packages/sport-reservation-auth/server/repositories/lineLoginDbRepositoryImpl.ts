@@ -1,6 +1,6 @@
 import { PgDrizzle } from "@effect/sql-drizzle/Pg";
 import { and, eq, isNull } from "drizzle-orm";
-import { Context, Effect, Layer, Option } from "effect";
+import { Effect, Layer, Option } from "effect";
 import { authUserLineConnection } from "sport-reservation-db/schema";
 import { LineLoginDbRepository } from "./lineLoginDbRepository";
 
@@ -9,7 +9,7 @@ export const lineLoginDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
   /*@__PURE__*/ Effect.gen(function* () {
     const db = yield* PgDrizzle;
 
-    return <Context.Tag.Service<LineLoginDbRepository>>{
+    return LineLoginDbRepository.of({
       findUserIdByLineId: ({ lineId }) =>
         Effect.gen(function* () {
           const users = yield* db
@@ -44,6 +44,6 @@ export const lineLoginDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
             "lineLoginDbRepositoryImpl.associateUserIdWithLineId",
           ),
         ),
-    };
+    });
   }),
 );

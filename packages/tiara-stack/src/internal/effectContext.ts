@@ -34,13 +34,13 @@ const cachedEffectContext = Effect.runSync(
   Effect.cached(
     Effect.gen(function* () {
       yield* Console.log("creating effect context...");
-      return {
+      return EffectContext.of({
         latch: yield* Effect.makeLatch(),
         ref: yield* SynchronizedRef.make({
           scope: yield* Scope.make(),
           context: Context.empty() as Context.Context<unknown>,
         }),
-      };
+      });
     }),
   ),
 );

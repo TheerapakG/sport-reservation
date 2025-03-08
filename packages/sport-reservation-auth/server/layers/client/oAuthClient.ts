@@ -14,11 +14,11 @@ export const oAuthClient = /*@__PURE__*/ Layer.effect(
   OAuthClient,
   /*@__PURE__*/ Effect.gen(function* () {
     const config = yield* yield* RuntimeConfig;
-    return {
+    return OAuthClient.of({
       client: createClient({
         clientID: config.oauth.clientId,
         issuer: config.oauth.issuer,
       }),
-    };
+    });
   }),
 );

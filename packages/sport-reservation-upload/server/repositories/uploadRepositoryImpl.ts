@@ -13,7 +13,7 @@ export const uploadRepositoryImpl = /*@__PURE__*/ Layer.effect(
     const config = yield* yield* RuntimeConfig;
     const { s3 } = yield* S3;
 
-    return {
+    return UploadRepository.of({
       generateUploadToken: () =>
         Effect.succeed({ token: "" }).pipe(
           Effect.withSpan("uploadRepositoryImpl.generateUploadToken"),
@@ -53,6 +53,6 @@ export const uploadRepositoryImpl = /*@__PURE__*/ Layer.effect(
         Effect.gen(function* () {}).pipe(
           Effect.withSpan("uploadRepositoryImpl.delete"),
         ),
-    };
+    });
   }),
 );

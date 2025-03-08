@@ -1,6 +1,6 @@
 import { PgDrizzle } from "@effect/sql-drizzle/Pg";
 import { and, eq, isNull } from "drizzle-orm";
-import { Context, Effect, Layer, Option } from "effect";
+import { Effect, Layer, Option } from "effect";
 import { authUserFacebookConnection } from "sport-reservation-db/schema";
 import { FacebookLoginDbRepository } from "./facebookLoginDbRepository";
 
@@ -9,7 +9,7 @@ export const facebookLoginDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
   /*@__PURE__*/ Effect.gen(function* () {
     const db = yield* PgDrizzle;
 
-    return <Context.Tag.Service<FacebookLoginDbRepository>>{
+    return FacebookLoginDbRepository.of({
       findUserIdByFacebookId: ({ facebookId }) =>
         Effect.gen(function* () {
           const users = yield* db
@@ -46,6 +46,6 @@ export const facebookLoginDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
             "facebookLoginDbRepositoryImpl.associateUserIdWithFacebookId",
           ),
         ),
-    };
+    });
   }),
 );

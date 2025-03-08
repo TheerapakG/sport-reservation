@@ -50,23 +50,25 @@ export class GoogleService
 
 export const googleService = /*@__PURE__*/ Layer.effect(
   GoogleService,
-  /*@__PURE__*/ Effect.succeed({
-    verifyIdToken: ({ idToken }: { idToken: string }) =>
-      Effect.provideService(
-        Effect.gen(function* () {
-          const { client } = yield* GoogleClient;
-          const ticket = yield* Effect.tryPromise(
-            async () => await client.verifyIdToken({ idToken }),
-          );
-          return yield* effectType(
-            googleVerifyIdTokenResponse,
-            ticket.getPayload(),
-          );
-        }),
-        GoogleClient,
-        { client: googleClient },
-      ).pipe(Effect.withSpan("googleService.verifyIdToken")),
-  }),
+  /*@__PURE__*/ Effect.succeed(
+    GoogleService.of({
+      verifyIdToken: ({ idToken }: { idToken: string }) =>
+        Effect.provideService(
+          Effect.gen(function* () {
+            const { client } = yield* GoogleClient;
+            const ticket = yield* Effect.tryPromise(
+              async () => await client.verifyIdToken({ idToken }),
+            );
+            return yield* effectType(
+              googleVerifyIdTokenResponse,
+              ticket.getPayload(),
+            );
+          }),
+          GoogleClient,
+          { client: googleClient },
+        ).pipe(Effect.withSpan("googleService.verifyIdToken")),
+    }),
+  ),
 );
 
 export const mockGoogleService = async () => {
@@ -80,14 +82,17 @@ export const mockGoogleService = async () => {
 
   return {
     mocks,
-    layer: Layer.succeed(GoogleService, {
-      verifyIdToken: (data) =>
-        Effect.gen(function* () {
-          return yield* effectType(
-            googleVerifyIdTokenResponse,
-            yield* mocks.verifyIdToken(data),
-          );
-        }),
-    }),
+    layer: Layer.succeed(
+      GoogleService,
+      GoogleService.of({
+        verifyIdToken: (data) =>
+          Effect.gen(function* () {
+            return yield* effectType(
+              googleVerifyIdTokenResponse,
+              yield* mocks.verifyIdToken(data),
+            );
+          }),
+      }),
+    ),
   };
 };

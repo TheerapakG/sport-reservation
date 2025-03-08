@@ -12,7 +12,7 @@ export const friendRepositoryImpl = /*@__PURE__*/ Layer.effect(
   FriendRepository,
   /*@__PURE__*/ Effect.gen(function* () {
     const db = yield* PgDrizzle;
-    return {
+    return FriendRepository.of({
       createFriendRequest: (fromUserId, toUserId) =>
         Effect.tryPromise(() =>
           db.transaction(async (tx) => {
@@ -296,6 +296,6 @@ export const friendRepositoryImpl = /*@__PURE__*/ Layer.effect(
               ),
             );
         }).pipe(Effect.withSpan("friendRepositoryImpl.getFriends")),
-    };
+    });
   }),
 );

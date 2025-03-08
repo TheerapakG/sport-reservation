@@ -29,7 +29,7 @@ export const issuerLive = Layer.effect(
     const googleService = yield* GoogleService;
     const facebookService = yield* FacebookService;
 
-    return {
+    return Issuer.of({
       issuer: issuer({
         theme: THEME_OPENAUTH,
         subjects,
@@ -273,6 +273,6 @@ export const issuerLive = Layer.effect(
           }
         },
       }),
-    };
+    });
   }),
 );

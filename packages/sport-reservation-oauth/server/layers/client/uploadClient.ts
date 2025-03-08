@@ -12,14 +12,14 @@ export const uploadClient = /*@__PURE__*/ _uploadClient.pipe(
       UploadFetch,
       /*@__PURE__*/ Effect.gen(function* () {
         const config = yield* yield* RuntimeConfig;
-        return {
+        return UploadFetch.of({
           fetch: createUploadFetch({
             baseURL: config.upload.baseUrl,
             headers: {
               Authorization: `Bearer ${Redacted.value(config.upload.secret)}`,
             },
           }),
-        };
+        });
       }),
     ),
   ),

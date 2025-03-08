@@ -36,34 +36,36 @@ export class FacebookService
 
 export const facebookService = /*@__PURE__*/ Layer.effect(
   FacebookService,
-  /*@__PURE__*/ Effect.succeed({
-    getUserProfile: ({ accessToken }: { accessToken: string }) =>
-      Effect.provideService(
-        Effect.gen(function* () {
-          return yield* typedFetch(
-            {
-              responseType: facebookGetUserProfileResponse,
-              queryType: noInferOut(
-                type({
-                  fields: "string",
-                  access_token: "string",
-                }),
-              ),
-            },
-            "/me",
-            {
-              method: "GET",
-              query: {
-                fields: "id,name,picture{url}",
-                access_token: accessToken,
+  /*@__PURE__*/ Effect.succeed(
+    FacebookService.of({
+      getUserProfile: ({ accessToken }: { accessToken: string }) =>
+        Effect.provideService(
+          Effect.gen(function* () {
+            return yield* typedFetch(
+              {
+                responseType: facebookGetUserProfileResponse,
+                queryType: noInferOut(
+                  type({
+                    fields: "string",
+                    access_token: "string",
+                  }),
+                ),
               },
-            },
-          );
-        }),
-        Fetch,
-        { fetch: facebookFetch },
-      ).pipe(Effect.withSpan("facebookService.getUserProfile")),
-  }),
+              "/me",
+              {
+                method: "GET",
+                query: {
+                  fields: "id,name,picture{url}",
+                  access_token: accessToken,
+                },
+              },
+            );
+          }),
+          Fetch,
+          { fetch: facebookFetch },
+        ).pipe(Effect.withSpan("facebookService.getUserProfile")),
+    }),
+  ),
 );
 
 export const mockFacebookService = async () => {
@@ -77,14 +79,17 @@ export const mockFacebookService = async () => {
 
   return {
     mocks,
-    layer: Layer.succeed(FacebookService, {
-      getUserProfile: (data) =>
-        Effect.gen(function* () {
-          return yield* effectType(
-            facebookGetUserProfileResponse,
-            yield* mocks.getUserProfile(data),
-          );
-        }),
-    }),
+    layer: Layer.succeed(
+      FacebookService,
+      FacebookService.of({
+        getUserProfile: (data) =>
+          Effect.gen(function* () {
+            return yield* effectType(
+              facebookGetUserProfileResponse,
+              yield* mocks.getUserProfile(data),
+            );
+          }),
+      }),
+    ),
   };
 };

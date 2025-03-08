@@ -44,7 +44,7 @@ export const lineService = /*@__PURE__*/ Layer.effect(
   LineService,
   /*@__PURE__*/ Effect.gen(function* () {
     const config = yield* yield* RuntimeConfig;
-    return {
+    return LineService.of({
       postGetUserProfile: ({ idToken }: { idToken: string }) =>
         Effect.provideService(
           Effect.gen(function* () {
@@ -66,7 +66,7 @@ export const lineService = /*@__PURE__*/ Layer.effect(
           Fetch,
           { fetch: lineFetch },
         ).pipe(Effect.withSpan("lineService.postGetUserProfile")),
-    };
+    });
   }),
 );
 
@@ -81,14 +81,17 @@ export const mockLineService = async () => {
 
   return {
     mocks,
-    layer: Layer.succeed(LineService, {
-      postGetUserProfile: (data) =>
-        Effect.gen(function* () {
-          return yield* effectType(
-            linePostGetUserProfileResponse,
-            yield* mocks.postGetUserProfile(data),
-          );
-        }),
-    }),
+    layer: Layer.succeed(
+      LineService,
+      LineService.of({
+        postGetUserProfile: (data) =>
+          Effect.gen(function* () {
+            return yield* effectType(
+              linePostGetUserProfileResponse,
+              yield* mocks.postGetUserProfile(data),
+            );
+          }),
+      }),
+    ),
   };
 };

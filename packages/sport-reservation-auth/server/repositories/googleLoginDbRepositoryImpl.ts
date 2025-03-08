@@ -1,6 +1,6 @@
 import { PgDrizzle } from "@effect/sql-drizzle/Pg";
 import { and, eq, isNull } from "drizzle-orm";
-import { Context, Effect, Layer, Option } from "effect";
+import { Effect, Layer, Option } from "effect";
 import { authUserGoogleConnection } from "sport-reservation-db/schema";
 import { GoogleLoginDbRepository } from "./googleLoginDbRepository";
 
@@ -9,7 +9,7 @@ export const googleLoginDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
   /*@__PURE__*/ Effect.gen(function* () {
     const db = yield* PgDrizzle;
 
-    return <Context.Tag.Service<GoogleLoginDbRepository>>{
+    return GoogleLoginDbRepository.of({
       findUserIdByGoogleId: ({ googleId }) =>
         Effect.gen(function* () {
           const users = yield* db
@@ -44,6 +44,6 @@ export const googleLoginDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
             "googleLoginDbRepositoryImpl.associateUserIdWithGoogleId",
           ),
         ),
-    };
+    });
   }),
 );

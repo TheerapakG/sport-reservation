@@ -12,14 +12,14 @@ export const authClient = /*@__PURE__*/ _authClient.pipe(
       AuthFetch,
       /*@__PURE__*/ Effect.gen(function* () {
         const config = yield* yield* RuntimeConfig;
-        return {
+        return AuthFetch.of({
           fetch: createAuthFetch({
             baseURL: config.auth.baseUrl,
             headers: {
               Authorization: `Bearer ${Redacted.value(config.auth.secret)}`,
             },
           }),
-        };
+        });
       }),
     ),
   ),

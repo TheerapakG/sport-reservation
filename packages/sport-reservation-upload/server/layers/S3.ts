@@ -18,9 +18,8 @@ export const s3Live = /*@__PURE__*/ Layer.effect(
         secretAccessKey: Redacted.value(config.s3.secret),
       },
     };
-    const s3 = yield* Effect.tryPromise(
-      async () => new S3Client(s3ClientConfig),
-    );
-    return { s3 };
+    return S3.of({
+      s3: yield* Effect.tryPromise(async () => new S3Client(s3ClientConfig)),
+    });
   }),
 );

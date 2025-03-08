@@ -16,14 +16,14 @@ export const storageService = Layer.effect(
   StorageService,
   Effect.gen(function* () {
     const config = yield* yield* RuntimeConfig;
-    return {
+    return StorageService.of({
       storage: createStorage({
         driver: redisDriver({
           base: "sport-reservation:oauth",
           url: Redacted.value(config.valkeyUrl),
         }),
       }),
-    };
+    });
   }),
 );
 

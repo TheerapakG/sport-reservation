@@ -1,90 +1,82 @@
 import { ArkErrors } from "arktype";
 import { FetchError as OFetchError } from "ofetch";
 
-export class OAuthError {
-  readonly _tag = "OAuthError";
+type BaseErrorType = Error | ArkErrors;
 
-  constructor(readonly error?: Error) {}
+export class BaseError<ErrorType extends BaseErrorType = BaseErrorType> {
+  readonly _type = "BaseError";
+
+  constructor(
+    readonly _tag: string,
+    readonly error?: ErrorType,
+  ) {}
+}
+
+export const isBaseError = (error: unknown): error is BaseError => {
+  return Boolean(
+    typeof error === "object" &&
+      error &&
+      "_type" in error &&
+      error._type === "BaseError",
+  );
+};
+
+export class OAuthError extends BaseError<Error> {
+  constructor(error?: Error) {
+    super("OAuthError", error);
+  }
 }
 
 export const isOAuthError = (error: unknown): error is OAuthError => {
-  return Boolean(
-    typeof error === "object" &&
-      error &&
-      "_tag" in error &&
-      error._tag === "OAuthError",
-  );
+  return isBaseError(error) && error._tag === "OAuthError";
 };
 
-export class ArktypeError {
-  readonly _tag = "ArktypeError";
-
-  constructor(readonly error?: ArkErrors) {}
+export class ArktypeError extends BaseError<ArkErrors> {
+  constructor(error?: ArkErrors) {
+    super("ArktypeError", error);
+  }
 }
 
 export const isArktypeError = (error: unknown): error is ArktypeError => {
-  return Boolean(
-    typeof error === "object" &&
-      error &&
-      "_tag" in error &&
-      error._tag === "ArktypeError",
-  );
+  return isBaseError(error) && error._tag === "ArktypeError";
 };
 
-export class MsgpackError {
-  readonly _tag = "MsgpackError";
-
-  constructor(readonly error?: Error) {}
+export class MsgpackError extends BaseError<Error> {
+  constructor(error?: Error) {
+    super("MsgpackError", error);
+  }
 }
 
 export const isMsgpackError = (error: unknown): error is MsgpackError => {
-  return Boolean(
-    typeof error === "object" &&
-      error &&
-      "_tag" in error &&
-      error._tag === "MsgpackError",
-  );
+  return isBaseError(error) && error._tag === "MsgpackError";
 };
 
-export class FetchError {
-  readonly _tag = "FetchError";
-
-  constructor(readonly error?: OFetchError) {}
+export class FetchError extends BaseError<OFetchError> {
+  constructor(error?: OFetchError) {
+    super("FetchError", error);
+  }
 }
 
 export const isFetchError = (error: unknown): error is FetchError => {
-  return Boolean(
-    typeof error === "object" &&
-      error &&
-      "_tag" in error &&
-      error._tag === "FetchError",
-  );
+  return isBaseError(error) && error._tag === "FetchError";
 };
 
-export class S3Error {
-  readonly _tag = "S3Error";
-
-  constructor(readonly error?: Error) {}
+export class S3Error extends BaseError<Error> {
+  constructor(error?: Error) {
+    super("S3Error", error);
+  }
 }
 
 export const isS3Error = (error: unknown): error is S3Error => {
-  return Boolean(
-    typeof error === "object" &&
-      error &&
-      "_tag" in error &&
-      error._tag === "S3Error",
-  );
+  return isBaseError(error) && error._tag === "S3Error";
 };
 
-export class ValkeyError {
-  readonly _tag = "ValkeyError";
+export class ValkeyError extends BaseError<Error> {
+  constructor(error?: Error) {
+    super("ValkeyError", error);
+  }
 }
 
 export const isValkeyError = (error: unknown): error is ValkeyError => {
-  return Boolean(
-    typeof error === "object" &&
-      error &&
-      "_tag" in error &&
-      error._tag === "ValkeyError",
-  );
+  return isBaseError(error) && error._tag === "ValkeyError";
 };

@@ -8,7 +8,7 @@ export const downloadRepositoryImpl = /*@__PURE__*/ Layer.effect(
   /*@__PURE__*/ Effect.gen(function* () {
     const { fetch } = yield* Fetch;
 
-    return {
+    return DownloadRepository.of({
       downloadUrl: ({ url }) => {
         return Effect.provideService(
           Effect.gen(function* () {
@@ -20,6 +20,6 @@ export const downloadRepositoryImpl = /*@__PURE__*/ Layer.effect(
           { fetch },
         ).pipe(Effect.withSpan("downloadRepositoryImpl.downloadUrl"));
       },
-    };
+    });
   }),
 );

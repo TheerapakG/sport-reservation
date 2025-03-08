@@ -6,12 +6,12 @@ export const authRepositoryImpl = /*@__PURE__*/ Layer.effect(
   AuthRepository,
   Effect.gen(function* () {
     const config = yield* yield* RuntimeConfig;
-    return {
+    return AuthRepository.of({
       checkSecret: ({ secret }) =>
         Effect.gen(function* () {
           if (secret !== Redacted.value(config.upload.secret))
             return yield* Effect.fail(new InvalidSecretError());
         }).pipe(Effect.withSpan("authRepositoryImpl.checkSecret")),
-    };
+    });
   }),
 );
