@@ -8,6 +8,8 @@
     "vitest": "catalog:"
   },
   "scripts": {
-    "prepare": "husky"
+    "prepare": "husky",
+    "initialize": "nx run tiara-stack:generate && pnpm install && pnpm generate",
+    "generate": "nx run-many -t generate --output-style=stream"
   }
 }

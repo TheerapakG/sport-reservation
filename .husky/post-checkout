@@ -1,2 +1,2 @@
 pnpm install
-pnpm nx run-many -t generate --output-style=stream
+pnpm generate

@@ -101,7 +101,7 @@ export const chatRepositoryImpl = /*@__PURE__*/ Layer.scoped(
       HashMap.empty<string, Scope.CloseableScope>(),
     );
 
-    return {
+    return ChatRepository.of({
       getChat: (groupId) =>
         Effect.gen(function* () {
           const chats = yield* db
@@ -235,6 +235,6 @@ export const chatRepositoryImpl = /*@__PURE__*/ Layer.scoped(
             }),
           );
         }),
-    };
+    });
   }),
 );
