@@ -31,11 +31,8 @@ jobs:
       - name: Install Dependencies
         run: pnpm install
 
-      - name: Run Generate For TiaraStack
-        run: pnpm nx run tiara-stack:generate
-
-      - name: Install Bin For TiaraStack
-        run: pnpm install
+      - name: Initialize Monorepo
+        run: pnpm initialize
 
       - name: Run Checks
         run: pnpm nx run-many -t format,lint,typecheck --output-style=stream
@@ -68,11 +65,8 @@ jobs:
       - name: Install Dependencies
         run: pnpm install
 
-      - name: Run Generate For TiaraStack
-        run: pnpm nx run tiara-stack:generate
-
-      - name: Install Bin For TiaraStack
-        run: pnpm install
+      - name: Initialize Monorepo
+        run: pnpm initialize
 
       - name: Run Build
         run: pnpm nx build sport-reservation-${{ matrix.package }} --output-style=stream
@@ -94,7 +88,7 @@ jobs:
   deploy:
     strategy:
       matrix:
-        package: [oauth,user, auth, upload, chat, web]
+        package: [oauth, user, auth, upload, chat, web]
     needs: [build]
     runs-on: ubuntu-latest
     defaults:
