@@ -38,6 +38,7 @@
     "validator": "^13.12.0"
   },
   "peerDependencies": {
+    "@openauthjs/openauth": "catalog:",
     "arktype": "catalog:",
     "drizzle-orm": "catalog:",
     "effect": "catalog:",
