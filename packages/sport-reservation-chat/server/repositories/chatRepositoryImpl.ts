@@ -24,7 +24,6 @@ import {
   chatChat,
   chatChatMessage,
   chatChatSubscription,
-  userUserGroupMember,
 } from "sport-reservation-db/schema";
 import { effectType } from "tiara-stack/utils/effectType";
 import { Kafka } from "~/layers";
@@ -244,7 +243,7 @@ export const chatRepositoryImpl = /*@__PURE__*/ Layer.scoped(
 
           return messages;
         }).pipe(Effect.withSpan("chatRepositoryImpl.getChatMessages")),
-      sendChatMessage: ({ chatId, senderId, message, imageUrl }) =>
+      sendChatMessage: ({ chatId, senderId, receiverIds, message, imageUrl }) =>
         Effect.gen(function* () {
           const [dbChatMessage] = yield* db
             .insert(chatChatMessage)
@@ -253,42 +252,15 @@ export const chatRepositoryImpl = /*@__PURE__*/ Layer.scoped(
 
           const encodedChatMessage = encode(dbChatMessage);
 
-          const chatGroupIds = db
-            .$with("chatUserIds")
-            .as(
-              db
-                .select({ id: chatChat.groupId })
-                .from(chatChat)
-                .where(eq(chatChat.publicId, chatId)),
-            );
-
-          // TODO: call user-service to get user ids from group ids instead
-          const chatUserIds = db
-            .$with("chatUserIds")
-            .as(
-              db
-                .with(chatGroupIds)
-                .select({ id: userUserGroupMember.userId })
-                .from(userUserGroupMember)
-                .innerJoin(
-                  chatGroupIds,
-                  eq(userUserGroupMember.groupId, chatGroupIds.id),
-                ),
-            );
-
           const chatSubscriptionUserPartitions = GroupBy.evaluate(
             Stream.fromIterableEffect(
               db
-                .with(chatUserIds)
                 .select({
                   partition: chatChatSubscription.partition,
                   userId: chatChatSubscription.userId,
                 })
                 .from(chatChatSubscription)
-                .innerJoin(
-                  chatUserIds,
-                  eq(chatChatSubscription.userId, chatUserIds.id),
-                ),
+                .where(inArray(chatChatSubscription.userId, receiverIds)),
             ).pipe(Stream.groupByKey(({ partition }) => partition)),
             (partition, stream) =>
               Stream.fromEffect(

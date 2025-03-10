@@ -40,6 +40,7 @@ export class ChatRepository
       sendChatMessage: (opts: {
         chatId: string;
         senderId: string;
+        receiverIds: string[];
         message?: string;
         imageUrl?: string;
       }) => Effect.Effect<void, UnknownException | SqlError.SqlError>;
