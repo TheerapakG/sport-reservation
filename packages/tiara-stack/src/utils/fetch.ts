@@ -71,7 +71,7 @@ export const typedFetch = <
   request: string,
   options?: TypedFetchOptions<QP, BP, RP, R>,
 ): Effect.Effect<
-  MappedResponseType<R, T["infer"]>,
+  MappedResponseType<R, T["out"]["infer"]>,
   ArktypeError | FetchError,
   Fetch
 > =>
@@ -99,11 +99,11 @@ export const typedFetch = <
         (opts as FetchOptions<R>)?.responseType ?? "json",
       )
     )
-      return fetchResponse as MappedResponseType<R, T["infer"]>;
+      return fetchResponse as MappedResponseType<R, T["out"]["infer"]>;
     return (yield* effectType(
-      (responseType ?? anyObjectType) as T,
+      (responseType?.out ?? anyObjectType) as T,
       fetchResponse,
-    )) as MappedResponseType<R, T["infer"]>;
+    )) as MappedResponseType<R, T["out"]["infer"]>;
   });
 
 /*@__NO_SIDE_EFFECTS__*/
@@ -125,7 +125,7 @@ export const typedRawFetch = <
   request: string,
   options?: TypedFetchOptions<QP, BP, RP, R>,
 ): Effect.Effect<
-  FetchResponse<MappedResponseType<R, T["infer"]>>,
+  FetchResponse<MappedResponseType<R, T["out"]["infer"]>>,
   ArktypeError | FetchError,
   Fetch
 > =>
@@ -156,8 +156,8 @@ export const typedRawFetch = <
       return fetchResponse;
 
     fetchResponse._data = (yield* effectType(
-      (responseType ?? anyObjectType) as T,
+      (responseType?.out ?? anyObjectType) as T,
       fetchResponse._data,
-    )) as MappedResponseType<R, T["infer"]>;
+    )) as MappedResponseType<R, T["out"]["infer"]>;
     return fetchResponse;
   });

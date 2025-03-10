@@ -20,5 +20,4 @@ export const chatMessage = /*@__PURE__*/ type({
   imageUrl: "string | null",
   createdAt: "string.date.parse",
   updatedAt: "string.date.parse",
-  deletedAt: "string.date.parse | null",
 });

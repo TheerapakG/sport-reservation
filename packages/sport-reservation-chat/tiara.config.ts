@@ -14,5 +14,17 @@ export default defineTiaraConfig({
         ca: config("string"),
       },
     },
+    oauth: {
+      clientId: config("string"),
+      issuer: config("string"),
+    },
+    upload: {
+      baseUrl: config("string"),
+      secret: redacted("string"),
+    },
+    user: {
+      baseUrl: config("string"),
+      secret: redacted("string"),
+    },
   },
 });

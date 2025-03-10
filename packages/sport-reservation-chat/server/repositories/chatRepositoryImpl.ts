@@ -1,11 +1,14 @@
 import { KafkaJS } from "@confluentinc/kafka-javascript";
 import { PgDrizzle } from "@effect/sql-drizzle/Pg";
-import { decode, encode } from "@msgpack/msgpack";
-import { and, between, eq, isNull } from "drizzle-orm";
+import { decodeMulti, encode } from "@msgpack/msgpack";
+import { type } from "arktype";
+import { and, between, eq, inArray, isNull } from "drizzle-orm";
 import {
+  Chunk,
   Effect,
   ExecutionStrategy,
   Exit,
+  GroupBy,
   HashMap,
   Layer,
   Option,
@@ -39,7 +42,6 @@ export const chatRepositoryImpl = /*@__PURE__*/ Layer.scoped(
     const producer = kafka.producer();
     const consumer = kafka.consumer({
       "group.id": "sport-reservation-chat",
-      "enable.auto.commit": false,
       rebalance_cb: () => {
         Effect.runPromise(
           SubscriptionRef.set(consumerAssignment, consumer.assignment()),
@@ -72,8 +74,10 @@ export const chatRepositoryImpl = /*@__PURE__*/ Layer.scoped(
       ),
     );
 
-    const consumerChatMessage =
-      yield* PubSub.bounded<typeof chatChatMessage.$inferSelect>(128);
+    const consumerChatMessage = yield* PubSub.bounded<{
+      userIds: string[];
+      message: typeof chatChatMessage.$inferSelect;
+    }>(128);
 
     yield* Effect.forkScoped(
       Effect.tryPromise(() =>
@@ -84,12 +88,22 @@ export const chatRepositoryImpl = /*@__PURE__*/ Layer.scoped(
                 const { value } = message;
                 if (!value) return;
 
-                const decoded = decode(value);
-                const validated = yield* effectType(
-                  chatMessageInternal,
-                  decoded,
+                const [decodedUserIds, decodedMessage] = Array.from(
+                  decodeMulti(value),
                 );
-                yield* consumerChatMessage.publish(validated);
+                const validatedUserIds = yield* effectType(
+                  type("string[]"),
+                  decodedUserIds,
+                );
+                const validatedMessage = yield* effectType(
+                  chatMessageInternal,
+                  decodedMessage,
+                );
+
+                yield* consumerChatMessage.publish({
+                  userIds: validatedUserIds,
+                  message: validatedMessage,
+                });
               }),
             ),
         }),
@@ -101,8 +115,33 @@ export const chatRepositoryImpl = /*@__PURE__*/ Layer.scoped(
       HashMap.empty<string, Scope.CloseableScope>(),
     );
 
+    yield* Effect.fork(
+      Stream.runDrain(
+        consumerRebalance.subscribe.pipe(
+          Stream.fromEffect,
+          Stream.flatMap((dequeue) => Stream.fromQueue(dequeue)),
+          Stream.tap(([partition]) =>
+            Effect.gen(function* () {
+              const subscriptionIds = HashMap.keySet(
+                yield* SynchronizedRef.get(subscriptionScopeHashMapRef),
+              );
+              yield* db
+                .update(chatChatSubscription)
+                .set({ partition: partition.partition })
+                .where(
+                  inArray(
+                    chatChatSubscription.publicId,
+                    Array.from(subscriptionIds),
+                  ),
+                );
+            }),
+          ),
+        ),
+      ),
+    );
+
     return ChatRepository.of({
-      getChat: (groupId) =>
+      getChatByGroupId: (groupId) =>
         Effect.gen(function* () {
           const chats = yield* db
             .select()
@@ -114,8 +153,21 @@ export const chatRepositoryImpl = /*@__PURE__*/ Layer.scoped(
 
           if (chats.length === 0) return Option.none();
           return Option.some(chats[0]);
-        }).pipe(Effect.withSpan("chatRepositoryImpl.getGroupChat")),
-      subscribeChatMessages: (userId) =>
+        }).pipe(Effect.withSpan("chatRepositoryImpl.getChatByGroupId")),
+      getChatByChatId: (chatId) =>
+        Effect.gen(function* () {
+          const chats = yield* db
+            .select()
+            .from(chatChat)
+            .where(
+              and(isNull(chatChat.deletedAt), eq(chatChat.publicId, chatId)),
+            )
+            .limit(1);
+
+          if (chats.length === 0) return Option.none();
+          return Option.some(chats[0]);
+        }).pipe(Effect.withSpan("chatRepositoryImpl.getChatByChatId")),
+      subscribeUserChatMessages: (userId) =>
         Effect.gen(function* () {
           const [subscription] = yield* db
             .insert(chatChatSubscription)
@@ -137,14 +189,20 @@ export const chatRepositoryImpl = /*@__PURE__*/ Layer.scoped(
 
           const messages = Stream.fromEffect(
             consumerChatMessage.subscribe.pipe(Scope.extend(scope)),
-          ).pipe(Stream.flatMap((dequeue) => Stream.fromQueue(dequeue)));
+          ).pipe(
+            Stream.flatMap((dequeue) => Stream.fromQueue(dequeue)),
+            Stream.filter(({ userIds }) => userIds.includes(userId)),
+            Stream.map(({ message }) => message),
+          );
 
           return {
             subscriptionId: subscription.publicId,
             messages,
           };
-        }),
-      unsubscribeChatMessages: (subscriptionId) =>
+        }).pipe(
+          Effect.withSpan("chatRepositoryImpl.subscribeUserChatMessages"),
+        ),
+      unsubscribeUserChatMessages: (subscriptionId) =>
         Effect.gen(function* () {
           yield* db
             .update(chatChatSubscription)
@@ -168,7 +226,9 @@ export const chatRepositoryImpl = /*@__PURE__*/ Layer.scoped(
               return newHashMap;
             },
           );
-        }),
+        }).pipe(
+          Effect.withSpan("chatRepositoryImpl.unsubscribeUserChatMessages"),
+        ),
       getChatMessages: ({ chatId, from, to }) =>
         Effect.gen(function* () {
           const messages = yield* db
@@ -183,7 +243,7 @@ export const chatRepositoryImpl = /*@__PURE__*/ Layer.scoped(
             );
 
           return messages;
-        }),
+        }).pipe(Effect.withSpan("chatRepositoryImpl.getChatMessages")),
       sendChatMessage: ({ chatId, senderId, message, imageUrl }) =>
         Effect.gen(function* () {
           const [dbChatMessage] = yield* db
@@ -191,7 +251,7 @@ export const chatRepositoryImpl = /*@__PURE__*/ Layer.scoped(
             .values({ chatId, senderId, message, imageUrl })
             .returning();
 
-          const encodedChatMessage = Buffer.from(encode(dbChatMessage));
+          const encodedChatMessage = encode(dbChatMessage);
 
           const chatGroupIds = db
             .$with("chatUserIds")
@@ -216,25 +276,54 @@ export const chatRepositoryImpl = /*@__PURE__*/ Layer.scoped(
                 ),
             );
 
-          const chatSubscriptionPartitions = yield* db
-            .with(chatUserIds)
-            .select({ partition: chatChatSubscription.partition })
-            .from(chatChatSubscription)
-            .innerJoin(
-              chatUserIds,
-              eq(chatChatSubscription.userId, chatUserIds.id),
-            );
+          const chatSubscriptionUserPartitions = GroupBy.evaluate(
+            Stream.fromIterableEffect(
+              db
+                .with(chatUserIds)
+                .select({
+                  partition: chatChatSubscription.partition,
+                  userId: chatChatSubscription.userId,
+                })
+                .from(chatChatSubscription)
+                .innerJoin(
+                  chatUserIds,
+                  eq(chatChatSubscription.userId, chatUserIds.id),
+                ),
+            ).pipe(Stream.groupByKey(({ partition }) => partition)),
+            (partition, stream) =>
+              Stream.fromEffect(
+                Effect.gen(function* () {
+                  const userIds = yield* Stream.runCollect(
+                    stream.pipe(Stream.map(({ userId }) => userId)),
+                  );
+
+                  return {
+                    partition,
+                    userIds,
+                  };
+                }),
+              ),
+          );
+
+          const producerMessages = yield* Stream.runCollect(
+            chatSubscriptionUserPartitions.pipe(
+              Stream.map(({ partition, userIds }) => ({
+                partition,
+                value: Buffer.concat([
+                  encode(Chunk.toArray(userIds)),
+                  encodedChatMessage,
+                ]),
+              })),
+            ),
+          );
 
           yield* Effect.tryPromise(() =>
             producer.send({
               topic: "sport-reservation.chat.message",
-              messages: chatSubscriptionPartitions.map(({ partition }) => ({
-                partition,
-                value: encodedChatMessage,
-              })),
+              messages: Chunk.toArray(producerMessages),
             }),
           );
-        }),
+        }).pipe(Effect.withSpan("chatRepositoryImpl.sendChatMessage")),
     });
   }),
 );

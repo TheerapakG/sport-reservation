@@ -1,7 +1,13 @@
 import { runtimeConfig } from "$/layers";
 import { NodeFileSystem } from "@effect/platform-node";
 import { Layer } from "effect";
-import { dbLive, kafkaLive } from "~/layers";
+import {
+  dbLive,
+  kafkaLive,
+  oAuthClient,
+  uploadClient,
+  userClient,
+} from "~/layers";
 import { chatRepositoryImpl } from "~/repositories/chatRepositoryImpl";
 
 /*@__NO_SIDE_EFFECTS__*/
@@ -21,7 +27,14 @@ const createRepositoryLive = () =>
     .pipe(Layer.provide(Layer.mergeAll(dbLive, kafkaLive)))
     .pipe(Layer.provide(runtimeConfig));
 
+/*@__NO_SIDE_EFFECTS__*/
+const createClientLive = () =>
+  Layer.mergeAll(oAuthClient, uploadClient, userClient).pipe(
+    Layer.provide(baseDependenciesLive),
+  );
+
 export const dependenciesLive = /*@__PURE__*/ Layer.mergeAll(
   baseDependenciesLive,
   createRepositoryLive(),
+  createClientLive(),
 );

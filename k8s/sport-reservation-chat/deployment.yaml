@@ -61,6 +61,16 @@ spec:
                 secretKeyRef:
                   name: sport-reservation-auth-secret
                   key: kafkaSslCa
+            - name: OAUTH_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-chat-secret
+                  key: oauthClientId
+            - name: OAUTH_ISSUER
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-chat-secret
+                  key: oauthIssuer
             - name: UPLOAD_SECRET
               valueFrom:
                 secretKeyRef:
@@ -70,7 +80,18 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: sport-reservation-chat-secret
-                  key: uploadBaseUrls
+                  key: uploadBaseUrl
+            - name: USER_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-chat-secret
+                  key: userSecret
+            - name: USER_BASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-chat-secret
+                  key: userBaseUrl
+
           volumeMounts:
             - name: sport-reservation-auth-secret-path
               readOnly: true

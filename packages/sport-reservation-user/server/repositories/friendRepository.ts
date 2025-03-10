@@ -1,7 +1,10 @@
 import { SqlError } from "@effect/sql";
-import { Context, Effect } from "effect";
+import { Context, Effect, Option } from "effect";
 import { UnknownException } from "effect/Cause";
-import { userUserGroupMember } from "sport-reservation-db/schema";
+import {
+  userUserGroup,
+  userUserGroupMember,
+} from "sport-reservation-db/schema";
 
 export class FriendRepository
   extends /*@__PURE__*/ Context.Tag("FriendRepository")<
@@ -63,6 +66,13 @@ export class FriendRepository
           typeof userUserGroupMember.$inferSelect,
           "groupId" | "userId" | "status"
         >[],
+        SqlError.SqlError
+      >;
+      getFriendGroupId: (
+        userId: string,
+        friendId: string,
+      ) => Effect.Effect<
+        Option.Option<Pick<typeof userUserGroup.$inferSelect, "publicId">>,
         SqlError.SqlError
       >;
     }

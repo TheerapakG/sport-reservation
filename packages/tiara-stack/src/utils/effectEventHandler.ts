@@ -85,8 +85,8 @@ export type EffectEffectEventHandlerType<
 
 export type EffectStreamEventHandlerType<ResponseType = unknown, R = never> = (
   sourceStream: Stream.Stream<void>,
-) => Stream.Stream<
-  ResponseType,
+) => Effect.Effect<
+  Stream.Stream<ResponseType, unknown, EventContext | EventParamsContext | R>,
   unknown,
   EventContext | EventParamsContext | R
 >;
@@ -221,7 +221,8 @@ const effectStreamEventHandler = <
           );
 
           const handlerStream = pipe(
-            handler(sourceStream),
+            Stream.fromEffect(handler(sourceStream)),
+            Stream.flatMap((s) => s),
             Stream.flatMap((item) =>
               Stream.fromEffect(
                 effectType(responseType as ResponseValidatorType, item),

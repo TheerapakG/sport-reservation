@@ -1,7 +1,7 @@
 import { PgDrizzle } from "@effect/sql-drizzle/Pg";
 import { and, eq, isNull, not, sql } from "drizzle-orm";
 import { intersect } from "drizzle-orm/pg-core";
-import { Effect, Layer } from "effect";
+import { Effect, Layer, Option } from "effect";
 import {
   userUserGroup,
   userUserGroupMember,
@@ -53,11 +53,11 @@ export const friendRepositoryImpl = /*@__PURE__*/ Layer.effect(
           const userFriendGroupIds = db.$with("user_friend_group_ids").as(
             intersect(
               db
-                .select({ id: userUserGroup.id })
+                .select({ id: userUserGroup.publicId })
                 .from(userUserGroup)
                 .innerJoin(
                   userUserGroupMember,
-                  eq(userUserGroup.id, userUserGroupMember.groupId),
+                  eq(userUserGroup.publicId, userUserGroupMember.groupId),
                 )
                 .where(
                   and(
@@ -69,11 +69,11 @@ export const friendRepositoryImpl = /*@__PURE__*/ Layer.effect(
                   ),
                 ),
               db
-                .select({ id: userUserGroup.id })
+                .select({ id: userUserGroup.publicId })
                 .from(userUserGroup)
                 .innerJoin(
                   userUserGroupMember,
-                  eq(userUserGroup.id, userUserGroupMember.groupId),
+                  eq(userUserGroup.publicId, userUserGroupMember.groupId),
                 )
                 .where(
                   and(
@@ -111,11 +111,11 @@ export const friendRepositoryImpl = /*@__PURE__*/ Layer.effect(
           const userFriendGroupIds = db.$with("user_friend_group_ids").as(
             intersect(
               db
-                .select({ id: userUserGroup.id })
+                .select({ id: userUserGroup.publicId })
                 .from(userUserGroup)
                 .innerJoin(
                   userUserGroupMember,
-                  eq(userUserGroup.id, userUserGroupMember.groupId),
+                  eq(userUserGroup.publicId, userUserGroupMember.groupId),
                 )
                 .where(
                   and(
@@ -127,11 +127,11 @@ export const friendRepositoryImpl = /*@__PURE__*/ Layer.effect(
                   ),
                 ),
               db
-                .select({ id: userUserGroup.id })
+                .select({ id: userUserGroup.publicId })
                 .from(userUserGroup)
                 .innerJoin(
                   userUserGroupMember,
-                  eq(userUserGroup.id, userUserGroupMember.groupId),
+                  eq(userUserGroup.publicId, userUserGroupMember.groupId),
                 )
                 .where(
                   and(
@@ -168,11 +168,11 @@ export const friendRepositoryImpl = /*@__PURE__*/ Layer.effect(
         Effect.gen(function* () {
           const userFriendGroupIds = db.$with("user_friend_group_ids").as(
             db
-              .select({ id: userUserGroup.id })
+              .select({ id: userUserGroup.publicId })
               .from(userUserGroup)
               .innerJoin(
                 userUserGroupMember,
-                eq(userUserGroup.id, userUserGroupMember.groupId),
+                eq(userUserGroup.publicId, userUserGroupMember.groupId),
               )
               .where(
                 and(
@@ -206,11 +206,11 @@ export const friendRepositoryImpl = /*@__PURE__*/ Layer.effect(
           const userFriendGroupIds = db.$with("user_friend_group_ids").as(
             intersect(
               db
-                .select({ id: userUserGroup.id })
+                .select({ id: userUserGroup.publicId })
                 .from(userUserGroup)
                 .innerJoin(
                   userUserGroupMember,
-                  eq(userUserGroup.id, userUserGroupMember.groupId),
+                  eq(userUserGroup.publicId, userUserGroupMember.groupId),
                 )
                 .where(
                   and(
@@ -222,11 +222,11 @@ export const friendRepositoryImpl = /*@__PURE__*/ Layer.effect(
                   ),
                 ),
               db
-                .select({ id: userUserGroup.id })
+                .select({ id: userUserGroup.publicId })
                 .from(userUserGroup)
                 .innerJoin(
                   userUserGroupMember,
-                  eq(userUserGroup.id, userUserGroupMember.groupId),
+                  eq(userUserGroup.publicId, userUserGroupMember.groupId),
                 )
                 .where(
                   and(
@@ -263,11 +263,11 @@ export const friendRepositoryImpl = /*@__PURE__*/ Layer.effect(
         Effect.gen(function* () {
           const userFriendGroupIds = db.$with("user_friend_group_ids").as(
             db
-              .select({ id: userUserGroup.id })
+              .select({ id: userUserGroup.publicId })
               .from(userUserGroup)
               .innerJoin(
                 userUserGroupMember,
-                eq(userUserGroup.id, userUserGroupMember.groupId),
+                eq(userUserGroup.publicId, userUserGroupMember.groupId),
               )
               .where(
                 and(
@@ -296,6 +296,46 @@ export const friendRepositoryImpl = /*@__PURE__*/ Layer.effect(
               ),
             );
         }).pipe(Effect.withSpan("friendRepositoryImpl.getFriends")),
+      getFriendGroupId: (userId, friendId) =>
+        Effect.gen(function* () {
+          const userFriendGroupIds = yield* intersect(
+            db
+              .select({ publicId: userUserGroup.publicId })
+              .from(userUserGroup)
+              .innerJoin(
+                userUserGroupMember,
+                eq(userUserGroup.publicId, userUserGroupMember.groupId),
+              )
+              .where(
+                and(
+                  isNull(userUserGroup.deletedAt),
+                  isNull(userUserGroupMember.deletedAt),
+                  eq(userUserGroup.type, "friend"),
+                  eq(userUserGroupMember.userId, userId),
+                  eq(userUserGroupMember.status, "member"),
+                ),
+              ),
+            db
+              .select({ publicId: userUserGroup.publicId })
+              .from(userUserGroup)
+              .innerJoin(
+                userUserGroupMember,
+                eq(userUserGroup.publicId, userUserGroupMember.groupId),
+              )
+              .where(
+                and(
+                  isNull(userUserGroup.deletedAt),
+                  isNull(userUserGroupMember.deletedAt),
+                  eq(userUserGroup.type, "friend"),
+                  eq(userUserGroupMember.userId, friendId),
+                  eq(userUserGroupMember.status, "member"),
+                ),
+              ),
+          );
+
+          if (userFriendGroupIds.length === 0) return Option.none();
+          return Option.some(userFriendGroupIds[0]);
+        }).pipe(Effect.withSpan("friendRepositoryImpl.getFriendGroup")),
     });
   }),
 );

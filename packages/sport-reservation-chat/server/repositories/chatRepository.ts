@@ -7,20 +7,26 @@ export class ChatRepository
   extends /*@__PURE__*/ Context.Tag("ChatRepository")<
     ChatRepository,
     {
-      getChat: (
+      getChatByGroupId: (
         groupId: string,
       ) => Effect.Effect<
         Option.Option<typeof chatChat.$inferSelect>,
         SqlError.SqlError
       >;
-      subscribeChatMessages: (userId: string) => Effect.Effect<
+      getChatByChatId: (
+        chatId: string,
+      ) => Effect.Effect<
+        Option.Option<typeof chatChat.$inferSelect>,
+        SqlError.SqlError
+      >;
+      subscribeUserChatMessages: (userId: string) => Effect.Effect<
         {
           subscriptionId: string;
           messages: Stream.Stream<typeof chatChatMessage.$inferSelect>;
         },
         UnknownException | SqlError.SqlError
       >;
-      unsubscribeChatMessages: (
+      unsubscribeUserChatMessages: (
         subscriptionId: string,
       ) => Effect.Effect<void, UnknownException | SqlError.SqlError>;
       getChatMessages: (opts: {
