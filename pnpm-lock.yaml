@@ -309,6 +309,9 @@ importers:
       sport-reservation-upload:
         specifier: workspace:*
         version: link:../sport-reservation-upload
+      sport-reservation-user:
+        specifier: workspace:*
+        version: link:../sport-reservation-user
       tiara-stack:
         specifier: workspace:*
         version: link:../tiara-stack
