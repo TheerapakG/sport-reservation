@@ -1,16 +1,8 @@
-import { SqlError } from "@effect/sql";
-import { Context, Effect, Option } from "effect";
+import { Context } from "effect";
+import { PlatformLoginDbRepository } from "./platformLoginDbRepository";
 
 export class GoogleLoginDbRepository
   extends /*@__PURE__*/ Context.Tag("GoogleLoginDbRepository")<
     GoogleLoginDbRepository,
-    {
-      findUserIdByGoogleId: (data: {
-        googleId: string;
-      }) => Effect.Effect<Option.Option<{ userId: string }>, SqlError.SqlError>;
-      associateUserIdWithGoogleId: (data: {
-        userId: string;
-        googleId: string;
-      }) => Effect.Effect<void, SqlError.SqlError>;
-    }
+    Context.Tag.Service<typeof PlatformLoginDbRepository>
   >() {}

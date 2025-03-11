@@ -38,8 +38,8 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
 
     const lineLoginDbRepository = yield* LineLoginDbRepository;
     const { userId } = Option.getOrUndefined(
-      yield* lineLoginDbRepository.findUserIdByLineId({
-        lineId: query.lineId,
+      yield* lineLoginDbRepository.findUserIdByPlatformId({
+        platformId: query.lineId,
       }),
     ) ?? { userId: undefined };
 

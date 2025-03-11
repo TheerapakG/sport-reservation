@@ -5,11 +5,13 @@ import {
 } from "$/effectEventHandler";
 import { type } from "arktype";
 import { Effect, pipe } from "effect";
+import { parseCookies } from "h3";
 import { getSubjectTypeFromToken } from "sport-reservation-oauth-common/subjects";
 import { UserClient } from "sport-reservation-user/client";
 import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
 import { BaseError, OAuthError } from "tiara-stack/models/errors";
 import { OAuthClient } from "~/layers";
+import { ChatDbRepository } from "~/repositories/chatDbRepository";
 import { ChatRepository } from "~/repositories/chatRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
@@ -48,8 +50,8 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
       ),
     );
 
-    const chatRepository = yield* ChatRepository;
-    const { groupId } = yield* yield* chatRepository.getChatByChatId(chatId);
+    const chatDbRepository = yield* ChatDbRepository;
+    const { groupId } = yield* yield* chatDbRepository.getChatByChatId(chatId);
 
     const userClient = yield* UserClient;
     const groupStatus = yield* userClient.getGroupStatus({
@@ -69,6 +71,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
       },
     });
 
+    const chatRepository = yield* ChatRepository;
     yield* chatRepository.sendChatMessage({
       chatId,
       senderId: userId,

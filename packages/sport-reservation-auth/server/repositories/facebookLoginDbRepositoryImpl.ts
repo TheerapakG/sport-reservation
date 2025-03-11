@@ -10,7 +10,7 @@ export const facebookLoginDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
     const db = yield* PgDrizzle;
 
     return FacebookLoginDbRepository.of({
-      findUserIdByFacebookId: ({ facebookId }) =>
+      findUserIdByPlatformId: ({ platformId }) =>
         Effect.gen(function* () {
           const users = yield* db
             .select()
@@ -18,7 +18,7 @@ export const facebookLoginDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
             .where(
               and(
                 isNull(authUserFacebookConnection.deletedAt),
-                eq(authUserFacebookConnection.facebookId, facebookId),
+                eq(authUserFacebookConnection.facebookId, platformId),
               ),
             )
             .limit(1);
@@ -28,22 +28,22 @@ export const facebookLoginDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
           return Option.some({ userId: users[0].userId });
         }).pipe(
           Effect.withSpan(
-            "facebookLoginDbRepositoryImpl.findUserIdByFacebookId",
+            "facebookLoginDbRepositoryImpl.findUserIdByPlatformId",
           ),
         ),
-      associateUserIdWithFacebookId: ({ userId, facebookId }) =>
+      associateUserIdWithPlatformId: ({ userId, platformId }) =>
         Effect.gen(function* () {
           yield* db
             .insert(authUserFacebookConnection)
-            .values({ userId, facebookId })
+            .values({ userId, facebookId: platformId })
             .onConflictDoUpdate({
               target: authUserFacebookConnection.userId,
-              set: { facebookId },
+              set: { facebookId: platformId },
               setWhere: eq(authUserFacebookConnection.userId, userId),
             });
         }).pipe(
           Effect.withSpan(
-            "facebookLoginDbRepositoryImpl.associateUserIdWithFacebookId",
+            "facebookLoginDbRepositoryImpl.associateUserIdWithPlatformId",
           ),
         ),
     });

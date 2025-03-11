@@ -10,7 +10,7 @@ export const lineLoginDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
     const db = yield* PgDrizzle;
 
     return LineLoginDbRepository.of({
-      findUserIdByLineId: ({ lineId }) =>
+      findUserIdByPlatformId: ({ platformId }) =>
         Effect.gen(function* () {
           const users = yield* db
             .select()
@@ -18,7 +18,7 @@ export const lineLoginDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
             .where(
               and(
                 isNull(authUserLineConnection.deletedAt),
-                eq(authUserLineConnection.lineId, lineId),
+                eq(authUserLineConnection.lineId, platformId),
               ),
             )
             .limit(1);
@@ -27,21 +27,21 @@ export const lineLoginDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
 
           return Option.some({ userId: users[0].userId });
         }).pipe(
-          Effect.withSpan("lineLoginDbRepositoryImpl.findUserIdByLineId"),
+          Effect.withSpan("lineLoginDbRepositoryImpl.findUserIdByPlatformId"),
         ),
-      associateUserIdWithLineId: ({ userId, lineId }) =>
+      associateUserIdWithPlatformId: ({ userId, platformId }) =>
         Effect.gen(function* () {
           yield* db
             .insert(authUserLineConnection)
-            .values({ userId, lineId })
+            .values({ userId, lineId: platformId })
             .onConflictDoUpdate({
               target: authUserLineConnection.userId,
-              set: { lineId },
+              set: { lineId: platformId },
               setWhere: eq(authUserLineConnection.userId, userId),
             });
         }).pipe(
           Effect.withSpan(
-            "lineLoginDbRepositoryImpl.associateUserIdWithLineId",
+            "lineLoginDbRepositoryImpl.associateUserIdWithPlatformId",
           ),
         ),
     });

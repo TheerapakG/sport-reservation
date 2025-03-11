@@ -38,8 +38,8 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
 
     const facebookLoginDbRepository = yield* FacebookLoginDbRepository;
     const { userId } = Option.getOrUndefined(
-      yield* facebookLoginDbRepository.findUserIdByFacebookId({
-        facebookId: query.facebookId.toString(),
+      yield* facebookLoginDbRepository.findUserIdByPlatformId({
+        platformId: query.facebookId.toString(),
       }),
     ) ?? { userId: undefined };
 
