@@ -38,8 +38,8 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
 
     const googleLoginDbRepository = yield* GoogleLoginDbRepository;
     const { userId } = Option.getOrUndefined(
-      yield* googleLoginDbRepository.findUserIdByGoogleId({
-        googleId: query.googleId,
+      yield* googleLoginDbRepository.findUserIdByPlatformId({
+        platformId: query.googleId,
       }),
     ) ?? { userId: undefined };
 

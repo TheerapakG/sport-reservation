@@ -10,7 +10,7 @@ export const googleLoginDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
     const db = yield* PgDrizzle;
 
     return GoogleLoginDbRepository.of({
-      findUserIdByGoogleId: ({ googleId }) =>
+      findUserIdByPlatformId: ({ platformId }) =>
         Effect.gen(function* () {
           const users = yield* db
             .select()
@@ -18,7 +18,7 @@ export const googleLoginDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
             .where(
               and(
                 isNull(authUserGoogleConnection.deletedAt),
-                eq(authUserGoogleConnection.googleId, googleId),
+                eq(authUserGoogleConnection.googleId, platformId),
               ),
             )
             .limit(1);
@@ -27,21 +27,21 @@ export const googleLoginDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
 
           return Option.some({ userId: users[0].userId });
         }).pipe(
-          Effect.withSpan("googleLoginDbRepositoryImpl.findUserIdByGoogleId"),
+          Effect.withSpan("googleLoginDbRepositoryImpl.findUserIdByPlatformId"),
         ),
-      associateUserIdWithGoogleId: ({ userId, googleId }) =>
+      associateUserIdWithPlatformId: ({ userId, platformId }) =>
         Effect.gen(function* () {
           yield* db
             .insert(authUserGoogleConnection)
-            .values({ userId, googleId })
+            .values({ userId, googleId: platformId })
             .onConflictDoUpdate({
               target: authUserGoogleConnection.userId,
-              set: { googleId },
+              set: { googleId: platformId },
               setWhere: eq(authUserGoogleConnection.userId, userId),
             });
         }).pipe(
           Effect.withSpan(
-            "googleLoginDbRepositoryImpl.associateUserIdWithGoogleId",
+            "googleLoginDbRepositoryImpl.associateUserIdWithPlatformId",
           ),
         ),
     });

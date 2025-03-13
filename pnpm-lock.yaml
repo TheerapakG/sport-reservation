@@ -282,6 +282,9 @@ importers:
       '@msgpack/msgpack':
         specifier: ^3.1.0
         version: 3.1.0
+      '@openauthjs/openauth':
+        specifier: 'catalog:'
+        version: 0.3.7(arctic@2.3.4)(hono@4.6.20)
       arktype:
         specifier: 'catalog:'
         version: 2.0.0

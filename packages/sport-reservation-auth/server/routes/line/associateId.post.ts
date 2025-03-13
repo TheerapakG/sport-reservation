@@ -63,9 +63,9 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     );
 
     const lineLoginDbRepository = yield* LineLoginDbRepository;
-    yield* lineLoginDbRepository.associateUserIdWithLineId({
+    yield* lineLoginDbRepository.associateUserIdWithPlatformId({
       userId: id,
-      lineId: body.lineId,
+      platformId: body.lineId,
     });
 
     return {};

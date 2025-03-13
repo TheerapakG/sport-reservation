@@ -63,9 +63,9 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     );
 
     const facebookLoginDbRepository = yield* FacebookLoginDbRepository;
-    yield* facebookLoginDbRepository.associateUserIdWithFacebookId({
+    yield* facebookLoginDbRepository.associateUserIdWithPlatformId({
       userId: id,
-      facebookId: body.facebookId.toString(),
+      platformId: body.facebookId.toString(),
     });
 
     return {};

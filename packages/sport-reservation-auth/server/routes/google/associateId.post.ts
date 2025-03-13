@@ -63,9 +63,9 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     );
 
     const googleLoginDbRepository = yield* GoogleLoginDbRepository;
-    yield* googleLoginDbRepository.associateUserIdWithGoogleId({
+    yield* googleLoginDbRepository.associateUserIdWithPlatformId({
       userId: id,
-      googleId: body.googleId,
+      platformId: body.googleId,
     });
 
     return {};

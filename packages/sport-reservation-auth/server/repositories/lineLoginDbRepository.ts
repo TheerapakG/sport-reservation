@@ -1,16 +1,8 @@
-import { SqlError } from "@effect/sql";
-import { Context, Effect, Option } from "effect";
+import { Context } from "effect";
+import { PlatformLoginDbRepository } from "./platformLoginDbRepository";
 
 export class LineLoginDbRepository
   extends /*@__PURE__*/ Context.Tag("LineLoginDbRepository")<
     LineLoginDbRepository,
-    {
-      findUserIdByLineId: (data: {
-        lineId: string;
-      }) => Effect.Effect<Option.Option<{ userId: string }>, SqlError.SqlError>;
-      associateUserIdWithLineId: (data: {
-        userId: string;
-        lineId: string;
-      }) => Effect.Effect<void, SqlError.SqlError>;
-    }
+    Context.Tag.Service<typeof PlatformLoginDbRepository>
   >() {}

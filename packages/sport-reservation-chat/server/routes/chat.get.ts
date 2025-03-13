@@ -5,12 +5,13 @@ import {
 } from "$/effectEventHandler";
 import { type } from "arktype";
 import { Effect, pipe } from "effect";
+import { parseCookies } from "h3";
 import { getSubjectTypeFromToken } from "sport-reservation-oauth-common/subjects";
 import { UserClient } from "sport-reservation-user/client";
 import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
 import { BaseError, OAuthError } from "tiara-stack/models/errors";
 import { OAuthClient } from "~/layers";
-import { ChatRepository } from "~/repositories/chatRepository";
+import { ChatDbRepository } from "~/repositories/chatDbRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
   name: "getChatByGroupId",
@@ -58,8 +59,9 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
       return yield* Effect.fail(new BaseError("not_member"));
     }
 
-    const chatRepository = yield* ChatRepository;
-    const { publicId } = yield* yield* chatRepository.getChatByGroupId(groupId);
+    const chatDbRepository = yield* ChatDbRepository;
+    const { publicId } =
+      yield* yield* chatDbRepository.getChatByGroupId(groupId);
 
     return {
       chatId: publicId,
