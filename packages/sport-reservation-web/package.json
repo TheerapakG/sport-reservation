@@ -54,6 +54,7 @@
     "clsx": "^2.1.1",
     "cmdk": "1.0.4",
     "date-fns": "^3.6.0",
+    "dayjs": "^1.11.13",
     "destr": "^2.0.3",
     "embla-carousel-react": "^8.5.2",
     "input-otp": "^1.4.2",
@@ -78,8 +79,8 @@
     "effect": "catalog:",
     "h3": "catalog:",
     "sport-reservation-oauth-common": "workspace:*",
-    "tiara-stack": "workspace:*",
-    "sport-reservation-user": "workspace:*"
+    "sport-reservation-user": "workspace:*",
+    "tiara-stack": "workspace:*"
   },
   "devDependencies": {
     "@eslint/compat": "catalog:",
