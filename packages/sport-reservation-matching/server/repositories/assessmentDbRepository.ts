@@ -1,31 +1,31 @@
 import { SqlError } from "@effect/sql";
 import { Context, Effect } from "effect";
 import {
-  badmintonAssessmentSchema,
-  generalAssessmentSchema,
-  runningAssessmentSchema,
-  tennisAssessmentSchema,
+  badmintonAssessmentSchemas,
+  generalAssessmentSchemas,
+  runningAssessmentSchemas,
+  tennisAssessmentSchemas,
 } from "~/models/assessment";
 
 export class AssessmentDbRepository
   extends /*@__PURE__*/ Context.Tag("AssessmentDbRepository")<
     AssessmentDbRepository,
     {
-      createGeneralAssessment: (
+      createGeneralV1Assessment: (
         userId: string,
-        assessment: typeof generalAssessmentSchema.infer,
+        assessment: (typeof generalAssessmentSchemas)[1]["infer"],
       ) => Effect.Effect<void, SqlError.SqlError>;
-      createBadmintonAssessment: (
+      createBadmintonV1Assessment: (
         userId: string,
-        assessment: typeof badmintonAssessmentSchema.infer,
+        assessment: (typeof badmintonAssessmentSchemas)[1]["infer"],
       ) => Effect.Effect<void, SqlError.SqlError>;
-      createTennisAssessment: (
+      createTennisV1Assessment: (
         userId: string,
-        assessment: typeof tennisAssessmentSchema.infer,
+        assessment: (typeof tennisAssessmentSchemas)[1]["infer"],
       ) => Effect.Effect<void, SqlError.SqlError>;
-      createRunningAssessment: (
+      createRunningV1Assessment: (
         userId: string,
-        assessment: typeof runningAssessmentSchema.infer,
+        assessment: (typeof runningAssessmentSchemas)[1]["infer"],
       ) => Effect.Effect<void, SqlError.SqlError>;
     }
   >() {}

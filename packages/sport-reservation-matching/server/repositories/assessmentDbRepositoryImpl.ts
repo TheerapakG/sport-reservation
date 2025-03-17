@@ -25,7 +25,7 @@ export const assessmentDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
   /*@__PURE__*/ Effect.gen(function* () {
     const db = yield* PgDrizzle;
     return AssessmentDbRepository.of({
-      createGeneralAssessment: (userId, userGeneralAssessment) =>
+      createGeneralV1Assessment: (userId, userGeneralAssessment) =>
         Effect.gen(function* () {
           const {
             vigorousDays,
@@ -76,7 +76,7 @@ export const assessmentDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
         }).pipe(
           Effect.withSpan("assessmentDbRepositoryImpl.createGeneralAssessment"),
         ),
-      createBadmintonAssessment: (userId, userBadmintonAssessment) =>
+      createBadmintonV1Assessment: (userId, userBadmintonAssessment) =>
         Effect.gen(function* () {
           const {
             skillLevel,
@@ -162,7 +162,7 @@ export const assessmentDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
             "assessmentDbRepositoryImpl.createBadmintonAssessment",
           ),
         ),
-      createTennisAssessment: (userId, userTennisAssessment) =>
+      createTennisV1Assessment: (userId, userTennisAssessment) =>
         Effect.gen(function* () {
           const {
             skillLevel,
@@ -250,7 +250,7 @@ export const assessmentDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
         }).pipe(
           Effect.withSpan("assessmentDbRepositoryImpl.createTennisAssessment"),
         ),
-      createRunningAssessment: (userId, userRunningAssessment) =>
+      createRunningV1Assessment: (userId, userRunningAssessment) =>
         Effect.gen(function* () {
           const {
             distance,
