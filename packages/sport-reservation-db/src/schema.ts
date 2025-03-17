@@ -383,7 +383,10 @@ export const matchingUserGeneralAssessment = pgTable(
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
   },
   (table) => [
-    index("matching_user_general_assessment_user_id_idx").on(table.userId),
+    uniqueIndex("matching_user_general_assessment_user_id_idx").on(
+      table.userId,
+      table.assessmentVersion,
+    ),
   ],
 );
 
@@ -404,7 +407,10 @@ export const matchingUserBadmintonAssessment = pgTable(
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
   },
   (table) => [
-    index("matching_user_badminton_assessment_user_id_idx").on(table.userId),
+    uniqueIndex("matching_user_badminton_assessment_user_id_idx").on(
+      table.userId,
+      table.assessmentVersion,
+    ),
   ],
 );
 
@@ -425,7 +431,10 @@ export const matchingUserTennisAssessment = pgTable(
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
   },
   (table) => [
-    index("matching_user_tennis_assessment_user_id_idx").on(table.userId),
+    uniqueIndex("matching_user_tennis_assessment_user_id_idx").on(
+      table.userId,
+      table.assessmentVersion,
+    ),
   ],
 );
 
@@ -446,21 +455,33 @@ export const matchingUserRunningAssessment = pgTable(
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
   },
   (table) => [
-    index("matching_user_running_assessment_user_id_idx").on(table.userId),
+    uniqueIndex("matching_user_running_assessment_user_id_idx").on(
+      table.userId,
+      table.assessmentVersion,
+    ),
   ],
 );
 
-export const matchingUserGeneralAssessmentVector = pgTable(
-  "matching_user_general_assessment_vector",
+export const VECTOR_PARTITIONS = {
+  GENERAL: [1, 16],
+  BADMINTON: [17, 16],
+  TENNIS: [33, 16],
+  RUNNING: [49, 16],
+};
+
+export const matchingUserAssessmentVector = pgTable(
+  "matching_user_assessment_vector",
   {
     id: serial("id").primaryKey(),
     userId: uuid("user_id").notNull(),
-    vectorVersion: integer("vector_version").notNull(),
+    vectorVersion: vector("vector_version", {
+      dimensions: 16,
+    }).notNull(),
     passiveMatchingVector: vector("passive_matching_vector", {
-      dimensions: 64,
+      dimensions: 256,
     }).notNull(),
     activeMatchingVector: vector("active_matching_vector", {
-      dimensions: 64,
+      dimensions: 256,
     }).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
@@ -472,23 +493,23 @@ export const matchingUserGeneralAssessmentVector = pgTable(
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
   },
   (table) => [
-    index("matching_user_general_assessment_vector_user_id_idx").on(
+    uniqueIndex("matching_user_assessment_vector_user_id_idx").on(
       table.userId,
+      table.vectorVersion,
     ),
   ],
 );
 
-export const matchingUserBadmintonAssessmentVector = pgTable(
-  "matching_user_badminton_assessment_vector",
+export const matchingCursor = pgTable(
+  "matching_cursor",
   {
     id: serial("id").primaryKey(),
-    userId: uuid("user_id").notNull(),
-    vectorVersion: integer("vector_version").notNull(),
-    passiveMatchingVector: vector("passive_matching_vector", {
-      dimensions: 64,
+    publicId: uuid("public_id").defaultRandom().notNull(),
+    vectorVersion: vector("vector_version", {
+      dimensions: 16,
     }).notNull(),
-    activeMatchingVector: vector("active_matching_vector", {
-      dimensions: 64,
+    vector: vector("vector", {
+      dimensions: 256,
     }).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
@@ -500,64 +521,7 @@ export const matchingUserBadmintonAssessmentVector = pgTable(
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
   },
   (table) => [
-    index("matching_user_badminton_assessment_vector_user_id_idx").on(
-      table.userId,
-    ),
-  ],
-);
-
-export const matchingUserTennisAssessmentVector = pgTable(
-  "matching_user_tennis_assessment_vector",
-  {
-    id: serial("id").primaryKey(),
-    userId: uuid("user_id").notNull(),
-    vectorVersion: integer("vector_version").notNull(),
-    passiveMatchingVector: vector("passive_matching_vector", {
-      dimensions: 64,
-    }).notNull(),
-    activeMatchingVector: vector("active_matching_vector", {
-      dimensions: 64,
-    }).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .defaultNow()
-      .notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true })
-      .defaultNow()
-      .notNull()
-      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
-    deletedAt: timestamp("deleted_at", { withTimezone: true }),
-  },
-  (table) => [
-    index("matching_user_tennis_assessment_vector_user_id_idx").on(
-      table.userId,
-    ),
-  ],
-);
-
-export const matchingUserRunningAssessmentVector = pgTable(
-  "matching_user_running_assessment_vector",
-  {
-    id: serial("id").primaryKey(),
-    userId: uuid("user_id").notNull(),
-    vectorVersion: integer("vector_version").notNull(),
-    passiveMatchingVector: vector("passive_matching_vector", {
-      dimensions: 64,
-    }).notNull(),
-    activeMatchingVector: vector("active_matching_vector", {
-      dimensions: 64,
-    }).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .defaultNow()
-      .notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true })
-      .defaultNow()
-      .notNull()
-      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
-    deletedAt: timestamp("deleted_at", { withTimezone: true }),
-  },
-  (table) => [
-    index("matching_user_running_assessment_vector_user_id_idx").on(
-      table.userId,
-    ),
+    uniqueIndex("matching_cursor_public_id_idx").on(table.publicId),
+    index("matching_cursor_vector_version_idx").on(table.vectorVersion),
   ],
 );

@@ -1,14 +1,12 @@
 import { PgDrizzle } from "@effect/sql-drizzle/Pg";
+import { sql } from "drizzle-orm";
 import { Array, Effect, Layer, Number } from "effect";
 import {
+  matchingUserAssessmentVector,
   matchingUserBadmintonAssessment,
-  matchingUserBadmintonAssessmentVector,
   matchingUserGeneralAssessment,
-  matchingUserGeneralAssessmentVector,
   matchingUserRunningAssessment,
-  matchingUserRunningAssessmentVector,
   matchingUserTennisAssessment,
-  matchingUserTennisAssessmentVector,
 } from "sport-reservation-db/schema";
 import { AssessmentDbRepository } from "./assessmentDbRepository";
 
@@ -50,6 +48,17 @@ export const assessmentDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
               0.5 * minMaxScaler({ minimum: 200, maximum: 8640 })(totalMET),
           };
 
+          const passiveMatchingVector = Array.pad(
+            [passiveMatchingVectorComponents.totalMET],
+            16,
+            0,
+          );
+          const activeMatchingVector = Array.pad(
+            [activeMatchingVectorComponents.totalMET],
+            16,
+            0,
+          );
+
           yield* db
             .insert(matchingUserGeneralAssessment)
             .values({
@@ -59,20 +68,36 @@ export const assessmentDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
             })
             .returning({ id: matchingUserGeneralAssessment.id });
 
-          yield* db.insert(matchingUserGeneralAssessmentVector).values({
-            userId,
-            vectorVersion: 1,
-            passiveMatchingVector: Array.pad(
-              [passiveMatchingVectorComponents.totalMET],
-              64,
-              0,
-            ),
-            activeMatchingVector: Array.pad(
-              [activeMatchingVectorComponents.totalMET],
-              64,
-              0,
-            ),
-          });
+          yield* db
+            .insert(matchingUserAssessmentVector)
+            .values({
+              userId,
+              vectorVersion: Array.pad([1, 1, 1, 1], 16, 0),
+              passiveMatchingVector: [
+                ...passiveMatchingVector,
+                ...Array.replicate(0, 240),
+              ],
+              activeMatchingVector: [
+                ...activeMatchingVector,
+                ...Array.replicate(0, 240),
+              ],
+            })
+            .onConflictDoUpdate({
+              target: [
+                matchingUserAssessmentVector.userId,
+                matchingUserAssessmentVector.vectorVersion,
+              ],
+              set: {
+                passiveMatchingVector: sql`
+                    '${passiveMatchingVector}'::vector || 
+                    subvector(${matchingUserAssessmentVector.passiveMatchingVector}, 17, 240)
+                  `,
+                activeMatchingVector: sql`
+                    '${activeMatchingVector}'::vector || 
+                    subvector(${matchingUserAssessmentVector.activeMatchingVector}, 17, 240)
+                  `,
+              },
+            });
         }).pipe(
           Effect.withSpan("assessmentDbRepositoryImpl.createGeneralAssessment"),
         ),
@@ -118,45 +143,73 @@ export const assessmentDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
               1 * minMaxScaler({ minimum: 0, maximum: 360 })(playDuration),
           };
 
+          const passiveMatchingVector = Array.pad(
+            [
+              passiveMatchingVectorComponents.skillLevel,
+              passiveMatchingVectorComponents.yearsOfExperience,
+              passiveMatchingVectorComponents.offensive,
+              passiveMatchingVectorComponents.defensive,
+              passiveMatchingVectorComponents.singles,
+              passiveMatchingVectorComponents.doubles,
+              passiveMatchingVectorComponents.playDuration,
+            ],
+            16,
+            0,
+          );
+          const activeMatchingVector = Array.pad(
+            [
+              activeMatchingVectorComponents.skillLevel,
+              activeMatchingVectorComponents.yearsOfExperience,
+              activeMatchingVectorComponents.offensive,
+              activeMatchingVectorComponents.defensive,
+              activeMatchingVectorComponents.singles,
+              activeMatchingVectorComponents.doubles,
+              activeMatchingVectorComponents.playDuration,
+            ],
+            16,
+            0,
+          );
+
+          yield* db.insert(matchingUserBadmintonAssessment).values({
+            userId,
+            assessmentVersion: 1,
+            assessment: userBadmintonAssessment,
+          });
+
           yield* db
-            .insert(matchingUserBadmintonAssessment)
+            .insert(matchingUserAssessmentVector)
             .values({
               userId,
-              assessmentVersion: 1,
-              assessment: userBadmintonAssessment,
+              vectorVersion: Array.pad([1, 1, 1, 1], 16, 0),
+              passiveMatchingVector: [
+                ...Array.replicate(0, 16),
+                ...passiveMatchingVector,
+                ...Array.replicate(0, 224),
+              ],
+              activeMatchingVector: [
+                ...Array.replicate(0, 16),
+                ...activeMatchingVector,
+                ...Array.replicate(0, 224),
+              ],
             })
-            .returning({ id: matchingUserBadmintonAssessment.id });
-
-          yield* db.insert(matchingUserBadmintonAssessmentVector).values({
-            userId,
-            vectorVersion: 1,
-            passiveMatchingVector: Array.pad(
-              [
-                passiveMatchingVectorComponents.skillLevel,
-                passiveMatchingVectorComponents.yearsOfExperience,
-                passiveMatchingVectorComponents.offensive,
-                passiveMatchingVectorComponents.defensive,
-                passiveMatchingVectorComponents.singles,
-                passiveMatchingVectorComponents.doubles,
-                passiveMatchingVectorComponents.playDuration,
+            .onConflictDoUpdate({
+              target: [
+                matchingUserAssessmentVector.userId,
+                matchingUserAssessmentVector.vectorVersion,
               ],
-              64,
-              0,
-            ),
-            activeMatchingVector: Array.pad(
-              [
-                activeMatchingVectorComponents.skillLevel,
-                activeMatchingVectorComponents.yearsOfExperience,
-                activeMatchingVectorComponents.offensive,
-                activeMatchingVectorComponents.defensive,
-                activeMatchingVectorComponents.singles,
-                activeMatchingVectorComponents.doubles,
-                activeMatchingVectorComponents.playDuration,
-              ],
-              64,
-              0,
-            ),
-          });
+              set: {
+                passiveMatchingVector: sql`
+                    subvector(${matchingUserAssessmentVector.passiveMatchingVector}, 1, 16) || 
+                    '${passiveMatchingVector}'::vector || 
+                    subvector(${matchingUserAssessmentVector.passiveMatchingVector}, 33, 224)
+                  `,
+                activeMatchingVector: sql`
+                    subvector(${matchingUserAssessmentVector.activeMatchingVector}, 1, 16) || 
+                    '${activeMatchingVector}'::vector || 
+                    subvector(${matchingUserAssessmentVector.activeMatchingVector}, 33, 224)
+                  `,
+              },
+            });
         }).pipe(
           Effect.withSpan(
             "assessmentDbRepositoryImpl.createBadmintonAssessment",
@@ -204,6 +257,37 @@ export const assessmentDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
               1 * minMaxScaler({ minimum: 0, maximum: 360 })(playDuration),
           };
 
+          const passiveMatchingVector = Array.pad(
+            [
+              passiveMatchingVectorComponents.skillLevel,
+              passiveMatchingVectorComponents.yearsOfExperience,
+              passiveMatchingVectorComponents.forehand,
+              passiveMatchingVectorComponents.backhand,
+              passiveMatchingVectorComponents.volley,
+              passiveMatchingVectorComponents.serve,
+              passiveMatchingVectorComponents.singles,
+              passiveMatchingVectorComponents.doubles,
+              passiveMatchingVectorComponents.playDuration,
+            ],
+            16,
+            0,
+          );
+          const activeMatchingVector = Array.pad(
+            [
+              activeMatchingVectorComponents.skillLevel,
+              activeMatchingVectorComponents.yearsOfExperience,
+              activeMatchingVectorComponents.forehand,
+              activeMatchingVectorComponents.backhand,
+              activeMatchingVectorComponents.volley,
+              activeMatchingVectorComponents.serve,
+              activeMatchingVectorComponents.singles,
+              activeMatchingVectorComponents.doubles,
+              activeMatchingVectorComponents.playDuration,
+            ],
+            16,
+            0,
+          );
+
           yield* db
             .insert(matchingUserTennisAssessment)
             .values({
@@ -213,40 +297,40 @@ export const assessmentDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
             })
             .returning({ id: matchingUserTennisAssessment.id });
 
-          yield* db.insert(matchingUserTennisAssessmentVector).values({
-            userId,
-            vectorVersion: 1,
-            passiveMatchingVector: Array.pad(
-              [
-                passiveMatchingVectorComponents.skillLevel,
-                passiveMatchingVectorComponents.yearsOfExperience,
-                passiveMatchingVectorComponents.forehand,
-                passiveMatchingVectorComponents.backhand,
-                passiveMatchingVectorComponents.volley,
-                passiveMatchingVectorComponents.serve,
-                passiveMatchingVectorComponents.singles,
-                passiveMatchingVectorComponents.doubles,
-                passiveMatchingVectorComponents.playDuration,
+          yield* db
+            .insert(matchingUserAssessmentVector)
+            .values({
+              userId,
+              vectorVersion: Array.pad([1, 1, 1, 1], 16, 0),
+              passiveMatchingVector: [
+                ...Array.replicate(0, 32),
+                ...passiveMatchingVector,
+                ...Array.replicate(0, 208),
               ],
-              64,
-              0,
-            ),
-            activeMatchingVector: Array.pad(
-              [
-                activeMatchingVectorComponents.skillLevel,
-                activeMatchingVectorComponents.yearsOfExperience,
-                activeMatchingVectorComponents.forehand,
-                activeMatchingVectorComponents.backhand,
-                activeMatchingVectorComponents.volley,
-                activeMatchingVectorComponents.serve,
-                activeMatchingVectorComponents.singles,
-                activeMatchingVectorComponents.doubles,
-                activeMatchingVectorComponents.playDuration,
+              activeMatchingVector: [
+                ...Array.replicate(0, 32),
+                ...activeMatchingVector,
+                ...Array.replicate(0, 208),
               ],
-              64,
-              0,
-            ),
-          });
+            })
+            .onConflictDoUpdate({
+              target: [
+                matchingUserAssessmentVector.userId,
+                matchingUserAssessmentVector.vectorVersion,
+              ],
+              set: {
+                passiveMatchingVector: sql`
+                    subvector(${matchingUserAssessmentVector.passiveMatchingVector}, 1, 32) || 
+                    '${passiveMatchingVector}'::vector || 
+                    subvector(${matchingUserAssessmentVector.passiveMatchingVector}, 49, 208)
+                  `,
+                activeMatchingVector: sql`
+                    subvector(${matchingUserAssessmentVector.activeMatchingVector}, 1, 32) || 
+                    '${activeMatchingVector}'::vector || 
+                    subvector(${matchingUserAssessmentVector.activeMatchingVector}, 49, 208)
+                  `,
+              },
+            });
         }).pipe(
           Effect.withSpan("assessmentDbRepositoryImpl.createTennisAssessment"),
         ),
@@ -291,6 +375,35 @@ export const assessmentDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
               ),
           };
 
+          const passiveMatchingVector = Array.pad(
+            [
+              passiveMatchingVectorComponents.distance,
+              passiveMatchingVectorComponents.pace,
+              passiveMatchingVectorComponents.frequency,
+              passiveMatchingVectorComponents.casual,
+              passiveMatchingVectorComponents.raceTraining,
+              passiveMatchingVectorComponents.speedTraining,
+              passiveMatchingVectorComponents.social,
+              passiveMatchingVectorComponents.bestPerformanceModifier,
+            ],
+            16,
+            0,
+          );
+          const activeMatchingVector = Array.pad(
+            [
+              activeMatchingVectorComponents.distance,
+              activeMatchingVectorComponents.pace,
+              activeMatchingVectorComponents.frequency,
+              activeMatchingVectorComponents.casual,
+              activeMatchingVectorComponents.raceTraining,
+              activeMatchingVectorComponents.speedTraining,
+              activeMatchingVectorComponents.social,
+              activeMatchingVectorComponents.bestPerformanceModifier,
+            ],
+            16,
+            0,
+          );
+
           yield* db
             .insert(matchingUserRunningAssessment)
             .values({
@@ -300,38 +413,40 @@ export const assessmentDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
             })
             .returning({ id: matchingUserRunningAssessment.id });
 
-          yield* db.insert(matchingUserRunningAssessmentVector).values({
-            userId,
-            vectorVersion: 1,
-            passiveMatchingVector: Array.pad(
-              [
-                passiveMatchingVectorComponents.distance,
-                passiveMatchingVectorComponents.pace,
-                passiveMatchingVectorComponents.frequency,
-                passiveMatchingVectorComponents.casual,
-                passiveMatchingVectorComponents.raceTraining,
-                passiveMatchingVectorComponents.speedTraining,
-                passiveMatchingVectorComponents.social,
-                passiveMatchingVectorComponents.bestPerformanceModifier,
+          yield* db
+            .insert(matchingUserAssessmentVector)
+            .values({
+              userId,
+              vectorVersion: Array.pad([1, 1, 1, 1], 16, 0),
+              passiveMatchingVector: [
+                ...Array.replicate(0, 48),
+                ...passiveMatchingVector,
+                ...Array.replicate(0, 192),
               ],
-              64,
-              0,
-            ),
-            activeMatchingVector: Array.pad(
-              [
-                activeMatchingVectorComponents.distance,
-                activeMatchingVectorComponents.pace,
-                activeMatchingVectorComponents.frequency,
-                activeMatchingVectorComponents.casual,
-                activeMatchingVectorComponents.raceTraining,
-                activeMatchingVectorComponents.speedTraining,
-                activeMatchingVectorComponents.social,
-                activeMatchingVectorComponents.bestPerformanceModifier,
+              activeMatchingVector: [
+                ...Array.replicate(0, 48),
+                ...activeMatchingVector,
+                ...Array.replicate(0, 192),
               ],
-              64,
-              0,
-            ),
-          });
+            })
+            .onConflictDoUpdate({
+              target: [
+                matchingUserAssessmentVector.userId,
+                matchingUserAssessmentVector.vectorVersion,
+              ],
+              set: {
+                passiveMatchingVector: sql`
+                  subvector(${matchingUserAssessmentVector.passiveMatchingVector}, 1, 48) || 
+                  '${passiveMatchingVector}'::vector || 
+                  subvector(${matchingUserAssessmentVector.passiveMatchingVector}, 65, 192)
+                `,
+                activeMatchingVector: sql`
+                  subvector(${matchingUserAssessmentVector.activeMatchingVector}, 1, 48) || 
+                  '${activeMatchingVector}'::vector || 
+                  subvector(${matchingUserAssessmentVector.activeMatchingVector}, 65, 192)
+                `,
+              },
+            });
         }).pipe(
           Effect.withSpan("assessmentDbRepositoryImpl.createRunningAssessment"),
         ),

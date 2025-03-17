@@ -1,13 +1,19 @@
 import { SqlError } from "@effect/sql";
-import { Cause, Context, Effect } from "effect";
+import { Cause, Context, Effect, Option } from "effect";
 import { ArktypeError } from "tiara-stack/models/errors";
 
 export class MatchingDbRepository
   extends /*@__PURE__*/ Context.Tag("MatchingDbRepository")<
     MatchingDbRepository,
     {
-      matchUser: (
+      matchUserCursor: (
         userId: string,
+      ) => Effect.Effect<
+        Option.Option<{ cursorId: string }>,
+        ArktypeError | SqlError.SqlError | Cause.NoSuchElementException
+      >;
+      matchUser: (
+        cursorId: string,
         limit: number,
       ) => Effect.Effect<
         {
