@@ -14,40 +14,42 @@ export const friendRepositoryImpl = /*@__PURE__*/ Layer.effect(
     const db = yield* PgDrizzle;
     return FriendRepository.of({
       createFriendRequest: (fromUserId, toUserId) =>
-        Effect.tryPromise(() =>
-          db.transaction(async (tx) => {
-            const [group] = await tx
+        Effect.gen(function* () {
+          const group = db.$with("group").as(
+            db
               .insert(userUserGroup)
               .values({
                 creatorId: fromUserId,
                 type: "friend",
               })
               .returning({
-                id: userUserGroup.id,
                 publicId: userUserGroup.publicId,
-              });
-            const members = await tx
-              .insert(userUserGroupMember)
-              .values([
-                {
-                  groupId: group.publicId,
-                  userId: fromUserId,
-                  status: "member",
-                },
-                {
-                  groupId: group.publicId,
-                  userId: toUserId,
-                  status: "pending",
-                },
-              ])
-              .returning({
-                groupId: userUserGroupMember.groupId,
-                userId: userUserGroupMember.userId,
-                status: userUserGroupMember.status,
-              });
-            return members;
-          }),
-        ).pipe(Effect.withSpan("friendRepositoryImpl.createFriendRequest")),
+              }),
+          );
+
+          const members = yield* db
+            .with(group)
+            .insert(userUserGroupMember)
+            .values([
+              {
+                groupId: sql`(select * from ${group})`,
+                userId: fromUserId,
+                status: "member",
+              },
+              {
+                groupId: sql`(select * from ${group})`,
+                userId: toUserId,
+                status: "pending",
+              },
+            ])
+            .returning({
+              groupId: userUserGroupMember.groupId,
+              userId: userUserGroupMember.userId,
+              status: userUserGroupMember.status,
+            });
+
+          return members;
+        }).pipe(Effect.withSpan("friendRepositoryImpl.createFriendRequest")),
       acceptFriendRequest: (fromUserId, toUserId) =>
         Effect.gen(function* () {
           const userFriendGroupIds = db.$with("user_friend_group_ids").as(

@@ -1,8 +1,10 @@
 import { sql } from "drizzle-orm";
 import {
   boolean,
+  geometry,
   index,
   integer,
+  jsonb,
   pgEnum,
   pgTable,
   serial,
@@ -10,6 +12,7 @@ import {
   uniqueIndex,
   uuid,
   varchar,
+  vector,
 } from "drizzle-orm/pg-core";
 
 export const authUserEmailConnection = pgTable(
@@ -85,7 +88,7 @@ export const authUserFacebookConnection = pgTable(
   {
     id: serial("id").primaryKey(),
     userId: uuid("user_id").notNull(),
-    facebookId: varchar("facebook_id", { length: 64 }).notNull().unique(),
+    facebookId: varchar("facebook_id", { length: 64 }).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -103,6 +106,12 @@ export const authUserFacebookConnection = pgTable(
   ],
 );
 
+export const userUserProfileGender = pgEnum("user_user_profile_gender", [
+  "male",
+  "female",
+  "prefer_not_to_say",
+]);
+
 export const userUserProfile = pgTable(
   "user_user_profile",
   {
@@ -110,6 +119,9 @@ export const userUserProfile = pgTable(
     publicId: uuid("public_id").defaultRandom().notNull(),
     name: varchar("name", {}),
     avatar: varchar("avatar", {}),
+    gender: userUserProfileGender("gender"),
+    birthDate: timestamp("birth_date", { withTimezone: true }),
+    location: geometry("location", { type: "point", srid: 4326 }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -121,6 +133,44 @@ export const userUserProfile = pgTable(
   },
   (table) => [
     uniqueIndex("user_user_profile_public_id_idx").on(table.publicId),
+  ],
+);
+
+export const userUserProfileObjectiveType = pgEnum(
+  "user_user_profile_objective_type",
+  [
+    "casual_match",
+    "for_fitness",
+    "for_fun",
+    "love_challenge",
+    "love_competition",
+    "meet_new_friends",
+    "play_to_win",
+    "push_limits",
+    "relax_rally",
+    "self_improvement",
+    "serious_play",
+    "stay_active",
+  ],
+);
+
+export const userUserProfileObjective = pgTable(
+  "user_user_profile_objective",
+  {
+    id: serial("id").primaryKey(),
+    userId: uuid("user_id").notNull(),
+    objective: userUserProfileObjectiveType("objective").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  },
+  (table) => [
+    uniqueIndex("user_user_profile_objective_user_id_idx").on(table.userId),
   ],
 );
 
@@ -313,5 +363,201 @@ export const chatChatSubscription = pgTable(
   (table) => [
     uniqueIndex("chat_chat_subscription_public_id_idx").on(table.publicId),
     index("chat_chat_subscription_user_id_idx").on(table.userId),
+  ],
+);
+
+export const matchingUserGeneralAssessment = pgTable(
+  "matching_user_general_assessment",
+  {
+    id: serial("id").primaryKey(),
+    userId: uuid("user_id").notNull(),
+    assessmentVersion: integer("assessment_version"),
+    assessment: jsonb("assessment"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  },
+  (table) => [
+    index("matching_user_general_assessment_user_id_idx").on(table.userId),
+  ],
+);
+
+export const matchingUserBadmintonAssessment = pgTable(
+  "matching_user_badminton_assessment",
+  {
+    id: serial("id").primaryKey(),
+    userId: uuid("user_id").notNull(),
+    assessmentVersion: integer("assessment_version"),
+    assessment: jsonb("assessment"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  },
+  (table) => [
+    index("matching_user_badminton_assessment_user_id_idx").on(table.userId),
+  ],
+);
+
+export const matchingUserTennisAssessment = pgTable(
+  "matching_user_tennis_assessment",
+  {
+    id: serial("id").primaryKey(),
+    userId: uuid("user_id").notNull(),
+    assessmentVersion: integer("assessment_version"),
+    assessment: jsonb("assessment"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  },
+  (table) => [
+    index("matching_user_tennis_assessment_user_id_idx").on(table.userId),
+  ],
+);
+
+export const matchingUserRunningAssessment = pgTable(
+  "matching_user_running_assessment",
+  {
+    id: serial("id").primaryKey(),
+    userId: uuid("user_id").notNull(),
+    assessmentVersion: integer("assessment_version"),
+    assessment: jsonb("assessment"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  },
+  (table) => [
+    index("matching_user_running_assessment_user_id_idx").on(table.userId),
+  ],
+);
+
+export const matchingUserGeneralAssessmentVector = pgTable(
+  "matching_user_general_assessment_vector",
+  {
+    id: serial("id").primaryKey(),
+    userId: uuid("user_id").notNull(),
+    vectorVersion: integer("vector_version").notNull(),
+    passiveMatchingVector: vector("passive_matching_vector", {
+      dimensions: 64,
+    }).notNull(),
+    activeMatchingVector: vector("active_matching_vector", {
+      dimensions: 64,
+    }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  },
+  (table) => [
+    index("matching_user_general_assessment_vector_user_id_idx").on(
+      table.userId,
+    ),
+  ],
+);
+
+export const matchingUserBadmintonAssessmentVector = pgTable(
+  "matching_user_badminton_assessment_vector",
+  {
+    id: serial("id").primaryKey(),
+    userId: uuid("user_id").notNull(),
+    vectorVersion: integer("vector_version").notNull(),
+    passiveMatchingVector: vector("passive_matching_vector", {
+      dimensions: 64,
+    }).notNull(),
+    activeMatchingVector: vector("active_matching_vector", {
+      dimensions: 64,
+    }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  },
+  (table) => [
+    index("matching_user_badminton_assessment_vector_user_id_idx").on(
+      table.userId,
+    ),
+  ],
+);
+
+export const matchingUserTennisAssessmentVector = pgTable(
+  "matching_user_tennis_assessment_vector",
+  {
+    id: serial("id").primaryKey(),
+    userId: uuid("user_id").notNull(),
+    vectorVersion: integer("vector_version").notNull(),
+    passiveMatchingVector: vector("passive_matching_vector", {
+      dimensions: 64,
+    }).notNull(),
+    activeMatchingVector: vector("active_matching_vector", {
+      dimensions: 64,
+    }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  },
+  (table) => [
+    index("matching_user_tennis_assessment_vector_user_id_idx").on(
+      table.userId,
+    ),
+  ],
+);
+
+export const matchingUserRunningAssessmentVector = pgTable(
+  "matching_user_running_assessment_vector",
+  {
+    id: serial("id").primaryKey(),
+    userId: uuid("user_id").notNull(),
+    vectorVersion: integer("vector_version").notNull(),
+    passiveMatchingVector: vector("passive_matching_vector", {
+      dimensions: 64,
+    }).notNull(),
+    activeMatchingVector: vector("active_matching_vector", {
+      dimensions: 64,
+    }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  },
+  (table) => [
+    index("matching_user_running_assessment_vector_user_id_idx").on(
+      table.userId,
+    ),
   ],
 );

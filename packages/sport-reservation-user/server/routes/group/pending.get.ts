@@ -5,7 +5,7 @@ import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
 import { GroupRepository } from "~/repositories/groupRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
-  name: "getGroupMembers",
+  name: "getPendingGroupMembers",
   response: response(type({ userId: "string" }, "[]"), { stream: false }),
   query: params(
     type({

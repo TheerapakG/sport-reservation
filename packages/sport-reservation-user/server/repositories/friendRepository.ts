@@ -1,6 +1,5 @@
 import { SqlError } from "@effect/sql";
 import { Context, Effect, Option } from "effect";
-import { UnknownException } from "effect/Cause";
 import {
   userUserGroup,
   userUserGroupMember,
@@ -18,7 +17,7 @@ export class FriendRepository
           typeof userUserGroupMember.$inferSelect,
           "groupId" | "userId" | "status"
         >[],
-        UnknownException
+        SqlError.SqlError
       >;
       acceptFriendRequest: (
         fromUserId: string,
