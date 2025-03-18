@@ -1,14 +1,11 @@
-FROM node:20-slim AS base
-ENV NODE_ENV=production PNPM_HOME="/pnpm" PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
+FROM node:22
 
-FROM base AS builder
-COPY . /app
-WORKDIR /app
-RUN pnpm install --frozen-lockfile
-RUN pnpm run build
+RUN apt update
+RUN apt install -y libargon2-1
 
-FROM base AS runner
-COPY --from=builder /app/.output /app
-WORKDIR /app
-CMD ["node", "./server/index.mjs"] 
+COPY ./cert/ca-certificate.crt /usr/local/share/ca-certificates/
+RUN update-ca-certificates
+
+COPY ./.output ./.output
+
+CMD [ "node", "--use-openssl-ca", ".output/server/index.mjs" ]
