@@ -29,7 +29,7 @@ spec:
             - name: SECRET_PATH
               valueFrom:
                 secretKeyRef:
-                  name: sport-reservation-auth-secret
+                  name: sport-reservation-chat-secret
                   key: secretPath
             - name: POSTGRES_URL
               valueFrom:
@@ -44,17 +44,17 @@ spec:
             - name: KAFKA_SSL_KEY
               valueFrom:
                 secretKeyRef:
-                  name: sport-reservation-auth-secret
+                  name: sport-reservation-chat-secret
                   key: kafkaSslKey
             - name: KAFKA_SSL_CERT
               valueFrom:
                 secretKeyRef:
-                  name: sport-reservation-auth-secret
+                  name: sport-reservation-chat-secret
                   key: kafkaSslCert
             - name: KAFKA_SSL_CA
               valueFrom:
                 secretKeyRef:
-                  name: sport-reservation-auth-secret
+                  name: sport-reservation-chat-secret
                   key: kafkaSslCa
             - name: OAUTH_CLIENT_ID
               valueFrom:
@@ -88,13 +88,13 @@ spec:
                   key: userBaseUrl
 
           volumeMounts:
-            - name: sport-reservation-auth-secret-path
+            - name: sport-reservation-chat-secret-path
               readOnly: true
               mountPath: "/.secret"
       volumes:
-        - name: sport-reservation-auth-secret-path
+        - name: sport-reservation-chat-secret-path
           secret:
-            secretName: sport-reservation-auth-secret-path
+            secretName: sport-reservation-chat-secret-path
 
 ---
 apiVersion: v1
