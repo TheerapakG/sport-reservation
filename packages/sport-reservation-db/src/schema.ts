@@ -505,6 +505,7 @@ export const matchingCursor = pgTable(
   {
     id: serial("id").primaryKey(),
     publicId: uuid("public_id").defaultRandom().notNull(),
+    userId: uuid("user_id").notNull(),
     vectorVersion: vector("vector_version", {
       dimensions: 16,
     }).notNull(),
@@ -522,6 +523,7 @@ export const matchingCursor = pgTable(
   },
   (table) => [
     uniqueIndex("matching_cursor_public_id_idx").on(table.publicId),
+    index("matching_cursor_user_id_idx").on(table.userId),
     index("matching_cursor_vector_version_idx").on(table.vectorVersion),
   ],
 );

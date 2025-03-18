@@ -12,7 +12,7 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
   Effect.gen(function* () {
     const db = yield* PgDrizzle;
     return MatchingDbRepository.of({
-      matchUserCursor: (userId) =>
+      createMatchUserCursor: (userId) =>
         Effect.gen(function* () {
           const matchUserAssessmentVectors = yield* db
             .select({
@@ -40,6 +40,7 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
           const cursor = yield* db
             .insert(matchingCursor)
             .values({
+              userId,
               vectorVersion: Array.pad([1, 1, 1, 1], 16, 0),
               vector: randomNoiseUserAssessmentVectors,
             })
@@ -50,6 +51,24 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
           }
 
           return Option.some({ cursorId: cursor[0].publicId });
+        }),
+      getMatchUserCursor: (userId) =>
+        Effect.gen(function* () {
+          const cursors = yield* db
+            .select()
+            .from(matchingCursor)
+            .where(
+              and(
+                isNotNull(matchingCursor.deletedAt),
+                eq(matchingCursor.userId, userId),
+              ),
+            );
+
+          if (Array.isEmptyArray(cursors)) {
+            return Option.none();
+          }
+
+          return Option.some({ cursorId: cursors[0].publicId });
         }),
       matchUser: (cursorId, limit) =>
         Effect.gen(function* () {

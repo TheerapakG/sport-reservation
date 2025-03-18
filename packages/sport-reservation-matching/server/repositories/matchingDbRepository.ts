@@ -6,7 +6,13 @@ export class MatchingDbRepository
   extends /*@__PURE__*/ Context.Tag("MatchingDbRepository")<
     MatchingDbRepository,
     {
-      matchUserCursor: (
+      createMatchUserCursor: (
+        userId: string,
+      ) => Effect.Effect<
+        Option.Option<{ cursorId: string }>,
+        ArktypeError | SqlError.SqlError | Cause.NoSuchElementException
+      >;
+      getMatchUserCursor: (
         userId: string,
       ) => Effect.Effect<
         Option.Option<{ cursorId: string }>,
