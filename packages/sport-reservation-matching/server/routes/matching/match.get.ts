@@ -7,6 +7,8 @@ import { type } from "arktype";
 import { Effect, Number, pipe } from "effect";
 import { parseCookies } from "h3";
 import { getSubjectTypeFromToken } from "sport-reservation-oauth-common/subjects";
+import { UserClient } from "sport-reservation-user/client";
+import { userProfile } from "sport-reservation-user/models";
 import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
 import { OAuthError } from "tiara-stack/models/errors";
 import { OAuthClient } from "~/layers";
@@ -18,8 +20,7 @@ export const handlerConfig = defineEventHandlerConfig({
     type({
       matches: [
         {
-          userId: "string",
-          distance: "number",
+          user: userProfile,
           normalizedScore: "number",
         },
         "[]",
@@ -68,21 +69,28 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
       Number.clamp(limit, { minimum: 1, maximum: 20 }),
     );
 
-    const matches = matchResults
-      .filter((match) => match.userId !== userId)
-      .map((match) => {
-        const range = match.maxDistance - match.minDistance;
-        const normalizedScore =
-          range === 0
-            ? 100
-            : 100 * (1 - (match.distance - match.minDistance) / range);
+    const userClient = yield* UserClient;
 
-        return {
-          userId: match.userId,
-          distance: match.distance,
-          normalizedScore,
-        };
-      });
+    const matches = yield* Effect.all(
+      matchResults
+        .filter((match) => match.userId !== userId)
+        .map((match) =>
+          Effect.gen(function* () {
+            const range = match.maxDistance - match.minDistance;
+            const normalizedScore =
+              range === 0
+                ? 100
+                : 100 * (1 - (match.distance - match.minDistance) / range);
+
+            return {
+              user: yield* userClient.getUserProfileById({
+                query: { id: match.userId },
+              }),
+              normalizedScore,
+            };
+          }),
+        ),
+    );
 
     return {
       matches,

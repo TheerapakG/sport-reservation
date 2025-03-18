@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sport-reservation-matching
+  labels:
+    app: sport-reservation-matching
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sport-reservation-matching
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 5
+  template:
+    metadata:
+      labels:
+        app: sport-reservation-matching
+    spec:
+      containers:
+        - name: sport-reservation-matching
+          image: <IMAGE>
+          ports:
+            - containerPort: 3000
+              name: sp-matching-svc
+          env:
+            - name: POSTGRES_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-matching-secret
+                  key: postgresUrl
+            - name: OAUTH_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-matching-secret
+                  key: oauthClientId
+            - name: OAUTH_ISSUER
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-matching-secret
+                  key: oauthIssuer
+            - name: UPLOAD_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-matching-secret
+                  key: uploadSecret
+            - name: UPLOAD_BASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-matching-secret
+                  key: uploadBaseUrl
+            - name: USER_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-matching-secret
+                  key: userSecret
+            - name: USER_BASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-matching-secret
+                  key: userBaseUrl
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sport-reservation-matching-service
+spec:
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: sp-matching-svc
+  selector:
+    app: sport-reservation-matching

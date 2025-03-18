@@ -1,11 +1,10 @@
 import { runtimeConfig } from "$/layers";
 import { NodeFileSystem } from "@effect/platform-node";
 import { Layer } from "effect";
-import { dbLive, oAuthClient, uploadClient } from "~/layers";
+import { dbLive, oAuthClient, uploadClient, userClient } from "~/layers";
+import { assessmentDbRepositoryImpl } from "~/repositories/assessmentDbRepositoryImpl";
 import { authRepositoryImpl } from "~/repositories/authRepositoryImpl";
-import { friendRepositoryImpl } from "~/repositories/friendRepositoryImpl";
-import { groupRepositoryImpl } from "~/repositories/groupRepositoryImpl";
-import { userRepositoryImpl } from "~/repositories/userRepositoryImpl";
+import { matchingDbRepositoryImpl } from "~/repositories/matchingDbRepositoryImpl";
 
 /*@__NO_SIDE_EFFECTS__*/
 const createConfigLive = () =>
@@ -22,16 +21,15 @@ const baseDependenciesLive = /*@__PURE__*/ Layer.mergeAll(configLive);
 const createRepositoryLive = () =>
   Layer.mergeAll(
     authRepositoryImpl,
-    userRepositoryImpl,
-    friendRepositoryImpl,
-    groupRepositoryImpl,
+    assessmentDbRepositoryImpl,
+    matchingDbRepositoryImpl,
   )
     .pipe(Layer.provide(dbLive))
     .pipe(Layer.provide(runtimeConfig));
 
 /*@__NO_SIDE_EFFECTS__*/
 const createClientLive = () =>
-  Layer.mergeAll(oAuthClient, uploadClient).pipe(
+  Layer.mergeAll(oAuthClient, uploadClient, userClient).pipe(
     Layer.provide(baseDependenciesLive),
   );
 
