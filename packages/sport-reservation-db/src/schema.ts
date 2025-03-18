@@ -122,6 +122,7 @@ export const userUserProfile = pgTable(
     gender: userUserProfileGender("gender"),
     birthDate: timestamp("birth_date", { withTimezone: true }),
     location: geometry("location", { type: "point", srid: 4326 }),
+    locationDescription: varchar("location_description", {}),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -235,11 +236,37 @@ export const userUserGroupMember = pgTable(
   ],
 );
 
+export const clubClub = pgTable(
+  "club_club",
+  {
+    id: serial("id").primaryKey(),
+    groupId: uuid("group_id").notNull(),
+    description: varchar("description", {}),
+    location: geometry("location", { type: "point", srid: 4326 }),
+    locationDescription: varchar("location_description", {}),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  },
+  (table) => [index("user_club_group_id_idx").on(table.groupId)],
+);
+
+export const eventEventCreatorType = pgEnum("event_event_creator_type", [
+  "user",
+  "club",
+]);
+
 export const eventEvent = pgTable(
   "event_event",
   {
     id: serial("id").primaryKey(),
     publicId: uuid("public_id").defaultRandom().notNull(),
+    eventCreatorType: eventEventCreatorType("event_creator_type").notNull(),
     creatorId: uuid("creator_id").notNull(),
     name: varchar("name", {}),
     description: varchar("description", {}),
@@ -263,18 +290,12 @@ export const eventEvent = pgTable(
   ],
 );
 
-export const eventEventMemberStatus = pgEnum("event_event_member_status", [
-  "pending",
-  "member",
-]);
-
 export const eventEventMember = pgTable(
   "event_event_member",
   {
     id: serial("id").primaryKey(),
     eventId: uuid("event_id").notNull(),
     userId: uuid("user_id").notNull(),
-    status: eventEventMemberStatus("status").notNull(),
     size: integer("size").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
