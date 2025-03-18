@@ -18,11 +18,10 @@ export const handlerConfig = defineEventHandlerConfig({
   body: params(
     type({
       clubId: "string",
-      name: "string?",
-      description: "string?",
-      locationLatitude: "number?",
-      locationLongitude: "number?",
-      locationDescription: "string?",
+      "name?": "string",
+      "description?": "string",
+      "location?": ["number", "number"],
+      "locationDescription?": "string",
     }),
   ),
 });
@@ -33,14 +32,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     const { access_token: accessToken } = parseCookies(event);
     const {
       params: {
-        body: {
-          clubId,
-          name,
-          description,
-          locationLatitude,
-          locationLongitude,
-          locationDescription,
-        },
+        body: { clubId, name, description, location, locationDescription },
       },
     } = yield* EventParamsContext.typed<typeof handlerConfig>();
 
@@ -74,8 +66,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
       clubId,
       name,
       description,
-      locationLatitude,
-      locationLongitude,
+      location,
       locationDescription,
     });
 

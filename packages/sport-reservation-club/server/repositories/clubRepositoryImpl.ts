@@ -17,8 +17,7 @@ export const clubRepositoryImpl = /*@__PURE__*/ Layer.effect(
         userId,
         name,
         description,
-        locationLatitude,
-        locationLongitude,
+        location,
         locationDescription,
       }) =>
         Effect.gen(function* () {
@@ -35,13 +34,9 @@ export const clubRepositoryImpl = /*@__PURE__*/ Layer.effect(
             .insert(clubClub)
             .values({
               groupId: group.publicId,
-              description: description,
-              ...(locationLatitude && locationLongitude
-                ? {
-                    location: [locationLongitude, locationLatitude],
-                  }
-                : {}),
-              locationDescription: locationDescription,
+              ...(description ? { description } : {}),
+              ...(location ? { location } : {}),
+              ...(locationDescription ? { locationDescription } : {}),
             })
             .returning();
 
@@ -59,21 +54,16 @@ export const clubRepositoryImpl = /*@__PURE__*/ Layer.effect(
         clubId,
         name,
         description,
-        locationLatitude,
-        locationLongitude,
+        location,
         locationDescription,
       }) =>
         Effect.gen(function* () {
           yield* db
             .update(clubClub)
             .set({
-              description: description,
-              ...(locationLatitude && locationLongitude
-                ? {
-                    location: [locationLongitude, locationLatitude],
-                  }
-                : {}),
-              locationDescription: locationDescription,
+              ...(description ? { description } : {}),
+              ...(location ? { location } : {}),
+              ...(locationDescription ? { locationDescription } : {}),
             })
             .where(
               and(eq(clubClub.groupId, clubId), isNull(clubClub.deletedAt)),
@@ -93,7 +83,7 @@ export const clubRepositoryImpl = /*@__PURE__*/ Layer.effect(
               );
           }
         }).pipe(Effect.withSpan("clubRepositoryImpl.updateClub")),
-      deleteClub: ({ clubId, userId }) =>
+      deleteClub: ({ clubId }) =>
         Effect.gen(function* () {
           const groupResult = yield* db
             .select()
@@ -101,7 +91,6 @@ export const clubRepositoryImpl = /*@__PURE__*/ Layer.effect(
             .where(
               and(
                 eq(userUserGroup.publicId, clubId),
-                eq(userUserGroup.creatorId, userId),
                 isNull(userUserGroup.deletedAt),
               ),
             );
@@ -203,21 +192,8 @@ export const clubRepositoryImpl = /*@__PURE__*/ Layer.effect(
             })
             .returning();
         }).pipe(Effect.withSpan("clubRepositoryImpl.requestClubMembership")),
-      acceptClubMembership: ({ clubId, userId, acceptorId }) =>
+      acceptClubMembership: ({ clubId, userId }) =>
         Effect.gen(function* () {
-          const acceptor = yield* db
-            .select()
-            .from(userUserGroup)
-            .where(
-              and(
-                eq(userUserGroup.publicId, clubId),
-                eq(userUserGroup.creatorId, acceptorId),
-                isNull(userUserGroup.deletedAt),
-              ),
-            );
-
-          if (acceptor.length === 0) return;
-
           yield* db
             .update(userUserGroupMember)
             .set({
@@ -232,21 +208,8 @@ export const clubRepositoryImpl = /*@__PURE__*/ Layer.effect(
               ),
             );
         }).pipe(Effect.withSpan("clubRepositoryImpl.acceptClubMembership")),
-      rejectClubMembership: ({ clubId, userId, rejectorId }) =>
+      rejectClubMembership: ({ clubId, userId }) =>
         Effect.gen(function* () {
-          const rejector = yield* db
-            .select()
-            .from(userUserGroup)
-            .where(
-              and(
-                eq(userUserGroup.publicId, clubId),
-                eq(userUserGroup.creatorId, rejectorId),
-                isNull(userUserGroup.deletedAt),
-              ),
-            );
-
-          if (rejector.length === 0) return;
-
           yield* db
             .update(userUserGroupMember)
             .set({
@@ -261,23 +224,8 @@ export const clubRepositoryImpl = /*@__PURE__*/ Layer.effect(
               ),
             );
         }).pipe(Effect.withSpan("clubRepositoryImpl.rejectClubMembership")),
-      removeMember: ({ clubId, userId, removerId }) =>
+      removeMember: ({ clubId, userId }) =>
         Effect.gen(function* () {
-          if (removerId === userId) return;
-
-          const remover = yield* db
-            .select()
-            .from(userUserGroup)
-            .where(
-              and(
-                eq(userUserGroup.publicId, clubId),
-                eq(userUserGroup.creatorId, removerId),
-                isNull(userUserGroup.deletedAt),
-              ),
-            );
-
-          if (remover.length === 0) return;
-
           yield* db
             .update(userUserGroupMember)
             .set({

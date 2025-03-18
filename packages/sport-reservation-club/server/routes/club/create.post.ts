@@ -23,10 +23,9 @@ export const handlerConfig = defineEventHandlerConfig({
   body: params(
     type({
       name: "string",
-      description: "string?",
-      locationLatitude: "number?",
-      locationLongitude: "number?",
-      locationDescription: "string?",
+      "description?": "string",
+      "location?": ["number", "number"],
+      "locationDescription?": "string",
     }),
   ),
 });
@@ -37,13 +36,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     const { access_token: accessToken } = parseCookies(event);
     const {
       params: {
-        body: {
-          name,
-          description,
-          locationLatitude,
-          locationLongitude,
-          locationDescription,
-        },
+        body: { name, description, location, locationDescription },
       },
     } = yield* EventParamsContext.typed<typeof handlerConfig>();
 
@@ -67,8 +60,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
       userId,
       name,
       description,
-      locationLatitude,
-      locationLongitude,
+      location,
       locationDescription,
     });
   }),

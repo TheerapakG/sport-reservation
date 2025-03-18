@@ -4,7 +4,7 @@ import {
   effectEventHandler,
 } from "$/effectEventHandler";
 import { type } from "arktype";
-import { Effect } from "effect";
+import { Effect, Equivalence, Option } from "effect";
 import { parseCookies } from "h3";
 import { getSubjectTypeFromToken } from "sport-reservation-oauth-common/subjects";
 import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
@@ -48,9 +48,18 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     );
 
     const clubRepository = yield* ClubRepository;
+    const club = yield* clubRepository.getClub({ clubId });
+    if (
+      Option.getEquivalence(Equivalence.string)(
+        Option.map(club, (club) => club.group.creatorId),
+        Option.some(userId),
+      )
+    ) {
+      yield* Effect.fail(new OAuthError());
+    }
+
     yield* clubRepository.deleteClub({
       clubId,
-      userId,
     });
 
     return {};

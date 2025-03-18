@@ -14,8 +14,7 @@ export class ClubRepository
         userId: string;
         name: string;
         description?: string;
-        locationLatitude?: number;
-        locationLongitude?: number;
+        location?: [number, number]; // [longitude, latitude]
         locationDescription?: string;
       }) => Effect.Effect<
         {
@@ -27,13 +26,11 @@ export class ClubRepository
         clubId: string;
         name?: string;
         description?: string;
-        locationLatitude?: number;
-        locationLongitude?: number;
+        location?: [number, number]; // [longitude, latitude]
         locationDescription?: string;
       }) => Effect.Effect<void, SqlError.SqlError>;
       deleteClub: (data: {
         clubId: string;
-        userId: string;
       }) => Effect.Effect<void, SqlError.SqlError>;
       getClub: (data: { clubId: string }) => Effect.Effect<
         Option.Option<{
@@ -49,17 +46,14 @@ export class ClubRepository
       acceptClubMembership: (data: {
         clubId: string;
         userId: string;
-        acceptorId: string;
       }) => Effect.Effect<void, SqlError.SqlError>;
       rejectClubMembership: (data: {
         clubId: string;
         userId: string;
-        rejectorId: string;
       }) => Effect.Effect<void, SqlError.SqlError>;
       removeMember: (data: {
         clubId: string;
         userId: string;
-        removerId: string;
       }) => Effect.Effect<void, SqlError.SqlError>;
       getClubMembers: (data: {
         clubId: string;
