@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sport-reservation-club
+  labels:
+    app: sport-reservation-club
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sport-reservation-club
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 5
+  template:
+    metadata:
+      labels:
+        app: sport-reservation-club
+    spec:
+      containers:
+        - name: sport-reservation-club
+          image: <IMAGE>
+          ports:
+            - containerPort: 3000
+              name: sp-club-svc
+          env:
+            - name: POSTGRES_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-club-secret
+                  key: postgresUrl
+            - name: OAUTH_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-club-secret
+                  key: oauthClientId
+            - name: OAUTH_ISSUER
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-club-secret
+                  key: oauthIssuer
+            - name: UPLOAD_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-club-secret
+                  key: uploadSecret
+            - name: UPLOAD_BASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-club-secret
+                  key: uploadBaseUrl
+            - name: USER_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-club-secret
+                  key: userSecret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sport-reservation-club-service
+spec:
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: sp-club-svc
+  selector:
+    app: sport-reservation-club
