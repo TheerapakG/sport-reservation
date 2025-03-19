@@ -166,7 +166,7 @@ export const friendRepositoryImpl = /*@__PURE__*/ Layer.effect(
             });
           return members;
         }).pipe(Effect.withSpan("friendRepositoryImpl.rejectFriendRequest")),
-      getFriendRequests: (userId) =>
+      getIncomingFriendRequests: (userId) =>
         Effect.gen(function* () {
           const userFriendGroupIds = db.$with("user_friend_group_ids").as(
             db
@@ -202,7 +202,49 @@ export const friendRepositoryImpl = /*@__PURE__*/ Layer.effect(
                 not(eq(userUserGroupMember.userId, userId)),
               ),
             );
-        }).pipe(Effect.withSpan("friendRepositoryImpl.getFriendRequests")),
+        }).pipe(
+          Effect.withSpan("friendRepositoryImpl.getIncomingFriendRequests"),
+        ),
+      getOutgoingFriendRequests: (userId) =>
+        Effect.gen(function* () {
+          const userFriendGroupIds = db.$with("user_friend_group_ids").as(
+            db
+              .select({ id: userUserGroup.publicId })
+              .from(userUserGroup)
+              .innerJoin(
+                userUserGroupMember,
+                eq(userUserGroup.publicId, userUserGroupMember.groupId),
+              )
+              .where(
+                and(
+                  isNull(userUserGroup.deletedAt),
+                  isNull(userUserGroupMember.deletedAt),
+                  eq(userUserGroup.type, "friend"),
+                  eq(userUserGroupMember.userId, userId),
+                  eq(userUserGroupMember.status, "member"),
+                ),
+              ),
+          );
+
+          return yield* db
+            .with(userFriendGroupIds)
+            .select({
+              groupId: userUserGroupMember.groupId,
+              userId: userUserGroupMember.userId,
+              status: userUserGroupMember.status,
+            })
+            .from(userUserGroupMember)
+            .where(
+              and(
+                isNull(userUserGroupMember.deletedAt),
+                eq(userUserGroupMember.groupId, userFriendGroupIds.id),
+                not(eq(userUserGroupMember.userId, userId)),
+                eq(userUserGroupMember.status, "pending"),
+              ),
+            );
+        }).pipe(
+          Effect.withSpan("friendRepositoryImpl.getOutgoingFriendRequests"),
+        ),
       removeFriend: (userId, friendId) =>
         Effect.gen(function* () {
           const userFriendGroupIds = db.$with("user_friend_group_ids").as(
@@ -338,6 +380,62 @@ export const friendRepositoryImpl = /*@__PURE__*/ Layer.effect(
           if (userFriendGroupIds.length === 0) return Option.none();
           return Option.some(userFriendGroupIds[0]);
         }).pipe(Effect.withSpan("friendRepositoryImpl.getFriendGroup")),
+      getFriendStatus: (userId, friendId) =>
+        Effect.gen(function* () {
+          const userMemberStatuses = yield* db
+            .select({ status: userUserGroupMember.status })
+            .from(userUserGroup)
+            .innerJoin(
+              userUserGroupMember,
+              eq(userUserGroup.publicId, userUserGroupMember.groupId),
+            )
+            .where(
+              and(
+                isNull(userUserGroup.deletedAt),
+                isNull(userUserGroupMember.deletedAt),
+                eq(userUserGroup.publicId, friendId),
+                eq(userUserGroup.type, "friend"),
+                eq(userUserGroupMember.userId, userId),
+              ),
+            );
+
+          const friendMemberStatuses = yield* db
+            .select({ status: userUserGroupMember.status })
+            .from(userUserGroup)
+            .innerJoin(
+              userUserGroupMember,
+              eq(userUserGroup.publicId, userUserGroupMember.groupId),
+            )
+            .where(
+              and(
+                isNull(userUserGroup.deletedAt),
+                isNull(userUserGroupMember.deletedAt),
+                eq(userUserGroup.publicId, friendId),
+                eq(userUserGroup.type, "friend"),
+                not(eq(userUserGroupMember.userId, userId)),
+              ),
+            );
+
+          if (
+            userMemberStatuses.length === 0 ||
+            friendMemberStatuses.length === 0
+          ) {
+            return Option.none();
+          }
+
+          if (
+            userMemberStatuses[0].status === "member" &&
+            friendMemberStatuses[0].status === "member"
+          ) {
+            return Option.some({
+              status: "member" as const,
+            });
+          }
+
+          return Option.some({
+            status: "pending" as const,
+          });
+        }).pipe(Effect.withSpan("friendRepositoryImpl.getFriendStatus")),
     });
   }),
 );

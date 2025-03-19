@@ -4,30 +4,31 @@ import {
   effectEventHandler,
 } from "$/effectEventHandler";
 import { type } from "arktype";
-import { Effect } from "effect";
+import { Effect, Equivalence, Option } from "effect";
 import { parseCookies } from "h3";
 import { getSubjectTypeFromToken } from "sport-reservation-oauth-common/subjects";
 import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
 import { OAuthError } from "tiara-stack/models/errors";
 import { OAuthClient } from "~/layers";
-import { FriendRepository } from "~/repositories/friendRepository";
+import { ClubRepository } from "~/repositories/clubRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
-  name: "postAcceptFriendRequest",
+  name: "getClubMemberPending",
   response: response(
-    type(
-      {
-        groupId: "string",
-        userId: "string",
-        status: "string",
-      },
-      "[]",
-    ),
+    type({
+      members: [
+        {
+          userId: "string",
+          status: "'pending'",
+        },
+        "[]",
+      ],
+    }),
     { stream: false },
   ),
-  body: params(
+  query: params(
     type({
-      fromUserId: "string",
+      clubId: "string",
     }),
   ),
 });
@@ -38,13 +39,13 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     const { access_token: accessToken } = parseCookies(event);
     const {
       params: {
-        body: { fromUserId },
+        query: { clubId },
       },
     } = yield* EventParamsContext.typed<typeof handlerConfig>();
 
     const { client: oauthClient } = yield* OAuthClient;
 
-    const userId = yield* Effect.flatMap(
+    const requesterId = yield* Effect.flatMap(
       Effect.promise(async () =>
         getSubjectTypeFromToken({
           type: "user",
@@ -57,11 +58,29 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
         user ? Effect.succeed(user.id) : Effect.fail(new OAuthError()),
     );
 
-    const friendRepository = yield* FriendRepository;
-    const members = yield* friendRepository.acceptFriendRequest(
-      fromUserId,
-      userId,
-    );
-    return members;
+    const clubRepository = yield* ClubRepository;
+
+    const clubOption = yield* clubRepository.getClub({ clubId });
+    if (
+      !Option.getEquivalence(Equivalence.string)(
+        Option.map(clubOption, (club) => club.group.creatorId),
+        Option.some(requesterId),
+      )
+    ) {
+      yield* Effect.fail(new OAuthError());
+    }
+
+    const members = yield* clubRepository.getClubPendingMembers({
+      clubId,
+    });
+
+    const pendingMembers = members.map((member) => ({
+      userId: member.userId,
+      status: "pending" as const,
+    }));
+
+    return {
+      members: pendingMembers,
+    };
   }),
 );

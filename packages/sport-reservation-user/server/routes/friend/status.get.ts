@@ -1,34 +1,21 @@
-import {
-  EventContext,
-  EventParamsContext,
-  effectEventHandler,
-} from "$/effectEventHandler";
+import { EventContext, effectEventHandler } from "$/effectEventHandler";
 import { type } from "arktype";
-import { Effect } from "effect";
-import { parseCookies } from "h3";
+import { Effect, Option } from "effect";
+import { getQuery, parseCookies } from "h3";
 import { getSubjectTypeFromToken } from "sport-reservation-oauth-common/subjects";
-import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
+import { defineEventHandlerConfig, response } from "tiara-stack/config";
 import { OAuthError } from "tiara-stack/models/errors";
 import { OAuthClient } from "~/layers";
 import { FriendRepository } from "~/repositories/friendRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
-  name: "postAcceptFriendRequest",
+  name: "getFriendStatus",
   response: response(
-    type(
-      {
-        groupId: "string",
-        userId: "string",
-        status: "string",
-      },
-      "[]",
-    ),
-    { stream: false },
-  ),
-  body: params(
     type({
-      fromUserId: "string",
+      status: "'pending' | 'member' | 'none'",
+      groupId: "string?",
     }),
+    { stream: false },
   ),
 });
 
@@ -36,11 +23,15 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
   Effect.gen(function* () {
     const { event } = yield* EventContext;
     const { access_token: accessToken } = parseCookies(event);
-    const {
-      params: {
-        body: { fromUserId },
-      },
-    } = yield* EventParamsContext.typed<typeof handlerConfig>();
+    const query = getQuery(event);
+    const friendId = query.friendId as string | undefined;
+
+    if (!friendId) {
+      return {
+        status: "none" as const,
+        groupId: undefined,
+      };
+    }
 
     const { client: oauthClient } = yield* OAuthClient;
 
@@ -58,10 +49,17 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     );
 
     const friendRepository = yield* FriendRepository;
-    const members = yield* friendRepository.acceptFriendRequest(
-      fromUserId,
+    const statusOption = yield* friendRepository.getFriendStatus(
       userId,
+      friendId,
     );
-    return members;
+
+    return Option.match(statusOption, {
+      onNone: () => ({
+        status: "none" as const,
+        groupId: undefined,
+      }),
+      onSome: (status) => status,
+    });
   }),
 );

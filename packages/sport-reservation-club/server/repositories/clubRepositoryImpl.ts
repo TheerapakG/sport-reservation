@@ -316,6 +316,73 @@ export const clubRepositoryImpl = /*@__PURE__*/ Layer.effect(
               ),
             );
         }).pipe(Effect.withSpan("clubRepositoryImpl.getUserClubs")),
+      getUserCreatedClubs: ({ userId }) =>
+        Effect.gen(function* () {
+          return yield* db
+            .select({
+              club: clubClub,
+              group: userUserGroup,
+            })
+            .from(userUserGroup)
+            .innerJoin(clubClub, eq(userUserGroup.publicId, clubClub.groupId))
+            .where(
+              and(
+                eq(userUserGroup.creatorId, userId),
+                eq(userUserGroup.type, "club"),
+                isNull(userUserGroup.deletedAt),
+                isNull(clubClub.deletedAt),
+              ),
+            );
+        }).pipe(Effect.withSpan("clubRepositoryImpl.getUserCreatedClubs")),
+      getUserMemberClubs: ({ userId }) =>
+        Effect.gen(function* () {
+          return yield* db
+            .select({
+              club: clubClub,
+              group: userUserGroup,
+            })
+            .from(userUserGroupMember)
+            .innerJoin(
+              userUserGroup,
+              eq(userUserGroupMember.groupId, userUserGroup.publicId),
+            )
+            .innerJoin(clubClub, eq(userUserGroup.publicId, clubClub.groupId))
+            .where(
+              and(
+                eq(userUserGroupMember.userId, userId),
+                eq(userUserGroupMember.status, "member"),
+                eq(userUserGroup.type, "club"),
+                not(eq(userUserGroup.creatorId, userId)),
+                isNull(userUserGroupMember.deletedAt),
+                isNull(userUserGroup.deletedAt),
+                isNull(clubClub.deletedAt),
+              ),
+            );
+        }).pipe(Effect.withSpan("clubRepositoryImpl.getUserMemberClubs")),
+      getUserPendingClubs: ({ userId }) =>
+        Effect.gen(function* () {
+          return yield* db
+            .select({
+              club: clubClub,
+              group: userUserGroup,
+            })
+            .from(userUserGroupMember)
+            .innerJoin(
+              userUserGroup,
+              eq(userUserGroupMember.groupId, userUserGroup.publicId),
+            )
+            .innerJoin(clubClub, eq(userUserGroup.publicId, clubClub.groupId))
+            .where(
+              and(
+                eq(userUserGroupMember.userId, userId),
+                eq(userUserGroupMember.status, "pending"),
+                eq(userUserGroup.type, "club"),
+                isNull(userUserGroupMember.deletedAt),
+                isNull(userUserGroup.deletedAt),
+                isNull(clubClub.deletedAt),
+              ),
+            );
+        }).pipe(Effect.withSpan("clubRepositoryImpl.getUserPendingClubs")),
       getClubMemberStatus: ({ clubId, userId }) =>
         Effect.gen(function* () {
           const club = yield* db
@@ -329,7 +396,7 @@ export const clubRepositoryImpl = /*@__PURE__*/ Layer.effect(
               ),
             );
 
-          if (club.length === 0) return Option.none();
+          if (club.length === 0) return { status: "pending" as const };
 
           const memberStatus = yield* db
             .select({
@@ -345,10 +412,10 @@ export const clubRepositoryImpl = /*@__PURE__*/ Layer.effect(
             );
 
           if (memberStatus.length === 0) {
-            return Option.none();
+            return { status: "pending" as const };
           }
 
-          return Option.some({ status: memberStatus[0].status });
+          return { status: memberStatus[0].status };
         }).pipe(Effect.withSpan("clubRepositoryImpl.getClubMemberStatus")),
     });
   }),

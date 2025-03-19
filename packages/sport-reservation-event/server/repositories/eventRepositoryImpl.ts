@@ -22,6 +22,7 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
         name,
         description,
         location,
+        locationDescription,
         startAt,
         endAt,
         autoAccept,
@@ -45,6 +46,7 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
               groupId: group.publicId,
               description,
               location,
+              locationDescription,
               startAt,
               endAt,
               autoAccept,
@@ -67,6 +69,7 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
         name,
         description,
         location,
+        locationDescription,
         startAt,
         endAt,
         autoAccept,
@@ -105,6 +108,7 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
               groupId: group.publicId,
               description,
               location,
+              locationDescription,
               startAt,
               endAt,
               autoAccept,
@@ -116,12 +120,12 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
             eventId: event.groupId,
           });
         }).pipe(Effect.withSpan("eventRepositoryImpl.createEventByClub")),
-
       updateEvent: ({
         eventId,
         name,
         description,
         location,
+        locationDescription,
         startAt,
         endAt,
         autoAccept,
@@ -133,6 +137,7 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
             .set({
               ...(description ? { description } : {}),
               ...(location ? { location } : {}),
+              ...(locationDescription ? { locationDescription } : {}),
               ...(startAt ? { startAt } : {}),
               ...(endAt ? { endAt } : {}),
               ...(autoAccept ? { autoAccept } : {}),
@@ -424,7 +429,7 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
               ),
             );
         }).pipe(Effect.withSpan("eventRepositoryImpl.rejectEventJoin")),
-      leaveEvent: ({ eventId, userId }) =>
+      removeMember: ({ eventId, userId }) =>
         Effect.gen(function* () {
           yield* db
             .update(eventEventMember)

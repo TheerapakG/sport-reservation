@@ -39,7 +39,16 @@ export class FriendRepository
         >[],
         SqlError.SqlError
       >;
-      getFriendRequests: (
+      getIncomingFriendRequests: (
+        userId: string,
+      ) => Effect.Effect<
+        Pick<
+          typeof userUserGroupMember.$inferSelect,
+          "groupId" | "userId" | "status"
+        >[],
+        SqlError.SqlError
+      >;
+      getOutgoingFriendRequests: (
         userId: string,
       ) => Effect.Effect<
         Pick<
@@ -72,6 +81,16 @@ export class FriendRepository
         friendId: string,
       ) => Effect.Effect<
         Option.Option<Pick<typeof userUserGroup.$inferSelect, "publicId">>,
+        SqlError.SqlError
+      >;
+      getFriendStatus: (
+        userId: string,
+        friendId: string,
+      ) => Effect.Effect<
+        Option.Option<{
+          status: "pending" | "member" | "none";
+          groupId?: string;
+        }>,
         SqlError.SqlError
       >;
     }

@@ -6,25 +6,20 @@ import { getSubjectTypeFromToken } from "sport-reservation-oauth-common/subjects
 import { defineEventHandlerConfig, response } from "tiara-stack/config";
 import { OAuthError } from "tiara-stack/models/errors";
 import { OAuthClient } from "~/layers";
-import { EventRepository } from "~/repositories/eventRepository";
+import { ClubRepository } from "~/repositories/clubRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
-  name: "getUserPendingEvents",
+  name: "getUserMemberClubs",
   response: response(
     type({
-      events: [
+      clubs: [
         {
           id: "string",
-          eventCreatorType: "string",
           creatorId: "string",
           "name?": "string",
           "description?": "string",
           "location?": ["number", "number"],
           "locationDescription?": "string",
-          startAt: "string",
-          endAt: "string",
-          autoAccept: "boolean",
-          sizeLimit: "number",
         },
         "[]",
       ],
@@ -53,32 +48,23 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
         user ? Effect.succeed(user.id) : Effect.fail(new OAuthError()),
     );
 
-    const eventRepository = yield* EventRepository;
+    const clubRepository = yield* ClubRepository;
 
-    const events = yield* eventRepository.getUserPendingEvents({ userId });
+    const userClubs = yield* clubRepository.getUserMemberClubs({ userId });
 
-    const formattedEvents = events.map(({ event, group }) => {
-      return {
-        id: group.publicId,
-        ...(group.name && { name: group.name }),
-        ...(event.description && {
-          description: event.description,
-        }),
-        ...(event.location && {
-          location: event.location,
-        }),
-        ...(event.locationDescription && {
-          locationDescription: event.locationDescription,
-        }),
-        startAt: event.startAt.toISOString(),
-        endAt: event.endAt.toISOString(),
-        autoAccept: event.autoAccept,
-        sizeLimit: event.sizeLimit,
-        eventCreatorType: event.eventCreatorType,
-        creatorId: event.creatorId,
-      };
-    });
-
-    return { events: formattedEvents };
+    return {
+      clubs: userClubs.map(({ club, group }) => {
+        return {
+          id: group.publicId,
+          creatorId: group.creatorId,
+          ...(group.name && { name: group.name }),
+          ...(club.description && { description: club.description }),
+          ...(club.location && { location: club.location }),
+          ...(club.locationDescription && {
+            locationDescription: club.locationDescription,
+          }),
+        };
+      }),
+    };
   }),
 );

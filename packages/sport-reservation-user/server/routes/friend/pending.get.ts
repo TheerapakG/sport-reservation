@@ -1,19 +1,15 @@
-import {
-  EventContext,
-  EventParamsContext,
-  effectEventHandler,
-} from "$/effectEventHandler";
+import { EventContext, effectEventHandler } from "$/effectEventHandler";
 import { type } from "arktype";
 import { Effect } from "effect";
 import { parseCookies } from "h3";
 import { getSubjectTypeFromToken } from "sport-reservation-oauth-common/subjects";
-import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
+import { defineEventHandlerConfig, response } from "tiara-stack/config";
 import { OAuthError } from "tiara-stack/models/errors";
 import { OAuthClient } from "~/layers";
 import { FriendRepository } from "~/repositories/friendRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
-  name: "postAcceptFriendRequest",
+  name: "getOutgoingFriendRequests",
   response: response(
     type(
       {
@@ -25,22 +21,12 @@ export const handlerConfig = defineEventHandlerConfig({
     ),
     { stream: false },
   ),
-  body: params(
-    type({
-      fromUserId: "string",
-    }),
-  ),
 });
 
 export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
   Effect.gen(function* () {
     const { event } = yield* EventContext;
     const { access_token: accessToken } = parseCookies(event);
-    const {
-      params: {
-        body: { fromUserId },
-      },
-    } = yield* EventParamsContext.typed<typeof handlerConfig>();
 
     const { client: oauthClient } = yield* OAuthClient;
 
@@ -58,10 +44,6 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     );
 
     const friendRepository = yield* FriendRepository;
-    const members = yield* friendRepository.acceptFriendRequest(
-      fromUserId,
-      userId,
-    );
-    return members;
+    return yield* friendRepository.getOutgoingFriendRequests(userId);
   }),
 );

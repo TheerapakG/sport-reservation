@@ -19,7 +19,8 @@ export const handlerConfig = defineEventHandlerConfig({
           creatorId: "string",
           "name?": "string",
           "description?": "string",
-          "location?": "string",
+          "location?": ["number", "number"],
+          "locationDescription?": "string",
           startAt: "string",
           endAt: "string",
           autoAccept: "boolean",
@@ -56,18 +57,25 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
 
     const events = yield* eventRepository.getUserMemberEvents({ userId });
 
-    const formattedEvents = events.map((eventData) => {
+    const formattedEvents = events.map(({ event, group }) => {
       return {
-        id: eventData.event.groupId,
-        eventCreatorType: eventData.event.eventCreatorType,
-        creatorId: eventData.event.creatorId,
-        name: eventData.group.name || undefined,
-        description: eventData.event.description || undefined,
-        location: eventData.event.location || undefined,
-        startAt: eventData.event.startAt.toISOString(),
-        endAt: eventData.event.endAt.toISOString(),
-        autoAccept: eventData.event.autoAccept,
-        sizeLimit: eventData.event.sizeLimit,
+        id: group.publicId,
+        eventCreatorType: event.eventCreatorType,
+        creatorId: event.creatorId,
+        ...(group.name && { name: group.name }),
+        ...(event.description && {
+          description: event.description,
+        }),
+        ...(event.location && {
+          location: event.location,
+        }),
+        ...(event.locationDescription && {
+          locationDescription: event.locationDescription,
+        }),
+        startAt: event.startAt.toISOString(),
+        endAt: event.endAt.toISOString(),
+        autoAccept: event.autoAccept,
+        sizeLimit: event.sizeLimit,
       };
     });
 

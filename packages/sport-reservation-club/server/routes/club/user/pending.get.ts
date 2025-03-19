@@ -9,22 +9,17 @@ import { OAuthClient } from "~/layers";
 import { ClubRepository } from "~/repositories/clubRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
-  name: "getClubList",
+  name: "getUserPendingClubs",
   response: response(
     type({
       clubs: [
         {
-          club: {
-            "description?": "string",
-            "location?": ["number", "number"],
-            "locationDescription?": "string",
-          },
-          group: {
-            id: "string",
-            creatorId: "string",
-            "name?": "string",
-            type: "string",
-          },
+          id: "string",
+          creatorId: "string",
+          "name?": "string",
+          "description?": "string",
+          "location?": ["number", "number"],
+          "locationDescription?": "string",
         },
         "[]",
       ],
@@ -54,24 +49,20 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     );
 
     const clubRepository = yield* ClubRepository;
-    const clubs = yield* clubRepository.getUserClubs({
-      userId,
-    });
+
+    const userClubs = yield* clubRepository.getUserPendingClubs({ userId });
 
     return {
-      clubs: clubs.map(({ club, group }) => {
+      clubs: userClubs.map(({ club, group }) => {
         return {
-          club: {
-            description: club.description ?? undefined,
-            location: club.location ?? undefined,
-            locationDescription: club.locationDescription ?? undefined,
-          },
-          group: {
-            id: group.publicId,
-            creatorId: group.creatorId,
-            name: group.name ?? undefined,
-            type: group.type,
-          },
+          id: group.publicId,
+          creatorId: group.creatorId,
+          ...(group.name && { name: group.name }),
+          ...(club.description && { description: club.description }),
+          ...(club.location && { location: club.location }),
+          ...(club.locationDescription && {
+            locationDescription: club.locationDescription,
+          }),
         };
       }),
     };

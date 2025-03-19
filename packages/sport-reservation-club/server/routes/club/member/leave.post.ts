@@ -4,30 +4,20 @@ import {
   effectEventHandler,
 } from "$/effectEventHandler";
 import { type } from "arktype";
-import { Effect } from "effect";
+import { Effect, Equivalence, Option } from "effect";
 import { parseCookies } from "h3";
 import { getSubjectTypeFromToken } from "sport-reservation-oauth-common/subjects";
 import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
 import { OAuthError } from "tiara-stack/models/errors";
 import { OAuthClient } from "~/layers";
-import { FriendRepository } from "~/repositories/friendRepository";
+import { ClubRepository } from "~/repositories/clubRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
-  name: "postAcceptFriendRequest",
-  response: response(
-    type(
-      {
-        groupId: "string",
-        userId: "string",
-        status: "string",
-      },
-      "[]",
-    ),
-    { stream: false },
-  ),
+  name: "postClubMemberLeave",
+  response: response(type({}), { stream: false }),
   body: params(
     type({
-      fromUserId: "string",
+      clubId: "string",
     }),
   ),
 });
@@ -38,7 +28,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     const { access_token: accessToken } = parseCookies(event);
     const {
       params: {
-        body: { fromUserId },
+        body: { clubId },
       },
     } = yield* EventParamsContext.typed<typeof handlerConfig>();
 
@@ -57,11 +47,22 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
         user ? Effect.succeed(user.id) : Effect.fail(new OAuthError()),
     );
 
-    const friendRepository = yield* FriendRepository;
-    const members = yield* friendRepository.acceptFriendRequest(
-      fromUserId,
+    const clubRepository = yield* ClubRepository;
+    const club = yield* clubRepository.getClub({ clubId });
+    if (
+      Option.getEquivalence(Equivalence.string)(
+        Option.map(club, (club) => club.group.creatorId),
+        Option.some(userId),
+      )
+    ) {
+      yield* Effect.fail(new OAuthError());
+    }
+
+    yield* clubRepository.removeMember({
+      clubId,
       userId,
-    );
-    return members;
+    });
+
+    return {};
   }),
 );

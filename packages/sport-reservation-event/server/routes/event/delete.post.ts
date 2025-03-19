@@ -4,30 +4,20 @@ import {
   effectEventHandler,
 } from "$/effectEventHandler";
 import { type } from "arktype";
-import { Effect } from "effect";
+import { Effect, Equivalence, Option } from "effect";
 import { parseCookies } from "h3";
 import { getSubjectTypeFromToken } from "sport-reservation-oauth-common/subjects";
 import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
 import { OAuthError } from "tiara-stack/models/errors";
 import { OAuthClient } from "~/layers";
-import { FriendRepository } from "~/repositories/friendRepository";
+import { EventRepository } from "~/repositories/eventRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
-  name: "postAcceptFriendRequest",
-  response: response(
-    type(
-      {
-        groupId: "string",
-        userId: "string",
-        status: "string",
-      },
-      "[]",
-    ),
-    { stream: false },
-  ),
+  name: "postDeleteEvent",
+  response: response(type({}), { stream: false }),
   body: params(
     type({
-      fromUserId: "string",
+      eventId: "string",
     }),
   ),
 });
@@ -38,7 +28,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     const { access_token: accessToken } = parseCookies(event);
     const {
       params: {
-        body: { fromUserId },
+        body: { eventId },
       },
     } = yield* EventParamsContext.typed<typeof handlerConfig>();
 
@@ -57,11 +47,21 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
         user ? Effect.succeed(user.id) : Effect.fail(new OAuthError()),
     );
 
-    const friendRepository = yield* FriendRepository;
-    const members = yield* friendRepository.acceptFriendRequest(
-      fromUserId,
-      userId,
-    );
-    return members;
+    const eventRepository = yield* EventRepository;
+    const eventData = yield* eventRepository.getEvent({ eventId });
+    if (
+      !Option.getEquivalence(Equivalence.string)(
+        Option.map(eventData, (eventData) => eventData.group.creatorId),
+        Option.some(userId),
+      )
+    ) {
+      yield* Effect.fail(new OAuthError());
+    }
+
+    yield* eventRepository.deleteEvent({
+      eventId,
+    });
+
+    return {};
   }),
 );

@@ -74,12 +74,30 @@ export class ClubRepository
         }[],
         SqlError.SqlError
       >;
+      getUserCreatedClubs: (data: { userId: string }) => Effect.Effect<
+        {
+          club: typeof clubClub.$inferSelect;
+          group: typeof userUserGroup.$inferSelect;
+        }[],
+        SqlError.SqlError
+      >;
+      getUserMemberClubs: (data: { userId: string }) => Effect.Effect<
+        {
+          club: typeof clubClub.$inferSelect;
+          group: typeof userUserGroup.$inferSelect;
+        }[],
+        SqlError.SqlError
+      >;
+      getUserPendingClubs: (data: { userId: string }) => Effect.Effect<
+        {
+          club: typeof clubClub.$inferSelect;
+          group: typeof userUserGroup.$inferSelect;
+        }[],
+        SqlError.SqlError
+      >;
       getClubMemberStatus: (data: {
         clubId: string;
         userId: string;
-      }) => Effect.Effect<
-        Option.Option<Pick<typeof userUserGroupMember.$inferSelect, "status">>,
-        SqlError.SqlError
-      >;
+      }) => Effect.Effect<{ status: "pending" | "member" }, SqlError.SqlError>;
     }
   >() {}

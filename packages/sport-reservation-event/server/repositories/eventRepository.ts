@@ -15,7 +15,8 @@ export class EventRepository
         userId: string;
         name: string;
         description?: string;
-        location?: string;
+        location?: [number, number];
+        locationDescription?: string;
         startAt: Date;
         endAt: Date;
         autoAccept: boolean;
@@ -30,7 +31,8 @@ export class EventRepository
         clubId: string;
         name: string;
         description?: string;
-        location?: string;
+        location?: [number, number];
+        locationDescription?: string;
         startAt: Date;
         endAt: Date;
         autoAccept: boolean;
@@ -45,7 +47,8 @@ export class EventRepository
         eventId: string;
         name?: string;
         description?: string;
-        location?: string;
+        location?: [number, number];
+        locationDescription?: string;
         startAt?: Date;
         endAt?: Date;
         autoAccept?: boolean;
@@ -74,7 +77,7 @@ export class EventRepository
         eventId: string;
         userId: string;
       }) => Effect.Effect<void, SqlError.SqlError>;
-      leaveEvent: (data: {
+      removeMember: (data: {
         eventId: string;
         userId: string;
       }) => Effect.Effect<void, SqlError.SqlError>;

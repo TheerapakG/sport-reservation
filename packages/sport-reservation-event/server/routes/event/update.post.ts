@@ -13,11 +13,19 @@ import { OAuthClient } from "~/layers";
 import { EventRepository } from "~/repositories/eventRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
-  name: "postEventMemberLeave",
+  name: "postUpdateEvent",
   response: response(type({}), { stream: false }),
   body: params(
     type({
       eventId: "string",
+      "name?": "string",
+      "description?": "string",
+      "location?": ["number", "number"],
+      "locationDescription?": "string",
+      "startAt?": "string", // ISO string format
+      "endAt?": "string", // ISO string format
+      "autoAccept?": "boolean",
+      "sizeLimit?": "number",
     }),
   ),
 });
@@ -28,7 +36,17 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     const { access_token: accessToken } = parseCookies(event);
     const {
       params: {
-        body: { eventId },
+        body: {
+          eventId,
+          name,
+          description,
+          location,
+          locationDescription,
+          startAt,
+          endAt,
+          autoAccept,
+          sizeLimit,
+        },
       },
     } = yield* EventParamsContext.typed<typeof handlerConfig>();
 
@@ -48,19 +66,26 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     );
 
     const eventRepository = yield* EventRepository;
-    const eventOption = yield* eventRepository.getEvent({ eventId });
+    const eventData = yield* eventRepository.getEvent({ eventId });
     if (
-      Option.getEquivalence(Equivalence.string)(
-        Option.map(eventOption, (event) => event.group.creatorId),
+      !Option.getEquivalence(Equivalence.string)(
+        Option.map(eventData, (eventData) => eventData.group.creatorId),
         Option.some(userId),
       )
     ) {
       yield* Effect.fail(new OAuthError());
     }
 
-    yield* eventRepository.removeMember({
+    yield* eventRepository.updateEvent({
       eventId,
-      userId,
+      name,
+      description,
+      location,
+      locationDescription,
+      startAt: startAt ? new Date(startAt) : undefined,
+      endAt: endAt ? new Date(endAt) : undefined,
+      autoAccept,
+      sizeLimit,
     });
 
     return {};
