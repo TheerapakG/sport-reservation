@@ -265,10 +265,9 @@ export const eventEvent = pgTable(
   "event_event",
   {
     id: serial("id").primaryKey(),
-    publicId: uuid("public_id").defaultRandom().notNull(),
+    groupId: uuid("group_id").notNull(),
     eventCreatorType: eventEventCreatorType("event_creator_type").notNull(),
     creatorId: uuid("creator_id").notNull(),
-    name: varchar("name", {}),
     description: varchar("description", {}),
     location: varchar("location", {}),
     startAt: timestamp("start_at", { withTimezone: true }).notNull(),
@@ -285,7 +284,7 @@ export const eventEvent = pgTable(
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
   },
   (table) => [
-    uniqueIndex("event_event_public_id_idx").on(table.publicId),
+    index("event_event_group_id_idx").on(table.groupId),
     index("event_event_creator_id_idx").on(table.creatorId),
   ],
 );

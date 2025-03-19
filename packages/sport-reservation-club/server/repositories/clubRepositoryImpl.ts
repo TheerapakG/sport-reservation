@@ -146,7 +146,7 @@ export const clubRepositoryImpl = /*@__PURE__*/ Layer.effect(
             )
             .where(
               and(
-                eq(userUserGroup.publicId, clubId),
+                eq(clubClub.groupId, clubId),
                 isNull(clubClub.deletedAt),
                 isNull(userUserGroup.deletedAt),
               ),
@@ -244,13 +244,9 @@ export const clubRepositoryImpl = /*@__PURE__*/ Layer.effect(
         Effect.gen(function* () {
           const club = yield* db
             .select()
-            .from(userUserGroup)
+            .from(clubClub)
             .where(
-              and(
-                isNull(userUserGroup.deletedAt),
-                eq(userUserGroup.publicId, clubId),
-                eq(userUserGroup.type, "club"),
-              ),
+              and(isNull(clubClub.deletedAt), eq(clubClub.groupId, clubId)),
             );
 
           if (club.length === 0) return [];

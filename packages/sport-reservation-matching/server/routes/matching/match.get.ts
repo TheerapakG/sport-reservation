@@ -48,7 +48,6 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     const { event } = yield* EventContext;
     const { access_token: accessToken } = parseCookies(event);
 
-    // Verify user is authenticated
     const userId = yield* pipe(
       Effect.promise(() =>
         getSubjectTypeFromToken({

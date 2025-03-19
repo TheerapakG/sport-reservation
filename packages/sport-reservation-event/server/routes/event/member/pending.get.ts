@@ -10,18 +10,26 @@ import { getSubjectTypeFromToken } from "sport-reservation-oauth-common/subjects
 import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
 import { OAuthError } from "tiara-stack/models/errors";
 import { OAuthClient } from "~/layers";
-import { ClubRepository } from "~/repositories/clubRepository";
+import { EventRepository } from "~/repositories/eventRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
-  name: "postUpdateClub",
-  response: response(type({}), { stream: false }),
-  body: params(
+  name: "getEventMemberPending",
+  response: response(
     type({
-      clubId: "string",
-      "name?": "string",
-      "description?": "string",
-      "location?": ["number", "number"],
-      "locationDescription?": "string",
+      members: [
+        {
+          userId: "string",
+          size: "number",
+          status: "'pending'",
+        },
+        "[]",
+      ],
+    }),
+    { stream: false },
+  ),
+  query: params(
+    type({
+      eventId: "string",
     }),
   ),
 });
@@ -32,13 +40,13 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     const { access_token: accessToken } = parseCookies(event);
     const {
       params: {
-        body: { clubId, name, description, location, locationDescription },
+        query: { eventId },
       },
     } = yield* EventParamsContext.typed<typeof handlerConfig>();
 
     const { client: oauthClient } = yield* OAuthClient;
 
-    const userId = yield* Effect.flatMap(
+    const requesterId = yield* Effect.flatMap(
       Effect.promise(async () =>
         getSubjectTypeFromToken({
           type: "user",
@@ -51,25 +59,32 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
         user ? Effect.succeed(user.id) : Effect.fail(new OAuthError()),
     );
 
-    const clubRepository = yield* ClubRepository;
-    const club = yield* clubRepository.getClub({ clubId });
+    const eventRepository = yield* EventRepository;
+
+    const eventOption = yield* eventRepository.getEvent({ eventId });
     if (
       !Option.getEquivalence(Equivalence.string)(
-        Option.map(club, (club) => club.group.creatorId),
-        Option.some(userId),
+        Option.map(eventOption, (event) => event.group.creatorId),
+        Option.some(requesterId),
       )
     ) {
       yield* Effect.fail(new OAuthError());
     }
 
-    yield* clubRepository.updateClub({
-      clubId,
-      name,
-      description,
-      location,
-      locationDescription,
+    const members = yield* eventRepository.getEventPendingMembers({
+      eventId,
     });
 
-    return {};
+    const pendingMembers = members
+      .filter((member) => member.status === "pending")
+      .map((member) => ({
+        userId: member.userId,
+        size: member.size,
+        status: "pending" as const,
+      }));
+
+    return {
+      members: pendingMembers,
+    };
   }),
 );
