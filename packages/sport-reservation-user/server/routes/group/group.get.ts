@@ -2,10 +2,9 @@ import { EventParamsContext, effectEventHandler } from "$/effectEventHandler";
 import { type } from "arktype";
 import { Effect } from "effect";
 import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
-import { group } from "~/models/group";
+import { group } from "~/models";
 import { GroupRepository } from "~/repositories/groupRepository";
 
-// Note: You'll need to create a group model similar to userProfile
 export const handlerConfig = defineEventHandlerConfig({
   name: "getGroupById",
   response: response(group, { stream: false }),

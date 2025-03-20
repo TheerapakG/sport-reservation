@@ -4,7 +4,7 @@ import {
   effectEventHandler,
 } from "$/effectEventHandler";
 import { type } from "arktype";
-import { Effect, Number, pipe } from "effect";
+import { Effect, pipe } from "effect";
 import { parseCookies } from "h3";
 import { getSubjectTypeFromToken } from "sport-reservation-oauth-common/subjects";
 import { UserClient } from "sport-reservation-user/client";
@@ -31,7 +31,7 @@ export const handlerConfig = defineEventHandlerConfig({
   query: params(
     type({
       cursorId: "string",
-      limit: "number",
+      limit: "4<=number<=20",
     }),
   ),
 });
@@ -63,10 +63,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     );
 
     const matchingDbRepository = yield* MatchingDbRepository;
-    const matchResults = yield* matchingDbRepository.matchUser(
-      cursorId,
-      Number.clamp(limit, { minimum: 1, maximum: 20 }),
-    );
+    const matchResults = yield* matchingDbRepository.matchUser(cursorId, limit);
 
     const userClient = yield* UserClient;
 

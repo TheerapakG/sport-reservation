@@ -514,10 +514,7 @@ export const matchingUserAssessmentVector = pgTable(
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
   },
   (table) => [
-    uniqueIndex("matching_user_assessment_vector_user_id_idx").on(
-      table.userId,
-      table.vectorVersion,
-    ),
+    uniqueIndex("matching_user_assessment_user_id_idx").on(table.userId),
   ],
 );
 
@@ -545,6 +542,5 @@ export const matchingCursor = pgTable(
   (table) => [
     uniqueIndex("matching_cursor_public_id_idx").on(table.publicId),
     index("matching_cursor_user_id_idx").on(table.userId),
-    index("matching_cursor_vector_version_idx").on(table.vectorVersion),
   ],
 );

@@ -10,6 +10,7 @@ if (env instanceof ArkErrors) {
 export default defineConfig({
   schema: "./src/schema.ts",
   dialect: "postgresql",
+  extensionsFilters: ["postgis"],
   dbCredentials: {
     url: env.POSTGRES_URL,
   },
