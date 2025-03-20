@@ -3,8 +3,7 @@ import { NodeFileSystem } from "@effect/platform-node";
 import { Layer } from "effect";
 import { dbLive, oAuthClient, uploadClient } from "~/layers";
 import { authRepositoryImpl } from "~/repositories/authRepositoryImpl";
-import { groupRepositoryImpl } from "~/repositories/groupRepositoryImpl";
-import { userRepositoryImpl } from "~/repositories/userRepositoryImpl";
+import { friendRepositoryImpl } from "~/repositories/friendRepositoryImpl";
 
 /*@__NO_SIDE_EFFECTS__*/
 const createConfigLive = () =>
@@ -19,7 +18,7 @@ const baseDependenciesLive = /*@__PURE__*/ Layer.mergeAll(configLive);
 
 /*@__NO_SIDE_EFFECTS__*/
 const createRepositoryLive = () =>
-  Layer.mergeAll(authRepositoryImpl, userRepositoryImpl, groupRepositoryImpl)
+  Layer.mergeAll(authRepositoryImpl, friendRepositoryImpl)
     .pipe(Layer.provide(dbLive))
     .pipe(Layer.provide(runtimeConfig));
 

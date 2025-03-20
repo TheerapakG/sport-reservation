@@ -40,7 +40,7 @@ jobs:
   build:
     strategy:
       matrix:
-        package: [oauth, user, club, event, auth, upload, chat, matching, web]
+        package: [oauth, user, friend, club, event, auth, upload, chat, matching, web]
     needs: [checks]
     runs-on: ubuntu-latest
     defaults:
@@ -88,7 +88,7 @@ jobs:
   deploy:
     strategy:
       matrix:
-        package: [oauth, user, club, event, auth, upload, chat, matching, web]
+        package: [oauth, user, friend, club, event, auth, upload, chat, matching, web]
     needs: [build]
     runs-on: ubuntu-latest
     defaults:

@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sport-reservation-friend
+  labels:
+    app: sport-reservation-friend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sport-reservation-friend
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  minReadySeconds: 5
+  template:
+    metadata:
+      labels:
+        app: sport-reservation-friend
+    spec:
+      containers:
+        - name: sport-reservation-friend
+          image: <IMAGE>
+          ports:
+            - containerPort: 3000
+              name: sp-friend-svc
+          env:
+            - name: POSTGRES_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-friend-secret
+                  key: postgresUrl
+            - name: OAUTH_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-friend-secret
+                  key: oauthClientId
+            - name: OAUTH_ISSUER
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-friend-secret
+                  key: oauthIssuer
+            - name: UPLOAD_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-friend-secret
+                  key: uploadSecret
+            - name: UPLOAD_BASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-friend-secret
+                  key: uploadBaseUrl
+            - name: USER_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-friend-secret
+                  key: userSecret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sport-reservation-friend-service
+spec:
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: sp-friend-svc
+  selector:
+    app: sport-reservation-friend
