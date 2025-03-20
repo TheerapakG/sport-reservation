@@ -1,95 +1,59 @@
-// src/pages/EventsPage.tsx
 import React from "react";
 import EventListing from "@/components/eventlisting";
+import dayjs from "dayjs";
+import { mockEventsByDate } from "@/components/mockEvents";
 
-export default function EventsPage() {
-  const events = [
-    {
-      dateTime: "Fri, 31 Jan (1:00 - 2:00 PM)",
-      title: "101 Friendly Match Badminton",
-      description: "Short description about this activity over here.",
-      location: "101 Badminton Club",
-      participants: "8/10",
-    },
-    {
-      dateTime: "Fri, 31 Jan (3:00 - 5:00 PM)",
-      title: "Evening Football",
-      description: "Short description about this activity over here.",
-      location: "81 badminton court",
-      participants: "20/20",
-      buttonLabel: "Join Waitlist",
-    },
-    {
-      dateTime: "Fri, 31 Jan (3:00 - 5:00 PM)",
-      title: "Evening Football",
-      description: "Short description about this activity over here.",
-      location: "81 badminton court",
-      participants: "20/20",
-      buttonLabel: "Join Waitlist",
-    },
-    {
-      dateTime: "Fri, 31 Jan (3:00 - 5:00 PM)",
-      title: "Evening Football",
-      description: "Short description about this activity over here.",
-      location: "81 badminton court",
-      participants: "20/20",
-      buttonLabel: "Join Waitlist",
-    },
-    {
-      dateTime: "Fri, 31 Jan (3:00 - 5:00 PM)",
-      title: "Evening Football",
-      description: "Short description about this activity over here.",
-      location: "81 badminton court",
-      participants: "20/20",
-      buttonLabel: "Join Waitlist",
-    },
-  ];
+type EventsPageProps = {
+  selectedDate?: string; // "YYYY-MM-DD"
+};
+
+export default function EventsPage({ selectedDate }: EventsPageProps) {
+  // If no date is selected, default to "today"
+  const todayString = dayjs().format("YYYY-MM-DD");
+  const dateToShow = selectedDate || todayString;
+
+  // Get the array of events for that date (or empty)
+  const events = mockEventsByDate[dateToShow] || [];
+
+  // If date is "todayString", show "Today" heading, else show date
+  const heading =
+    dateToShow === todayString
+      ? "Today"
+      : dayjs(dateToShow).format("dddd, DD MMM");
+
   return (
     <div className="p-4">
       {/* Tabs: "Events" & "Clubs" */}
       <div className="mb-6 flex items-center space-x-8">
-        {/* Active tab in red (#FF0000) */}
-        <button className="border-b-2 border-[#FF0000] pb-1 font-bold text-[#FF0000]">
+        {/* Active tab in red */}
+        <button className="border-b-2 border-[#F28382] pb-1 font-bold text-[#F28382]">
           Events
         </button>
         {/* Inactive tab */}
         <button className="text-gray-500 hover:text-gray-700">Clubs</button>
       </div>
 
-      {/* ========== DATE SECTION: TODAY ========== */}
       <div className="mb-8">
-        <h3 className="mb-1 text-lg font-semibold">Today</h3>
+        <h3 className="mb-1 text-lg font-semibold">{heading}</h3>
         <hr className="mb-4 w-full border-t-2 border-black" />
 
-        <EventListing
-          dateTime="Thu, 30 Jan (1:00 - 3:00 PM)"
-          title="Hey! Badminton"
-          description="Short description about this activity over here."
-          location="81 badminton court"
-          participants="5/10"
-        />
-      </div>
-
-      {/* ========== DATE SECTION: THURSDAY, 13 FEB ========== */}
-      <div className="mb-8">
-        <h3 className="mb-1 text-lg font-semibold">Thursday, 13 Feb</h3>
-        <hr className="mb-4 w-full border-t-2 border-black" />
-
-        {events.map(
-          ({ dateTime, title, description, location, participants }) => (
+        {events.length === 0 ? (
+          <p className="text-gray-500">No events for this date.</p>
+        ) : (
+          events.map((evt) => (
             <EventListing
-              dateTime={dateTime}
-              title={title}
-              description={description}
-              location={location}
-              participants={participants}
+              key={evt.id}
+              // If you have real images, pass them in:
+              // image="/someLocalImage.jpg"
+              dateTime={evt.dateTime}
+              title={evt.title}
+              description={evt.description}
+              location={evt.location}
+              participants={evt.participants}
             />
-          ),
+          ))
         )}
       </div>
-
-      {/* ========== DATE SECTION: (ADD MORE DATES) ========== */}
-      {/* ... Repeat for other dates ... */}
     </div>
   );
 }

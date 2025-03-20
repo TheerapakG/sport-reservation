@@ -1,32 +1,26 @@
-// src/components/EventListing.tsx
 import React, { useState } from "react";
-import { Link } from "@tanstack/react-router"; // Import Link from TanStack Router
-import { MapPin, Users } from "lucide-react"; // or your icon library
+import { useNavigate } from "@tanstack/react-router";
 
-type EventListingProps = {
-  eventId: string; // Ensure eventId is provided
-  image?: string;
-  dateTime: string;
+type EventJoinFlowProps = {
   title: string;
-  description: string;
+  dateTime: string;
   location: string;
-  participants: string;
-  buttonLabel?: string;
+  image: string;
 };
 
-export default function EventListing({
-  eventId,
-  dateTime,
+export default function EventJoinFlow({
   title,
-  description,
+  dateTime,
   location,
-  participants,
-  buttonLabel = "Join",
-}: EventListingProps) {
+  image,
+}: EventJoinFlowProps) {
+  // Steps: NONE => no popup, JOIN => first popup, CONGRATS => second popup
   const [popUpStep, setPopUpStep] = useState<"NONE" | "JOIN" | "CONGRATS">(
     "NONE",
   );
   const [guests, setGuests] = useState(0);
+
+  const navigate = useNavigate();
 
   function handleJoinClick() {
     setPopUpStep("JOIN");
@@ -39,62 +33,38 @@ export default function EventListing({
   function handleDone() {
     setPopUpStep("NONE");
     setGuests(0);
+    navigate("/events");
   }
 
   function handleClose() {
+    // Close the popup and navigate back
     setPopUpStep("NONE");
-    setGuests(0);
+    navigate("/events");
   }
 
+  // Stop event from bubbling to the overlay
   function stopPropagation(e: React.MouseEvent) {
     e.stopPropagation();
   }
 
   return (
-    <div>
-      {/* Event Card Layout */}
-      <div className="mb-4 flex max-w-3xl space-x-4 rounded-md bg-white p-4 shadow">
-        {/* Bigger Event Image */}
+    <div className="space-y-4">
+      {/* Event card */}
+      <div className="w-80 rounded bg-white p-4 shadow">
         <img
-          src="https://cdn.theerapakg.moe/reservation/asset/events/badminton-default.jpg"
+          src={image}
           alt={title}
-          className="h-32 w-48 rounded-md object-cover"
+          className="h-40 w-full rounded object-cover"
         />
-
-        {/* Event Details */}
-        <div className="flex w-full flex-col justify-between">
-          <div>
-            <p className="mb-1 text-sm text-[#F28382]">{dateTime}</p>
-            {/*
-              Using an absolute link to ensure the URL is correct.
-              This will navigate to: /_layout/events/{eventId}
-            */}
-            <Link
-              to={`/events/$eventId`}
-              params={{eventId}}
-              className="mb-1 block text-base font-semibold text-blue-600 underline"
-            >
-              {title}
-            </Link>
-            <p className="mb-2 text-sm text-gray-600">{description}</p>
-            <p className="mb-2 flex items-center text-sm text-gray-600">
-              <MapPin size={16} className="mr-1" />
-              {location}
-            </p>
-          </div>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center text-sm text-gray-600">
-              <Users size={16} className="mr-1" />
-              {participants}
-            </div>
-            <button
-              onClick={handleJoinClick}
-              className="rounded-md bg-[#65D1F8] px-4 py-1 text-sm text-white hover:bg-[#4A90E2]"
-            >
-              {buttonLabel}
-            </button>
-          </div>
-        </div>
+        <h3 className="mt-2 text-lg font-semibold">{title}</h3>
+        <p className="text-sm text-gray-600">{dateTime}</p>
+        <p className="mb-2 text-sm text-gray-600">{location}</p>
+        <button
+          onClick={handleJoinClick}
+          className="rounded bg-gradient-to-r from-[#65D1F8] to-[#6CCFD0] px-4 py-2 text-white hover:opacity-90"
+        >
+          Join
+        </button>
       </div>
 
       {/* FIRST POPUP: "Are you bringing anyone?" */}
@@ -108,7 +78,7 @@ export default function EventListing({
             onClick={stopPropagation}
           >
             <img
-              src="https://cdn.theerapakg.moe/reservation/asset/events/badminton-default.jpg"
+              src={image}
               alt={title}
               className="h-32 w-full rounded object-cover"
             />
@@ -134,6 +104,7 @@ export default function EventListing({
                 +
               </button>
             </div>
+
             <div className="mt-4 flex flex-col items-center">
               <button
                 onClick={handleConfirm}
@@ -166,14 +137,16 @@ export default function EventListing({
             <p className="mb-4 text-center text-gray-700">
               You're going to this event!
             </p>
+
             <img
-              src="https://cdn.theerapakg.moe/reservation/asset/events/badminton-default.jpg"
+              src={image}
               alt={title}
               className="h-32 w-full rounded object-cover"
             />
             <h4 className="mt-2 text-lg font-semibold">{title}</h4>
             <p className="text-sm text-gray-600">{dateTime}</p>
             <p className="mb-2 text-sm text-gray-600">{location}</p>
+
             <div className="mt-4 flex flex-col items-center">
               <button
                 onClick={handleDone}
