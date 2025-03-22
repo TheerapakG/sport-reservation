@@ -1,6 +1,7 @@
-// src/components/assessment/PhysicalAssessmentForm.tsx
-import React, { useState } from "react";
 import { Info } from "lucide-react";
+import { useState } from "react";
+import AssessmentHeaderComponent from "./AssessmentHeaderComponent";
+import AssessmentContainerComponent from "./AssesssmentContainerComponent";
 
 type Props = {
   onNext: () => void;
@@ -29,26 +30,15 @@ export default function PhysicalAssessmentForm({ onNext, onBack }: Props) {
   ];
 
   return (
-    <div className="rounded-xl bg-white p-4 shadow">
-      {/* Top gradient border only */}
-      <div
-        className="h-0 border-t-4"
-        style={{
-          borderImage: "linear-gradient(90deg, #65D1F8, #6CCFD0) 1",
-          borderImageSlice: 1,
-        }}
-      ></div>
-
+    <AssessmentContainerComponent>
       <div className="mt-4">
-        {/* Headline in blue */}
-        <h2 className="mb-4 text-xl font-bold" style={{ color: "#65D1F8" }}>
-          Physical assessment
-        </h2>
-        <p className="mb-6 text-sm text-gray-600">
-          We use the International Physical Activity Questionnaire (IPAQ) to
+        <AssessmentHeaderComponent
+          title="Physical assessment"
+          description="We use the International Physical Activity Questionnaire (IPAQ) to
           measure your overall activity level. This helps us find a suitable
-          partner in terms of fitness and conditions.
-        </p>
+          partner in terms of fitness and conditions."
+          className="mb-6"
+        />
 
         {/* ====== VIGOROUS ACTIVITY ====== */}
         <div className="mb-6">
@@ -197,6 +187,6 @@ export default function PhysicalAssessmentForm({ onNext, onBack }: Props) {
           Save and continue
         </button>
       </div>
-    </div>
+    </AssessmentContainerComponent>
   );
 }

@@ -1550,8 +1550,8 @@ importers:
         specifier: ^19.0.0
         version: 19.0.0
       react-day-picker:
-        specifier: 9.5.0
-        version: 9.5.0(react@19.0.0)
+        specifier: 8.10.1
+        version: 8.10.1(date-fns@3.6.0)(react@19.0.0)
       react-dom:
         specifier: ^19.0.0
         version: 19.0.0(react@19.0.0)
@@ -2163,9 +2163,6 @@ packages:
   '@confluentinc/kafka-javascript@1.2.0':
     resolution: {integrity: sha512-F5nlX282Cl7pDKbgbBJwPJtJm/+Mf0pn9h/hrkcjpeCiwRi3UjNXZE698tLOYwG4RnbDV7ECZ01FFpXHaMqP4Q==}
     engines: {node: '>=18.0.0'}
-
-  '@date-fns/tz@1.2.0':
-    resolution: {integrity: sha512-LBrd7MiJZ9McsOgxqWX7AaxrDjcFVjWH/tIKJd7pnR7McaslGYOP1QmmiBXdJH/H/yLCT+rcQ7FaPBUxRGUtrg==}
 
   '@deno/shim-deno-test@0.5.0':
     resolution: {integrity: sha512-4nMhecpGlPi0cSzT67L+Tm+GOJqvuk8gqHBziqcUQOarnuIax1z96/gJHCSIz2Z0zhxE6Rzwb3IZXPtFh51j+w==}
@@ -5400,14 +5397,8 @@ packages:
     resolution: {integrity: sha512-WboRycPNsVw3B3TL559F7kuBUM4d8CgMEvk6xEJlOp7OBPjt6G7z8WMWlD2rOFZLk6OYfFIUGsCOWzcQH9K2og==}
     engines: {node: '>= 6'}
 
-  date-fns-jalali@4.1.0-0:
-    resolution: {integrity: sha512-hTIP/z+t+qKwBDcmmsnmjWTduxCg+5KfdqWQvb2X/8C9+knYY6epN/pfxdDuyVlSVeFz0sM5eEfwIUQ70U4ckg==}
-
   date-fns@3.6.0:
     resolution: {integrity: sha512-fRHTG8g/Gif+kSh50gaGEdToemgfj74aRX3swtiouboip5JDLAyDE9F11nHMIcvOaXeOC6D7SpNhi7uFyB7Uww==}
-
-  date-fns@4.1.0:
-    resolution: {integrity: sha512-Ukq0owbQXxa/U3EGtsdVBkR1w7KOQ5gIBqdH2hkvknzZPYvBxb/aa6E8L7tmjFtkwZBu3UXBbjIgPo/Ez4xaNg==}
 
   dax-sh@0.39.2:
     resolution: {integrity: sha512-gpuGEkBQM+5y6p4cWaw9+ePy5TNon+fdwFVtTI8leU3UhwhsBfPewRxMXGuQNC+M2b/MDGMlfgpqynkcd0C3FQ==}
@@ -7095,11 +7086,11 @@ packages:
   rc9@2.1.2:
     resolution: {integrity: sha512-btXCnMmRIBINM2LDZoEmOogIZU7Qe7zn4BpomSKZ/ykbLObuBdvG+mFq11DL6fjH1DRwHhrlgtYWG96bJiC7Cg==}
 
-  react-day-picker@9.5.0:
-    resolution: {integrity: sha512-WmJnPFVLnKh5Qscm7wavMNg86rqPverSWjx+zgK8/ZmGRSQ8c8OoqW10RI+AzAfT2atIxImpCUU2R9Z7Xb2SUA==}
-    engines: {node: '>=18'}
+  react-day-picker@8.10.1:
+    resolution: {integrity: sha512-TMx7fNbhLk15eqcMt+7Z7S2KF7mfTId/XJDjKE8f+IUcFn0l08/kI4FiYTL/0yuOLmEcbR4Fwe3GJf/NiiMnPA==}
     peerDependencies:
-      react: '>=16.8.0'
+      date-fns: ^2.28.0 || ^3.0.0
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
 
   react-dom@19.0.0:
     resolution: {integrity: sha512-4GV5sHFG0e/0AD4X+ySy6UJd3jVl1iNsNHdpad0qhABJ11twS3TTBnseqsKurKcsNqCEFeGL3uLpVChpIO3QfQ==}
@@ -8657,8 +8648,6 @@ snapshots:
     transitivePeerDependencies:
       - encoding
       - supports-color
-
-  '@date-fns/tz@1.2.0': {}
 
   '@deno/shim-deno-test@0.5.0': {}
 
@@ -12321,11 +12310,7 @@ snapshots:
 
   data-uri-to-buffer@3.0.1: {}
 
-  date-fns-jalali@4.1.0-0: {}
-
   date-fns@3.6.0: {}
-
-  date-fns@4.1.0: {}
 
   dax-sh@0.39.2:
     dependencies:
@@ -14016,11 +14001,9 @@ snapshots:
       defu: 6.1.4
       destr: 2.0.3
 
-  react-day-picker@9.5.0(react@19.0.0):
+  react-day-picker@8.10.1(date-fns@3.6.0)(react@19.0.0):
     dependencies:
-      '@date-fns/tz': 1.2.0
-      date-fns: 4.1.0
-      date-fns-jalali: 4.1.0-0
+      date-fns: 3.6.0
       react: 19.0.0
 
   react-dom@19.0.0(react@19.0.0):

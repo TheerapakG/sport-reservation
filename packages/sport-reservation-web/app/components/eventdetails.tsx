@@ -1,6 +1,4 @@
-// src/routes/events/$eventId.tsx
-import React from "react";
-import { createFileRoute, useParams, Link } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 
 const mockEvents = [
   {
@@ -37,12 +35,7 @@ const mockEvents = [
   },
 ];
 
-export const Route = createFileRoute("/_layout/events/$eventId")({
-  component: EventDetailPage,
-});
-
-function EventDetailPage() {
-  const { eventId } = useParams<{ eventId: string }>();
+function EventDetailPage({ eventId }: { eventId: string }) {
   const event = mockEvents.find((e) => e.id === eventId);
 
   if (!event) {

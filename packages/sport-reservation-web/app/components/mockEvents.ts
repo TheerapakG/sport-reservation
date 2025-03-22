@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 export const mockEventsByDate: Record<
   string,
   Array<{
-    id: number;
+    id: string;
     dateTime: string;
     title: string;
     description: string;
@@ -15,7 +15,7 @@ export const mockEventsByDate: Record<
   // "Today" example: "2025-03-14"
   [dayjs().format("YYYY-MM-DD")]: [
     {
-      id: 1,
+      id: "1",
       dateTime: "Fri, 14 Mar (3:00 - 5:00 PM)",
       title: "Hey! Badminton",
       description: "Short description about this activity over here.",
@@ -26,7 +26,7 @@ export const mockEventsByDate: Record<
   // Another date example
   "2025-03-15": [
     {
-      id: 2,
+      id: "2",
       dateTime: "Sat, 15 Mar (1:00 - 2:00 PM)",
       title: "101 Friendly Match Badminton",
       description: "Short description about this activity over here.",
@@ -34,7 +34,7 @@ export const mockEventsByDate: Record<
       participants: "8/10",
     },
     {
-      id: 3,
+      id: "3",
       dateTime: "Sat, 15 Mar (3:00 - 5:00 PM)",
       title: "Evening Football",
       description: "Short description about this activity over here.",

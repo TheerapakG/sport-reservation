@@ -1,7 +1,6 @@
-import React from "react";
 import EventListing from "@/components/eventlisting";
-import dayjs from "dayjs";
 import { mockEventsByDate } from "@/components/mockEvents";
+import dayjs from "dayjs";
 
 type EventsPageProps = {
   selectedDate?: string; // "YYYY-MM-DD"
@@ -43,6 +42,7 @@ export default function EventsPage({ selectedDate }: EventsPageProps) {
           events.map((evt) => (
             <EventListing
               key={evt.id}
+              eventId={evt.id}
               // If you have real images, pass them in:
               // image="/someLocalImage.jpg"
               dateTime={evt.dateTime}

@@ -1,5 +1,5 @@
+import { useRouter } from "@tanstack/react-router";
 import React, { useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
 
 type EventJoinFlowProps = {
   title: string;
@@ -14,13 +14,12 @@ export default function EventJoinFlow({
   location,
   image,
 }: EventJoinFlowProps) {
+  const router = useRouter();
   // Steps: NONE => no popup, JOIN => first popup, CONGRATS => second popup
   const [popUpStep, setPopUpStep] = useState<"NONE" | "JOIN" | "CONGRATS">(
     "NONE",
   );
   const [guests, setGuests] = useState(0);
-
-  const navigate = useNavigate();
 
   function handleJoinClick() {
     setPopUpStep("JOIN");
@@ -33,13 +32,13 @@ export default function EventJoinFlow({
   function handleDone() {
     setPopUpStep("NONE");
     setGuests(0);
-    navigate("/events");
+    router.navigate({ to: "/events" });
   }
 
   function handleClose() {
     // Close the popup and navigate back
     setPopUpStep("NONE");
-    navigate("/events");
+    router.navigate({ to: "/events" });
   }
 
   // Stop event from bubbling to the overlay

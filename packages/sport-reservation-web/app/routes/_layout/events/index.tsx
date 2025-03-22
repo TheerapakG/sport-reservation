@@ -1,19 +1,30 @@
 // src/routes/events.tsx
-import { createFileRoute } from "@tanstack/react-router";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
-import Calendar2 from "@/components/calendar-real";
+import Calendar from "@/components/calendar";
 import CreateEventForm from "@/components/create-events";
 import EventListing from "@/components/eventlisting";
-import React, { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { createFileRoute } from "@tanstack/react-router";
+import dayjs from "dayjs";
+import { useState } from "react";
 
 // Mock events keyed by date for March 19 - 24, 2025
-const mockEventsByDate: Record<string, any[]> = {
+const mockEventsByDate: Record<
+  string,
+  {
+    id: string;
+    dateTime: string;
+    title: string;
+    description: string;
+    location: string;
+    participants: string;
+  }[]
+> = {
   "2025-03-19": [
     {
       id: "event-19-1",
@@ -132,22 +143,19 @@ const mockEventsByDate: Record<string, any[]> = {
   ],
 };
 
-// Flatten events array (if needed)
-const allEvents = Object.values(mockEventsByDate).flat();
-
 export const Route = createFileRoute("/_layout/events/")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
-  // Set default selectedDate to "2023-03-19" so that events show up by default
-  const [selectedDate, setSelectedDate] = useState<string>("2023-03-19");
+  const [selectedDate, setSelectedDate] = useState<Date>(
+    new Date("2025-03-19"),
+  );
 
-  // If a date is selected in the calendar, use that; otherwise, default remains "2023-03-19"
-  const displayedDate = selectedDate;
+  const selectedDateStr = dayjs(selectedDate).format("YYYY-MM-DD");
 
   // Get events for the displayedDate from the mock data
-  const filteredEvents = mockEventsByDate[displayedDate] || [];
+  const filteredEvents = mockEventsByDate[selectedDateStr] || [];
 
   return (
     <div className="flex h-screen flex-col">
@@ -161,11 +169,12 @@ function RouteComponent() {
               <CardDescription>Select a date</CardDescription>
             </CardHeader>
             <CardContent>
-              <div>
-                <Calendar2
-                  onDateSelect={(dateStr) => setSelectedDate(dateStr)}
-                />
-              </div>
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={(date) => date && setSelectedDate(date)}
+                className="flex justify-center rounded-xl border-2 border-[#65D1F8] p-2"
+              />
             </CardContent>
           </Card>
 
@@ -196,7 +205,7 @@ function RouteComponent() {
             ))
           ) : (
             <div className="text-center text-gray-500">
-              No events found for {displayedDate}.
+              No events found for {selectedDateStr}.
             </div>
           )}
         </main>

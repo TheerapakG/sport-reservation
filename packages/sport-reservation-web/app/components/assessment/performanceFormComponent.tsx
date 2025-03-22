@@ -1,5 +1,6 @@
-// src/components/assessment/PerformanceForm.tsx
-import React, { useState } from "react";
+import { useState } from "react";
+import AssessmentHeaderComponent from "./AssessmentHeaderComponent";
+import AssessmentContainerComponent from "./AssesssmentContainerComponent";
 
 type Props = {
   onNext?: () => void;
@@ -26,7 +27,7 @@ export default function PerformanceForm({ onNext, onBack }: Props) {
   const [primaryGoal, setPrimaryGoal] = useState<string>("Casual");
   const [performanceMarker, setPerformanceMarker] = useState<string>("");
 
-  const yearOptions = [1, 2, 3, 5];
+  const yearOptions = [1, 2, 3, 4, 5];
   const frequencyOptions = [
     "0 days",
     "1 day",
@@ -48,7 +49,7 @@ export default function PerformanceForm({ onNext, onBack }: Props) {
           Expert)
         </label>
         <div className="grid grid-cols-5 gap-2 text-sm">
-          {[1, 2, 3, 4, 5].map((r) => (
+          {yearOptions.map((r) => (
             <label key={r} className="flex items-center space-x-1">
               <input
                 type="radio"
@@ -335,16 +336,7 @@ export default function PerformanceForm({ onNext, onBack }: Props) {
   );
 
   return (
-    <div className="rounded-xl bg-white p-6 shadow">
-      {/* Top-only gradient border */}
-      <div
-        className="h-0 border-t-4"
-        style={{
-          borderImage: "linear-gradient(90deg, #65D1F8, #6CCFD0) 1",
-          borderImageSlice: 1,
-        }}
-      ></div>
-
+    <AssessmentContainerComponent>
       <div className="mt-4">
         {/* Tabs inside the card */}
         <div className="mb-6 flex space-x-2 text-sm font-medium">
@@ -366,14 +358,11 @@ export default function PerformanceForm({ onNext, onBack }: Props) {
           })}
         </div>
 
-        {/* Heading and Description */}
-        <h2 className="mb-4 text-xl font-bold" style={{ color: "#65D1F8" }}>
-          Rate your performance!
-        </h2>
-        <p className="mb-6 text-sm text-gray-600">
-          Describe your skills, experience, and style so we can fine-tune your
-          matches and ensure you find the best partner.
-        </p>
+        <AssessmentHeaderComponent
+          title="Rate your performance!"
+          description="Describe your skills, experience, and style so we can fine-tune your matches and ensure you find the best partner."
+          className="mb-6"
+        />
 
         {selectedTab === "Badminton" && renderBadmintonQuestions()}
         {selectedTab === "Tennis" && renderTennisQuestions()}
@@ -399,6 +388,6 @@ export default function PerformanceForm({ onNext, onBack }: Props) {
           </button>
         )}
       </div>
-    </div>
+    </AssessmentContainerComponent>
   );
 }
