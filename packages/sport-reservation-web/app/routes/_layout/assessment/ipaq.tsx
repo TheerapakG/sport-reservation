@@ -1,14 +1,12 @@
+import AssessmentHeaderComponent from "@/components/assessment/AssessmentHeaderComponent";
+import AssessmentContainerComponent from "@/components/assessment/AssesssmentContainerComponent";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { Info } from "lucide-react";
 import { useState } from "react";
-import AssessmentHeaderComponent from "./AssessmentHeaderComponent";
-import AssessmentContainerComponent from "./AssesssmentContainerComponent";
 
-type Props = {
-  onNext: () => void;
-  onBack: () => void;
-};
+export default function AssessmentComponent() {
+  const router = useRouter();
 
-export default function PhysicalAssessmentForm({ onNext, onBack }: Props) {
   // State for each dropdown/input
   const [vigorousDays, setVigorousDays] = useState("0 days");
   const [vigorousMins, setVigorousMins] = useState("120");
@@ -175,13 +173,11 @@ export default function PhysicalAssessmentForm({ onNext, onBack }: Props) {
       {/* Navigation Buttons inside the card, centered */}
       <div className="mt-6 flex justify-center space-x-4">
         <button
-          onClick={onBack}
-          className="rounded border border-gray-300 px-4 py-2 text-gray-600 hover:bg-gray-100"
-        >
-          Back
-        </button>
-        <button
-          onClick={onNext}
+          onClick={() => {
+            router.navigate({
+              to: "/assessment/performance/badminton",
+            });
+          }}
           className="rounded bg-gradient-to-r from-[#65D1F8] to-[#6CCFD0] px-4 py-2 text-white hover:opacity-90"
         >
           Save and continue
@@ -190,3 +186,10 @@ export default function PhysicalAssessmentForm({ onNext, onBack }: Props) {
     </AssessmentContainerComponent>
   );
 }
+
+export const Route = createFileRoute("/_layout/assessment/ipaq")({
+  beforeLoad: () => {
+    return { assessment: { step: 1, performance: undefined } };
+  },
+  component: AssessmentComponent,
+});

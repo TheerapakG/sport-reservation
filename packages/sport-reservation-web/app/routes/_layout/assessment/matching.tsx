@@ -1,9 +1,9 @@
-import { useRouter } from "@tanstack/react-router";
+import AssessmentHeaderComponent from "@/components/assessment/AssessmentHeaderComponent";
+import AssessmentContainerComponent from "@/components/assessment/AssesssmentContainerComponent";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useEffect } from "react";
-import AssessmentHeaderComponent from "./AssessmentHeaderComponent";
-import AssessmentContainerComponent from "./AssesssmentContainerComponent";
 
-export default function MatchingFormComponent() {
+export default function MatchingAssessmentComponent() {
   const router = useRouter();
 
   useEffect(() => {
@@ -26,3 +26,10 @@ export default function MatchingFormComponent() {
     </AssessmentContainerComponent>
   );
 }
+
+export const Route = createFileRoute("/_layout/assessment/matching")({
+  beforeLoad: () => {
+    return { assessment: { step: 3, performance: undefined } };
+  },
+  component: MatchingAssessmentComponent,
+});

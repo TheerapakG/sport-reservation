@@ -41,27 +41,33 @@ const RootComponent = () => {
   );
 };
 
-export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
-  {
-    head: () => ({
-      meta: [
-        {
-          title:
-            "TanStack Start | Type-Safe, Client-First, Full-Stack React Framework",
-        },
-        {
-          charSet: "UTF-8",
-        },
-        {
-          name: "viewport",
-          content: "width=device-width, initial-scale=1.0",
-        },
-      ],
-      links: [
-        { rel: "stylesheet", href: appCss },
-        { rel: "manifest", href: "/manifest.json" },
-      ],
-    }),
-    component: RootComponent,
-  },
-);
+export const Route = createRootRouteWithContext<{
+  queryClient: QueryClient;
+  assessment?: {
+    step: number;
+    performance?: {
+      sport: string;
+    };
+  };
+}>()({
+  head: () => ({
+    meta: [
+      {
+        title:
+          "TanStack Start | Type-Safe, Client-First, Full-Stack React Framework",
+      },
+      {
+        charSet: "UTF-8",
+      },
+      {
+        name: "viewport",
+        content: "width=device-width, initial-scale=1.0",
+      },
+    ],
+    links: [
+      { rel: "stylesheet", href: appCss },
+      { rel: "manifest", href: "/manifest.json" },
+    ],
+  }),
+  component: RootComponent,
+});
