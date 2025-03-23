@@ -35,7 +35,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: sport-reservation-chat-secret
-                  key: postgresUrls
+                  key: postgresUrl
             - name: KAFKA_BOOTSTRAP_URL
               valueFrom:
                 secretKeyRef:
