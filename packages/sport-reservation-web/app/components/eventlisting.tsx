@@ -1,7 +1,7 @@
 // src/components/EventListing.tsx
-import React, { useState } from "react";
 import { Link } from "@tanstack/react-router"; // Import Link from TanStack Router
 import { MapPin, Users } from "lucide-react"; // or your icon library
+import React, { useState } from "react";
 
 type EventListingProps = {
   eventId: string; // Ensure eventId is provided
@@ -71,7 +71,7 @@ export default function EventListing({
             */}
             <Link
               to={`/events/$eventId`}
-              params={{eventId}}
+              params={{ eventId }}
               className="mb-1 block text-base font-semibold text-blue-600 underline"
             >
               {title}

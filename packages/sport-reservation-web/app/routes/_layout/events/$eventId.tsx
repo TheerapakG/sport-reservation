@@ -1,53 +1,52 @@
 // src/routes/events/$eventId.tsx
-import React from 'react'
-import { createFileRoute, useParams, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 
 const mockEvents = [
   {
-    id: 'event-20-1',
-    title: 'Hey! Badminton',
-    host: 'Marcus Rashford',
-    dateTime: 'Fri, 14 Mar (3:00 - 5:00 PM)',
-    location: '81 Badminton Court, Bang Khae District, Bangkok, Thailand',
+    id: "event-20-1",
+    title: "Hey! Badminton",
+    host: "Marcus Rashford",
+    dateTime: "Fri, 14 Mar (3:00 - 5:00 PM)",
+    location: "81 Badminton Court, Bang Khae District, Bangkok, Thailand",
     description:
-      'Looking for a fun and energetic badminton session? Join players of all skill levels for an exciting match!',
+      "Looking for a fun and energetic badminton session? Join players of all skill levels for an exciting match!",
     participants: [
-      { name: 'Marcus', avatar: 'https://via.placeholder.com/40' },
-      { name: 'Harry', avatar: 'https://via.placeholder.com/40' },
-      { name: 'Mohamed', avatar: 'https://via.placeholder.com/40' },
-      { name: 'Klopp', avatar: 'https://via.placeholder.com/40' },
+      { name: "Marcus", avatar: "https://via.placeholder.com/40" },
+      { name: "Harry", avatar: "https://via.placeholder.com/40" },
+      { name: "Mohamed", avatar: "https://via.placeholder.com/40" },
+      { name: "Klopp", avatar: "https://via.placeholder.com/40" },
     ],
     totalSlots: 8,
-    image: 'https://via.placeholder.com/600x300',
+    image: "https://via.placeholder.com/600x300",
   },
   {
-    id: 'friendly-football',
-    title: 'Friendly Football',
-    host: 'Harry Kane',
-    dateTime: 'Sat, 15 Mar (2:00 - 4:00 PM)',
-    location: 'Local Stadium',
+    id: "friendly-football",
+    title: "Friendly Football",
+    host: "Harry Kane",
+    dateTime: "Sat, 15 Mar (2:00 - 4:00 PM)",
+    location: "Local Stadium",
     description:
-      'A casual football match with friends. All skill levels are welcome to join in the fun!',
+      "A casual football match with friends. All skill levels are welcome to join in the fun!",
     participants: [
-      { name: 'Harry', avatar: 'https://via.placeholder.com/40' },
-      { name: 'Tom', avatar: 'https://via.placeholder.com/40' },
+      { name: "Harry", avatar: "https://via.placeholder.com/40" },
+      { name: "Tom", avatar: "https://via.placeholder.com/40" },
     ],
     totalSlots: 10,
-    image: 'https://via.placeholder.com/600x300',
+    image: "https://via.placeholder.com/600x300",
   },
-]
+];
 
-export const Route = createFileRoute('/_layout/events/$eventId')({
+export const Route = createFileRoute("/_layout/events/$eventId")({
   component: EventDetailPage,
-})
+});
 
 function EventDetailPage() {
   // Extract eventId from the URL
-  const { eventId } = useParams({ from: '/_layout/events/$eventId' })
-  const event = mockEvents.find((e) => e.id === eventId)
+  const { eventId } = useParams({ from: "/_layout/events/$eventId" });
+  const event = mockEvents.find((e) => e.id === eventId);
 
   if (!event) {
-    return <div className="p-4">Event not found!</div>
+    return <div className="p-4">Event not found!</div>;
   }
 
   const {
@@ -59,11 +58,11 @@ function EventDetailPage() {
     participants,
     totalSlots,
     image,
-  } = event
-  const numParticipants = participants.length
+  } = event;
+  const numParticipants = participants.length;
 
   function handleJoin() {
-    alert('Join flow triggered!')
+    alert("Join flow triggered!");
   }
 
   return (
@@ -102,7 +101,7 @@ function EventDetailPage() {
           {participants.slice(0, 4).map((p, index) => (
             <div key={index} className="flex flex-col items-center">
               <img
-                src={p.avatar || 'https://via.placeholder.com/40'}
+                src={p.avatar || "https://via.placeholder.com/40"}
                 alt={p.name}
                 className="h-10 w-10 rounded-full object-cover"
               />
@@ -129,5 +128,5 @@ function EventDetailPage() {
         </button>
       </div>
     </div>
-  )
+  );
 }
