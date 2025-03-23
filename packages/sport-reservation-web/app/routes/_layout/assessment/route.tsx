@@ -1,16 +1,29 @@
-import StepProgressbarComponent from '@/components/assessment/StepProgressbarComponent'
+import StepProgressbarComponent from "@/components/assessment/StepProgressbarComponent";
 import {
   createFileRoute,
   Link,
+  linkOptions,
   Outlet,
   useChildMatches,
-} from '@tanstack/react-router'
+} from "@tanstack/react-router";
 
 const StepProgressbarComponents = [
-  { step: 1, title: 'Physical assessment' },
-  { step: 2, title: 'Performance evaluation' },
-  { step: 3, title: 'Enjoy your matching!' },
-]
+  {
+    step: 1,
+    title: "Physical assessment",
+    link: linkOptions({ to: "/assessment/ipaq" }),
+  },
+  {
+    step: 2,
+    title: "Performance evaluation",
+    link: linkOptions({ to: "/assessment/performance/badminton" }),
+  },
+  {
+    step: 3,
+    title: "Enjoy your matching!",
+    link: linkOptions({ to: "/assessment/matching" }),
+  },
+];
 
 export default function AssessmentComponent() {
   const currentStep =
@@ -18,7 +31,11 @@ export default function AssessmentComponent() {
       select: (matches) =>
         matches.reverse().find((d) => d.context?.assessment?.step)?.context
           ?.assessment?.step,
-    }) ?? 1
+    }) ?? 1;
+
+  const skipLink = StepProgressbarComponents.find(
+    (d) => d.step === currentStep + 1,
+  )?.link;
 
   return (
     <div className="mx-auto max-w-3xl p-4">
@@ -33,21 +50,22 @@ export default function AssessmentComponent() {
         ))}
       </div>
 
-      <div className="mb-4 text-center">
-        <Link
-          to="/assessment"
-          search={{ step: currentStep + 1 }}
-          className="text-sm text-gray-500 underline hover:text-gray-700"
-        >
-          Skip for now
-        </Link>
-      </div>
+      {skipLink && (
+        <div className="mb-4 text-center">
+          <Link
+            {...skipLink}
+            className="text-sm text-gray-500 underline hover:text-gray-700"
+          >
+            Skip for now
+          </Link>
+        </div>
+      )}
 
       <Outlet />
     </div>
-  )
+  );
 }
 
-export const Route = createFileRoute('/_layout/assessment')({
+export const Route = createFileRoute("/_layout/assessment")({
   component: AssessmentComponent,
-})
+});

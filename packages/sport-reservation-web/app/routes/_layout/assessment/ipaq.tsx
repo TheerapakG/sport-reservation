@@ -1,30 +1,33 @@
 import AssessmentHeaderComponent from "@/components/assessment/AssessmentHeaderComponent";
 import AssessmentContainerComponent from "@/components/assessment/AssesssmentContainerComponent";
+import { useAppForm } from "@/utils/form";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { Info } from "lucide-react";
-import { useState } from "react";
 
 export default function AssessmentComponent() {
   const router = useRouter();
 
-  // State for each dropdown/input
-  const [vigorousDays, setVigorousDays] = useState("0 days");
-  const [vigorousMins, setVigorousMins] = useState("120");
-  const [moderateDays, setModerateDays] = useState("0 days");
-  const [moderateMins, setModerateMins] = useState("120");
-  const [walkingDays, setWalkingDays] = useState("0 days");
-  const [walkingMins, setWalkingMins] = useState("120");
+  const form = useAppForm({
+    defaultValues: {
+      vigorousDays: undefined as string | undefined,
+      vigorousMins: undefined as number | undefined,
+      moderateDays: undefined as string | undefined,
+      moderateMins: undefined as number | undefined,
+      walkingDays: undefined as string | undefined,
+      walkingMins: undefined as number | undefined,
+    },
+  });
 
   // Common dropdown options
   const dayOptions = [
-    "0 days",
-    "1 day",
-    "2 days",
-    "3 days",
-    "4 days",
-    "5 days",
-    "6 days",
-    "7 days",
+    { label: "0 days", value: "0" },
+    { label: "1 day", value: "1" },
+    { label: "2 days", value: "2" },
+    { label: "3 days", value: "3" },
+    { label: "4 days", value: "4" },
+    { label: "5 days", value: "5" },
+    { label: "6 days", value: "6" },
+    { label: "7 days", value: "7" },
   ];
 
   return (
@@ -37,7 +40,9 @@ export default function AssessmentComponent() {
           partner in terms of fitness and conditions."
           className="mb-6"
         />
+      </div>
 
+      <form className="space-y-6">
         {/* ====== VIGOROUS ACTIVITY ====== */}
         <div className="mb-6">
           <div className="mb-1 flex items-center space-x-2">
@@ -56,33 +61,28 @@ export default function AssessmentComponent() {
               </div>
             </div>
           </div>
-          <p className="mb-2 text-xs text-gray-500">
-            During the last 7 days, how many days did you do vigorous physical
-            activities for at least 10 minutes at a time?
-          </p>
-          {/* Dropdown: left-border-only, shorter width, with shadow */}
-          <select
-            className="w-36 appearance-none border-0 border-l-4 border-l-[#65D1F8] bg-white px-2 py-1 text-sm text-gray-700 shadow focus:ring-0 focus:outline-none"
-            value={vigorousDays}
-            onChange={(e) => setVigorousDays(e.target.value)}
-          >
-            {dayOptions.map((opt) => (
-              <option key={opt} value={opt}>
-                {opt}
-              </option>
-            ))}
-          </select>
-          <p className="mt-3 mb-2 text-xs text-gray-500">
-            On these days, how much time did you usually spend on vigorous
-            activities? (minutes)
-          </p>
-          {/* Text input: no border, longer width, with shadow */}
-          <input
-            type="number"
-            className="w-44 border-0 px-2 py-1 text-sm text-gray-700 shadow focus:ring-0 focus:outline-none"
-            placeholder="e.g. 120"
-            value={vigorousMins}
-            onChange={(e) => setVigorousMins(e.target.value)}
+          <form.AppField
+            name="vigorousDays"
+            children={(field) => (
+              <field.SelectInputField
+                label="During the last 7 days, how many days did you do vigorous
+                physical activities for at least 10 minutes at a time?"
+                options={dayOptions}
+                classNames={{ label: "text-xs font-normal text-gray-500" }}
+              />
+            )}
+          />
+          <form.AppField
+            name="vigorousMins"
+            children={(field) => (
+              <field.NumericInputField
+                label="On these days, how much time did you usually spend on vigorous
+                activities?"
+                placeholder="e.g. 120"
+                trailingText="minutes"
+                classNames={{ label: "text-xs font-normal text-gray-500" }}
+              />
+            )}
           />
         </div>
 
@@ -104,33 +104,28 @@ export default function AssessmentComponent() {
               </div>
             </div>
           </div>
-          <p className="mb-2 text-xs text-gray-500">
-            During the last 7 days, how many days did you do moderate physical
-            activities for at least 10 minutes at a time?
-          </p>
-          {/* Dropdown: left-border-only, shorter width, with shadow */}
-          <select
-            className="w-36 appearance-none border-0 border-l-4 border-l-[#65D1F8] bg-white px-2 py-1 text-sm text-gray-700 shadow focus:ring-0 focus:outline-none"
-            value={moderateDays}
-            onChange={(e) => setModerateDays(e.target.value)}
-          >
-            {dayOptions.map((opt) => (
-              <option key={opt} value={opt}>
-                {opt}
-              </option>
-            ))}
-          </select>
-          <p className="mt-3 mb-2 text-xs text-gray-500">
-            On these days, how much time did you usually spend on moderate
-            activities? (minutes)
-          </p>
-          {/* Text input: no border, longer width, with shadow */}
-          <input
-            type="number"
-            className="w-44 border-0 px-2 py-1 text-sm text-gray-700 shadow focus:ring-0 focus:outline-none"
-            placeholder="e.g. 120"
-            value={moderateMins}
-            onChange={(e) => setModerateMins(e.target.value)}
+          <form.AppField
+            name="moderateDays"
+            children={(field) => (
+              <field.SelectInputField
+                label="During the last 7 days, how many days did you do moderate
+                physical activities for at least 10 minutes at a time?"
+                options={dayOptions}
+                classNames={{ label: "text-xs font-normal text-gray-500" }}
+              />
+            )}
+          />
+          <form.AppField
+            name="moderateMins"
+            children={(field) => (
+              <field.NumericInputField
+                label="On these days, how much time did you usually spend on moderate
+                activities?"
+                placeholder="e.g. 120"
+                trailingText="minutes"
+                classNames={{ label: "text-xs font-normal text-gray-500" }}
+              />
+            )}
           />
         </div>
 
@@ -139,50 +134,44 @@ export default function AssessmentComponent() {
           <label className="mb-1 block text-sm font-semibold text-gray-700">
             Walking
           </label>
-          <p className="mb-2 text-xs text-gray-500">
-            During the last 7 days, how many days did you walk at least 10
-            minutes at a time?
-          </p>
-          {/* Dropdown: left-border-only, shorter width, with shadow */}
-          <select
-            className="w-36 appearance-none border-0 border-l-4 border-l-[#65D1F8] bg-white px-2 py-1 text-sm text-gray-700 shadow focus:ring-0 focus:outline-none"
-            value={walkingDays}
-            onChange={(e) => setWalkingDays(e.target.value)}
-          >
-            {dayOptions.map((opt) => (
-              <option key={opt} value={opt}>
-                {opt}
-              </option>
-            ))}
-          </select>
-          <p className="mt-3 mb-2 text-xs text-gray-500">
-            On these days, how much time did you usually spend walking?
-            (minutes)
-          </p>
-          {/* Text input: no border, longer width, with shadow */}
-          <input
-            type="number"
-            className="w-44 border-0 px-2 py-1 text-sm text-gray-700 shadow focus:ring-0 focus:outline-none"
-            placeholder="e.g. 120"
-            value={walkingMins}
-            onChange={(e) => setWalkingMins(e.target.value)}
+          <form.AppField
+            name="walkingDays"
+            children={(field) => (
+              <field.SelectInputField
+                label="During the last 7 days, how many days did you walk at least 10
+                minutes at a time?"
+                options={dayOptions}
+                classNames={{ label: "text-xs font-normal text-gray-500" }}
+              />
+            )}
+          />
+          <form.AppField
+            name="walkingMins"
+            children={(field) => (
+              <field.NumericInputField
+                label="On these days, how much time did you usually spend on walking?"
+                placeholder="e.g. 120"
+                trailingText="minutes"
+                classNames={{ label: "text-xs font-normal text-gray-500" }}
+              />
+            )}
           />
         </div>
-      </div>
 
-      {/* Navigation Buttons inside the card, centered */}
-      <div className="mt-6 flex justify-center space-x-4">
-        <button
-          onClick={() => {
-            router.navigate({
-              to: "/assessment/performance/badminton",
-            });
-          }}
-          className="rounded bg-gradient-to-r from-[#65D1F8] to-[#6CCFD0] px-4 py-2 text-white hover:opacity-90"
-        >
-          Save and continue
-        </button>
-      </div>
+        {/* Navigation Buttons inside the card, centered */}
+        <div className="mt-6 flex justify-center space-x-4">
+          <button
+            onClick={() => {
+              router.navigate({
+                to: "/assessment/performance/badminton",
+              });
+            }}
+            className="rounded bg-gradient-to-r from-[#65D1F8] to-[#6CCFD0] px-4 py-2 text-white hover:opacity-90"
+          >
+            Save and continue
+          </button>
+        </div>
+      </form>
     </AssessmentContainerComponent>
   );
 }

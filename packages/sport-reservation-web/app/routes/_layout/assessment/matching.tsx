@@ -9,7 +9,7 @@ export default function MatchingAssessmentComponent() {
   useEffect(() => {
     const navigateToMatching = async () => {
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      await router.navigate({ to: "/matching" });
+      await router.navigate({ to: "/matching", replace: true });
     };
     navigateToMatching();
   });

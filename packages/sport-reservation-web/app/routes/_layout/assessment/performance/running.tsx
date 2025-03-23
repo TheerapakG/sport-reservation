@@ -1,109 +1,98 @@
+import { useAppForm } from "@/utils/form";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { useState } from "react";
 
 function RouteComponent() {
   const router = useRouter();
-  // States for Running
-  const [distance, setDistance] = useState<number>(0);
-  const [pace, setPace] = useState<number>(0);
-  const [weeklyFrequency, setWeeklyFrequency] = useState<number>(0);
-  const [primaryGoal, setPrimaryGoal] = useState<string>("Casual");
-  const [performanceMarker, setPerformanceMarker] = useState<string>("");
+  const form = useAppForm({
+    defaultValues: {
+      distance: undefined as number | undefined,
+      pace: undefined as number | undefined,
+      weeklyFrequency: undefined as string | undefined,
+      primaryGoal: undefined as string | undefined,
+      performanceMarker: undefined as string | undefined,
+    },
+  });
 
   const frequencyOptions = [
-    "0 days",
-    "1 day",
-    "2 days",
-    "3 days",
-    "4 days",
-    "5 days",
-    "6 days",
-    "7 days",
+    { label: "0 days", value: "0 days" },
+    { label: "1 day", value: "1 day" },
+    { label: "2 days", value: "2 days" },
+    { label: "3 days", value: "3 days" },
+    { label: "4 days", value: "4 days" },
+    { label: "5 days", value: "5 days" },
+    { label: "6 days", value: "6 days" },
+    { label: "7 days", value: "7 days" },
   ];
 
   return (
-    <div className="space-y-6">
+    <form
+      className="space-y-6"
+      onSubmit={(e) => {
+        e.preventDefault();
+        form.handleSubmit();
+      }}
+    >
       {/* Q1: Typical distance */}
-      <div>
-        <label className="mb-2 block text-sm font-semibold text-gray-700">
-          1. What is your typical running distance (in km)?
-        </label>
-        <input
-          type="number"
-          value={distance}
-          onChange={(e) => setDistance(parseFloat(e.target.value) || 0)}
-          className="w-44 border-0 bg-white px-2 py-1 text-sm shadow focus:outline-none"
-          placeholder="e.g. 10"
-        />
-      </div>
+      <form.AppField
+        name="distance"
+        children={(field) => (
+          <field.NumericInputField
+            label="1. What is your typical running distance?"
+            placeholder="e.g. 10"
+            trailingText="km"
+          />
+        )}
+      />
 
       {/* Q2: Pace (min/km) */}
-      <div>
-        <label className="mb-2 block text-sm font-semibold text-gray-700">
-          2. What is your average pace (min/km)?
-        </label>
-        <input
-          type="number"
-          value={pace}
-          onChange={(e) => setPace(parseFloat(e.target.value) || 0)}
-          className="w-44 border-0 bg-white px-2 py-1 text-sm shadow focus:outline-none"
-          placeholder="e.g. 5"
-        />
-      </div>
+      <form.AppField
+        name="pace"
+        children={(field) => (
+          <field.NumericInputField
+            label="2. What is your average pace?"
+            placeholder="e.g. 5"
+            trailingText="min/km"
+          />
+        )}
+      />
 
       {/* Q3: Weekly frequency (days/week) as dropdown */}
-      <div>
-        <label className="mb-2 block text-sm font-semibold text-gray-700">
-          3. How many days per week do you run?
-        </label>
-        <select
-          className="w-36 appearance-none border-0 border-l-4 border-l-[#65D1F8] bg-white px-2 py-1 text-sm text-gray-700 shadow focus:outline-none"
-          value={weeklyFrequency}
-          onChange={(e) => setWeeklyFrequency(parseInt(e.target.value) || 0)}
-        >
-          {frequencyOptions.map((opt, index) => (
-            <option key={opt} value={index}>
-              {opt}
-            </option>
-          ))}
-        </select>
-      </div>
+      <form.AppField
+        name="weeklyFrequency"
+        children={(field) => (
+          <field.SelectInputField
+            label="3. How many days per week do you run?"
+            options={frequencyOptions}
+          />
+        )}
+      />
 
       {/* Q4: Primary goal */}
-      <div>
-        <label className="mb-2 block text-sm font-semibold text-gray-700">
-          4. What is your primary goal?
-        </label>
-        <div className="flex flex-wrap gap-2">
-          {["Casual", "Race training", "Social", "Speed work"].map((goal) => (
-            <button
-              key={goal}
-              onClick={() => setPrimaryGoal(goal)}
-              className={`rounded-full border px-3 py-1 text-sm ${
-                primaryGoal === goal
-                  ? "border-[#65D1F8] bg-[#E1F8FE] text-[#65D1F8]"
-                  : "border-gray-300 text-gray-500 hover:bg-gray-100"
-              }`}
-            >
-              {goal}
-            </button>
-          ))}
-        </div>
-      </div>
+      <form.AppField
+        name="primaryGoal"
+        children={(field) => (
+          <field.SingleChoiceField
+            label="4. What is your primary goal?"
+            options={[
+              { label: "Casual", value: "Casual" },
+              { label: "Race training", value: "Race training" },
+              { label: "Social", value: "Social" },
+              { label: "Speed work", value: "Speed work" },
+            ]}
+          />
+        )}
+      />
 
       {/* Q5: Best performance marker */}
-      <div>
-        <label className="mb-2 block text-sm font-semibold text-gray-700">
-          5. What is your best performance marker? (e.g., "10K in 50:00")
-        </label>
-        <input
-          type="text"
-          value={performanceMarker}
-          onChange={(e) => setPerformanceMarker(e.target.value)}
-          className="w-44 border-0 bg-white px-2 py-1 text-sm shadow focus:outline-none"
-          placeholder="e.g. 10K in 50:00"
-        />
-      </div>
+      <form.AppField
+        name="performanceMarker"
+        children={(field) => (
+          <field.TextInputField
+            label="5. What is your best performance marker? (e.g., '10K in 50:00')"
+            placeholder="e.g. 10K in 50:00"
+          />
+        )}
+      />
 
       <div className="mt-6 flex justify-center space-x-4">
         <button
@@ -127,7 +116,7 @@ function RouteComponent() {
           Save and continue
         </button>
       </div>
-    </div>
+    </form>
   );
 }
 

@@ -1,117 +1,91 @@
+import { useAppForm } from "@/utils/form";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { useState } from "react";
 
 function RouteComponent() {
   const router = useRouter();
-  // Common states for Badminton & Tennis
-  const [skillRating, setSkillRating] = useState<number>(1); // from 1 to 5
-  const [years, setYears] = useState<number>(1);
-  // For Badminton: playing style; for Tennis: stroke proficiency
-  const [option, setOption] = useState<string>("Offensive");
-  const [format, setFormat] = useState("Singles");
-  const [hours, setHours] = useState<number>(0);
+
+  const form = useAppForm({
+    defaultValues: {
+      skillRating: undefined as number | undefined,
+      years: undefined as number | undefined,
+      stroke: undefined as string | undefined,
+      format: undefined as string | undefined,
+      hours: undefined as number | undefined,
+    },
+  });
 
   return (
-    <div className="space-y-6">
+    <form className="space-y-6">
       {/* Q1: Overall tennis skill */}
-      <div>
-        <label className="mb-2 block text-sm font-semibold text-gray-700">
-          1. How would you rate your overall tennis skill? (1 = Beginner, 5 =
-          Expert)
-        </label>
-        <div className="grid grid-cols-5 gap-2 text-sm">
-          {[1, 2, 3, 4, 5].map((r) => (
-            <label key={r} className="flex items-center space-x-1">
-              <input
-                type="radio"
-                name="tennisSkill"
-                value={r}
-                checked={skillRating === r}
-                onChange={() => setSkillRating(r)}
-                className="text-[#65D1F8] focus:ring-[#65D1F8]"
-              />
-              <span>{r}</span>
-            </label>
-          ))}
-        </div>
-      </div>
+      <form.AppField
+        name="skillRating"
+        children={(field) => (
+          <field.SingleChoiceField
+            label="1. How would you rate your overall tennis skill?"
+            options={[
+              { label: "1: Beginner", value: 1 },
+              { label: "2: Novice", value: 2 },
+              { label: "3: Intermediate", value: 3 },
+              { label: "4: Advanced", value: 4 },
+              { label: "5: Expert", value: 5 },
+            ]}
+            spread
+          />
+        )}
+      />
 
       {/* Q2: Years playing tennis */}
-      <div>
-        <label className="mb-2 block text-sm font-semibold text-gray-700">
-          2. How many years have you been playing tennis?
-        </label>
-        <input
-          type="number"
-          value={years}
-          onChange={(e) => setYears(parseInt(e.target.value) || 0)}
-          className="w-36 border-0 border-l-4 border-l-[#65D1F8] bg-white px-2 py-1 text-sm shadow focus:outline-none"
-          placeholder="Years"
-        />
-      </div>
+      <form.AppField
+        name="years"
+        children={(field) => (
+          <field.NumericInputField
+            label="2. How many years have you been playing tennis?"
+            trailingText="years"
+          />
+        )}
+      />
 
       {/* Q3: Stroke proficiency */}
-      <div>
-        <label className="mb-2 block text-sm font-semibold text-gray-700">
-          3. Which stroke do you excel at?
-        </label>
-        <div className="grid grid-cols-4 gap-2 text-sm">
-          {["Forehand", "Backhand", "Net volleys", "Serve returns"].map(
-            (stroke) => (
-              <label key={stroke} className="flex items-center space-x-1">
-                <input
-                  type="radio"
-                  name="tennisStroke"
-                  value={stroke}
-                  checked={option === stroke}
-                  onChange={() => setOption(stroke)}
-                  className="text-[#65D1F8] focus:ring-[#65D1F8]"
-                />
-                <span>{stroke}</span>
-              </label>
-            ),
-          )}
-        </div>
-      </div>
+      <form.AppField
+        name="stroke"
+        children={(field) => (
+          <field.SingleChoiceField
+            label="3. Which stroke do you excel at?"
+            options={[
+              { label: "Forehand", value: "Forehand" },
+              { label: "Backhand", value: "Backhand" },
+              { label: "Net volleys", value: "Net volleys" },
+              { label: "Serve returns", value: "Serve returns" },
+            ]}
+          />
+        )}
+      />
 
       {/* Q4: Preferred format */}
-      <div>
-        <label className="mb-2 block text-sm font-semibold text-gray-700">
-          4. Which best describes your preferred format of playing?
-        </label>
-        <div className="grid grid-cols-3 gap-2 text-sm">
-          {["Singles", "Doubles", "Both"].map((fmt) => (
-            <label key={fmt} className="flex items-center space-x-1">
-              <input
-                type="radio"
-                name="tennisFormat"
-                value={fmt}
-                checked={format === fmt}
-                onChange={() => setFormat(fmt)}
-                className="text-[#65D1F8] focus:ring-[#65D1F8]"
-              />
-              <span>{fmt}</span>
-            </label>
-          ))}
-        </div>
-      </div>
+      <form.AppField
+        name="format"
+        children={(field) => (
+          <field.SingleChoiceField
+            label="4. Which best describes your preferred format of playing?"
+            options={[
+              { label: "Singles", value: "Singles" },
+              { label: "Doubles", value: "Doubles" },
+              { label: "Both", value: "Both" },
+            ]}
+          />
+        )}
+      />
 
       {/* Q5: Hours per week */}
-      <div>
-        <label className="mb-2 block text-sm font-semibold text-gray-700">
-          5. On average, how many hours per week do you play or practice tennis?
-        </label>
-        <div className="flex items-center">
-          <input
-            type="number"
-            value={hours}
-            onChange={(e) => setHours(parseInt(e.target.value) || 0)}
-            className="w-44 border-0 bg-white px-2 py-1 text-sm shadow focus:outline-none"
-            placeholder="e.g. 5"
+      <form.AppField
+        name="hours"
+        children={(field) => (
+          <field.NumericInputField
+            label="5. On average, how many hours per week do you play or practice tennis?"
+            trailingText="hours"
           />
-          <span className="ml-2 text-xs text-gray-400">hours</span>
-        </div>
-      </div>
+        )}
+      />
 
       <div className="mt-6 flex justify-center space-x-4">
         <button
@@ -135,7 +109,7 @@ function RouteComponent() {
           Save and continue
         </button>
       </div>
-    </div>
+    </form>
   );
 }
 
