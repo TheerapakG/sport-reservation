@@ -1,5 +1,5 @@
 import { Outlet, ScrollRestoration } from "@tanstack/react-router";
-import { Meta, Scripts } from "@tanstack/start";
+import { Meta, Scripts } from "@tanstack/react-start";
 import React from "react";
 
 import appCss from "@/styles/app.css?url";

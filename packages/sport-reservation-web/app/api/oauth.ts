@@ -1,7 +1,7 @@
 import { OAuthClient } from "@/layers/client/oauthClient";
 import { effectContext } from "@/utils/effectContext";
 import { queryOptions } from "@tanstack/react-query";
-import { createServerFn } from "@tanstack/start";
+import { createServerFn } from "@tanstack/react-start";
 import { type } from "arktype";
 import { Effect } from "effect";
 import { subjects } from "sport-reservation-oauth-common/subjects";
