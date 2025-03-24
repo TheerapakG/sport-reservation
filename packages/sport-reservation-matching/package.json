@@ -42,11 +42,11 @@
     "effect": "catalog:",
     "h3": "catalog:",
     "ofetch": "catalog:",
-    "tiara-stack": "workspace:*",
-    "sport-reservation-oauth-common": "workspace:*",
     "sport-reservation-db": "workspace:*",
+    "sport-reservation-oauth-common": "workspace:*",
     "sport-reservation-upload": "workspace:*",
     "sport-reservation-user": "workspace:*",
+    "tiara-stack": "workspace:*",
     "ufo": "catalog:"
   },
   "devDependencies": {

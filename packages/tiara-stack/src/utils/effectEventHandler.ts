@@ -20,11 +20,8 @@ import {
   EventHandlerResponseValidatorType,
   EventHandlerTypeConfig,
 } from "~~/src/config/eventHandlerConfig";
-import { isBaseError } from "~~/src/models/errors";
-import {
-  EffectContextServices,
-  getInnerContext,
-} from "~~/src/server/effectContext";
+import { ArktypeError, isBaseError } from "~~/src/models/errors";
+import { EffectContext, getInnerContext } from "~~/src/server/effectContext";
 import {
   effectEventHandlerParams,
   EffectEventHandlerParams,
@@ -106,20 +103,25 @@ export type EffectEventHandlerWrapper<
     EventHandlerResponseConfig<C> = EventHandlerResponseConfig<C>,
   ResponseType extends
     EventHandlerResponseType<C> = EventHandlerResponseType<C>,
-> = ResponseConfig extends { stream: true }
-  ? EffectStreamEventHandlerWrapper<ResponseType, R>
-  : ResponseConfig extends { stream: false }
-    ? EffectEffectEventHandlerWrapper<ResponseType, R>
-    : never;
+> = ResponseConfig extends infer _ResponseConfig
+  ? _ResponseConfig extends { stream: true }
+    ? EffectStreamEventHandlerWrapper<ResponseType, R>
+    : _ResponseConfig extends { stream: false }
+      ? EffectEffectEventHandlerWrapper<ResponseType, R>
+      : never
+  : never;
 
 const handlerContext = <Services>(
-  effectContext: EffectContextServices<Services>,
+  effectContext: EffectContext<Services>,
   event: H3Event<EventHandlerRequest>,
   config: EventHandlerConfig<
     string,
     CoercedResponseType<type.Any, { stream: boolean }>
   >,
-) =>
+): Effect.Effect<
+  Context.Context<EventContext | EventParamsContext | Services>,
+  ArktypeError
+> =>
   Effect.gen(function* () {
     return Context.empty().pipe(
       Context.add(EventContext, { event }),
@@ -167,7 +169,7 @@ const effectStreamEventHandler = <
   ResponseType extends
     EventHandlerResponseType<C> = EventHandlerResponseType<C>,
 >(
-  effectContext: EffectContextServices<Services>,
+  effectContext: EffectContext<Services>,
   config: C,
 ): EffectStreamEventHandlerWrapper<ResponseType, R> => {
   const {
@@ -241,7 +243,7 @@ const effectEffectEventHandler =
     ResponseType extends
       EventHandlerResponseType<C> = EventHandlerResponseType<C>,
   >(
-    effectContext: EffectContextServices<Services>,
+    effectContext: EffectContext<Services>,
     config: C,
   ): EffectEffectEventHandlerWrapper<ResponseType, R> =>
   (handler) => {
@@ -284,7 +286,7 @@ const effectEventHandler = <
   >,
   R extends Services = never,
 >(
-  effectContext: EffectContextServices<Services>,
+  effectContext: EffectContext<Services>,
   config: C,
 ): EffectEventHandlerWrapper<C, R> => {
   return (
@@ -302,7 +304,7 @@ const effectEventHandler = <
 
 /*@__NO_SIDE_EFFECTS__*/
 export const createEffectEventHandler = <Services>(
-  effectContext: EffectContextServices<Services>,
+  effectContext: EffectContext<Services>,
 ) => {
   return <
     C extends EventHandlerConfig<

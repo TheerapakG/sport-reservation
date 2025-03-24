@@ -8,7 +8,7 @@ import {
   SynchronizedRef,
 } from "effect";
 
-export type EffectContextServices<Services> = {
+export type EffectContext<Services> = {
   latch: Effect.Latch;
   ref: SynchronizedRef.SynchronizedRef<{
     scope: Scope.CloseableScope;
@@ -16,52 +16,38 @@ export type EffectContextServices<Services> = {
   }>;
 };
 
-export const getEffectContext = <Services>(): Context.TagClass<
-  unknown,
-  "EffectContext",
-  EffectContextServices<Services>
-> => {
-  return class EffectContext
-    extends /*@__PURE__*/ Context.Tag("EffectContext")<
-      EffectContext,
-      EffectContextServices<Services>
-    >() {} as Context.TagClass<
-    unknown,
-    "EffectContext",
-    EffectContextServices<Services>
-  >;
-};
+/*@__NO_SIDE_EFFECTS__*/
+export const newEffectContext = <Services>(): Effect.Effect<
+  EffectContext<Services>
+> =>
+  Effect.gen(function* () {
+    return {
+      latch: yield* Effect.makeLatch(),
+      ref: yield* SynchronizedRef.make({
+        scope: yield* Scope.make(),
+        context: Context.empty() as Context.Context<Services>,
+      }),
+    };
+  });
 
 export type EffectContextHooks = {
   start: () => Promise<void>;
   close: () => Promise<void>;
 };
 
+/*@__NO_SIDE_EFFECTS__*/
 export const getEffectContextHooks = <Services>({
   layer,
 }: {
   layer: Layer.Layer<Services, unknown>;
 }): Effect.Effect<{
-  EffectContext: Context.TagClass<
-    unknown,
-    "EffectContext",
-    EffectContextServices<Services>
-  >;
-  effectContext: EffectContextServices<Services>;
+  effectContext: EffectContext<Services>;
   hooks: EffectContextHooks;
 }> =>
   Effect.gen(function* () {
-    const EffectContext = getEffectContext<Services>();
-    const effectContext = EffectContext.of({
-      latch: yield* Effect.makeLatch(),
-      ref: yield* SynchronizedRef.make({
-        scope: yield* Scope.make(),
-        context: Context.empty() as Context.Context<Services>,
-      }),
-    });
+    const effectContext = yield* newEffectContext<Services>();
 
     return {
-      EffectContext,
       effectContext,
       hooks: {
         start: async () => {
@@ -111,9 +97,10 @@ export const getEffectContextHooks = <Services>({
     };
   });
 
+/*@__NO_SIDE_EFFECTS__*/
 export const getInnerContext = <Services>(
-  effectContext: EffectContextServices<Services>,
-) =>
+  effectContext: EffectContext<Services>,
+): Effect.Effect<Context.Context<Services>> =>
   Effect.gen(function* () {
     const { latch, ref } = effectContext;
     yield* latch.await;
