@@ -1,15 +1,6 @@
 import { encode } from "@msgpack/msgpack";
 import { type } from "arktype";
-import {
-  Cause,
-  Console,
-  Context,
-  Effect,
-  Exit,
-  pipe,
-  Stream,
-  SynchronizedRef,
-} from "effect";
+import { Cause, Console, Context, Effect, Exit, pipe, Stream } from "effect";
 import { Simplify } from "effect/Types";
 import {
   createError,
@@ -29,11 +20,11 @@ import {
   EventHandlerResponseValidatorType,
   EventHandlerTypeConfig,
 } from "~~/src/config/eventHandlerConfig";
-import {
-  EffectContext,
-  effectContextLive,
-} from "~~/src/internal/effectContext";
 import { isBaseError } from "~~/src/models/errors";
+import {
+  EffectContextServices,
+  getInnerContext,
+} from "~~/src/server/effectContext";
 import {
   effectEventHandlerParams,
   EffectEventHandlerParams,
@@ -91,13 +82,6 @@ export type EffectStreamEventHandlerType<ResponseType = unknown, R = never> = (
   EventContext | EventParamsContext | R
 >;
 
-const getEffectContext = <R = never>() =>
-  Effect.gen(function* () {
-    const { latch, ref } = yield* EffectContext.typed<R>();
-    yield* latch.await;
-    return (yield* SynchronizedRef.get(ref)).context;
-  });
-
 export type EffectStreamEventHandlerWrapper<
   ResponseType = unknown,
   R = never,
@@ -128,7 +112,8 @@ export type EffectEventHandlerWrapper<
     ? EffectEffectEventHandlerWrapper<ResponseType, R>
     : never;
 
-const handlerContext = <R = never>(
+const handlerContext = <Services>(
+  effectContext: EffectContextServices<Services>,
   event: H3Event<EventHandlerRequest>,
   config: EventHandlerConfig<
     string,
@@ -141,9 +126,7 @@ const handlerContext = <R = never>(
       Context.add(EventParamsContext, {
         params: yield* effectEventHandlerParams(event, config),
       }),
-      Context.merge(
-        yield* pipe(getEffectContext<R>(), Effect.provide(effectContextLive)),
-      ),
+      Context.merge(yield* getInnerContext(effectContext)),
     );
   });
 
@@ -173,16 +156,18 @@ const handleOrThrowEffect = async <A, E = never>(
 };
 
 const effectStreamEventHandler = <
+  Services,
   C extends EventHandlerConfig<
     string,
     CoercedResponseType<type.Any, { stream: true }>
   >,
-  R = never,
+  R extends Services = never,
   ResponseValidatorType extends
     EventHandlerResponseValidatorType<C> = EventHandlerResponseValidatorType<C>,
   ResponseType extends
     EventHandlerResponseType<C> = EventHandlerResponseType<C>,
 >(
+  effectContext: EffectContextServices<Services>,
   config: C,
 ): EffectStreamEventHandlerWrapper<ResponseType, R> => {
   const {
@@ -229,7 +214,9 @@ const effectStreamEventHandler = <
               ),
             ),
             Stream.map((item) => encode(item)),
-            Stream.provideContext(yield* handlerContext<R>(event, config)),
+            Stream.provideContext(
+              yield* handlerContext(effectContext, event, config),
+            ),
           );
 
           return yield* Effect.functionWithSpan({
@@ -243,16 +230,18 @@ const effectStreamEventHandler = <
 
 const effectEffectEventHandler =
   <
+    Services,
     C extends EventHandlerConfig<
       string,
       CoercedResponseType<type.Any, { stream: false }>
     >,
-    R = never,
+    R extends Services = never,
     ResponseValidatorType extends
       EventHandlerResponseValidatorType<C> = EventHandlerResponseValidatorType<C>,
     ResponseType extends
       EventHandlerResponseType<C> = EventHandlerResponseType<C>,
   >(
+    effectContext: EffectContextServices<Services>,
     config: C,
   ): EffectEffectEventHandlerWrapper<ResponseType, R> =>
   (handler) => {
@@ -275,7 +264,7 @@ const effectEffectEventHandler =
             Effect.flatMap((item) =>
               effectType(responseType as ResponseValidatorType, item),
             ),
-            Effect.provide(yield* handlerContext<R>(event, config)),
+            Effect.provide(yield* handlerContext(effectContext, event, config)),
           );
 
           return yield* Effect.functionWithSpan({
@@ -288,33 +277,40 @@ const effectEffectEventHandler =
   };
 
 const effectEventHandler = <
+  Services,
   C extends EventHandlerConfig<
     string,
     CoercedResponseType<type.Any, { stream: boolean }>
   >,
-  R = never,
+  R extends Services = never,
 >(
+  effectContext: EffectContextServices<Services>,
   config: C,
 ): EffectEventHandlerWrapper<C, R> => {
   return (
     config.response.config.stream
       ? effectStreamEventHandler(
+          effectContext,
           config as C & { response: { config: { stream: true } } },
         )
       : effectEffectEventHandler(
+          effectContext,
           config as C & { response: { config: { stream: false } } },
         )
   ) as EffectEventHandlerWrapper<C, R>;
 };
 
 /*@__NO_SIDE_EFFECTS__*/
-export const createEffectEventHandler = <R = never>() => {
+export const createEffectEventHandler = <Services>(
+  effectContext: EffectContextServices<Services>,
+) => {
   return <
     C extends EventHandlerConfig<
       string,
       CoercedResponseType<type.Any, { stream: boolean }>
     >,
+    R extends Services = never,
   >(
     options: C,
-  ) => effectEventHandler<C, R>(options);
+  ) => effectEventHandler<Services, C, R>(effectContext, options);
 };

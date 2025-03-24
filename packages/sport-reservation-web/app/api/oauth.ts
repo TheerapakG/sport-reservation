@@ -1,9 +1,11 @@
-import { oAuthClient, OAuthClient } from "@/utils/client/oauthClient";
+import { OAuthClient } from "@/layers/client/oauthClient";
+import { effectContext } from "@/utils/effectContext";
 import { queryOptions } from "@tanstack/react-query";
 import { createServerFn } from "@tanstack/start";
 import { type } from "arktype";
 import { Effect } from "effect";
 import { subjects } from "sport-reservation-oauth-common/subjects";
+import { getInnerContext } from "tiara-stack/server/effectContext";
 import { effectType } from "tiara-stack/utils/effectType";
 import {
   getRequestHost,
@@ -18,6 +20,13 @@ export const oauthKeys = {
   login: () => [...oauthKeys.all(), "login"] as const,
   exchange: () => [...oauthKeys.all(), "exchange"] as const,
 };
+
+const provideEffectContext = <A, E, R>(effect: Effect.Effect<A, E, R>) =>
+  Effect.gen(function* () {
+    return yield* effect.pipe(
+      Effect.provide(yield* getInnerContext(effectContext)),
+    );
+  });
 
 export const currentUserProfileServerFn = createServerFn({
   method: "POST",
@@ -37,7 +46,7 @@ export const currentUserProfileServerFn = createServerFn({
           refresh: refreshToken,
         }),
       );
-    }).pipe(Effect.provide(oAuthClient)),
+    }).pipe(provideEffectContext),
   );
 
   if (verified.err) {
@@ -72,7 +81,7 @@ export const loginServerFn = createServerFn({ method: "POST" })
             { provider },
           ),
         );
-      }).pipe(Effect.provide(oAuthClient)),
+      }).pipe(provideEffectContext),
     );
 
     return { success: true, url };
@@ -98,7 +107,7 @@ export const exchangeServerFn = createServerFn({ method: "POST" })
             `${getRequestProtocol()}://${getRequestHost()}/login/callback`,
           ),
         );
-      }).pipe(Effect.provide(oAuthClient)),
+      }).pipe(provideEffectContext),
     );
     if (exchanged.err) return { success: false };
 
