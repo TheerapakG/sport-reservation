@@ -1,33 +1,54 @@
+import { useCreateGeneralAssessmentMutation } from "@/api/matching";
 import AssessmentHeaderComponent from "@/components/assessment/AssessmentHeaderComponent";
 import AssessmentContainerComponent from "@/components/assessment/AssesssmentContainerComponent";
 import { useAppForm } from "@/utils/form";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { type } from "arktype";
+import { Effect } from "effect";
 import { Info } from "lucide-react";
+import { getMatchingClientBodyType } from "sport-reservation-matching/models";
+import { effectType } from "tiara-stack/utils/effectType";
 
 export default function AssessmentComponent() {
   const router = useRouter();
 
+  const createGeneralAssessmentMutation = useCreateGeneralAssessmentMutation();
+
   const form = useAppForm({
     defaultValues: {
-      vigorousDays: undefined as string | undefined,
-      vigorousMins: undefined as number | undefined,
-      moderateDays: undefined as string | undefined,
-      moderateMins: undefined as number | undefined,
-      walkingDays: undefined as string | undefined,
-      walkingMins: undefined as number | undefined,
+      vigorousDays: "" as "" | number,
+      vigorousMins: "" as "" | number,
+      moderateDays: "" as "" | number,
+      moderateMins: "" as "" | number,
+      walkingDays: "" as "" | number,
+      walkingMins: "" as "" | number,
+    },
+    validators: {
+      onSubmit: getMatchingClientBodyType("createGeneralAssessmentV1"),
+    },
+    onSubmit: async ({ value }) => {
+      const data = await Effect.runPromise(
+        effectType(
+          getMatchingClientBodyType("createGeneralAssessmentV1"),
+          value,
+        ),
+      );
+      await createGeneralAssessmentMutation.mutateAsync({ data });
+      await router.navigate({
+        to: "/assessment/performance/badminton",
+      });
     },
   });
 
-  // Common dropdown options
   const dayOptions = [
-    { label: "0 days", value: "0" },
-    { label: "1 day", value: "1" },
-    { label: "2 days", value: "2" },
-    { label: "3 days", value: "3" },
-    { label: "4 days", value: "4" },
-    { label: "5 days", value: "5" },
-    { label: "6 days", value: "6" },
-    { label: "7 days", value: "7" },
+    { label: "0 days", value: 0 },
+    { label: "1 day", value: 1 },
+    { label: "2 days", value: 2 },
+    { label: "3 days", value: 3 },
+    { label: "4 days", value: 4 },
+    { label: "5 days", value: 5 },
+    { label: "6 days", value: 6 },
+    { label: "7 days", value: 7 },
   ];
 
   return (
@@ -42,7 +63,14 @@ export default function AssessmentComponent() {
         />
       </div>
 
-      <form className="space-y-6">
+      <form
+        className="space-y-6"
+        onSubmit={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          form.handleSubmit();
+        }}
+      >
         {/* ====== VIGOROUS ACTIVITY ====== */}
         <div className="mb-6">
           <div className="mb-1 flex items-center space-x-2">
@@ -63,6 +91,7 @@ export default function AssessmentComponent() {
           </div>
           <form.AppField
             name="vigorousDays"
+            validators={{ onBlur: type("number") }}
             children={(field) => (
               <field.SelectInputField
                 label="During the last 7 days, how many days did you do vigorous
@@ -74,6 +103,7 @@ export default function AssessmentComponent() {
           />
           <form.AppField
             name="vigorousMins"
+            validators={{ onBlur: type("number") }}
             children={(field) => (
               <field.NumericInputField
                 label="On these days, how much time did you usually spend on vigorous
@@ -106,6 +136,7 @@ export default function AssessmentComponent() {
           </div>
           <form.AppField
             name="moderateDays"
+            validators={{ onBlur: type("number") }}
             children={(field) => (
               <field.SelectInputField
                 label="During the last 7 days, how many days did you do moderate
@@ -117,6 +148,7 @@ export default function AssessmentComponent() {
           />
           <form.AppField
             name="moderateMins"
+            validators={{ onBlur: type("number") }}
             children={(field) => (
               <field.NumericInputField
                 label="On these days, how much time did you usually spend on moderate
@@ -136,6 +168,7 @@ export default function AssessmentComponent() {
           </label>
           <form.AppField
             name="walkingDays"
+            validators={{ onBlur: type("number") }}
             children={(field) => (
               <field.SelectInputField
                 label="During the last 7 days, how many days did you walk at least 10
@@ -147,6 +180,7 @@ export default function AssessmentComponent() {
           />
           <form.AppField
             name="walkingMins"
+            validators={{ onBlur: type("number") }}
             children={(field) => (
               <field.NumericInputField
                 label="On these days, how much time did you usually spend on walking?"
@@ -159,18 +193,20 @@ export default function AssessmentComponent() {
         </div>
 
         {/* Navigation Buttons inside the card, centered */}
-        <div className="mt-6 flex justify-center space-x-4">
-          <button
-            onClick={() => {
-              router.navigate({
-                to: "/assessment/performance/badminton",
-              });
-            }}
-            className="rounded bg-gradient-to-r from-[#65D1F8] to-[#6CCFD0] px-4 py-2 text-white hover:opacity-90"
-          >
-            Save and continue
-          </button>
-        </div>
+        <form.Subscribe
+          selector={(state) => [state.canSubmit, state.isSubmitting]}
+          children={([canSubmit, isSubmitting]) => (
+            <div className="mt-6 flex justify-center space-x-4">
+              <button
+                type="submit"
+                disabled={!canSubmit}
+                className="rounded bg-gradient-to-r from-[#65D1F8] to-[#6CCFD0] px-4 py-2 text-white hover:opacity-90"
+              >
+                {isSubmitting ? "Saving..." : "Save and continue"}
+              </button>
+            </div>
+          )}
+        />
       </form>
     </AssessmentContainerComponent>
   );

@@ -20,7 +20,7 @@ export default function NumericInputField({
   placeholder?: string;
   trailingText?: string;
 }) {
-  const field = useFieldContext<undefined | number>();
+  const field = useFieldContext<"" | number>();
 
   return (
     <div className="space-y-2">
@@ -33,11 +33,16 @@ export default function NumericInputField({
         <Input
           type="number"
           className={cn(
-            "h-7 w-44 rounded-none border-0 px-2 py-1 shadow focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none",
+            "h-7 w-44 rounded-none border-0 px-2 py-1 shadow focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none aria-[invalid]:ring-1 aria-[invalid]:ring-red-500 aria-[invalid]:ring-offset-2",
             classNames?.input,
           )}
+          {...(field.state.meta.errors.length > 0
+            ? {
+                "aria-invalid": true,
+              }
+            : {})}
           placeholder={placeholder}
-          value={field.state.value}
+          value={field.state.meta.isPristine ? "" : field.state.value}
           onChange={(e) =>
             field.handleChange(
               Effect.runSync(

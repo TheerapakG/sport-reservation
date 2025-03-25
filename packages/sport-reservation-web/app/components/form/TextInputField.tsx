@@ -17,7 +17,7 @@ export default function TextInputField({
   placeholder?: string;
   trailingText?: string;
 }) {
-  const field = useFieldContext<undefined | string>();
+  const field = useFieldContext<string>();
 
   return (
     <div className="space-y-2">
@@ -30,11 +30,16 @@ export default function TextInputField({
         <Input
           type="text"
           className={cn(
-            "h-7 w-44 rounded-none border-0 px-2 py-1 shadow focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none",
+            "h-7 w-44 rounded-none border-0 px-2 py-1 shadow focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none aria-[invalid]:ring-1 aria-[invalid]:ring-red-500 aria-[invalid]:ring-offset-2",
             classNames?.input,
           )}
+          {...(field.state.meta.errors.length > 0
+            ? {
+                "aria-invalid": true,
+              }
+            : {})}
           placeholder={placeholder}
-          value={field.state.value}
+          value={field.state.meta.isPristine ? "" : field.state.value}
           onChange={(e) => field.handleChange(e.target.value)}
           onBlur={field.handleBlur}
         />

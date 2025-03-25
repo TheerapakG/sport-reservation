@@ -1,11 +1,10 @@
 import { OAuthClient } from "@/layers/client/oauthClient";
-import { effectContext } from "@/utils/effectContext";
-import { queryOptions } from "@tanstack/react-query";
+import { provideEffectContext } from "@/utils/effectContext";
+import { QueryClient, queryOptions, useMutation } from "@tanstack/react-query";
 import { createServerFn } from "@tanstack/react-start";
 import { type } from "arktype";
 import { Effect } from "effect";
 import { subjects } from "sport-reservation-oauth-common/subjects";
-import { getInnerContext } from "tiara-stack/server/effectContext";
 import { effectType } from "tiara-stack/utils/effectType";
 import {
   getRequestHost,
@@ -18,15 +17,7 @@ export const oauthKeys = {
   all: () => ["oauth"] as const,
   userProfile: () => [...oauthKeys.all(), "userProfile"] as const,
   login: () => [...oauthKeys.all(), "login"] as const,
-  exchange: () => [...oauthKeys.all(), "exchange"] as const,
 };
-
-const provideEffectContext = <A, E, R>(effect: Effect.Effect<A, E, R>) =>
-  Effect.gen(function* () {
-    return yield* effect.pipe(
-      Effect.provide(yield* getInnerContext(effectContext)),
-    );
-  });
 
 export const currentUserProfileServerFn = createServerFn({
   method: "POST",
@@ -117,8 +108,11 @@ export const exchangeServerFn = createServerFn({ method: "POST" })
     return { success: true };
   });
 
-export const exchangeQueryOptions = ({ code }: { code: string }) =>
-  queryOptions({
-    queryKey: oauthKeys.exchange(),
-    queryFn: () => exchangeServerFn({ data: { code } }),
+export const useExchangeMutation = () =>
+  useMutation({
+    mutationFn: ({ code }: { queryClient: QueryClient; code: string }) =>
+      exchangeServerFn({ data: { code } }),
+    onSuccess: (_, { queryClient }) => {
+      queryClient.invalidateQueries({ queryKey: oauthKeys.all() });
+    },
   });

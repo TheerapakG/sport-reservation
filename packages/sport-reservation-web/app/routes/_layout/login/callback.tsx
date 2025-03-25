@@ -1,4 +1,4 @@
-import { exchangeQueryOptions, oauthKeys } from "@/api/oauth";
+import { useExchangeMutation } from "@/api/oauth";
 import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { type } from "arktype";
@@ -6,30 +6,20 @@ import { Effect } from "effect";
 import { useEffect } from "react";
 import { effectTypeCheck } from "tiara-stack/utils/effectType";
 
-const exchangeAndRedirect = async ({
-  queryClient,
-  router,
-  code,
-}: {
-  queryClient: ReturnType<typeof useQueryClient>;
-  router: ReturnType<typeof useRouter>;
-  code: string;
-}) => {
-  await queryClient.fetchQuery(exchangeQueryOptions({ code }));
-  await queryClient.invalidateQueries({
-    queryKey: oauthKeys.all(),
-  });
-  await router.navigate({ to: "/" });
-};
-
 const CallbackComponent = () => {
   const { code } = Route.useLoaderData();
 
   const queryClient = useQueryClient();
   const router = useRouter();
+
+  const exchangeMutation = useExchangeMutation();
+
   useEffect(() => {
-    exchangeAndRedirect({ queryClient, router, code });
-  });
+    (async () => {
+      await exchangeMutation.mutateAsync({ queryClient, code });
+      await router.navigate({ to: "/" });
+    })();
+  }, [code, queryClient, router, exchangeMutation]);
 
   return (
     <div className="p-2">
