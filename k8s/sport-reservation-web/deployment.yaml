@@ -51,6 +51,21 @@ spec:
                 secretKeyRef:
                   name: sport-reservation-web-secret
                   key: uploadBaseUrl
+            - name: FRIEND_BASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-web-secret
+                  key: friendBaseUrl
+            - name: CLUB_BASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-web-secret
+                  key: clubBaseUrl
+            - name: EVENT_BASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-web-secret
+                  key: eventBaseUrl
 ---
 apiVersion: v1
 kind: Service

@@ -26,20 +26,20 @@ export type TypedFetchParamsOptions<
   RP extends type.Any | undefined,
 > = Simplify<
   ([QP] extends [type.Any]
-    ? QP["infer"] extends Record<string, unknown>
+    ? QP["inferIn"] extends Record<string, unknown>
       ? {
-          query: QP["infer"];
+          query: QP["inferIn"];
         }
       : { query?: never }
     : { query?: never }) &
     ([BP] extends [type.Any]
-      ? BP["infer"] extends unknown
-        ? { body: NonNullable<RequestInit["body"]> | BP["infer"] }
+      ? BP["inferIn"] extends unknown
+        ? { body: NonNullable<RequestInit["body"]> | BP["inferIn"] }
         : { body?: never }
       : { body?: never }) &
     ([RP] extends [type.Any]
-      ? RP["infer"] extends Record<string, unknown>
-        ? { router: RP["infer"] }
+      ? RP["inferIn"] extends Record<string, unknown>
+        ? { router: RP["inferIn"] }
         : { router?: never }
       : { router?: never })
 >;

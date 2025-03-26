@@ -7,19 +7,19 @@ type EventListingProps = {
   eventId: string; // Ensure eventId is provided
   image?: string;
   dateTime: string;
-  title: string;
-  description: string;
-  location: string;
-  participants: string;
+  name?: string;
+  description?: string;
+  locationDescription?: string;
+  participants: number;
   buttonLabel?: string;
 };
 
 export default function EventListing({
   eventId,
   dateTime,
-  title,
+  name,
   description,
-  location,
+  locationDescription,
   participants,
   buttonLabel = "Join",
 }: EventListingProps) {
@@ -57,7 +57,7 @@ export default function EventListing({
         {/* Bigger Event Image */}
         <img
           src="https://cdn.theerapakg.moe/reservation/asset/events/badminton-default.jpg"
-          alt={title}
+          alt={name}
           className="h-32 w-48 rounded-md object-cover"
         />
 
@@ -74,12 +74,12 @@ export default function EventListing({
               params={{ eventId }}
               className="mb-1 block text-base font-semibold text-blue-600 underline"
             >
-              {title}
+              {name}
             </Link>
             <p className="mb-2 text-sm text-gray-600">{description}</p>
             <p className="mb-2 flex items-center text-sm text-gray-600">
               <MapPin size={16} className="mr-1" />
-              {location}
+              {locationDescription}
             </p>
           </div>
           <div className="flex items-center justify-between">
@@ -109,12 +109,12 @@ export default function EventListing({
           >
             <img
               src="https://cdn.theerapakg.moe/reservation/asset/events/badminton-default.jpg"
-              alt={title}
+              alt={name}
               className="h-32 w-full rounded object-cover"
             />
-            <h4 className="mt-2 text-lg font-semibold">{title}</h4>
+            <h4 className="mt-2 text-lg font-semibold">{name}</h4>
             <p className="text-sm text-gray-600">{dateTime}</p>
-            <p className="mb-2 text-sm text-gray-600">{location}</p>
+            <p className="mb-2 text-sm text-gray-600">{locationDescription}</p>
 
             <div className="mb-2 text-center text-lg font-semibold">
               Are you bringing anyone?
@@ -168,12 +168,12 @@ export default function EventListing({
             </p>
             <img
               src="https://cdn.theerapakg.moe/reservation/asset/events/badminton-default.jpg"
-              alt={title}
+              alt={name}
               className="h-32 w-full rounded object-cover"
             />
-            <h4 className="mt-2 text-lg font-semibold">{title}</h4>
+            <h4 className="mt-2 text-lg font-semibold">{name}</h4>
             <p className="text-sm text-gray-600">{dateTime}</p>
-            <p className="mb-2 text-sm text-gray-600">{location}</p>
+            <p className="mb-2 text-sm text-gray-600">{locationDescription}</p>
             <div className="mt-4 flex flex-col items-center">
               <button
                 onClick={handleDone}

@@ -1,7 +1,7 @@
 import { config, defineTiaraConfig, redacted } from "tiara-stack/config";
 
 export default defineTiaraConfig({
-  name: "user",
+  name: "club",
   runtimeConfig: {
     postgresUrl: redacted("string"),
     oauth: {

@@ -14,7 +14,7 @@ export const handlerConfig = defineEventHandlerConfig({
     type({
       events: [
         {
-          id: "string",
+          eventId: "string",
           eventCreatorType: "string",
           creatorId: "string",
           "name?": "string",
@@ -25,6 +25,7 @@ export const handlerConfig = defineEventHandlerConfig({
           endAt: "string",
           autoAccept: "boolean",
           sizeLimit: "number",
+          participants: "number",
         },
         "[]",
       ],
@@ -57,9 +58,9 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
 
     const events = yield* eventRepository.getUserCreatedEvents({ userId });
 
-    const formattedEvents = events.map(({ event, group }) => {
+    const formattedEvents = events.map(({ event, group, participants }) => {
       return {
-        id: group.publicId,
+        eventId: group.publicId,
         ...(group.name && { name: group.name }),
         ...(event.description && {
           description: event.description,
@@ -74,6 +75,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
         sizeLimit: event.sizeLimit,
         eventCreatorType: event.eventCreatorType,
         creatorId: event.creatorId,
+        participants,
       };
     });
 

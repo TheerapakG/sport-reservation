@@ -84,6 +84,9 @@
     "sport-reservation-matching": "workspace:*",
     "sport-reservation-oauth-common": "workspace:*",
     "sport-reservation-user": "workspace:*",
+    "sport-reservation-friend": "workspace:*",
+    "sport-reservation-club": "workspace:*",
+    "sport-reservation-event": "workspace:*",
     "tiara-stack": "workspace:*"
   },
   "devDependencies": {

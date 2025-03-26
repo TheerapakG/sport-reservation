@@ -61,6 +61,7 @@ export class EventRepository
         Option.Option<{
           event: typeof eventEvent.$inferSelect;
           group: typeof userUserGroup.$inferSelect;
+          participants: number;
         }>,
         SqlError.SqlError
       >;
@@ -97,6 +98,7 @@ export class EventRepository
         {
           event: typeof eventEvent.$inferSelect;
           group: typeof userUserGroup.$inferSelect;
+          participants: number;
         }[],
         SqlError.SqlError
       >;
@@ -104,6 +106,7 @@ export class EventRepository
         {
           event: typeof eventEvent.$inferSelect;
           group: typeof userUserGroup.$inferSelect;
+          participants: number;
         }[],
         SqlError.SqlError
       >;
@@ -111,6 +114,7 @@ export class EventRepository
         {
           event: typeof eventEvent.$inferSelect;
           group: typeof userUserGroup.$inferSelect;
+          participants: number;
         }[],
         SqlError.SqlError
       >;
@@ -118,6 +122,7 @@ export class EventRepository
         {
           event: typeof eventEvent.$inferSelect;
           group: typeof userUserGroup.$inferSelect;
+          participants: number;
         }[],
         SqlError.SqlError
       >;
@@ -126,6 +131,18 @@ export class EventRepository
         userId: string;
       }) => Effect.Effect<
         Option.Option<Pick<typeof userUserGroupMember.$inferSelect, "status">>,
+        SqlError.SqlError
+      >;
+      getEventsByDate: (data: {
+        date: Date;
+        offset: number;
+        limit: number;
+      }) => Effect.Effect<
+        {
+          event: typeof eventEvent.$inferSelect;
+          group: typeof userUserGroup.$inferSelect;
+          participants: number;
+        }[],
         SqlError.SqlError
       >;
     }

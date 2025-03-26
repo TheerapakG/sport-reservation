@@ -12,5 +12,14 @@ export default defineTiaraConfig({
     matching: {
       baseUrl: config("string"),
     },
+    friend: {
+      baseUrl: config("string"),
+    },
+    club: {
+      baseUrl: config("string"),
+    },
+    event: {
+      baseUrl: config("string"),
+    },
   },
 });

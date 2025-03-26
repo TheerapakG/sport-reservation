@@ -16,6 +16,7 @@ import { LocationRepository } from "~/repositories/locationRepository";
 import { ObjectiveRepository } from "~/repositories/objectiveRepository";
 import { SportRepository } from "~/repositories/sportRepository";
 import { UserRepository } from "~/repositories/userRepository";
+import { getHeader } from "h3";
 
 export const handlerConfig = defineEventHandlerConfig({
   name: "getUserProfile",
