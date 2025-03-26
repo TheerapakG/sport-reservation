@@ -48,6 +48,13 @@ export const userRepositoryImpl = /*@__PURE__*/ Layer.effect(
           if (users.length === 0) return Option.none();
           return Option.some(users[0]);
         }).pipe(Effect.withSpan("userRepositoryImpl.findUserProfileById")),
+      deleteUserProfile: ({ publicId }) =>
+        Effect.gen(function* () {
+          yield* db
+            .update(userUserProfile)
+            .set({ deletedAt: new Date() })
+            .where(eq(userUserProfile.publicId, publicId));
+        }).pipe(Effect.withSpan("userRepositoryImpl.deleteUserProfile")),
     });
   }),
 );

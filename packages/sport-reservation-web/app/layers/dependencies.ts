@@ -1,5 +1,5 @@
 import { Layer } from "effect";
-import { matchingClient, oAuthClient } from "./client";
+import { matchingClient, oAuthClient, userClient } from "./client";
 import { runtimeConfig } from "./config";
 
 /*@__NO_SIDE_EFFECTS__*/
@@ -12,7 +12,7 @@ const baseDependenciesLive = /*@__PURE__*/ Layer.mergeAll(configLive);
 
 /*@__NO_SIDE_EFFECTS__*/
 const createClientLive = () =>
-  Layer.mergeAll(oAuthClient, matchingClient).pipe(
+  Layer.mergeAll(oAuthClient, matchingClient, userClient).pipe(
     Layer.provide(baseDependenciesLive),
   );
 

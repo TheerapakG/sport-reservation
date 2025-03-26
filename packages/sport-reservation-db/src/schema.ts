@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import {
   boolean,
+  doublePrecision,
   geometry,
   index,
   integer,
@@ -119,10 +120,9 @@ export const userUserProfile = pgTable(
     publicId: uuid("public_id").defaultRandom().notNull(),
     name: varchar("name", {}),
     avatar: varchar("avatar", {}),
+    availability: varchar("availability", {}),
     gender: userUserProfileGender("gender"),
     birthDate: timestamp("birth_date", { withTimezone: true }),
-    location: geometry("location", { type: "point", srid: 4326 }),
-    locationDescription: varchar("location_description", {}),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -137,30 +137,36 @@ export const userUserProfile = pgTable(
   ],
 );
 
-export const userUserProfileObjectiveType = pgEnum(
-  "user_user_profile_objective_type",
-  [
-    "casual_match",
-    "for_fitness",
-    "for_fun",
-    "love_challenge",
-    "love_competition",
-    "meet_new_friends",
-    "play_to_win",
-    "push_limits",
-    "relax_rally",
-    "self_improvement",
-    "serious_play",
-    "stay_active",
-  ],
+export const userSportType = pgEnum("user_sport_type", [
+  "badminton",
+  "tennis",
+  "running",
+]);
+
+export const userSport = pgTable(
+  "user_sport",
+  {
+    id: serial("id").primaryKey(),
+    publicId: uuid("public_id").defaultRandom().notNull(),
+    sportType: userSportType("sport_type").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  },
+  (table) => [uniqueIndex("user_sport_public_id_idx").on(table.publicId)],
 );
 
-export const userUserProfileObjective = pgTable(
-  "user_user_profile_objective",
+export const userUserProfileSport = pgTable(
+  "user_user_profile_sport",
   {
     id: serial("id").primaryKey(),
     userId: uuid("user_id").notNull(),
-    objective: userUserProfileObjectiveType("objective").notNull(),
+    sportId: uuid("sport_id").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -171,7 +177,108 @@ export const userUserProfileObjective = pgTable(
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
   },
   (table) => [
-    uniqueIndex("user_user_profile_objective_user_id_idx").on(table.userId),
+    uniqueIndex("user_user_profile_sport_user_id_sport_id_idx").on(
+      table.userId,
+      table.sportId,
+    ),
+  ],
+);
+
+export const userObjectiveType = pgEnum("user_objective_type", [
+  "casual_match",
+  "for_fitness",
+  "for_fun",
+  "love_challenge",
+  "love_competition",
+  "meet_new_friends",
+  "play_to_win",
+  "push_limits",
+  "relax_rally",
+  "self_improvement",
+  "serious_play",
+  "stay_active",
+]);
+
+export const userObjective = pgTable(
+  "user_objective",
+  {
+    id: serial("id").primaryKey(),
+    publicId: uuid("public_id").defaultRandom().notNull(),
+    objectiveType: userObjectiveType("objective_type").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  },
+  (table) => [uniqueIndex("user_objective_public_id_idx").on(table.publicId)],
+);
+
+export const userUserProfileObjective = pgTable(
+  "user_user_profile_objective",
+  {
+    id: serial("id").primaryKey(),
+    userId: uuid("user_id").notNull(),
+    objectiveId: uuid("objective_id").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  },
+  (table) => [
+    uniqueIndex("user_user_profile_objective_user_id_idx").on(
+      table.userId,
+      table.objectiveId,
+    ),
+  ],
+);
+
+export const userLocation = pgTable(
+  "user_location",
+  {
+    id: serial("id").primaryKey(),
+    publicId: uuid("public_id").defaultRandom().notNull(),
+    location: geometry("location", { type: "point", srid: 4326 }),
+    locationDescription: varchar("location_description", {}),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  },
+  (table) => [uniqueIndex("user_location_public_id_idx").on(table.publicId)],
+);
+
+export const userUserProfileLocation = pgTable(
+  "user_user_profile_location",
+  {
+    id: serial("id").primaryKey(),
+    userId: uuid("user_id").notNull(),
+    locationId: uuid("location_id").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  },
+  (table) => [
+    uniqueIndex("user_user_profile_location_user_id_idx").on(
+      table.userId,
+      table.locationId,
+    ),
   ],
 );
 
@@ -542,5 +649,31 @@ export const matchingCursor = pgTable(
   (table) => [
     uniqueIndex("matching_cursor_public_id_idx").on(table.publicId),
     index("matching_cursor_user_id_idx").on(table.userId),
+  ],
+);
+
+export const matchingCursorMatches = pgTable(
+  "matching_cursor_matches",
+  {
+    id: serial("id").primaryKey(),
+    cursorId: uuid("cursor_id").notNull(),
+    userId: uuid("user_id").notNull(),
+    distance: doublePrecision("distance").notNull(),
+    minDistance: doublePrecision("min_distance").notNull(),
+    maxDistance: doublePrecision("max_distance").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  },
+  (table) => [
+    uniqueIndex("matching_cursor_matches_cursor_id_user_id_idx").on(
+      table.cursorId,
+      table.userId,
+    ),
   ],
 );

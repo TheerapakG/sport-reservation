@@ -5,12 +5,12 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 
 type User = {
-  name: string;
-  image: string;
-  distance: number;
+  name?: string;
+  avatar?: string;
+  distance?: number;
   sports: string[];
-  reasons: string[];
-  playTimes: string;
+  objectives: string[];
+  availability?: string;
   locations: string[];
 };
 
@@ -35,7 +35,7 @@ export default function UserCard({
       >
         <Card className="w-full rotate-y-0 rounded-2xl border-[#65D1F8] p-4 text-center shadow-lg [backface-visibility:hidden]">
           <img
-            src={user.image}
+            src={user.avatar}
             alt={user.name}
             className="h-48 w-full rounded-lg object-cover"
           />
@@ -87,17 +87,17 @@ export default function UserCard({
           </div>
           <p className="mt-2 text-sm text-gray-600">Why I'm here...</p>
           <div className="mt-1 flex flex-wrap justify-center gap-1">
-            {user.reasons.map((reason: string) => (
+            {user.objectives.map((objective: string) => (
               <span
-                key={reason}
+                key={objective}
                 className="rounded-lg border border-[#6CCFD0] bg-white px-2 py-1 text-xs"
               >
-                {reason}
+                {objective}
               </span>
             ))}
           </div>
           <p className="mt-2 text-sm text-gray-600">Preferred Play Times:</p>
-          <p className="text-xs text-gray-500">{user.playTimes}</p>
+          <p className="text-xs text-gray-500">{user.availability}</p>
           <p className="mt-2 text-sm text-gray-600">Preferred Locations:</p>
           <p className="text-xs text-gray-500">{user.locations.join(", ")}</p>
           <div className="mt-3 flex justify-between">

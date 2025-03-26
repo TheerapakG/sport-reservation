@@ -10,7 +10,9 @@ import { MatchingDbRepository } from "~/repositories/matchingDbRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
   name: "getMatchingCursor",
-  response: response(type({ cursorId: "string" }), { stream: false }),
+  response: response(type({ cursorId: "string", createdAt: "string" }), {
+    stream: false,
+  }),
 });
 
 export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
@@ -34,6 +36,12 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     );
 
     const matchingDbRepository = yield* MatchingDbRepository;
-    return yield* yield* matchingDbRepository.getMatchUserCursor(userId);
+    const cursor =
+      yield* yield* matchingDbRepository.getMatchUserCursor(userId);
+
+    return {
+      cursorId: cursor.publicId,
+      createdAt: cursor.createdAt.toISOString(),
+    };
   }),
 );

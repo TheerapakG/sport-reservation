@@ -1,6 +1,10 @@
 import { OAuthClient } from "@/layers/client/oauthClient";
 import { provideEffectContext } from "@/utils/effectContext";
-import { QueryClient, queryOptions, useMutation } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { createServerFn } from "@tanstack/react-start";
 import { type } from "arktype";
 import { Effect } from "effect";
@@ -13,10 +17,14 @@ import {
   setCookie,
 } from "vinxi/http";
 
-export const oauthKeys = {
-  all: () => ["oauth"] as const,
-  userProfile: () => [...oauthKeys.all(), "userProfile"] as const,
-  login: () => [...oauthKeys.all(), "login"] as const,
+export const oauthKeys = () => {
+  const all = ["oauth"] as const;
+  return {
+    all: () => all,
+    userProfile: () => [...all, "userProfile"] as const,
+    login: ({ provider }: { provider?: string }) =>
+      [...all, "login", provider] as const,
+  };
 };
 
 export const currentUserProfileServerFn = createServerFn({
@@ -53,7 +61,7 @@ export const currentUserProfileServerFn = createServerFn({
 
 export const currentUserProfileQueryOptions = () =>
   queryOptions({
-    queryKey: oauthKeys.userProfile(),
+    queryKey: oauthKeys().userProfile(),
     queryFn: () => currentUserProfileServerFn(),
   });
 
@@ -80,7 +88,7 @@ export const loginServerFn = createServerFn({ method: "POST" })
 
 export const loginQueryOptions = ({ provider }: { provider?: string }) =>
   queryOptions({
-    queryKey: oauthKeys.login(),
+    queryKey: oauthKeys().login({ provider }),
     queryFn: () => loginServerFn({ data: { provider } }),
   });
 
@@ -108,11 +116,14 @@ export const exchangeServerFn = createServerFn({ method: "POST" })
     return { success: true };
   });
 
-export const useExchangeMutation = () =>
-  useMutation({
-    mutationFn: ({ code }: { queryClient: QueryClient; code: string }) =>
+export const useExchangeMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ code }: { code: string }) =>
       exchangeServerFn({ data: { code } }),
-    onSuccess: (_, { queryClient }) => {
-      queryClient.invalidateQueries({ queryKey: oauthKeys.all() });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: oauthKeys().all() });
     },
   });
+};

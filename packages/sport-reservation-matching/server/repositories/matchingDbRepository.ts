@@ -1,5 +1,9 @@
 import { SqlError } from "@effect/sql";
 import { Cause, Context, Effect, Option } from "effect";
+import {
+  matchingCursor,
+  matchingCursorMatches,
+} from "sport-reservation-db/schema";
 import { ArktypeError } from "tiara-stack/models/errors";
 
 export class MatchingDbRepository
@@ -9,18 +13,31 @@ export class MatchingDbRepository
       createMatchUserCursor: (
         userId: string,
       ) => Effect.Effect<
-        Option.Option<{ cursorId: string }>,
+        Option.Option<typeof matchingCursor.$inferSelect>,
         ArktypeError | SqlError.SqlError | Cause.NoSuchElementException
       >;
       getMatchUserCursor: (
         userId: string,
       ) => Effect.Effect<
-        Option.Option<{ cursorId: string }>,
+        Option.Option<typeof matchingCursor.$inferSelect>,
+        ArktypeError | SqlError.SqlError | Cause.NoSuchElementException
+      >;
+      getCursorMatchCount: (
+        cursorId: string,
+      ) => Effect.Effect<
+        number,
+        ArktypeError | SqlError.SqlError | Cause.NoSuchElementException
+      >;
+      getCursorMatches: (
+        cursorId: string,
+      ) => Effect.Effect<
+        (typeof matchingCursorMatches.$inferSelect)[],
         ArktypeError | SqlError.SqlError | Cause.NoSuchElementException
       >;
       matchUser: (
         cursorId: string,
-        limit: number,
+        exactMatchCount: number,
+        generalMatchCount: number,
       ) => Effect.Effect<
         {
           userId: string;

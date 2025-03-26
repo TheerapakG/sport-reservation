@@ -1,6 +1,6 @@
 import { EventContext, effectEventHandler } from "$/effectEventHandler";
 import { type } from "arktype";
-import { Effect, pipe } from "effect";
+import { Effect, Option, pipe } from "effect";
 import { parseCookies } from "h3";
 import { getSubjectTypeFromToken } from "sport-reservation-oauth-common/subjects";
 import { defineEventHandlerConfig, response } from "tiara-stack/config";
@@ -10,7 +10,9 @@ import { MatchingDbRepository } from "~/repositories/matchingDbRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
   name: "createMatchingCursor",
-  response: response(type({ cursorId: "string?" }), { stream: false }),
+  response: response(type({ cursorId: "string", createdAt: "string" }), {
+    stream: false,
+  }),
 });
 
 export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
@@ -34,6 +36,24 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     );
 
     const matchingDbRepository = yield* MatchingDbRepository;
-    return yield* yield* matchingDbRepository.createMatchUserCursor(userId);
+
+    const lastCursor = yield* matchingDbRepository.getMatchUserCursor(userId);
+    const lastCursorTime = Option.match(lastCursor, {
+      onSome: (cursor) => cursor.createdAt.getTime(),
+      onNone: () => 0,
+    });
+
+    const cursor = yield* yield* Effect.if(
+      lastCursorTime + 1000 * 60 * 60 * 24 < Date.now(),
+      {
+        onTrue: () => Effect.succeed(lastCursor),
+        onFalse: () => matchingDbRepository.createMatchUserCursor(userId),
+      },
+    );
+
+    return {
+      cursorId: cursor.publicId,
+      createdAt: cursor.createdAt.toISOString(),
+    };
   }),
 );

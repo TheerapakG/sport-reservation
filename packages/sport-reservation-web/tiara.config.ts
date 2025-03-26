@@ -6,6 +6,9 @@ export default defineTiaraConfig({
     oauth: {
       issuer: config("string"),
     },
+    user: {
+      baseUrl: config("string"),
+    },
     matching: {
       baseUrl: config("string"),
     },

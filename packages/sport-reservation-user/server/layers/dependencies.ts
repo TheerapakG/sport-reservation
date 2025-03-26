@@ -4,6 +4,9 @@ import { Layer } from "effect";
 import { dbLive, oAuthClient, uploadClient } from "~/layers";
 import { authRepositoryImpl } from "~/repositories/authRepositoryImpl";
 import { groupRepositoryImpl } from "~/repositories/groupRepositoryImpl";
+import { locationRepositoryImpl } from "~/repositories/locationRepositoryImpl";
+import { objectiveRepositoryImpl } from "~/repositories/objectiveRepositoryImpl";
+import { sportRepositoryImpl } from "~/repositories/sportRepositoryImpl";
 import { userRepositoryImpl } from "~/repositories/userRepositoryImpl";
 
 /*@__NO_SIDE_EFFECTS__*/
@@ -19,7 +22,14 @@ const baseDependenciesLive = /*@__PURE__*/ Layer.mergeAll(configLive);
 
 /*@__NO_SIDE_EFFECTS__*/
 const createRepositoryLive = () =>
-  Layer.mergeAll(authRepositoryImpl, userRepositoryImpl, groupRepositoryImpl)
+  Layer.mergeAll(
+    authRepositoryImpl,
+    userRepositoryImpl,
+    groupRepositoryImpl,
+    objectiveRepositoryImpl,
+    locationRepositoryImpl,
+    sportRepositoryImpl,
+  )
     .pipe(Layer.provide(dbLive))
     .pipe(Layer.provide(runtimeConfig));
 

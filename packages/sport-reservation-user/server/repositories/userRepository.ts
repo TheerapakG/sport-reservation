@@ -30,5 +30,8 @@ export class UserRepository
         Option.Option<typeof userUserProfile.$inferSelect>,
         SqlError.SqlError
       >;
+      deleteUserProfile: (data: {
+        publicId: string;
+      }) => Effect.Effect<void, SqlError.SqlError>;
     }
   >() {}

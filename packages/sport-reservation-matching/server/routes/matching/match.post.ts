@@ -28,10 +28,9 @@ export const handlerConfig = defineEventHandlerConfig({
     }),
     { stream: false },
   ),
-  query: params(
+  body: params(
     type({
       cursorId: "string",
-      limit: "4<=number<=20",
     }),
   ),
 });
@@ -40,7 +39,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
   Effect.gen(function* () {
     const {
       params: {
-        query: { cursorId, limit },
+        body: { cursorId },
       },
     } = yield* EventParamsContext.typed<typeof handlerConfig>();
 
@@ -63,7 +62,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     );
 
     const matchingDbRepository = yield* MatchingDbRepository;
-    const matchResults = yield* matchingDbRepository.matchUser(cursorId, limit);
+    const matchResults = yield* matchingDbRepository.matchUser(cursorId, 1, 3);
 
     const userClient = yield* UserClient;
 
@@ -79,7 +78,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
                 : 100 * (1 - (match.distance - match.minDistance) / range);
 
             return {
-              user: yield* userClient.getUserProfileById({
+              user: yield* userClient.getUserProfile({
                 query: { id: match.userId },
               }),
               normalizedScore,

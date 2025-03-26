@@ -107,9 +107,14 @@ export const issuerLive = Layer.effect(
                       {
                         onSome: (id) =>
                           Effect.gen(function* () {
-                            return yield* userClient.getUserProfileById({
+                            const profile = yield* userClient.getUserProfile({
                               query: { id },
                             });
+                            return {
+                              id: profile.id,
+                              name: profile.name,
+                              avatar: profile.avatar,
+                            };
                           }),
                         onNone: () =>
                           Effect.gen(function* () {
@@ -133,12 +138,18 @@ export const issuerLive = Layer.effect(
                                   url: lineAvatar,
                                 },
                               });
-                            return yield* userClient.postUpdateUserProfile({
-                              body: {
-                                id: partialProfile.id,
-                                avatar: avatarKey,
-                              },
-                            });
+                            const updatedProfile =
+                              yield* userClient.postUpdateUserProfile({
+                                body: {
+                                  id: partialProfile.id,
+                                  avatar: avatarKey,
+                                },
+                              });
+                            return {
+                              id: updatedProfile.id,
+                              name: updatedProfile.name,
+                              avatar: updatedProfile.avatar,
+                            };
                           }),
                       },
                     );
@@ -167,9 +178,14 @@ export const issuerLive = Layer.effect(
                       {
                         onSome: (id) =>
                           Effect.gen(function* () {
-                            return yield* userClient.getUserProfileById({
+                            const profile = yield* userClient.getUserProfile({
                               query: { id },
                             });
+                            return {
+                              id: profile.id,
+                              name: profile.name,
+                              avatar: profile.avatar,
+                            };
                           }),
                         onNone: () =>
                           Effect.gen(function* () {
@@ -193,12 +209,18 @@ export const issuerLive = Layer.effect(
                                   url: googleAvatar,
                                 },
                               });
-                            return yield* userClient.postUpdateUserProfile({
-                              body: {
-                                id: partialProfile.id,
-                                avatar: avatarKey,
-                              },
-                            });
+                            const updatedProfile =
+                              yield* userClient.postUpdateUserProfile({
+                                body: {
+                                  id: partialProfile.id,
+                                  avatar: avatarKey,
+                                },
+                              });
+                            return {
+                              id: updatedProfile.id,
+                              name: updatedProfile.name,
+                              avatar: updatedProfile.avatar,
+                            };
                           }),
                       },
                     );
@@ -230,9 +252,14 @@ export const issuerLive = Layer.effect(
                       {
                         onSome: (id) =>
                           Effect.gen(function* () {
-                            return yield* userClient.getUserProfileById({
+                            const profile = yield* userClient.getUserProfile({
                               query: { id },
                             });
+                            return {
+                              id: profile.id,
+                              name: profile.name,
+                              avatar: profile.avatar,
+                            };
                           }),
                         onNone: () =>
                           Effect.gen(function* () {
@@ -256,12 +283,18 @@ export const issuerLive = Layer.effect(
                                   url: facebookAvatar,
                                 },
                               });
-                            return yield* userClient.postUpdateUserProfile({
-                              body: {
-                                id: partialProfile.id,
-                                avatar: avatarKey,
-                              },
-                            });
+                            const updatedProfile =
+                              yield* userClient.postUpdateUserProfile({
+                                body: {
+                                  id: partialProfile.id,
+                                  avatar: avatarKey,
+                                },
+                              });
+                            return {
+                              id: updatedProfile.id,
+                              name: updatedProfile.name,
+                              avatar: updatedProfile.avatar,
+                            };
                           }),
                       },
                     );

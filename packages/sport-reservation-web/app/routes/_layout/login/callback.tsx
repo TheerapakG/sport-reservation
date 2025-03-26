@@ -1,5 +1,4 @@
 import { useExchangeMutation } from "@/api/oauth";
-import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { type } from "arktype";
 import { Effect } from "effect";
@@ -9,17 +8,16 @@ import { effectTypeCheck } from "tiara-stack/utils/effectType";
 const CallbackComponent = () => {
   const { code } = Route.useLoaderData();
 
-  const queryClient = useQueryClient();
   const router = useRouter();
 
   const exchangeMutation = useExchangeMutation();
 
   useEffect(() => {
     (async () => {
-      await exchangeMutation.mutateAsync({ queryClient, code });
+      await exchangeMutation.mutateAsync({ code });
       await router.navigate({ to: "/" });
     })();
-  }, [code, queryClient, router, exchangeMutation]);
+  }, [code, router, exchangeMutation]);
 
   return (
     <div className="p-2">

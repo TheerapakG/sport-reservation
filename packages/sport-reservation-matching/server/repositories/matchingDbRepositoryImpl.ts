@@ -1,8 +1,21 @@
 import { PgDrizzle } from "@effect/sql-drizzle/Pg";
-import { and, asc, eq, isNotNull, l2Distance, max, min } from "drizzle-orm";
-import { Array, Effect, Layer, Option } from "effect";
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  inArray,
+  isNotNull,
+  l2Distance,
+  max,
+  min,
+  sql,
+} from "drizzle-orm";
+import { Array, Effect, Layer, Option, pipe, Random, Stream } from "effect";
 import {
   matchingCursor,
+  matchingCursorMatches,
   matchingUserAssessmentVector,
 } from "sport-reservation-db/schema";
 import { MatchingDbRepository } from "./matchingDbRepository";
@@ -44,13 +57,13 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
               vectorVersion: Array.pad([1, 1, 1, 1], 16, 0),
               vector: randomNoiseUserAssessmentVectors,
             })
-            .returning({ publicId: matchingCursor.publicId });
+            .returning();
 
           if (cursor.length === 0) {
             return Option.none();
           }
 
-          return Option.some({ cursorId: cursor[0].publicId });
+          return Option.some(cursor[0]);
         }),
       getMatchUserCursor: (userId) =>
         Effect.gen(function* () {
@@ -62,15 +75,46 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
                 isNotNull(matchingCursor.deletedAt),
                 eq(matchingCursor.userId, userId),
               ),
-            );
+            )
+            .orderBy(desc(matchingCursor.createdAt));
 
           if (Array.isEmptyArray(cursors)) {
             return Option.none();
           }
 
-          return Option.some({ cursorId: cursors[0].publicId });
+          return Option.some(cursors[0]);
         }),
-      matchUser: (cursorId, limit) =>
+      getCursorMatchCount: (cursorId) =>
+        Effect.gen(function* () {
+          const counts = yield* db
+            .select({ count: count() })
+            .from(matchingCursorMatches)
+            .where(
+              and(
+                isNotNull(matchingCursorMatches.deletedAt),
+                eq(matchingCursorMatches.cursorId, cursorId),
+              ),
+            );
+
+          if (Array.isEmptyArray(counts)) {
+            return 0;
+          }
+
+          return counts[0].count;
+        }),
+      getCursorMatches: (cursorId) =>
+        Effect.gen(function* () {
+          return yield* db
+            .select()
+            .from(matchingCursorMatches)
+            .where(
+              and(
+                isNotNull(matchingCursorMatches.deletedAt),
+                eq(matchingCursorMatches.cursorId, cursorId),
+              ),
+            );
+        }),
+      matchUser: (cursorId, exactMatchCount, generalMatchCount) =>
         Effect.gen(function* () {
           const cursors = yield* db
             .select()
@@ -90,7 +134,41 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
             return [];
           }
 
-          const vector = cursors[0].vector;
+          const [{ count: rowCount }] = yield* db
+            .select({
+              count: count(),
+            })
+            .from(matchingUserAssessmentVector)
+            .where(
+              and(
+                isNotNull(matchingUserAssessmentVector.deletedAt),
+                eq(
+                  matchingUserAssessmentVector.vectorVersion,
+                  Array.pad([1, 1, 1, 1], 16, 0),
+                ),
+              ),
+            );
+
+          const { vector } = cursors[0];
+          const exactMatchRows = [
+            ...(yield* Stream.runCollect(
+              pipe(
+                Stream.repeatEffect(
+                  Random.nextIntBetween(1, Math.ceil((rowCount + 1) * 0.1)),
+                ),
+                Stream.take(exactMatchCount),
+              ),
+            )),
+          ];
+          const generalMatchRows = [
+            ...(yield* Stream.runCollect(
+              pipe(
+                Stream.repeatEffect(Random.nextIntBetween(1, rowCount + 1)),
+                Stream.take(generalMatchCount),
+              ),
+            )),
+          ];
+          const matchRows = [...exactMatchRows, ...generalMatchRows];
 
           const distanceTable = db.$with(`distanceTable`).as(
             db
@@ -103,26 +181,60 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
                   .mapWith(Number)
                   .as("distance"),
               })
-              .from(matchingUserAssessmentVector),
+              .from(matchingUserAssessmentVector)
+              .where(
+                and(
+                  isNotNull(matchingUserAssessmentVector.deletedAt),
+                  eq(
+                    matchingUserAssessmentVector.vectorVersion,
+                    Array.pad([1, 1, 1, 1], 16, 0),
+                  ),
+                ),
+              ),
           );
 
-          const matchesUserAssessment = yield* db
-            .with(distanceTable)
-            .select({
-              userId: distanceTable.userId,
-              distance: distanceTable.distance,
-              minDistance: min(distanceTable.distance)
-                .mapWith(Number)
-                .as("minDistance"),
-              maxDistance: max(distanceTable.distance)
-                .mapWith(Number)
-                .as("maxDistance"),
-            })
-            .from(distanceTable)
-            .orderBy(asc(distanceTable.distance))
-            .limit(limit);
+          const matchesUserAssessment = db.$with(`matchesUserAssessment`).as(
+            db
+              .with(distanceTable)
+              .select({
+                userId: distanceTable.userId,
+                distance: distanceTable.distance,
+                minDistance: min(distanceTable.distance)
+                  .mapWith(Number)
+                  .as("minDistance"),
+                maxDistance: max(distanceTable.distance)
+                  .mapWith(Number)
+                  .as("maxDistance"),
+                rank: sql`row_number() over (order by "distance")`
+                  .mapWith(Number)
+                  .as("rank"),
+              })
+              .from(distanceTable)
+              .orderBy(asc(distanceTable.distance)),
+          );
 
-          return matchesUserAssessment;
+          const matches = yield* db
+            .with(matchesUserAssessment)
+            .select({
+              userId: matchesUserAssessment.userId,
+              distance: matchesUserAssessment.distance,
+              minDistance: matchesUserAssessment.minDistance,
+              maxDistance: matchesUserAssessment.maxDistance,
+            })
+            .from(matchesUserAssessment)
+            .where(inArray(matchesUserAssessment.rank, matchRows));
+
+          yield* db.insert(matchingCursorMatches).values(
+            matches.map((match) => ({
+              cursorId,
+              userId: match.userId,
+              distance: match.distance,
+              minDistance: match.minDistance,
+              maxDistance: match.maxDistance,
+            })),
+          );
+
+          return matches;
         }),
     });
   }),
