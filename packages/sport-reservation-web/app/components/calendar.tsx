@@ -28,10 +28,8 @@ export default function Calendar({
         ),
         day: cn(
           buttonVariants({ variant: "ghost" }),
-          "h-8 w-8 rounded-full p-0 font-normal aria-selected:opacity-100",
+          "h-8 w-8 rounded-full p-0 font-normal aria-selected:bg-[#65D1F8] aria-selected:text-white aria-selected:opacity-100",
         ),
-        day_selected:
-          "bg-[#65D1F8] text-white hover:bg-[#65D1F8] hover:text-white focus:bg-[#65D1F8] focus:text-white",
         day_outside:
           "day-outside text-gray-400 aria-selected:[#65D1F8]/50 aria-selected:text-white",
         ...classNames,

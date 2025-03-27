@@ -14,7 +14,7 @@ type EventListingProps = {
   buttonLabel?: string;
 };
 
-export default function EventListing({
+export default function EventListItem({
   eventId,
   dateTime,
   name,
@@ -51,7 +51,7 @@ export default function EventListing({
   }
 
   return (
-    <div>
+    <>
       {/* Event Card Layout */}
       <div className="mb-4 flex max-w-3xl space-x-4 rounded-md bg-white p-4 shadow">
         {/* Bigger Event Image */}
@@ -191,6 +191,6 @@ export default function EventListing({
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

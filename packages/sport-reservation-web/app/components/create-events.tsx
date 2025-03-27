@@ -53,12 +53,6 @@ export default function CreateEventForm() {
     <div className="mx-auto max-w-3xl p-4">
       {/* Inner Card with round blue border and no shadow */}
       <div className="rounded-xl border-2 border-[#65D1F8] bg-white p-4">
-        {/* Title in #F28382 */}
-        <h2 className="mb-2 text-2xl font-bold text-[#F28382]">
-          Create Events
-        </h2>
-        <p className="mb-4 text-sm text-gray-500">Add a new activity</p>
-
         <form className="space-y-4" onSubmit={handleSubmit}>
           {/* 1) Picture Upload */}
           <div>

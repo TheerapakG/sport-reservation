@@ -31,6 +31,7 @@
     "@effect/sql": "catalog:",
     "@effect/sql-drizzle": "catalog:",
     "@effect/sql-pg": "catalog:",
+    "@tanstack/react-virtual": "^3.13.5",
     "jsonwebtoken": "catalog:",
     "unstorage": "^1.12.0",
     "validator": "^13.12.0"
@@ -42,12 +43,12 @@
     "effect": "catalog:",
     "h3": "catalog:",
     "ofetch": "catalog:",
-    "tiara-stack": "workspace:*",
-    "sport-reservation-oauth-common": "workspace:*",
+    "sport-reservation-club": "workspace:*",
     "sport-reservation-db": "workspace:*",
+    "sport-reservation-oauth-common": "workspace:*",
     "sport-reservation-upload": "workspace:*",
     "sport-reservation-user": "workspace:*",
-    "sport-reservation-club": "workspace:*",
+    "tiara-stack": "workspace:*",
     "ufo": "catalog:"
   },
   "devDependencies": {

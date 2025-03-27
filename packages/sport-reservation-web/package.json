@@ -55,7 +55,6 @@
     "cmdk": "1.0.4",
     "cookie-es": "^2.0.0",
     "date-fns": "^3.6.0",
-    "dayjs": "^1.11.13",
     "destr": "^2.0.3",
     "embla-carousel-react": "^8.5.2",
     "framer-motion": "^12.5.0",
