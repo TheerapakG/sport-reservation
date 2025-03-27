@@ -7,7 +7,7 @@ import {
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { Suspense } from "react";
-import { userProfile } from "sport-reservation-user/models";
+import { subjects } from "sport-reservation-oauth-common/subjects";
 
 const AvatarFallback = () => {
   return (
@@ -33,7 +33,7 @@ const AvatarFallback = () => {
 const UserAvatarImageBase = ({
   profile,
 }: {
-  profile: typeof userProfile.infer;
+  profile: typeof subjects.user.infer;
 }) => {
   return profile.avatar ? (
     <AvatarImagePrimitive src={profile.avatar}></AvatarImagePrimitive>

@@ -1,38 +1,50 @@
 import { provideEffectContext } from "@/utils/effectContext";
-import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
+import {
+  infiniteQueryOptions,
+  queryOptions,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { createServerFn } from "@tanstack/react-start";
+import { type } from "arktype";
 import { serialize } from "cookie-es";
-import { Effect } from "effect";
+import { Effect, Match } from "effect";
 import { EventClient } from "sport-reservation-event/client";
-import { getEventClientQueryType } from "sport-reservation-event/models";
+import {
+  getEventClientBodyType,
+  getEventClientQueryType,
+} from "sport-reservation-event/models";
 import { effectType } from "tiara-stack/utils/effectType";
 
 import { parseCookies } from "vinxi/http";
 
-export const eventKeys = {
-  all: () => ["event"] as const,
-  event: () => {
-    const allEvent = [...eventKeys.all(), "event"] as const;
-    return {
-      all: () => allEvent,
-      id: ({ id }: { id: string }) => {
-        const allEventId = [...allEvent, "id", id] as const;
-        return {
-          all: () => allEventId,
-          detail: () => [...allEventId, "detail"] as const,
-          memberList: () => [...allEventId, "memberList"] as const,
-        };
-      },
-      list: () => {
-        const allEventList = [...allEvent, "list"] as const;
-        return {
-          all: () => allEventList,
-          date: ({ date }: { date: string }) =>
-            [...allEventList, date] as const,
-        };
-      },
-    };
-  },
+export const eventKeys = () => {
+  const all = ["event"] as const;
+  return {
+    all: () => all,
+    event: () => {
+      const allEvent = [...all, "event"] as const;
+      return {
+        all: () => allEvent,
+        id: ({ id }: { id: string }) => {
+          const allEventId = [...allEvent, "id", id] as const;
+          return {
+            all: () => allEventId,
+            detail: () => [...allEventId, "detail"] as const,
+            memberList: () => [...allEventId, "memberList"] as const,
+          };
+        },
+        list: () => {
+          const allEventList = [...allEvent, "list"] as const;
+          return {
+            all: () => allEventList,
+            date: ({ date }: { date: string }) =>
+              [...allEventList, date] as const,
+          };
+        },
+      };
+    },
+  };
 };
 
 export const getEventServerFn = createServerFn({
@@ -63,7 +75,7 @@ export const getEventServerFn = createServerFn({
 
 export const getEventQueryOptions = ({ id }: { id: string }) =>
   queryOptions({
-    queryKey: eventKeys.event().id({ id }).detail(),
+    queryKey: eventKeys().event().id({ id }).detail(),
     queryFn: () => getEventServerFn({ data: { eventId: id } }),
   });
 
@@ -97,7 +109,7 @@ export const getEventMemberListServerFn = createServerFn({
 
 export const getEventMemberListQueryOptions = ({ id }: { id: string }) =>
   queryOptions({
-    queryKey: eventKeys.event().id({ id }).memberList(),
+    queryKey: eventKeys().event().id({ id }).memberList(),
     queryFn: () => getEventMemberListServerFn({ data: { eventId: id } }),
   });
 
@@ -120,9 +132,8 @@ export const getEventListServerFn = createServerFn({
         return yield* eventClient.getEventList({
           headers: { Cookie: serialize("access_token", accessToken) },
           query: {
+            ...data,
             date: data.date.toISOString(),
-            limit: data.limit,
-            offset: data.offset,
           },
         });
       }).pipe(provideEffectContext),
@@ -139,7 +150,7 @@ export const getEventListInfiniteQueryOptions = ({
   limit: number;
 }) =>
   infiniteQueryOptions({
-    queryKey: eventKeys.event().list().date({ date: date.toISOString() }),
+    queryKey: eventKeys().event().list().date({ date: date.toISOString() }),
     queryFn: ({ pageParam }) =>
       getEventListServerFn({
         data: {
@@ -156,3 +167,76 @@ export const getEventListInfiniteQueryOptions = ({
           : undefined
         : undefined,
   });
+
+export const createEventServerFn = createServerFn({
+  method: "POST",
+})
+  .validator((data: unknown) =>
+    Effect.runSync(
+      effectType(
+        type([
+          {
+            creatorType: "'user'",
+            event: getEventClientBodyType("postCreateUserEvent"),
+          },
+          "|",
+          {
+            creatorType: "'club'",
+            event: getEventClientBodyType("postCreateClubEvent"),
+          },
+        ]),
+        data,
+      ),
+    ),
+  )
+  .handler(async ({ data }) => {
+    const { access_token: accessToken } = parseCookies();
+
+    if (!accessToken) {
+      return { success: false } as const;
+    }
+
+    const event = await Effect.runPromise(
+      Effect.gen(function* () {
+        const eventClient = yield* EventClient;
+        return yield* Match.value(data).pipe(
+          Match.when({ creatorType: "user" }, ({ event }) =>
+            eventClient.postCreateUserEvent({
+              headers: { Cookie: serialize("access_token", accessToken) },
+              body: {
+                ...event,
+                startAt: event.startAt.toISOString(),
+                endAt: event.endAt.toISOString(),
+              },
+            }),
+          ),
+          Match.when({ creatorType: "club" }, ({ event }) =>
+            eventClient.postCreateClubEvent({
+              headers: { Cookie: serialize("access_token", accessToken) },
+              body: {
+                ...event,
+                startAt: event.startAt.toISOString(),
+                endAt: event.endAt.toISOString(),
+              },
+            }),
+          ),
+          Match.exhaustive,
+        );
+      }).pipe(provideEffectContext),
+    );
+
+    return { success: true, event } as const;
+  });
+
+export const useCreateEventMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: createEventServerFn,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: eventKeys().event().list().all(),
+      });
+    },
+  });
+};

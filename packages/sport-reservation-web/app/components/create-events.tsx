@@ -1,9 +1,9 @@
 // src/components/CreateEventForm.tsx
-import React, { useState } from "react";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import React, { useState } from "react";
 
 export default function CreateEventForm() {
   // Main form states
@@ -54,7 +54,7 @@ export default function CreateEventForm() {
       {/* Inner Card with round blue border and no shadow */}
       <div className="rounded-xl border-2 border-[#65D1F8] bg-white p-4">
         {/* Title in #F28382 */}
-        <h2 className="mb-2 text-2xl font-bold" style={{ color: "#F28382" }}>
+        <h2 className="mb-2 text-2xl font-bold text-[#F28382]">
           Create Events
         </h2>
         <p className="mb-4 text-sm text-gray-500">Add a new activity</p>
