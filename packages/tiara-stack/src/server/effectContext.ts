@@ -103,7 +103,9 @@ export const getInnerContext = <Services>(
 ): Effect.Effect<Context.Context<Services>> =>
   Effect.gen(function* () {
     const { latch, ref } = effectContext;
+    console.log("waiting for latch");
     yield* latch.await;
+    console.log("latch opened");
     const { context } = yield* SynchronizedRef.get(ref);
     return context;
   });

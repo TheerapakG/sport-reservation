@@ -70,7 +70,6 @@ export const loginServerFn = createServerFn({ method: "POST" })
     Effect.runSync(effectType(type({ "provider?": "string" }), data)),
   )
   .handler(async ({ data: { provider } }) => {
-    console.log("run login");
     const { url } = await Effect.runPromise(
       Effect.gen(function* () {
         const oauthClient = yield* OAuthClient;
