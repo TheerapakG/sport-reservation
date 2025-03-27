@@ -6,7 +6,7 @@ export const defineEffectContextPlugin = ({
   hooks,
 }: {
   defineFn: typeof defineNitroPlugin;
-  hooks: EffectContextHooks;
+  hooks: EffectContextHooks<unknown>;
 }) => {
   return defineFn(async (nitroApp) => {
     await hooks.start();
