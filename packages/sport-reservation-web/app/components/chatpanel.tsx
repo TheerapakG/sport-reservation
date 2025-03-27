@@ -1,8 +1,13 @@
 // src/components/chat/ChatPanel.tsx
-import React from "react";
-import { Camera, Smile } from "lucide-react";
 import { Friend } from "@/components/friendslist";
-import { Message } from "@/components/chatpage";
+import { Camera, Smile } from "lucide-react";
+import React from "react";
+
+type Message = {
+  from: string;
+  text: string;
+  time: string;
+};
 
 type ChatPanelProps = {
   friend?: Friend;
