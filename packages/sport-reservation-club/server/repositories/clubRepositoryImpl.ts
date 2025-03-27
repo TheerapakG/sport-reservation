@@ -1,6 +1,6 @@
 import { PgDrizzle } from "@effect/sql-drizzle/Pg";
-import { and, eq, isNull, not, sql } from "drizzle-orm";
-import { Effect, Layer, Option } from "effect";
+import { and, eq, inArray, isNull, not, sql } from "drizzle-orm";
+import { Effect, HashMap, Layer } from "effect";
 import {
   clubClub,
   userUserGroup,
@@ -132,7 +132,7 @@ export const clubRepositoryImpl = /*@__PURE__*/ Layer.effect(
               ),
             );
         }).pipe(Effect.withSpan("clubRepositoryImpl.deleteClub")),
-      getClub: ({ clubId }) =>
+      getClubs: ({ clubIds }) =>
         Effect.gen(function* () {
           const result = yield* db
             .select({
@@ -146,17 +146,17 @@ export const clubRepositoryImpl = /*@__PURE__*/ Layer.effect(
             )
             .where(
               and(
-                eq(clubClub.groupId, clubId),
+                inArray(clubClub.groupId, clubIds),
                 isNull(clubClub.deletedAt),
                 isNull(userUserGroup.deletedAt),
               ),
             );
 
-          if (result.length === 0) {
-            return Option.none();
-          }
+          const clubHashmap = HashMap.fromIterable(
+            result.map((club) => [club.group.publicId, club]),
+          );
 
-          return Option.some(result[0]);
+          return clubIds.map((clubId) => HashMap.get(clubHashmap, clubId));
         }).pipe(Effect.withSpan("clubRepositoryImpl.getClub")),
       requestClubMembership: ({ clubId, userId }) =>
         Effect.gen(function* () {

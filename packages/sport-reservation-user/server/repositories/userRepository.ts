@@ -24,10 +24,10 @@ export class UserRepository
         Option.Option<typeof userUserProfile.$inferSelect>,
         SqlError.SqlError
       >;
-      findUserProfileById: (data: {
-        publicId: string;
+      findUserProfileByIds: (data: {
+        publicIds: string[];
       }) => Effect.Effect<
-        Option.Option<typeof userUserProfile.$inferSelect>,
+        Option.Option<typeof userUserProfile.$inferSelect>[],
         SqlError.SqlError
       >;
       deleteUserProfile: (data: {

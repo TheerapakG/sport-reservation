@@ -12,8 +12,12 @@ export default defineTiaraConfig({
       baseUrl: config("string"),
       secret: redacted("string"),
     },
-    event: {
+    user: {
+      baseUrl: config("string"),
       secret: redacted("string"),
+    },
+    club: {
+      baseUrl: config("string"),
     },
   },
 });

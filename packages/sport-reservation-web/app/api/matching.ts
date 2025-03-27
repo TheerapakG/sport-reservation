@@ -28,7 +28,7 @@ export const matchingKeys = () => {
         all: () => allCursor,
         current: () => [...allCursor, "current"] as const,
         id: ({ id }: { id: string }) => {
-          const allCursorId = [...allCursor, id] as const;
+          const allCursorId = [...allCursor, "id", id] as const;
           return {
             all: () => allCursorId,
             matches: () => [...allCursorId, "matches"] as const,

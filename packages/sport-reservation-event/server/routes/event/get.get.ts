@@ -1,6 +1,11 @@
 import { EventParamsContext, effectEventHandler } from "$/effectEventHandler";
 import { type } from "arktype";
-import { Effect } from "effect";
+import { Effect, Match } from "effect";
+import { ClubClient } from "sport-reservation-club/client";
+import { clubType } from "sport-reservation-club/models";
+import { UploadClient } from "sport-reservation-upload/client";
+import { UserClient } from "sport-reservation-user/client";
+import { userProfile } from "sport-reservation-user/models";
 import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
 import { EventRepository } from "~/repositories/eventRepository";
 
@@ -10,8 +15,9 @@ export const handlerConfig = defineEventHandlerConfig({
     type({
       eventId: "string",
       eventCreatorType: "string",
-      creatorId: "string",
+      creator: [[userProfile, "|", clubType], "|", "undefined"],
       "name?": "string",
+      "image?": "string",
       "description?": "string",
       "location?": ["number", "number"],
       "locationDescription?": "string",
@@ -44,9 +50,30 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
         eventId,
       });
 
+    const uploadClient = yield* UploadClient;
+    const { url: image } = event.image
+      ? yield* uploadClient.getDownloadPresignedUrl({
+          query: { key: event.image },
+        })
+      : { url: undefined };
+
+    const clubClient = yield* ClubClient;
+    const userClient = yield* UserClient;
+
+    const creator = yield* Match.value(event.eventCreatorType).pipe(
+      Match.when("club", () =>
+        clubClient.getClub({ query: { clubId: event.creatorId } }),
+      ),
+      Match.when("user", () =>
+        userClient.getUserProfile({ query: { id: event.creatorId } }),
+      ),
+      Match.exhaustive,
+    );
+
     return {
       eventId: group.publicId,
       ...(group.name && { name: group.name }),
+      ...(image && { image }),
       ...(event.description && { description: event.description }),
       ...(event.location && { location: event.location }),
       ...(event.locationDescription && {
@@ -57,7 +84,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
       autoAccept: event.autoAccept,
       sizeLimit: event.sizeLimit,
       eventCreatorType: event.eventCreatorType,
-      creatorId: event.creatorId,
+      creator,
       participants,
     };
   }),

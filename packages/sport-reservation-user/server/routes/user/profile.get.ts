@@ -5,6 +5,7 @@ import {
 } from "$/effectEventHandler";
 import { type } from "arktype";
 import { Effect, Option, pipe } from "effect";
+import { getHeader, parseCookies } from "h3";
 import { getSubjectTypeFromToken } from "sport-reservation-oauth-common/subjects";
 import { UploadClient } from "sport-reservation-upload/client";
 import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
@@ -16,7 +17,6 @@ import { LocationRepository } from "~/repositories/locationRepository";
 import { ObjectiveRepository } from "~/repositories/objectiveRepository";
 import { SportRepository } from "~/repositories/sportRepository";
 import { UserRepository } from "~/repositories/userRepository";
-import { getHeader } from "h3";
 
 export const handlerConfig = defineEventHandlerConfig({
   name: "getUserProfile",
@@ -67,9 +67,9 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     );
 
     const userRepository = yield* UserRepository;
-    const profile = yield* yield* userRepository.findUserProfileById({
-      publicId: id,
-    });
+    const profile = yield* (yield* userRepository.findUserProfileByIds({
+      publicIds: [id],
+    }))[0];
 
     const uploadClient = yield* UploadClient;
     const { url: avatar } = profile.avatar

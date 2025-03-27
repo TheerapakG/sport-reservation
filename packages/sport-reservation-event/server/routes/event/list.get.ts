@@ -1,6 +1,7 @@
 import { EventParamsContext, effectEventHandler } from "$/effectEventHandler";
 import { type } from "arktype";
 import { Effect } from "effect";
+import { UploadClient } from "sport-reservation-upload/client";
 import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
 import { EventRepository } from "~/repositories/eventRepository";
 
@@ -13,6 +14,7 @@ export const handlerConfig = defineEventHandlerConfig({
         eventCreatorType: "string",
         creatorId: "string",
         "name?": "string",
+        "image?": "string",
         "description?": "string",
         "location?": ["number", "number"],
         "locationDescription?": "string",
@@ -50,21 +52,36 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
       offset,
     });
 
-    return events.map(({ event, group, participants }) => ({
-      eventId: group.publicId,
-      ...(group.name && { name: group.name }),
-      ...(event.description && { description: event.description }),
-      ...(event.location && { location: event.location }),
-      ...(event.locationDescription && {
-        locationDescription: event.locationDescription,
-      }),
-      startAt: event.startAt.toISOString(),
-      endAt: event.endAt.toISOString(),
-      autoAccept: event.autoAccept,
-      sizeLimit: event.sizeLimit,
-      eventCreatorType: event.eventCreatorType,
-      creatorId: event.creatorId,
-      participants,
-    }));
+    const uploadClient = yield* UploadClient;
+
+    return yield* Effect.all(
+      events.map(({ event, group, participants }) =>
+        Effect.gen(function* () {
+          const { url: image } = event.image
+            ? yield* uploadClient.getDownloadPresignedUrl({
+                query: { key: event.image },
+              })
+            : { url: undefined };
+
+          return {
+            eventId: group.publicId,
+            ...(group.name && { name: group.name }),
+            ...(image && { image }),
+            ...(event.description && { description: event.description }),
+            ...(event.location && { location: event.location }),
+            ...(event.locationDescription && {
+              locationDescription: event.locationDescription,
+            }),
+            startAt: event.startAt.toISOString(),
+            endAt: event.endAt.toISOString(),
+            autoAccept: event.autoAccept,
+            sizeLimit: event.sizeLimit,
+            eventCreatorType: event.eventCreatorType,
+            creatorId: event.creatorId,
+            participants,
+          };
+        }),
+      ),
+    );
   }),
 );

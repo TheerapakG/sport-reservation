@@ -13,6 +13,7 @@ export default defineTiaraConfig({
       secret: redacted("string"),
     },
     user: {
+      baseUrl: config("string"),
       secret: redacted("string"),
     },
   },

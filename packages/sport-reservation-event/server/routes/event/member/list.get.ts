@@ -1,6 +1,8 @@
 import { EventParamsContext, effectEventHandler } from "$/effectEventHandler";
 import { type } from "arktype";
-import { Effect } from "effect";
+import { Array, Effect } from "effect";
+import { UserClient } from "sport-reservation-user/client";
+import { userProfile } from "sport-reservation-user/models";
 import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
 import { EventRepository } from "~/repositories/eventRepository";
 
@@ -10,7 +12,7 @@ export const handlerConfig = defineEventHandlerConfig({
     type({
       members: [
         {
-          userId: "string",
+          user: [userProfile, "|", "undefined"],
           size: "number",
           status: "'member'",
         },
@@ -48,8 +50,21 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
         status: "member" as const,
       }));
 
+    const userClient = yield* UserClient;
+    const userProfiles = yield* userClient.getUserProfiles({
+      query: {
+        ids: activeMembers.map((member) => member.userId),
+      },
+    });
+
     return {
-      members: activeMembers,
+      members: Array.zip(activeMembers, userProfiles).map(
+        ([member, profile]) => ({
+          user: profile,
+          size: member.size,
+          status: member.status,
+        }),
+      ),
     };
   }),
 );

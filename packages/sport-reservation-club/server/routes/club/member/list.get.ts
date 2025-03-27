@@ -1,6 +1,8 @@
 import { EventParamsContext, effectEventHandler } from "$/effectEventHandler";
 import { type } from "arktype";
-import { Effect } from "effect";
+import { Array, Effect } from "effect";
+import { UserClient } from "sport-reservation-user/client";
+import { userProfile } from "sport-reservation-user/models";
 import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
 import { ClubRepository } from "~/repositories/clubRepository";
 
@@ -10,9 +12,8 @@ export const handlerConfig = defineEventHandlerConfig({
     type({
       members: [
         {
-          groupId: "string",
-          userId: "string",
-          status: "'pending' | 'member'",
+          user: [userProfile, "|", "undefined"],
+          status: "'member'",
         },
         "[]",
       ],
@@ -39,8 +40,27 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
       clubId,
     });
 
+    const activeMembers = members
+      .filter((member) => member.status === "member")
+      .map((member) => ({
+        userId: member.userId,
+        status: "member" as const,
+      }));
+
+    const userClient = yield* UserClient;
+    const userProfiles = yield* userClient.getUserProfiles({
+      query: {
+        ids: activeMembers.map((member) => member.userId),
+      },
+    });
+
     return {
-      members,
+      members: Array.zip(activeMembers, userProfiles).map(
+        ([member, profile]) => ({
+          user: profile,
+          status: member.status,
+        }),
+      ),
     };
   }),
 );

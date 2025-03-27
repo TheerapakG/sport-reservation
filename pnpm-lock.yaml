@@ -439,6 +439,9 @@ importers:
       sport-reservation-upload:
         specifier: workspace:*
         version: link:../sport-reservation-upload
+      sport-reservation-user:
+        specifier: workspace:*
+        version: link:../sport-reservation-user
       tiara-stack:
         specifier: workspace:*
         version: link:../tiara-stack
@@ -606,6 +609,9 @@ importers:
       ofetch:
         specifier: 'catalog:'
         version: 1.4.1
+      sport-reservation-club:
+        specifier: workspace:*
+        version: link:../sport-reservation-club
       sport-reservation-db:
         specifier: workspace:*
         version: link:../sport-reservation-db
@@ -615,6 +621,9 @@ importers:
       sport-reservation-upload:
         specifier: workspace:*
         version: link:../sport-reservation-upload
+      sport-reservation-user:
+        specifier: workspace:*
+        version: link:../sport-reservation-user
       tiara-stack:
         specifier: workspace:*
         version: link:../tiara-stack
@@ -739,6 +748,9 @@ importers:
       sport-reservation-upload:
         specifier: workspace:*
         version: link:../sport-reservation-upload
+      sport-reservation-user:
+        specifier: workspace:*
+        version: link:../sport-reservation-user
       tiara-stack:
         specifier: workspace:*
         version: link:../tiara-stack
@@ -1573,6 +1585,15 @@ importers:
       sonner:
         specifier: ^1.7.2
         version: 1.7.2(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      sport-reservation-club:
+        specifier: workspace:*
+        version: link:../sport-reservation-club
+      sport-reservation-event:
+        specifier: workspace:*
+        version: link:../sport-reservation-event
+      sport-reservation-friend:
+        specifier: workspace:*
+        version: link:../sport-reservation-friend
       sport-reservation-matching:
         specifier: workspace:*
         version: link:../sport-reservation-matching

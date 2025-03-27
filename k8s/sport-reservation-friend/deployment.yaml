@@ -56,6 +56,11 @@ spec:
                 secretKeyRef:
                   name: sport-reservation-friend-secret
                   key: userSecret
+            - name: USER_BASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sport-reservation-friend-secret
+                  key: userBaseUrl
 ---
 apiVersion: v1
 kind: Service

@@ -14,8 +14,6 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { type } from "arktype";
 import dayjs from "dayjs";
-import { Effect } from "effect";
-import { effectTypeCheck } from "tiara-stack/utils/effectType";
 
 function RouteComponent() {
   const { date } = Route.useLoaderData();
@@ -104,8 +102,7 @@ const validateSearch = type({ "date?": "string.date.parse" });
 export const Route = createFileRoute("/_layout/events/")({
   validateSearch,
   loaderDeps: ({ search }) => search,
-  loader: async ({ context: { queryClient }, deps }) => {
-    const { date } = Effect.runSync(effectTypeCheck(deps));
+  loader: async ({ context: { queryClient }, deps: { date } }) => {
     const defaultedDate = date ?? new Date();
 
     queryClient.prefetchInfiniteQuery(

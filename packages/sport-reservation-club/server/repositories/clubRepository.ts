@@ -32,11 +32,11 @@ export class ClubRepository
       deleteClub: (data: {
         clubId: string;
       }) => Effect.Effect<void, SqlError.SqlError>;
-      getClub: (data: { clubId: string }) => Effect.Effect<
+      getClubs: (data: { clubIds: string[] }) => Effect.Effect<
         Option.Option<{
           club: typeof clubClub.$inferSelect;
           group: typeof userUserGroup.$inferSelect;
-        }>,
+        }>[],
         SqlError.SqlError
       >;
       requestClubMembership: (data: {

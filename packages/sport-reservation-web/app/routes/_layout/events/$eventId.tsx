@@ -1,65 +1,21 @@
-// src/routes/events/$eventId.tsx
-import { createFileRoute, Link, useParams } from "@tanstack/react-router";
-
-const mockEvents = [
-  {
-    id: "event-20-1",
-    title: "Hey! Badminton",
-    host: "Marcus Rashford",
-    dateTime: "Fri, 14 Mar (3:00 - 5:00 PM)",
-    location: "81 Badminton Court, Bang Khae District, Bangkok, Thailand",
-    description:
-      "Looking for a fun and energetic badminton session? Join players of all skill levels for an exciting match!",
-    participants: [
-      { name: "Marcus", avatar: "https://via.placeholder.com/40" },
-      { name: "Harry", avatar: "https://via.placeholder.com/40" },
-      { name: "Mohamed", avatar: "https://via.placeholder.com/40" },
-      { name: "Klopp", avatar: "https://via.placeholder.com/40" },
-    ],
-    totalSlots: 8,
-    image: "https://via.placeholder.com/600x300",
-  },
-  {
-    id: "friendly-football",
-    title: "Friendly Football",
-    host: "Harry Kane",
-    dateTime: "Sat, 15 Mar (2:00 - 4:00 PM)",
-    location: "Local Stadium",
-    description:
-      "A casual football match with friends. All skill levels are welcome to join in the fun!",
-    participants: [
-      { name: "Harry", avatar: "https://via.placeholder.com/40" },
-      { name: "Tom", avatar: "https://via.placeholder.com/40" },
-    ],
-    totalSlots: 10,
-    image: "https://via.placeholder.com/600x300",
-  },
-];
-
-export const Route = createFileRoute("/_layout/events/$eventId")({
-  component: EventDetailPage,
-});
+import {
+  getEventMemberListQueryOptions,
+  getEventQueryOptions,
+} from "@/api/event";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { createFileRoute, Link } from "@tanstack/react-router";
 
 function EventDetailPage() {
-  // Extract eventId from the URL
-  const { eventId } = useParams({ from: "/_layout/events/$eventId" });
-  const event = mockEvents.find((e) => e.id === eventId);
+  const { eventId } = Route.useLoaderData();
 
-  if (!event) {
+  const eventQuery = useSuspenseQuery(getEventQueryOptions({ id: eventId }));
+  const memberListQuery = useSuspenseQuery(
+    getEventMemberListQueryOptions({ id: eventId }),
+  );
+
+  if (!eventQuery.data.success) {
     return <div className="p-4">Event not found!</div>;
   }
-
-  const {
-    title,
-    host,
-    dateTime,
-    location,
-    description,
-    participants,
-    totalSlots,
-    image,
-  } = event;
-  const numParticipants = participants.length;
 
   function handleJoin() {
     alert("Join flow triggered!");
@@ -72,45 +28,56 @@ function EventDetailPage() {
       </Link>
 
       <div className="mb-4 rounded bg-white p-4 shadow">
-        <h1 className="mb-1 text-2xl font-bold">{title}</h1>
-        <p className="mb-3 text-sm text-gray-500">Hosted by {host}</p>
+        <h1 className="mb-1 text-2xl font-bold">
+          {eventQuery.data.event.name}
+        </h1>
+        <p className="mb-3 text-sm text-gray-500">
+          Hosted by {eventQuery.data.event.creator?.name}
+        </p>
         <img
-          src={image}
-          alt={title}
+          src={eventQuery.data.event.image}
+          alt={eventQuery.data.event.name}
           className="mb-4 h-60 w-full rounded object-cover"
         />
         <div className="flex flex-col justify-between md:flex-row md:items-center">
           <div className="space-y-1">
             <h2 className="text-lg font-semibold">When</h2>
-            <p className="text-sm text-gray-600">{dateTime}</p>
+            <p className="text-sm text-gray-600">
+              {eventQuery.data.event.startAt}
+            </p>
           </div>
           <div className="mt-4 space-y-1 md:mt-0">
             <h2 className="text-lg font-semibold">Where</h2>
-            <p className="text-sm text-gray-600">{location}</p>
+            <p className="text-sm text-gray-600">
+              {eventQuery.data.event.locationDescription}
+            </p>
           </div>
         </div>
       </div>
 
       <div className="mb-4 rounded bg-white p-4 shadow">
         <h2 className="mb-2 text-lg font-bold">About</h2>
-        <p className="mb-4 text-sm text-gray-700">{description}</p>
+        <p className="mb-4 text-sm text-gray-700">
+          {eventQuery.data.event.description}
+        </p>
         <h2 className="mb-2 text-lg font-bold">
-          Participants ({numParticipants}/{totalSlots})
+          Participants ({eventQuery.data.event.participants}/
+          {eventQuery.data.event.sizeLimit})
         </h2>
         <div className="flex items-center space-x-2">
-          {participants.slice(0, 4).map((p, index) => (
+          {memberListQuery.data.members?.slice(0, 4).map((member, index) => (
             <div key={index} className="flex flex-col items-center">
               <img
-                src={p.avatar || "https://via.placeholder.com/40"}
-                alt={p.name}
+                src={member.user?.avatar || "https://via.placeholder.com/40"}
+                alt={member.user?.name || "User"}
                 className="h-10 w-10 rounded-full object-cover"
               />
-              <span className="mt-1 text-xs">{p.name}</span>
+              <span className="mt-1 text-xs">{member.user?.name}</span>
             </div>
           ))}
-          {numParticipants > 4 && (
+          {eventQuery.data.event.participants > 4 && (
             <p className="text-sm text-gray-600">
-              + {numParticipants - 4} more
+              + {eventQuery.data.event.participants - 4} more
             </p>
           )}
         </div>
@@ -118,7 +85,8 @@ function EventDetailPage() {
 
       <div className="flex items-center justify-between rounded bg-white p-4 shadow">
         <p className="text-sm text-gray-600">
-          {numParticipants}/{totalSlots} joined
+          {eventQuery.data.event.participants}/{eventQuery.data.event.sizeLimit}{" "}
+          joined
         </p>
         <button
           onClick={handleJoin}
@@ -130,3 +98,13 @@ function EventDetailPage() {
     </div>
   );
 }
+
+export const Route = createFileRoute("/_layout/events/$eventId")({
+  component: EventDetailPage,
+  loader: async ({ context: { queryClient }, params: { eventId } }) => {
+    queryClient.prefetchQuery(getEventQueryOptions({ id: eventId }));
+    queryClient.prefetchQuery(getEventMemberListQueryOptions({ id: eventId }));
+
+    return { eventId };
+  },
+});

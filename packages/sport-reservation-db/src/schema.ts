@@ -348,6 +348,7 @@ export const clubClub = pgTable(
   {
     id: serial("id").primaryKey(),
     groupId: uuid("group_id").notNull(),
+    image: varchar("image", {}),
     description: varchar("description", {}),
     location: geometry("location", { type: "point", srid: 4326 }),
     locationDescription: varchar("location_description", {}),
@@ -373,6 +374,7 @@ export const eventEvent = pgTable(
   {
     id: serial("id").primaryKey(),
     groupId: uuid("group_id").notNull(),
+    image: varchar("image", {}),
     eventCreatorType: eventEventCreatorType("event_creator_type").notNull(),
     creatorId: uuid("creator_id").notNull(),
     description: varchar("description", {}),

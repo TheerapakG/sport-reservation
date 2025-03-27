@@ -1,5 +1,5 @@
 import { provideEffectContext } from "@/utils/effectContext";
-import { infiniteQueryOptions } from "@tanstack/react-query";
+import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import { createServerFn } from "@tanstack/react-start";
 import { serialize } from "cookie-es";
 import { Effect } from "effect";
@@ -15,6 +15,14 @@ export const eventKeys = {
     const allEvent = [...eventKeys.all(), "event"] as const;
     return {
       all: () => allEvent,
+      id: ({ id }: { id: string }) => {
+        const allEventId = [...allEvent, "id", id] as const;
+        return {
+          all: () => allEventId,
+          detail: () => [...allEventId, "detail"] as const,
+          memberList: () => [...allEventId, "memberList"] as const,
+        };
+      },
       list: () => {
         const allEventList = [...allEvent, "list"] as const;
         return {
@@ -26,6 +34,72 @@ export const eventKeys = {
     };
   },
 };
+
+export const getEventServerFn = createServerFn({
+  method: "GET",
+})
+  .validator((data: unknown) =>
+    Effect.runSync(effectType(getEventClientQueryType("getEvent"), data)),
+  )
+  .handler(async ({ data }) => {
+    const { access_token: accessToken } = parseCookies();
+
+    if (!accessToken) {
+      return { success: false } as const;
+    }
+
+    const event = await Effect.runPromise(
+      Effect.gen(function* () {
+        const eventClient = yield* EventClient;
+        return yield* eventClient.getEvent({
+          headers: { Cookie: serialize("access_token", accessToken) },
+          query: { eventId: data.eventId },
+        });
+      }).pipe(provideEffectContext),
+    );
+
+    return { success: true, event } as const;
+  });
+
+export const getEventQueryOptions = ({ id }: { id: string }) =>
+  queryOptions({
+    queryKey: eventKeys.event().id({ id }).detail(),
+    queryFn: () => getEventServerFn({ data: { eventId: id } }),
+  });
+
+export const getEventMemberListServerFn = createServerFn({
+  method: "GET",
+})
+  .validator((data: unknown) =>
+    Effect.runSync(
+      effectType(getEventClientQueryType("getEventMemberList"), data),
+    ),
+  )
+  .handler(async ({ data }) => {
+    const { access_token: accessToken } = parseCookies();
+
+    if (!accessToken) {
+      return { success: false } as const;
+    }
+
+    const { members } = await Effect.runPromise(
+      Effect.gen(function* () {
+        const eventClient = yield* EventClient;
+        return yield* eventClient.getEventMemberList({
+          headers: { Cookie: serialize("access_token", accessToken) },
+          query: { eventId: data.eventId },
+        });
+      }).pipe(provideEffectContext),
+    );
+
+    return { success: true, members } as const;
+  });
+
+export const getEventMemberListQueryOptions = ({ id }: { id: string }) =>
+  queryOptions({
+    queryKey: eventKeys.event().id({ id }).memberList(),
+    queryFn: () => getEventMemberListServerFn({ data: { eventId: id } }),
+  });
 
 export const getEventListServerFn = createServerFn({
   method: "GET",

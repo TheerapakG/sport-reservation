@@ -3,6 +3,7 @@ import { type } from "arktype";
 import { Effect } from "effect";
 import { parseCookies } from "h3";
 import { getSubjectTypeFromToken } from "sport-reservation-oauth-common/subjects";
+import { UploadClient } from "sport-reservation-upload/client";
 import { defineEventHandlerConfig, response } from "tiara-stack/config";
 import { OAuthError } from "tiara-stack/models/errors";
 import { OAuthClient } from "~/layers";
@@ -18,6 +19,7 @@ export const handlerConfig = defineEventHandlerConfig({
           eventCreatorType: "string",
           creatorId: "string",
           "name?": "string",
+          "image?": "string",
           "description?": "string",
           "location?": ["number", "number"],
           "locationDescription?": "string",
@@ -58,26 +60,37 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
 
     const events = yield* eventRepository.getUserCreatedEvents({ userId });
 
-    const formattedEvents = events.map(({ event, group, participants }) => {
-      return {
-        eventId: group.publicId,
-        ...(group.name && { name: group.name }),
-        ...(event.description && {
-          description: event.description,
+    const uploadClient = yield* UploadClient;
+
+    const formattedEvents = yield* Effect.all(
+      events.map(({ event, group, participants }) =>
+        Effect.gen(function* () {
+          const { url: image } = event.image
+            ? yield* uploadClient.getDownloadPresignedUrl({
+                query: { key: event.image },
+              })
+            : { url: undefined };
+
+          return {
+            eventId: group.publicId,
+            ...(group.name && { name: group.name }),
+            ...(image && { image }),
+            ...(event.description && { description: event.description }),
+            ...(event.location && { location: event.location }),
+            ...(event.locationDescription && {
+              locationDescription: event.locationDescription,
+            }),
+            startAt: event.startAt.toISOString(),
+            endAt: event.endAt.toISOString(),
+            autoAccept: event.autoAccept,
+            sizeLimit: event.sizeLimit,
+            eventCreatorType: event.eventCreatorType,
+            creatorId: event.creatorId,
+            participants,
+          };
         }),
-        ...(event.location && { location: event.location }),
-        ...(event.locationDescription && {
-          locationDescription: event.locationDescription,
-        }),
-        startAt: event.startAt.toISOString(),
-        endAt: event.endAt.toISOString(),
-        autoAccept: event.autoAccept,
-        sizeLimit: event.sizeLimit,
-        eventCreatorType: event.eventCreatorType,
-        creatorId: event.creatorId,
-        participants,
-      };
-    });
+      ),
+    );
 
     return { events: formattedEvents };
   }),

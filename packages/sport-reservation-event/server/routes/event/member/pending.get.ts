@@ -4,9 +4,11 @@ import {
   effectEventHandler,
 } from "$/effectEventHandler";
 import { type } from "arktype";
-import { Effect, Equivalence, Option } from "effect";
+import { Array, Effect, Equivalence, Option } from "effect";
 import { parseCookies } from "h3";
 import { getSubjectTypeFromToken } from "sport-reservation-oauth-common/subjects";
+import { UserClient } from "sport-reservation-user/client";
+import { userProfile } from "sport-reservation-user/models";
 import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
 import { OAuthError } from "tiara-stack/models/errors";
 import { OAuthClient } from "~/layers";
@@ -18,7 +20,7 @@ export const handlerConfig = defineEventHandlerConfig({
     type({
       members: [
         {
-          userId: "string",
+          user: [userProfile, "|", "undefined"],
           size: "number",
           status: "'pending'",
         },
@@ -83,8 +85,21 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
         status: "pending" as const,
       }));
 
+    const userClient = yield* UserClient;
+    const userProfiles = yield* userClient.getUserProfiles({
+      query: {
+        ids: pendingMembers.map((member) => member.userId),
+      },
+    });
+
     return {
-      members: pendingMembers,
+      members: Array.zip(pendingMembers, userProfiles).map(
+        ([member, profile]) => ({
+          user: profile,
+          size: member.size,
+          status: member.status,
+        }),
+      ),
     };
   }),
 );

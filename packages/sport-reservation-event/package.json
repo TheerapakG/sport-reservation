@@ -46,6 +46,8 @@
     "sport-reservation-oauth-common": "workspace:*",
     "sport-reservation-db": "workspace:*",
     "sport-reservation-upload": "workspace:*",
+    "sport-reservation-user": "workspace:*",
+    "sport-reservation-club": "workspace:*",
     "ufo": "catalog:"
   },
   "devDependencies": {
