@@ -223,7 +223,7 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
                   .as("participants"),
               })
               .from(eventEventMember)
-              .leftJoin(
+              .innerJoin(
                 userUserGroupMember,
                 and(
                   eq(eventEventMember.eventId, userUserGroupMember.groupId),
@@ -240,12 +240,31 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
               .groupBy(eventEventMember.eventId),
           );
 
+          const ensureEventParticipants = db
+            .$with("ensure_event_participants")
+            .as(
+              db
+                .with(eventParticipants)
+                .select({
+                  eventId: eventEvent.groupId,
+                  participants: sum(eventParticipants.participants)
+                    .mapWith(Number)
+                    .as("participants"),
+                })
+                .from(eventEvent)
+                .leftJoin(
+                  eventParticipants,
+                  eq(eventEvent.groupId, eventParticipants.eventId),
+                )
+                .groupBy(eventEvent.groupId),
+            );
+
           const result = yield* db
-            .with(eventParticipants)
+            .with(ensureEventParticipants)
             .select({
               event: eventEvent,
               group: userUserGroup,
-              participants: eventParticipants.participants,
+              participants: ensureEventParticipants.participants,
             })
             .from(eventEvent)
             .innerJoin(
@@ -253,8 +272,8 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
               eq(eventEvent.groupId, userUserGroup.publicId),
             )
             .innerJoin(
-              eventParticipants,
-              eq(eventEvent.groupId, eventParticipants.eventId),
+              ensureEventParticipants,
+              eq(eventEvent.groupId, ensureEventParticipants.eventId),
             )
             .where(
               and(
@@ -567,7 +586,7 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
                   .as("participants"),
               })
               .from(eventEventMember)
-              .leftJoin(
+              .innerJoin(
                 userUserGroupMember,
                 and(
                   eq(eventEventMember.eventId, userUserGroupMember.groupId),
@@ -584,12 +603,31 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
               .groupBy(eventEventMember.eventId),
           );
 
+          const ensureEventParticipants = db
+            .$with("ensure_event_participants")
+            .as(
+              db
+                .with(eventParticipants)
+                .select({
+                  eventId: eventEvent.groupId,
+                  participants: sum(eventParticipants.participants)
+                    .mapWith(Number)
+                    .as("participants"),
+                })
+                .from(eventEvent)
+                .leftJoin(
+                  eventParticipants,
+                  eq(eventEvent.groupId, eventParticipants.eventId),
+                )
+                .groupBy(eventEvent.groupId),
+            );
+
           return yield* db
-            .with(eventParticipants)
+            .with(ensureEventParticipants)
             .select({
               event: eventEvent,
               group: userUserGroup,
-              participants: eventParticipants.participants,
+              participants: ensureEventParticipants.participants,
             })
             .from(eventEvent)
             .innerJoin(
@@ -601,8 +639,8 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
               eq(eventEvent.groupId, eventEventMember.eventId),
             )
             .innerJoin(
-              eventParticipants,
-              eq(eventEvent.groupId, eventParticipants.eventId),
+              ensureEventParticipants,
+              eq(eventEvent.groupId, ensureEventParticipants.eventId),
             )
             .where(
               and(
@@ -626,7 +664,7 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
                   .as("participants"),
               })
               .from(eventEventMember)
-              .leftJoin(
+              .innerJoin(
                 userUserGroupMember,
                 and(
                   eq(eventEventMember.eventId, userUserGroupMember.groupId),
@@ -642,6 +680,25 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
               )
               .groupBy(eventEventMember.eventId),
           );
+
+          const ensureEventParticipants = db
+            .$with("ensure_event_participants")
+            .as(
+              db
+                .with(eventParticipants)
+                .select({
+                  eventId: eventEvent.groupId,
+                  participants: sum(eventParticipants.participants)
+                    .mapWith(Number)
+                    .as("participants"),
+                })
+                .from(eventEvent)
+                .leftJoin(
+                  eventParticipants,
+                  eq(eventEvent.groupId, eventParticipants.eventId),
+                )
+                .groupBy(eventEvent.groupId),
+            );
 
           const userGroupMember = db.$with("user_event_group").as(
             db
@@ -659,11 +716,11 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
           );
 
           return yield* db
-            .with(eventParticipants, userGroupMember)
+            .with(ensureEventParticipants, userGroupMember)
             .select({
               event: eventEvent,
               group: userUserGroup,
-              participants: eventParticipants.participants,
+              participants: ensureEventParticipants.participants,
             })
             .from(userGroupMember)
             .innerJoin(
@@ -675,8 +732,8 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
               eq(userGroupMember.groupId, eventEvent.groupId),
             )
             .innerJoin(
-              eventParticipants,
-              eq(eventEvent.groupId, eventParticipants.eventId),
+              ensureEventParticipants,
+              eq(eventEvent.groupId, ensureEventParticipants.eventId),
             )
             .where(
               and(
@@ -696,7 +753,7 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
                   .as("participants"),
               })
               .from(eventEventMember)
-              .leftJoin(
+              .innerJoin(
                 userUserGroupMember,
                 and(
                   eq(eventEventMember.eventId, userUserGroupMember.groupId),
@@ -712,6 +769,25 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
               )
               .groupBy(eventEventMember.eventId),
           );
+
+          const ensureEventParticipants = db
+            .$with("ensure_event_participants")
+            .as(
+              db
+                .with(eventParticipants)
+                .select({
+                  eventId: eventEvent.groupId,
+                  participants: sum(eventParticipants.participants)
+                    .mapWith(Number)
+                    .as("participants"),
+                })
+                .from(eventEvent)
+                .leftJoin(
+                  eventParticipants,
+                  eq(eventEvent.groupId, eventParticipants.eventId),
+                )
+                .groupBy(eventEvent.groupId),
+            );
 
           const userGroupMember = db.$with("user_event_group").as(
             db
@@ -729,11 +805,11 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
           );
 
           return yield* db
-            .with(eventParticipants, userGroupMember)
+            .with(ensureEventParticipants, userGroupMember)
             .select({
               event: eventEvent,
               group: userUserGroup,
-              participants: eventParticipants.participants,
+              participants: ensureEventParticipants.participants,
             })
             .from(userGroupMember)
             .innerJoin(
@@ -745,8 +821,8 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
               eq(userGroupMember.groupId, eventEvent.groupId),
             )
             .innerJoin(
-              eventParticipants,
-              eq(eventEvent.groupId, eventParticipants.eventId),
+              ensureEventParticipants,
+              eq(eventEvent.groupId, ensureEventParticipants.eventId),
             )
             .where(
               and(
@@ -766,7 +842,7 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
                   .as("participants"),
               })
               .from(eventEventMember)
-              .leftJoin(
+              .innerJoin(
                 userUserGroupMember,
                 and(
                   eq(eventEventMember.eventId, userUserGroupMember.groupId),
@@ -783,12 +859,31 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
               .groupBy(eventEventMember.eventId),
           );
 
+          const ensureEventParticipants = db
+            .$with("ensure_event_participants")
+            .as(
+              db
+                .with(eventParticipants)
+                .select({
+                  eventId: eventEvent.groupId,
+                  participants: sum(eventParticipants.participants)
+                    .mapWith(Number)
+                    .as("participants"),
+                })
+                .from(eventEvent)
+                .leftJoin(
+                  eventParticipants,
+                  eq(eventEvent.groupId, eventParticipants.eventId),
+                )
+                .groupBy(eventEvent.groupId),
+            );
+
           return yield* db
-            .with(eventParticipants)
+            .with(ensureEventParticipants)
             .select({
               event: eventEvent,
               group: userUserGroup,
-              participants: eventParticipants.participants,
+              participants: ensureEventParticipants.participants,
             })
             .from(eventEvent)
             .innerJoin(
@@ -796,8 +891,8 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
               eq(eventEvent.groupId, userUserGroup.publicId),
             )
             .innerJoin(
-              eventParticipants,
-              eq(eventEvent.groupId, eventParticipants.eventId),
+              ensureEventParticipants,
+              eq(eventEvent.groupId, ensureEventParticipants.eventId),
             )
             .where(
               and(
@@ -852,7 +947,7 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
                   .as("participants"),
               })
               .from(eventEventMember)
-              .leftJoin(
+              .innerJoin(
                 userUserGroupMember,
                 and(
                   eq(eventEventMember.eventId, userUserGroupMember.groupId),
@@ -869,12 +964,31 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
               .groupBy(eventEventMember.eventId),
           );
 
+          const ensureEventParticipants = db
+            .$with("ensure_event_participants")
+            .as(
+              db
+                .with(eventParticipants)
+                .select({
+                  eventId: eventEvent.groupId,
+                  participants: sum(eventParticipants.participants)
+                    .mapWith(Number)
+                    .as("participants"),
+                })
+                .from(eventEvent)
+                .leftJoin(
+                  eventParticipants,
+                  eq(eventEvent.groupId, eventParticipants.eventId),
+                )
+                .groupBy(eventEvent.groupId),
+            );
+
           return yield* db
-            .with(eventParticipants)
+            .with(ensureEventParticipants)
             .select({
               event: eventEvent,
               group: userUserGroup,
-              participants: eventParticipants.participants,
+              participants: ensureEventParticipants.participants,
             })
             .from(eventEvent)
             .innerJoin(
@@ -882,8 +996,8 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
               eq(eventEvent.groupId, userUserGroup.publicId),
             )
             .innerJoin(
-              eventParticipants,
-              eq(eventEvent.groupId, eventParticipants.eventId),
+              ensureEventParticipants,
+              eq(eventEvent.groupId, ensureEventParticipants.eventId),
             )
             .where(
               and(
