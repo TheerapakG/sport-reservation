@@ -7,24 +7,14 @@ import { UploadClient } from "sport-reservation-upload/client";
 import { defineEventHandlerConfig, response } from "tiara-stack/config";
 import { OAuthError } from "tiara-stack/models/errors";
 import { OAuthClient } from "~/layers";
+import { clubType } from "~/models";
 import { ClubRepository } from "~/repositories/clubRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
   name: "getUserCreatedClubs",
   response: response(
     type({
-      clubs: [
-        {
-          id: "string",
-          creatorId: "string",
-          "name?": "string",
-          "image?": "string",
-          "description?": "string",
-          "location?": ["number", "number"],
-          "locationDescription?": "string",
-        },
-        "[]",
-      ],
+      clubs: [clubType, "[]"],
     }),
     { stream: false },
   ),
