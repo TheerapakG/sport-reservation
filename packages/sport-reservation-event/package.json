@@ -31,7 +31,6 @@
     "@effect/sql": "catalog:",
     "@effect/sql-drizzle": "catalog:",
     "@effect/sql-pg": "catalog:",
-    "@tanstack/react-virtual": "^3.13.5",
     "jsonwebtoken": "catalog:",
     "unstorage": "^1.12.0",
     "validator": "^13.12.0"
