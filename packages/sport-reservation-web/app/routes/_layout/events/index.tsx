@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { type } from "arktype";
 import dayjs from "dayjs";
@@ -22,7 +22,7 @@ function RouteComponent() {
 
   const selectedDateStr = dayjs(date).format("YYYY-MM-DD");
 
-  const events = useInfiniteQuery(
+  const events = useSuspenseInfiniteQuery(
     getEventListInfiniteQueryOptions({
       date,
       limit: 10,
