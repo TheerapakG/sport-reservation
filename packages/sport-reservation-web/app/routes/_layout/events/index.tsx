@@ -18,6 +18,7 @@ import { startOfToday } from "date-fns";
 import { formatWithOptions } from "date-fns/fp";
 import { enUS } from "date-fns/locale";
 import { Suspense, useEffect, useRef } from "react";
+
 const Sidebar = ({ className }: { className?: string }) => {
   const { date } = Route.useLoaderData();
   const defaultedDate = date ?? startOfToday();
@@ -207,4 +208,5 @@ export const Route = createFileRoute("/_layout/events/")({
     return { date };
   },
   component: RouteComponent,
+  ssr: false,
 });
