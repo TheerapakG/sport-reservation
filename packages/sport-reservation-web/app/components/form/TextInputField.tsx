@@ -30,7 +30,7 @@ export default function TextInputField({
         <Input
           type="text"
           className={cn(
-            "h-7 w-44 rounded-none border-0 px-2 py-1 shadow focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none aria-[invalid]:ring-1 aria-[invalid]:ring-red-500 aria-[invalid]:ring-offset-2",
+            "h-7 rounded-none border-0 px-2 py-1 shadow focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none aria-[invalid]:ring-1 aria-[invalid]:ring-red-500 aria-[invalid]:ring-offset-2",
             classNames?.input,
           )}
           {...(field.state.meta.errors.length > 0

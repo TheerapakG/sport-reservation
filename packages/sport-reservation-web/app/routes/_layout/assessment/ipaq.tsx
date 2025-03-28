@@ -110,7 +110,10 @@ export default function AssessmentComponent() {
                 activities?"
                 placeholder="e.g. 120"
                 trailingText="minutes"
-                classNames={{ label: "text-xs font-normal text-gray-500" }}
+                classNames={{
+                  label: "text-xs font-normal text-gray-500",
+                  input: "w-44",
+                }}
               />
             )}
           />
@@ -155,7 +158,10 @@ export default function AssessmentComponent() {
                 activities?"
                 placeholder="e.g. 120"
                 trailingText="minutes"
-                classNames={{ label: "text-xs font-normal text-gray-500" }}
+                classNames={{
+                  label: "text-xs font-normal text-gray-500",
+                  input: "w-44",
+                }}
               />
             )}
           />
@@ -186,7 +192,10 @@ export default function AssessmentComponent() {
                 label="On these days, how much time did you usually spend on walking?"
                 placeholder="e.g. 120"
                 trailingText="minutes"
-                classNames={{ label: "text-xs font-normal text-gray-500" }}
+                classNames={{
+                  label: "text-xs font-normal text-gray-500",
+                  input: "w-44",
+                }}
               />
             )}
           />

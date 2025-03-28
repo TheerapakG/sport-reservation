@@ -61,6 +61,9 @@ function RouteComponent() {
             label="1. What is your typical running distance?"
             placeholder="e.g. 10"
             trailingText="km"
+            classNames={{
+              input: "w-44",
+            }}
           />
         )}
       />
@@ -73,6 +76,9 @@ function RouteComponent() {
             label="2. What is your average pace?"
             placeholder="e.g. 5"
             trailingText="min/km"
+            classNames={{
+              input: "w-44",
+            }}
           />
         )}
       />
@@ -120,6 +126,9 @@ function RouteComponent() {
           <field.TextInputField
             label="5. What is your best performance marker? (e.g., '10K in 50:00')"
             placeholder="e.g. 10K in 50:00"
+            classNames={{
+              input: "w-44",
+            }}
           />
         )}
       />

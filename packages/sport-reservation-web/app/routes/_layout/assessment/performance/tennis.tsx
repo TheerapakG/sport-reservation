@@ -62,6 +62,9 @@ function RouteComponent() {
           <field.NumericInputField
             label="2. How many years have you been playing tennis?"
             trailingText="years"
+            classNames={{
+              input: "w-44",
+            }}
           />
         )}
       />
@@ -104,6 +107,9 @@ function RouteComponent() {
           <field.NumericInputField
             label="5. On average, how many hours per week do you play or practice tennis?"
             trailingText="hours"
+            classNames={{
+              input: "w-44",
+            }}
           />
         )}
       />

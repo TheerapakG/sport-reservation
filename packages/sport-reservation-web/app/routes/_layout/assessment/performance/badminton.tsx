@@ -64,6 +64,9 @@ function RouteComponent() {
             label="2. How many years have you been playing badminton?"
             placeholder="e.g. 5"
             trailingText="years"
+            classNames={{
+              input: "w-44",
+            }}
           />
         )}
       />
@@ -106,6 +109,9 @@ function RouteComponent() {
             label="5. On average, how many hours per week do you play or practice badminton?"
             placeholder="e.g. 5"
             trailingText="hours"
+            classNames={{
+              input: "w-44",
+            }}
           />
         )}
       />
