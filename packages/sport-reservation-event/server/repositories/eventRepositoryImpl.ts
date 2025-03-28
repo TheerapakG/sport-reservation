@@ -792,8 +792,11 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
             )
             .where(
               and(
-                lte(eventEvent.startAt, date),
-                gte(eventEvent.endAt, date),
+                lte(sql`date_trunc('day', ${eventEvent.startAt})`, date),
+                gte(
+                  sql`date_trunc('day', ${eventEvent.endAt}) + interval '1 day' - interval '1 second'`,
+                  date,
+                ),
                 isNull(eventEvent.deletedAt),
                 isNull(userUserGroup.deletedAt),
               ),
