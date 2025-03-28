@@ -37,7 +37,7 @@ jobs:
       - name: Run Checks
         run: pnpm nx run-many -t format,lint,typecheck --output-style=stream
 
-  build:
+  deploy:
     strategy:
       matrix:
         package: [oauth, user, friend, club, event, auth, upload, chat, matching, web]
@@ -84,28 +84,6 @@ jobs:
 
       - name: Push image to DigitalOcean Container Registry
         run: docker push registry.digitalocean.com/${{ secrets.REGISTRY_NAME }}/sport-reservation-${{ matrix.package }}:$(echo $GITHUB_SHA | head -c7)
-
-  deploy:
-    strategy:
-      matrix:
-        package: [oauth, user, friend, club, event, auth, upload, chat, matching, web]
-    needs: [build]
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./packages/sport-reservation-${{ matrix.package }}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install doctl
-        uses: digitalocean/action-doctl@v2
-        with:
-          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-
-      - name: Log in to DigitalOcean Container Registry with short-lived credentials
-        run: doctl registry login --expiry-seconds 1200
 
       - name: Update deployment file
         run: TAG=$(echo $GITHUB_SHA | head -c7) && sed -i 's|<IMAGE>|registry.digitalocean.com/${{ secrets.REGISTRY_NAME }}/sport-reservation-${{ matrix.package }}:'${TAG}'|' $GITHUB_WORKSPACE/k8s/sport-reservation-${{ matrix.package }}/deployment.yaml
