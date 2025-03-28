@@ -1,5 +1,4 @@
-import { Outlet, ScrollRestoration } from "@tanstack/react-router";
-import { Meta, Scripts } from "@tanstack/react-start";
+import { HeadContent, Outlet, Scripts } from "@tanstack/react-router";
 import React from "react";
 
 import appCss from "@/styles/app.css?url";
@@ -10,7 +9,7 @@ const TanStackRouterDevtools =
   import.meta.env.MODE === "production"
     ? () => null
     : React.lazy(() =>
-        import("@tanstack/router-devtools").then((res) => ({
+        import("@tanstack/react-router-devtools").then((res) => ({
           default: res.TanStackRouterDevtools,
         })),
       );
@@ -28,11 +27,10 @@ const RootComponent = () => {
   return (
     <html>
       <head>
-        <Meta />
+        <HeadContent />
       </head>
       <body>
         <Outlet />
-        <ScrollRestoration />
         <ReactQueryDevtools buttonPosition="bottom-left" />
         <TanStackRouterDevtools position="bottom-right" />
         <Scripts />

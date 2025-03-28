@@ -65,16 +65,19 @@ function EventDetailPage() {
           {eventQuery.data.event.sizeLimit})
         </h2>
         <div className="flex items-center space-x-2">
-          {memberListQuery.data.members?.slice(0, 4).map((member, index) => (
-            <div key={index} className="flex flex-col items-center">
-              <img
-                src={member.user?.avatar || "https://via.placeholder.com/40"}
-                alt={member.user?.name || "User"}
-                className="h-10 w-10 rounded-full object-cover"
-              />
-              <span className="mt-1 text-xs">{member.user?.name}</span>
-            </div>
-          ))}
+          {memberListQuery.data.members
+            ?.filter(Boolean)
+            .slice(0, 4)
+            .map((member, index) => (
+              <div key={index} className="flex flex-col items-center">
+                <img
+                  src={member.user?.avatar || "https://via.placeholder.com/40"}
+                  alt={member.user?.name || "User"}
+                  className="h-10 w-10 rounded-full object-cover"
+                />
+                <span className="mt-1 text-xs">{member.user?.name}</span>
+              </div>
+            ))}
           {eventQuery.data.event.participants > 4 && (
             <p className="text-sm text-gray-600">
               + {eventQuery.data.event.participants - 4} more

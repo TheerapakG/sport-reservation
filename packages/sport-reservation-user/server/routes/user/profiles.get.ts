@@ -22,7 +22,7 @@ export const handlerConfig = defineEventHandlerConfig({
   }),
   query: params(
     type({
-      ids: "string[]",
+      ids: type("string.json.parse").to("string[]"),
     }),
   ),
 });

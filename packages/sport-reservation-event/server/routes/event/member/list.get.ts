@@ -53,7 +53,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     const userClient = yield* UserClient;
     const userProfiles = yield* userClient.getUserProfiles({
       query: {
-        ids: activeMembers.map((member) => member.userId),
+        ids: JSON.stringify(activeMembers.map((member) => member.userId)),
       },
     });
 

@@ -10,6 +10,7 @@ export const createRouter = () => {
     createTanstackRouter({
       routeTree,
       defaultPreload: "intent",
+      scrollRestoration: true,
       context: {
         queryClient,
       },
