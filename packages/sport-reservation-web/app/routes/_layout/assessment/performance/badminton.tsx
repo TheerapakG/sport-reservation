@@ -130,15 +130,13 @@ function RouteComponent() {
         <form.Subscribe
           selector={(state) => [state.canSubmit, state.isSubmitting]}
           children={([canSubmit, isSubmitting]) => (
-            <div className="mt-6 flex justify-center space-x-4">
-              <button
-                type="submit"
-                disabled={!canSubmit}
-                className="rounded bg-gradient-to-r from-[#65D1F8] to-[#6CCFD0] px-4 py-2 text-white hover:opacity-90"
-              >
-                {isSubmitting ? "Saving..." : "Save and continue"}
-              </button>
-            </div>
+            <button
+              type="submit"
+              disabled={!canSubmit}
+              className="rounded bg-gradient-to-r from-[#65D1F8] to-[#6CCFD0] px-4 py-2 text-white hover:opacity-90"
+            >
+              {isSubmitting ? "Saving..." : "Save and continue"}
+            </button>
           )}
         />
       </div>

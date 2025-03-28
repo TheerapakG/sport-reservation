@@ -1,4 +1,5 @@
 import { useCreateRunningAssessmentMutation } from "@/api/matching";
+import { StandaloneFieldLabel } from "@/components/form/StandaloneFieldLabel";
 import { useAppForm } from "@/utils/form";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { Effect } from "effect";
@@ -15,7 +16,10 @@ function RouteComponent() {
       pace: "" as "" | number,
       frequency: "" as "" | string,
       goal: "" as string,
-      performanceMarker: "" as string,
+      bestPerformance: {
+        distance: "" as "" | number,
+        time: "" as "" | number,
+      },
     },
     validators: {
       onSubmit: getMatchingClientBodyType("createRunningAssessmentV1"),
@@ -120,18 +124,36 @@ function RouteComponent() {
       />
 
       {/* Q5: Best performance marker */}
-      <form.AppField
-        name="performanceMarker"
-        children={(field) => (
-          <field.TextInputField
-            label="5. What is your best performance marker? (e.g., '10K in 50:00')"
-            placeholder="e.g. 10K in 50:00"
-            classNames={{
-              input: "w-44",
-            }}
+      <div className="space-y-2">
+        <StandaloneFieldLabel label="5. What is your best performance marker?" />
+        <div className="flex gap-2">
+          <form.AppField
+            name="bestPerformance.distance"
+            children={(field) => (
+              <field.StandaloneNumericInputField
+                placeholder="10"
+                trailingText="K"
+                classNames={{
+                  input: "w-16",
+                }}
+              />
+            )}
           />
-        )}
-      />
+          {"in"}
+          <form.AppField
+            name="bestPerformance.time"
+            children={(field) => (
+              <field.StandaloneNumericInputField
+                placeholder="50"
+                trailingText="minutes"
+                classNames={{
+                  input: "w-16",
+                }}
+              />
+            )}
+          />
+        </div>
+      </div>
 
       <div className="mt-6 flex justify-center space-x-4">
         <button
@@ -147,20 +169,18 @@ function RouteComponent() {
         <form.Subscribe
           selector={(state) => [state.canSubmit, state.isSubmitting]}
           children={([canSubmit, isSubmitting]) => (
-            <div className="mt-6 flex justify-center space-x-4">
-              <button
-                type="submit"
-                disabled={!canSubmit}
-                onClick={() => {
-                  router.navigate({
-                    to: "/assessment/matching",
-                  });
-                }}
-                className="rounded bg-gradient-to-r from-[#65D1F8] to-[#6CCFD0] px-4 py-2 text-white hover:opacity-90"
-              >
-                {isSubmitting ? "Saving..." : "Save and continue"}
-              </button>
-            </div>
+            <button
+              type="submit"
+              disabled={!canSubmit}
+              onClick={() => {
+                router.navigate({
+                  to: "/assessment/matching",
+                });
+              }}
+              className="rounded bg-gradient-to-r from-[#65D1F8] to-[#6CCFD0] px-4 py-2 text-white hover:opacity-90"
+            >
+              {isSubmitting ? "Saving..." : "Save and continue"}
+            </button>
           )}
         />
       </div>
