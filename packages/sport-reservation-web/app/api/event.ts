@@ -162,7 +162,7 @@ export const getEventListInfiniteQueryOptions = ({
     initialPageParam: 0,
     getNextPageParam: (lastPage, _, lastPageParam) =>
       lastPage.success
-        ? lastPage.events.length > 0
+        ? lastPage.events.length >= limit
           ? lastPageParam + lastPage.events.length
           : undefined
         : undefined,
