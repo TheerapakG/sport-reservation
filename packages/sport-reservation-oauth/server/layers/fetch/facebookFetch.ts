@@ -1,10 +1,11 @@
 import { type } from "arktype";
 import { Context, Effect, Layer } from "effect";
 import { ofetch } from "ofetch";
+import { params, response } from "tiara-stack/config/effectConfig";
+import { defineFetchConfig } from "tiara-stack/config/fetchConfig";
 import { ArktypeError, FetchError } from "tiara-stack/models/errors";
 import { effectType } from "tiara-stack/utils/effectType";
 import { Fetch, typedFetch } from "tiara-stack/utils/fetch";
-import { noInferOut } from "tiara-stack/utils/noInfer";
 import type { Mock } from "vitest";
 
 export const facebookFetch = /*@__PURE__*/ ofetch.create({
@@ -42,15 +43,18 @@ export const facebookService = /*@__PURE__*/ Layer.effect(
         Effect.provideService(
           Effect.gen(function* () {
             return yield* typedFetch(
-              {
-                responseType: facebookGetUserProfileResponse,
-                queryType: noInferOut(
+              defineFetchConfig({
+                response: response(facebookGetUserProfileResponse),
+                query: params(
                   type({
                     fields: "string",
                     access_token: "string",
                   }),
+                  {
+                    decode: false,
+                  },
                 ),
-              },
+              }),
               "/me",
               {
                 method: "GET",

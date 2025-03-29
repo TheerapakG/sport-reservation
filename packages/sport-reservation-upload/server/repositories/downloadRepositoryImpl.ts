@@ -1,7 +1,9 @@
 import { Effect, Layer } from "effect";
+import { defineFetchConfig } from "tiara-stack/config/fetchConfig";
 import { Fetch, typedFetch } from "tiara-stack/utils/fetch";
 import { unknownType } from "tiara-stack/utils/type";
 import { DownloadRepository } from "./downloadRepository";
+import { response } from "tiara-stack/config/effectConfig";
 
 export const downloadRepositoryImpl = /*@__PURE__*/ Layer.effect(
   DownloadRepository,
@@ -12,9 +14,15 @@ export const downloadRepositoryImpl = /*@__PURE__*/ Layer.effect(
       downloadUrl: ({ url }) => {
         return Effect.provideService(
           Effect.gen(function* () {
-            return yield* typedFetch({ responseType: unknownType }, url, {
-              responseType: "stream",
-            });
+            return yield* typedFetch(
+              defineFetchConfig({
+                response: response(unknownType),
+              }),
+              url,
+              {
+                responseType: "stream",
+              },
+            );
           }),
           Fetch,
           { fetch },

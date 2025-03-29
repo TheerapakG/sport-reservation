@@ -10,15 +10,44 @@ import {
 } from "h3";
 import { ArktypeError } from "~~/src/models/errors";
 import {
-  EventHandlerBodyType,
-  EventHandlerQueryType,
-  EventHandlerRouterType,
-  EventHandlerTypeConfig,
-} from "../config/eventHandlerConfig";
+  AnyCoercedParamsType,
+  FetchBodyType,
+  FetchQueryType,
+  FetchRouterType,
+  FetchTypeConfig,
+} from "../config/fetchConfig";
 import { effectType } from "./effectType";
 
+type EventHandlerQueryType<C extends FetchTypeConfig> = Simplify<
+  C["query"] extends infer Q
+    ? Q extends AnyCoercedParamsType
+      ? Q["config"]["decode"] extends true
+        ? FetchQueryType<C>
+        : never
+      : never
+    : never
+>;
+type EventHandlerBodyType<C extends FetchTypeConfig> = Simplify<
+  C["body"] extends infer B
+    ? B extends AnyCoercedParamsType
+      ? B["config"]["decode"] extends true
+        ? FetchBodyType<C>
+        : never
+      : never
+    : never
+>;
+type EventHandlerRouterType<C extends FetchTypeConfig> = Simplify<
+  C["router"] extends infer R
+    ? R extends AnyCoercedParamsType
+      ? R["config"]["decode"] extends true
+        ? FetchRouterType<C>
+        : never
+      : never
+    : never
+>;
+
 export type EffectEventHandlerParams<
-  C extends EventHandlerTypeConfig = EventHandlerTypeConfig,
+  C extends FetchTypeConfig = FetchTypeConfig,
 > = {
   query: EventHandlerQueryType<C>;
   body: EventHandlerBodyType<C>;
@@ -28,7 +57,7 @@ export type EffectEventHandlerParams<
 /*@__NO_SIDE_EFFECTS__*/
 export const effectEventHandlerParams = <
   Request extends EventHandlerRequest = EventHandlerRequest,
-  C extends EventHandlerTypeConfig = EventHandlerTypeConfig,
+  C extends FetchTypeConfig = FetchTypeConfig,
 >(
   event: H3Event<Request>,
   { query, body, router }: C,

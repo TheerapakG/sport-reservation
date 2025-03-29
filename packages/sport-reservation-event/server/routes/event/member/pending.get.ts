@@ -88,7 +88,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     const userClient = yield* UserClient;
     const userProfiles = yield* userClient.getUserProfiles({
       query: {
-        ids: JSON.stringify(pendingMembers.map((member) => member.userId)),
+        ids: pendingMembers.map((member) => member.userId),
       },
     });
 

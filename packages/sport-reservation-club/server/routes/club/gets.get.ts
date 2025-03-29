@@ -13,7 +13,7 @@ export const handlerConfig = defineEventHandlerConfig({
   }),
   query: params(
     type({
-      clubIds: type("string.json.parse").to("string[]"),
+      clubIds: "string[]",
     }),
   ),
 });

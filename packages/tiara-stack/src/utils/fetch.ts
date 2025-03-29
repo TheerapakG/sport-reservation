@@ -10,6 +10,12 @@ import {
   ResponseType,
 } from "ofetch";
 import { encodePath } from "ufo";
+import {
+  FetchBodyValidatorType,
+  FetchQueryValidatorType,
+  FetchRouterValidatorType,
+  FetchTypeConfig,
+} from "~~/src/config";
 import { ArktypeError, FetchError } from "~~/src/models/errors";
 import { effectType } from "~~/src/utils/effectType";
 import { anyObjectType } from "./type";
@@ -21,63 +27,79 @@ export class Fetch
   >() {}
 
 export type TypedFetchParamsOptions<
-  QP extends type.Any | undefined,
-  BP extends type.Any | undefined,
-  RP extends type.Any | undefined,
+  C extends FetchTypeConfig = FetchTypeConfig,
 > = Simplify<
-  ([QP] extends [type.Any]
-    ? QP["inferIn"] extends Record<string, unknown>
+  ([FetchQueryValidatorType<C>] extends [type.Any]
+    ? FetchQueryValidatorType<C>["inferIn"] extends Record<string, unknown>
       ? {
-          query: QP["inferIn"];
+          query: FetchQueryValidatorType<C>["inferIn"];
         }
       : { query?: never }
     : { query?: never }) &
-    ([BP] extends [type.Any]
-      ? BP["inferIn"] extends unknown
-        ? { body: NonNullable<RequestInit["body"]> | BP["inferIn"] }
+    ([FetchBodyValidatorType<C>] extends [type.Any]
+      ? FetchBodyValidatorType<C>["inferIn"] extends unknown
+        ? {
+            body:
+              | NonNullable<RequestInit["body"]>
+              | FetchBodyValidatorType<C>["inferIn"];
+          }
         : { body?: never }
       : { body?: never }) &
-    ([RP] extends [type.Any]
-      ? RP["inferIn"] extends Record<string, unknown>
-        ? { router: RP["inferIn"] }
+    ([FetchRouterValidatorType<C>] extends [type.Any]
+      ? FetchRouterValidatorType<C>["inferIn"] extends Record<string, unknown>
+        ? { router: FetchRouterValidatorType<C>["inferIn"] }
         : { router?: never }
       : { router?: never })
 >;
 
 export type TypedFetchOptions<
-  QP extends type.Any | undefined,
-  BP extends type.Any | undefined,
-  RP extends type.Any | undefined,
+  C extends FetchTypeConfig = FetchTypeConfig,
   R extends ResponseType = "json",
 > = Omit<FetchOptions<R>, "query" | "body" | "router"> &
-  TypedFetchParamsOptions<QP, BP, RP>;
+  TypedFetchParamsOptions<C>;
 
 /*@__NO_SIDE_EFFECTS__*/
 export const typedFetch = <
-  T extends type.Any,
-  QP extends type.Any | undefined,
-  BP extends type.Any | undefined,
-  RP extends type.Any | undefined,
+  C extends FetchTypeConfig = FetchTypeConfig,
   R extends ResponseType = "json",
 >(
   {
-    responseType,
-  }: {
-    responseType?: T;
-    queryType?: QP;
-    bodyType?: BP;
-    routerType?: RP;
-  },
+    response: responseType,
+    query: queryType,
+    body: bodyType,
+    router: routerType,
+  }: C,
   request: string,
-  options?: TypedFetchOptions<QP, BP, RP, R>,
+  options?: TypedFetchOptions<C, R>,
 ): Effect.Effect<
-  MappedResponseType<R, T["out"]["infer"]>,
+  MappedResponseType<R, C["response"]["type"]["out"]["infer"]>,
   ArktypeError | FetchError,
   Fetch
 > =>
   Effect.gen(function* () {
     const { fetch } = yield* Fetch;
-    const { router, ...opts } = { router: undefined, ...options };
+    const { query, body, router, ...opts } = {
+      query: undefined,
+      body: undefined,
+      router: undefined,
+      ...options,
+    };
+    const parsedQuery = queryType?.config.decode
+      ? Object.fromEntries(
+          Object.entries(query ?? {}).map(([key, value]) => [
+            key,
+            JSON.stringify(value),
+          ]),
+        )
+      : query;
+    const parsedBody = bodyType?.config.decode
+      ? Object.fromEntries(
+          Object.entries(body ?? {}).map(([key, value]) => [
+            key,
+            JSON.stringify(value),
+          ]),
+        )
+      : body;
     const parsedRequest = request
       .split("/")
       .filter(Boolean)
@@ -85,12 +107,20 @@ export const typedFetch = <
         if (!s.startsWith("**") && !s.startsWith(":")) return s;
         const replace = router?.[s.replace("**", "").replace(":", "")];
         if (replace === undefined) return s;
-        return encodePath(JSON.stringify(replace));
+        return routerType?.config.decode
+          ? encodePath(JSON.stringify(replace))
+          : replace;
       })
       .join("/");
 
     const fetchResponse = yield* Effect.mapError(
-      Effect.tryPromise(() => fetch(parsedRequest, opts)),
+      Effect.tryPromise(() =>
+        fetch(parsedRequest, {
+          ...opts,
+          ...(parsedQuery ? { query: parsedQuery } : {}),
+          ...(parsedBody ? { body: parsedBody } : {}),
+        }),
+      ),
       (error) => new FetchError(error.error as OFetchError),
     );
 
@@ -99,39 +129,58 @@ export const typedFetch = <
         (opts as FetchOptions<R>)?.responseType ?? "json",
       )
     )
-      return fetchResponse as MappedResponseType<R, T["out"]["infer"]>;
+      return fetchResponse as MappedResponseType<
+        R,
+        C["response"]["type"]["out"]["infer"]
+      >;
     return (yield* effectType(
-      (responseType?.out ?? anyObjectType) as T,
+      (responseType.type?.out ?? anyObjectType) as C["response"]["type"]["out"],
       fetchResponse,
-    )) as MappedResponseType<R, T["out"]["infer"]>;
+    )) as MappedResponseType<R, C["response"]["type"]["out"]["infer"]>;
   });
 
 /*@__NO_SIDE_EFFECTS__*/
 export const typedRawFetch = <
-  T extends type.Any,
-  QP extends type.Any | undefined,
-  BP extends type.Any | undefined,
-  RP extends type.Any | undefined,
+  C extends FetchTypeConfig = FetchTypeConfig,
   R extends ResponseType = "json",
 >(
   {
-    responseType,
-  }: {
-    responseType?: T;
-    queryType?: QP;
-    bodyType?: BP;
-    routerType?: RP;
-  },
+    response: responseType,
+    query: queryType,
+    body: bodyType,
+    router: routerType,
+  }: C,
   request: string,
-  options?: TypedFetchOptions<QP, BP, RP, R>,
+  options?: TypedFetchOptions<C, R>,
 ): Effect.Effect<
-  FetchResponse<MappedResponseType<R, T["out"]["infer"]>>,
+  FetchResponse<MappedResponseType<R, C["response"]["type"]["out"]["infer"]>>,
   ArktypeError | FetchError,
   Fetch
 > =>
   Effect.gen(function* () {
     const { fetch } = yield* Fetch;
-    const { router, ...opts } = { router: undefined, ...options };
+    const { query, body, router, ...opts } = {
+      query: undefined,
+      body: undefined,
+      router: undefined,
+      ...options,
+    };
+    const parsedQuery = queryType?.config.decode
+      ? Object.fromEntries(
+          Object.entries(query ?? {}).map(([key, value]) => [
+            key,
+            JSON.stringify(value),
+          ]),
+        )
+      : query;
+    const parsedBody = bodyType?.config.decode
+      ? Object.fromEntries(
+          Object.entries(body ?? {}).map(([key, value]) => [
+            key,
+            JSON.stringify(value),
+          ]),
+        )
+      : body;
     const parsedRequest = request
       .split("/")
       .filter(Boolean)
@@ -139,12 +188,20 @@ export const typedRawFetch = <
         if (!s.startsWith("**") && !s.startsWith(":")) return s;
         const replace = router?.[s.replace("**", "").replace(":", "")];
         if (replace === undefined) return s;
-        return encodePath(JSON.stringify(replace));
+        return routerType?.config.decode
+          ? encodePath(JSON.stringify(replace))
+          : replace;
       })
       .join("/");
 
     const fetchResponse = yield* Effect.mapError(
-      Effect.tryPromise(() => fetch.raw(parsedRequest, opts)),
+      Effect.tryPromise(() =>
+        fetch.raw(parsedRequest, {
+          ...opts,
+          ...(parsedQuery ? { query: parsedQuery } : {}),
+          ...(parsedBody ? { body: parsedBody } : {}),
+        }),
+      ),
       (error) => new FetchError(error.error as OFetchError),
     );
 
@@ -156,8 +213,8 @@ export const typedRawFetch = <
       return fetchResponse;
 
     fetchResponse._data = (yield* effectType(
-      (responseType?.out ?? anyObjectType) as T,
+      responseType.type?.out ?? anyObjectType,
       fetchResponse._data,
-    )) as MappedResponseType<R, T["out"]["infer"]>;
+    )) as MappedResponseType<R, C["response"]["type"]["out"]["infer"]>;
     return fetchResponse;
   });

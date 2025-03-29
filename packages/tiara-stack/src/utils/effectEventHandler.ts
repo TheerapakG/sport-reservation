@@ -12,14 +12,14 @@ import {
   setResponseHeader,
 } from "h3";
 import { ReadableStream } from "node:stream/web";
+import { EventHandlerConfig } from "~~/src/config/eventHandlerConfig";
 import {
   CoercedResponseType,
-  EventHandlerConfig,
-  EventHandlerResponseConfig,
-  EventHandlerResponseType,
-  EventHandlerResponseValidatorType,
-  EventHandlerTypeConfig,
-} from "~~/src/config/eventHandlerConfig";
+  FetchResponseConfig,
+  FetchResponseType,
+  FetchResponseValidatorType,
+  FetchTypeConfig,
+} from "~~/src/config/fetchConfig";
 import { ArktypeError, isBaseError } from "~~/src/models/errors";
 import { EffectContext, getInnerContext } from "~~/src/server/effectContext";
 import {
@@ -40,9 +40,7 @@ export class EventParamsContext
     { params: unknown }
   >()
 {
-  public static typed<
-    C extends EventHandlerTypeConfig = EventHandlerTypeConfig,
-  >() {
+  public static typed<C extends FetchTypeConfig = FetchTypeConfig>() {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const thisCls = this;
     return Effect.gen(function* () {
@@ -99,10 +97,8 @@ export type EffectEventHandlerWrapper<
     CoercedResponseType<type.Any, { stream: boolean }>
   >,
   R = never,
-  ResponseConfig extends
-    EventHandlerResponseConfig<C> = EventHandlerResponseConfig<C>,
-  ResponseType extends
-    EventHandlerResponseType<C> = EventHandlerResponseType<C>,
+  ResponseConfig extends FetchResponseConfig<C> = FetchResponseConfig<C>,
+  ResponseType extends FetchResponseType<C> = FetchResponseType<C>,
 > = ResponseConfig extends infer _ResponseConfig
   ? _ResponseConfig extends { stream: true }
     ? EffectStreamEventHandlerWrapper<ResponseType, R>
@@ -165,9 +161,8 @@ const effectStreamEventHandler = <
   >,
   R extends Services = never,
   ResponseValidatorType extends
-    EventHandlerResponseValidatorType<C> = EventHandlerResponseValidatorType<C>,
-  ResponseType extends
-    EventHandlerResponseType<C> = EventHandlerResponseType<C>,
+    FetchResponseValidatorType<C> = FetchResponseValidatorType<C>,
+  ResponseType extends FetchResponseType<C> = FetchResponseType<C>,
 >(
   effectContext: EffectContext<Services>,
   config: C,
@@ -239,9 +234,8 @@ const effectEffectEventHandler =
     >,
     R extends Services = never,
     ResponseValidatorType extends
-      EventHandlerResponseValidatorType<C> = EventHandlerResponseValidatorType<C>,
-    ResponseType extends
-      EventHandlerResponseType<C> = EventHandlerResponseType<C>,
+      FetchResponseValidatorType<C> = FetchResponseValidatorType<C>,
+    ResponseType extends FetchResponseType<C> = FetchResponseType<C>,
   >(
     effectContext: EffectContext<Services>,
     config: C,

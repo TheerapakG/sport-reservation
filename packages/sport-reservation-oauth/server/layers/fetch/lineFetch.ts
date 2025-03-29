@@ -2,6 +2,8 @@ import { RuntimeConfig } from "$/layers";
 import { type } from "arktype";
 import { Context, Effect, Layer } from "effect";
 import { ofetch } from "ofetch";
+import { params, response } from "tiara-stack/config/effectConfig";
+import { defineFetchConfig } from "tiara-stack/config/fetchConfig";
 import { ArktypeError, FetchError } from "tiara-stack/models/errors";
 import { effectType } from "tiara-stack/utils/effectType";
 import { Fetch, typedFetch } from "tiara-stack/utils/fetch";
@@ -49,10 +51,12 @@ export const lineService = /*@__PURE__*/ Layer.effect(
         Effect.provideService(
           Effect.gen(function* () {
             return yield* typedFetch(
-              {
-                responseType: linePostGetUserProfileResponse,
-                bodyType: unknownType,
-              },
+              defineFetchConfig({
+                response: response(linePostGetUserProfileResponse),
+                body: params(unknownType, {
+                  decode: false,
+                }),
+              }),
               "/verify",
               {
                 method: "POST",
