@@ -1,9 +1,10 @@
 import { PgDrizzle } from "@effect/sql-drizzle/Pg";
-import { and, eq, gte, inArray, isNull, lte, not, sql, sum } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 import { Effect, Layer, Option } from "effect";
 import {
   eventEvent,
-  eventEventMember,
+  eventEventSchedule,
+  eventScheduleMember,
   userUserGroup,
   userUserGroupMember,
 } from "sport-reservation-db/schema";
@@ -14,56 +15,6 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
   /*@__PURE__*/ Effect.gen(function* () {
     const db = yield* PgDrizzle;
 
-    const eventParticipantsCTE = (eventIds?: string[]) => {
-      const allEventParticipants = db.$with("all_event_participants").as(
-        db
-          .select({
-            eventId: eventEventMember.eventId,
-            participants: sum(eventEventMember.size)
-              .mapWith(Number)
-              .as("participants"),
-          })
-          .from(eventEventMember)
-          .innerJoin(
-            userUserGroupMember,
-            and(
-              eq(eventEventMember.eventId, userUserGroupMember.groupId),
-              eq(eventEventMember.userId, userUserGroupMember.userId),
-            ),
-          )
-          .where(
-            and(
-              eq(userUserGroupMember.status, "member"),
-              isNull(eventEventMember.deletedAt),
-              isNull(userUserGroupMember.deletedAt),
-            ),
-          )
-          .groupBy(eventEventMember.eventId),
-      );
-
-      const eventParticipants = db
-        .with(allEventParticipants)
-        .select({
-          eventId: eventEvent.groupId,
-          participants: sql`coalesce(${allEventParticipants.participants}, 0)`
-            .mapWith(Number)
-            .as("participants"),
-        })
-        .from(eventEvent)
-        .leftJoin(
-          allEventParticipants,
-          eq(eventEvent.groupId, allEventParticipants.eventId),
-        );
-
-      return db
-        .$with("event_participants")
-        .as(
-          eventIds
-            ? eventParticipants.where(inArray(eventEvent.groupId, eventIds))
-            : eventParticipants,
-        );
-    };
-
     return EventRepository.of({
       createEventByUser: ({
         userId,
@@ -71,8 +22,6 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
         description,
         location,
         locationDescription,
-        startAt,
-        endAt,
         autoAccept,
         sizeLimit,
       }) =>
@@ -95,8 +44,6 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
               description,
               location,
               locationDescription,
-              startAt,
-              endAt,
               autoAccept,
               sizeLimit,
             })
@@ -118,8 +65,6 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
         description,
         location,
         locationDescription,
-        startAt,
-        endAt,
         autoAccept,
         sizeLimit,
       }) =>
@@ -157,8 +102,6 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
               description,
               location,
               locationDescription,
-              startAt,
-              endAt,
               autoAccept,
               sizeLimit,
             })
@@ -174,8 +117,6 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
         description,
         location,
         locationDescription,
-        startAt,
-        endAt,
         autoAccept,
         sizeLimit,
       }) =>
@@ -186,10 +127,8 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
               ...(description ? { description } : {}),
               ...(location ? { location } : {}),
               ...(locationDescription ? { locationDescription } : {}),
-              ...(startAt ? { startAt } : {}),
-              ...(endAt ? { endAt } : {}),
-              ...(autoAccept ? { autoAccept } : {}),
-              ...(sizeLimit ? { sizeLimit } : {}),
+              ...(autoAccept !== undefined ? { autoAccept } : {}),
+              ...(sizeLimit !== undefined ? { sizeLimit } : {}),
             })
             .where(
               and(
@@ -214,6 +153,50 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
         }).pipe(Effect.withSpan("eventRepositoryImpl.updateEvent")),
       deleteEvent: ({ eventId }) =>
         Effect.gen(function* () {
+          // Get all schedules for this event
+          const schedules = yield* db
+            .select({
+              scheduleId: eventEventSchedule.publicId,
+            })
+            .from(eventEventSchedule)
+            .where(
+              and(
+                eq(eventEventSchedule.eventId, eventId),
+                isNull(eventEventSchedule.deletedAt),
+              ),
+            );
+
+          const scheduleIds = schedules.map((s) => s.scheduleId);
+
+          // Delete schedule members for all schedules in this event
+          if (scheduleIds.length > 0) {
+            yield* db
+              .update(eventScheduleMember)
+              .set({
+                deletedAt: sql`now()`,
+              })
+              .where(
+                and(
+                  sql`${eventScheduleMember.scheduleId} IN (${scheduleIds.join(",")})`,
+                  isNull(eventScheduleMember.deletedAt),
+                ),
+              );
+          }
+
+          // Delete all schedules for this event
+          yield* db
+            .update(eventEventSchedule)
+            .set({
+              deletedAt: sql`now()`,
+            })
+            .where(
+              and(
+                eq(eventEventSchedule.eventId, eventId),
+                isNull(eventEventSchedule.deletedAt),
+              ),
+            );
+
+          // Delete the event itself
           yield* db
             .update(eventEvent)
             .set({
@@ -226,6 +209,20 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
               ),
             );
 
+          // Delete all user group members
+          yield* db
+            .update(userUserGroupMember)
+            .set({
+              deletedAt: sql`now()`,
+            })
+            .where(
+              and(
+                eq(userUserGroupMember.groupId, eventId),
+                isNull(userUserGroupMember.deletedAt),
+              ),
+            );
+
+          // Delete the user group
           yield* db
             .update(userUserGroup)
             .set({
@@ -237,53 +234,22 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
                 isNull(userUserGroup.deletedAt),
               ),
             );
-
-          yield* db
-            .update(eventEventMember)
-            .set({
-              deletedAt: sql`now()`,
-            })
-            .where(
-              and(
-                eq(eventEventMember.eventId, eventId),
-                isNull(eventEventMember.deletedAt),
-              ),
-            );
-
-          yield* db
-            .update(userUserGroupMember)
-            .set({
-              deletedAt: sql`now()`,
-            })
-            .where(
-              and(
-                eq(userUserGroupMember.groupId, eventId),
-                isNull(userUserGroupMember.deletedAt),
-              ),
-            );
         }).pipe(Effect.withSpan("eventRepositoryImpl.deleteEvent")),
       getEvent: ({ eventId }) =>
         Effect.gen(function* () {
-          const eventParticipants = eventParticipantsCTE([eventId]);
-
           const result = yield* db
-            .with(eventParticipants)
             .select({
               event: eventEvent,
               group: userUserGroup,
-              participants: eventParticipants.participants,
             })
-            .from(eventParticipants)
-            .innerJoin(
-              eventEvent,
-              eq(eventParticipants.eventId, eventEvent.groupId),
-            )
+            .from(eventEvent)
             .innerJoin(
               userUserGroup,
-              eq(eventParticipants.eventId, userUserGroup.publicId),
+              eq(eventEvent.groupId, userUserGroup.publicId),
             )
             .where(
               and(
+                eq(eventEvent.groupId, eventId),
                 isNull(eventEvent.deletedAt),
                 isNull(userUserGroup.deletedAt),
               ),
@@ -295,315 +261,17 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
 
           return Option.some(result[0]);
         }).pipe(Effect.withSpan("eventRepositoryImpl.getEvent")),
-      requestEventJoin: ({ eventId, userId, size }) =>
-        Effect.gen(function* () {
-          const event = yield* db
-            .select()
-            .from(eventEvent)
-            .where(
-              and(
-                eq(eventEvent.groupId, eventId),
-                isNull(eventEvent.deletedAt),
-              ),
-            );
-
-          if (event.length === 0) return;
-
-          if (event[0].autoAccept || event[0].sizeLimit > 0) {
-            const currentTotalSizes = yield* db
-              .select({
-                size: sum(eventEventMember.size).mapWith(Number).as("size"),
-              })
-              .from(eventEventMember)
-              .innerJoin(
-                userUserGroupMember,
-                and(
-                  eq(eventEventMember.eventId, userUserGroupMember.groupId),
-                  eq(eventEventMember.userId, userUserGroupMember.userId),
-                ),
-              )
-              .where(
-                and(
-                  eq(eventEventMember.eventId, eventId),
-                  eq(userUserGroupMember.status, "member"),
-                  isNull(eventEventMember.deletedAt),
-                  isNull(userUserGroupMember.deletedAt),
-                ),
-              );
-
-            const currentTotalSize =
-              currentTotalSizes.length > 0 ? currentTotalSizes[0].size : 0;
-
-            if (currentTotalSize + size > event[0].sizeLimit) {
-              return;
-            }
-          }
-
-          yield* db
-            .insert(userUserGroupMember)
-            .values({
-              groupId: eventId,
-              userId,
-              status: event[0].autoAccept ? "member" : "pending",
-            })
-            .onConflictDoUpdate({
-              target: [userUserGroupMember.groupId, userUserGroupMember.userId],
-              set: {
-                status: event[0].autoAccept ? "member" : "pending",
-              },
-              setWhere: and(
-                isNull(userUserGroupMember.deletedAt),
-                not(eq(userUserGroupMember.status, "member")),
-              ),
-            });
-
-          yield* db
-            .insert(eventEventMember)
-            .values({
-              eventId,
-              userId,
-              size,
-            })
-            .onConflictDoUpdate({
-              target: [eventEventMember.eventId, eventEventMember.userId],
-              set: {
-                size,
-              },
-              setWhere: and(isNull(eventEventMember.deletedAt)),
-            });
-        }).pipe(Effect.withSpan("eventRepositoryImpl.requestEventJoin")),
-      acceptEventJoin: ({ eventId, userId }) =>
-        Effect.gen(function* () {
-          const event = yield* db
-            .select()
-            .from(eventEvent)
-            .where(
-              and(
-                eq(eventEvent.groupId, eventId),
-                isNull(eventEvent.deletedAt),
-              ),
-            );
-
-          if (event.length === 0) return;
-
-          if (event[0].sizeLimit > 0) {
-            const currentTotalSizes = yield* db
-              .select({
-                size: sum(eventEventMember.size).mapWith(Number).as("size"),
-              })
-              .from(eventEventMember)
-              .innerJoin(
-                userUserGroupMember,
-                and(
-                  eq(eventEventMember.eventId, userUserGroupMember.groupId),
-                  eq(eventEventMember.userId, userUserGroupMember.userId),
-                ),
-              )
-              .where(
-                and(
-                  eq(eventEventMember.eventId, eventId),
-                  eq(userUserGroupMember.status, "member"),
-                  isNull(eventEventMember.deletedAt),
-                  isNull(userUserGroupMember.deletedAt),
-                ),
-              );
-
-            const currentTotalSize =
-              currentTotalSizes.length > 0 ? currentTotalSizes[0].size : 0;
-
-            const pendingUser = yield* db
-              .select({
-                size: eventEventMember.size,
-              })
-              .from(eventEventMember)
-              .where(
-                and(
-                  eq(eventEventMember.eventId, eventId),
-                  eq(eventEventMember.userId, userId),
-                  isNull(eventEventMember.deletedAt),
-                ),
-              );
-
-            if (pendingUser.length === 0) return;
-
-            if (currentTotalSize + pendingUser[0].size > event[0].sizeLimit) {
-              return;
-            }
-          }
-
-          yield* db
-            .update(userUserGroupMember)
-            .set({
-              status: "member",
-            })
-            .where(
-              and(
-                eq(userUserGroupMember.groupId, eventId),
-                eq(userUserGroupMember.userId, userId),
-                eq(userUserGroupMember.status, "pending"),
-                isNull(userUserGroupMember.deletedAt),
-              ),
-            );
-        }).pipe(Effect.withSpan("eventRepositoryImpl.acceptEventJoin")),
-      rejectEventJoin: ({ eventId, userId }) =>
-        Effect.gen(function* () {
-          yield* db
-            .update(userUserGroupMember)
-            .set({
-              deletedAt: sql`now()`,
-            })
-            .where(
-              and(
-                eq(userUserGroupMember.groupId, eventId),
-                eq(userUserGroupMember.userId, userId),
-                eq(userUserGroupMember.status, "pending"),
-                isNull(userUserGroupMember.deletedAt),
-              ),
-            );
-
-          yield* db
-            .update(eventEventMember)
-            .set({
-              deletedAt: sql`now()`,
-            })
-            .where(
-              and(
-                eq(eventEventMember.eventId, eventId),
-                eq(eventEventMember.userId, userId),
-                isNull(eventEventMember.deletedAt),
-              ),
-            );
-        }).pipe(Effect.withSpan("eventRepositoryImpl.rejectEventJoin")),
-      removeMember: ({ eventId, userId }) =>
-        Effect.gen(function* () {
-          yield* db
-            .update(eventEventMember)
-            .set({
-              deletedAt: sql`now()`,
-            })
-            .where(
-              and(
-                eq(eventEventMember.eventId, eventId),
-                eq(eventEventMember.userId, userId),
-                isNull(eventEventMember.deletedAt),
-              ),
-            );
-
-          yield* db
-            .update(userUserGroupMember)
-            .set({
-              deletedAt: sql`now()`,
-            })
-            .where(
-              and(
-                eq(userUserGroupMember.groupId, eventId),
-                eq(userUserGroupMember.userId, userId),
-                eq(userUserGroupMember.status, "member"),
-                isNull(userUserGroupMember.deletedAt),
-              ),
-            );
-        }).pipe(Effect.withSpan("eventRepositoryImpl.leaveEvent")),
-      getEventMembers: ({ eventId }) =>
-        Effect.gen(function* () {
-          const event = yield* db
-            .select()
-            .from(eventEvent)
-            .where(
-              and(
-                isNull(eventEvent.deletedAt),
-                eq(eventEvent.groupId, eventId),
-              ),
-            );
-
-          if (event.length === 0) return [];
-
-          const members = yield* db
-            .select({
-              userId: eventEventMember.userId,
-              size: eventEventMember.size,
-              status: userUserGroupMember.status,
-            })
-            .from(eventEventMember)
-            .innerJoin(
-              userUserGroupMember,
-              and(
-                eq(eventEventMember.eventId, userUserGroupMember.groupId),
-                eq(eventEventMember.userId, userUserGroupMember.userId),
-              ),
-            )
-            .where(
-              and(
-                eq(eventEventMember.eventId, eventId),
-                eq(userUserGroupMember.status, "member"),
-                isNull(eventEventMember.deletedAt),
-                isNull(userUserGroupMember.deletedAt),
-              ),
-            );
-
-          return members;
-        }).pipe(Effect.withSpan("eventRepositoryImpl.getEventMembers")),
-      getEventPendingMembers: ({ eventId }) =>
-        Effect.gen(function* () {
-          const event = yield* db
-            .select()
-            .from(eventEvent)
-            .where(
-              and(
-                isNull(eventEvent.deletedAt),
-                eq(eventEvent.groupId, eventId),
-              ),
-            );
-
-          if (event.length === 0) return [];
-
-          const members = yield* db
-            .select({
-              userId: eventEventMember.userId,
-              size: eventEventMember.size,
-              status: userUserGroupMember.status,
-            })
-            .from(eventEventMember)
-            .innerJoin(
-              userUserGroupMember,
-              and(
-                eq(eventEventMember.eventId, userUserGroupMember.groupId),
-                eq(eventEventMember.userId, userUserGroupMember.userId),
-              ),
-            )
-            .where(
-              and(
-                eq(eventEventMember.eventId, eventId),
-                eq(userUserGroupMember.status, "pending"),
-                isNull(eventEventMember.deletedAt),
-                isNull(userUserGroupMember.deletedAt),
-              ),
-            );
-
-          return members;
-        }).pipe(Effect.withSpan("eventRepositoryImpl.getEventPendingMembers")),
       getUserCreatedEvents: ({ userId }) =>
         Effect.gen(function* () {
-          const eventParticipants = eventParticipantsCTE();
-
           return yield* db
-            .with(eventParticipants)
             .select({
               event: eventEvent,
               group: userUserGroup,
-              participants: eventParticipants.participants,
             })
             .from(eventEvent)
             .innerJoin(
               userUserGroup,
               eq(eventEvent.groupId, userUserGroup.publicId),
-            )
-            .innerJoin(
-              eventEventMember,
-              eq(eventEvent.groupId, eventEventMember.eventId),
-            )
-            .innerJoin(
-              eventParticipants,
-              eq(eventEvent.groupId, eventParticipants.eventId),
             )
             .where(
               and(
@@ -611,122 +279,20 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
                 eq(eventEvent.creatorId, userId),
                 isNull(eventEvent.deletedAt),
                 isNull(userUserGroup.deletedAt),
-                isNull(eventEventMember.deletedAt),
               ),
-            )
-            .groupBy(eventEvent.groupId);
+            );
         }).pipe(Effect.withSpan("eventRepositoryImpl.getUserCreatedEvents")),
-      getUserMemberEvents: ({ userId }) =>
-        Effect.gen(function* () {
-          const eventParticipants = eventParticipantsCTE();
-
-          const userGroupMember = db.$with("user_event_group").as(
-            db
-              .select({
-                groupId: userUserGroupMember.groupId,
-              })
-              .from(userUserGroupMember)
-              .where(
-                and(
-                  isNull(userUserGroupMember.deletedAt),
-                  eq(userUserGroupMember.userId, userId),
-                  eq(userUserGroupMember.status, "member"),
-                ),
-              ),
-          );
-
-          return yield* db
-            .with(eventParticipants, userGroupMember)
-            .select({
-              event: eventEvent,
-              group: userUserGroup,
-              participants: eventParticipants.participants,
-            })
-            .from(userGroupMember)
-            .innerJoin(
-              userUserGroup,
-              eq(userGroupMember.groupId, userUserGroup.publicId),
-            )
-            .innerJoin(
-              eventEvent,
-              eq(userGroupMember.groupId, eventEvent.groupId),
-            )
-            .innerJoin(
-              eventParticipants,
-              eq(eventEvent.groupId, eventParticipants.eventId),
-            )
-            .where(
-              and(
-                isNull(userUserGroupMember.deletedAt),
-                isNull(eventEvent.deletedAt),
-              ),
-            );
-        }).pipe(Effect.withSpan("eventRepositoryImpl.getUserMemberEvents")),
-      getUserPendingEvents: ({ userId }) =>
-        Effect.gen(function* () {
-          const eventParticipants = eventParticipantsCTE();
-
-          const userGroupMember = db.$with("user_event_group").as(
-            db
-              .select({
-                groupId: userUserGroupMember.groupId,
-              })
-              .from(userUserGroupMember)
-              .where(
-                and(
-                  isNull(userUserGroupMember.deletedAt),
-                  eq(userUserGroupMember.userId, userId),
-                  eq(userUserGroupMember.status, "pending"),
-                ),
-              ),
-          );
-
-          return yield* db
-            .with(eventParticipants, userGroupMember)
-            .select({
-              event: eventEvent,
-              group: userUserGroup,
-              participants: eventParticipants.participants,
-            })
-            .from(userGroupMember)
-            .innerJoin(
-              userUserGroup,
-              eq(userGroupMember.groupId, userUserGroup.publicId),
-            )
-            .innerJoin(
-              eventEvent,
-              eq(userGroupMember.groupId, eventEvent.groupId),
-            )
-            .innerJoin(
-              eventParticipants,
-              eq(eventEvent.groupId, eventParticipants.eventId),
-            )
-            .where(
-              and(
-                isNull(userUserGroupMember.deletedAt),
-                isNull(eventEvent.deletedAt),
-              ),
-            );
-        }).pipe(Effect.withSpan("eventRepositoryImpl.getUserPendingEvents")),
       getClubEvents: ({ clubId }) =>
         Effect.gen(function* () {
-          const eventParticipants = eventParticipantsCTE();
-
           return yield* db
-            .with(eventParticipants)
             .select({
               event: eventEvent,
               group: userUserGroup,
-              participants: eventParticipants.participants,
             })
             .from(eventEvent)
             .innerJoin(
               userUserGroup,
               eq(eventEvent.groupId, userUserGroup.publicId),
-            )
-            .innerJoin(
-              eventParticipants,
-              eq(eventEvent.groupId, eventParticipants.eventId),
             )
             .where(
               and(
@@ -737,73 +303,6 @@ export const eventRepositoryImpl = /*@__PURE__*/ Layer.effect(
               ),
             );
         }).pipe(Effect.withSpan("eventRepositoryImpl.getClubEvents")),
-      getEventMemberStatus: ({ eventId, userId }) =>
-        Effect.gen(function* () {
-          const event = yield* db
-            .select()
-            .from(eventEvent)
-            .where(
-              and(
-                isNull(eventEvent.deletedAt),
-                eq(eventEvent.groupId, eventId),
-              ),
-            );
-
-          if (event.length === 0) return Option.none();
-
-          const memberStatus = yield* db
-            .select({
-              status: userUserGroupMember.status,
-            })
-            .from(userUserGroupMember)
-            .where(
-              and(
-                eq(userUserGroupMember.groupId, eventId),
-                eq(userUserGroupMember.userId, userId),
-                isNull(userUserGroupMember.deletedAt),
-              ),
-            );
-
-          if (memberStatus.length === 0) {
-            return Option.none();
-          }
-
-          return Option.some({ status: memberStatus[0].status });
-        }).pipe(Effect.withSpan("eventRepositoryImpl.getEventMemberStatus")),
-      getEventsByDate: ({ date, offset, limit }) =>
-        Effect.gen(function* () {
-          const eventParticipants = eventParticipantsCTE();
-
-          return yield* db
-            .with(eventParticipants)
-            .select({
-              event: eventEvent,
-              group: userUserGroup,
-              participants: eventParticipants.participants,
-            })
-            .from(eventEvent)
-            .innerJoin(
-              userUserGroup,
-              eq(eventEvent.groupId, userUserGroup.publicId),
-            )
-            .innerJoin(
-              eventParticipants,
-              eq(eventEvent.groupId, eventParticipants.eventId),
-            )
-            .where(
-              and(
-                lte(sql`date_trunc('day', ${eventEvent.startAt})`, date),
-                gte(
-                  sql`date_trunc('day', ${eventEvent.endAt}) + interval '1 day' - interval '1 second'`,
-                  date,
-                ),
-                isNull(eventEvent.deletedAt),
-                isNull(userUserGroup.deletedAt),
-              ),
-            )
-            .offset(offset)
-            .limit(limit);
-        }).pipe(Effect.withSpan("eventRepositoryImpl.getEventsByDate")),
     });
   }),
 );

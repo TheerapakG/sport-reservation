@@ -22,24 +22,36 @@ export const eventKeys = () => {
   const all = ["event"] as const;
   return {
     all: () => all,
-    event: () => {
-      const allEvent = [...all, "event"] as const;
+    schedule: () => {
+      const allSchedule = [...all, "schedule"] as const;
       return {
-        all: () => allEvent,
+        all: () => allSchedule,
         id: ({ id }: { id: string }) => {
-          const allEventId = [...allEvent, "id", id] as const;
+          const allScheduleId = [...allSchedule, "id", id] as const;
           return {
-            all: () => allEventId,
-            detail: () => [...allEventId, "detail"] as const,
-            memberList: () => [...allEventId, "memberList"] as const,
+            all: () => allScheduleId,
+            detail: () => [...allScheduleId, "detail"] as const,
+            repeatIndex: ({ repeatIndex }: { repeatIndex: number }) => {
+              const allScheduleIdRepeatIndex = [
+                ...allScheduleId,
+                "repeatIndex",
+                repeatIndex,
+              ] as const;
+              return {
+                all: () => allScheduleIdRepeatIndex,
+                detail: () => [...allScheduleIdRepeatIndex, "detail"] as const,
+                memberList: () =>
+                  [...allScheduleIdRepeatIndex, "memberList"] as const,
+              };
+            },
           };
         },
         list: () => {
-          const allEventList = [...allEvent, "list"] as const;
+          const allScheduleList = [...allSchedule, "list"] as const;
           return {
-            all: () => allEventList,
-            date: ({ date }: { date: string }) =>
-              [...allEventList, date] as const,
+            all: () => allScheduleList,
+            date: ({ date }: { date: Date }) =>
+              [...allScheduleList, "date", date.toISOString()] as const,
           };
         },
       };
@@ -47,11 +59,11 @@ export const eventKeys = () => {
   };
 };
 
-export const getEventServerFn = createServerFn({
+export const getScheduleServerFn = createServerFn({
   method: "GET",
 })
   .validator((data: unknown) =>
-    Effect.runSync(effectType(getEventClientQueryType("getEvent"), data)),
+    Effect.runSync(effectType(getEventClientQueryType("getSchedule"), data)),
   )
   .handler(async ({ data }) => {
     const { access_token: accessToken } = parseCookies();
@@ -60,31 +72,31 @@ export const getEventServerFn = createServerFn({
       return { success: false } as const;
     }
 
-    const event = await Effect.runPromise(
+    const schedule = await Effect.runPromise(
       Effect.gen(function* () {
         const eventClient = yield* EventClient;
-        return yield* eventClient.getEvent({
+        return yield* eventClient.getSchedule({
           headers: { Cookie: serialize("access_token", accessToken) },
-          query: { eventId: data.eventId },
+          query: { id: data.id },
         });
       }).pipe(provideEffectContext),
     );
 
-    return { success: true, event } as const;
+    return { success: true, schedule } as const;
   });
 
-export const getEventQueryOptions = ({ id }: { id: string }) =>
+export const getScheduleQueryOptions = ({ id }: { id: string }) =>
   queryOptions({
-    queryKey: eventKeys().event().id({ id }).detail(),
-    queryFn: () => getEventServerFn({ data: { eventId: id } }),
+    queryKey: eventKeys().schedule().id({ id }).detail(),
+    queryFn: () => getScheduleServerFn({ data: { scheduleId: id } }),
   });
 
-export const getEventMemberListServerFn = createServerFn({
+export const getScheduleMemberListServerFn = createServerFn({
   method: "GET",
 })
   .validator((data: unknown) =>
     Effect.runSync(
-      effectType(getEventClientQueryType("getEventMemberList"), data),
+      effectType(getEventClientQueryType("getScheduleMemberList"), data),
     ),
   )
   .handler(async ({ data }) => {
@@ -97,9 +109,9 @@ export const getEventMemberListServerFn = createServerFn({
     const { members } = await Effect.runPromise(
       Effect.gen(function* () {
         const eventClient = yield* EventClient;
-        return yield* eventClient.getEventMemberList({
+        return yield* eventClient.getScheduleMemberList({
           headers: { Cookie: serialize("access_token", accessToken) },
-          query: { eventId: data.eventId },
+          query: { scheduleId: data.scheduleId, repeatIndex: data.repeatIndex },
         });
       }).pipe(provideEffectContext),
     );
@@ -107,17 +119,30 @@ export const getEventMemberListServerFn = createServerFn({
     return { success: true, members } as const;
   });
 
-export const getEventMemberListQueryOptions = ({ id }: { id: string }) =>
+export const getScheduleMemberListQueryOptions = ({
+  id,
+  repeatIndex,
+}: {
+  id: string;
+  repeatIndex: number;
+}) =>
   queryOptions({
-    queryKey: eventKeys().event().id({ id }).memberList(),
-    queryFn: () => getEventMemberListServerFn({ data: { eventId: id } }),
+    queryKey: eventKeys()
+      .schedule()
+      .id({ id })
+      .repeatIndex({ repeatIndex })
+      .memberList(),
+    queryFn: () =>
+      getScheduleMemberListServerFn({ data: { scheduleId: id, repeatIndex } }),
   });
 
-export const getEventListServerFn = createServerFn({
+export const getScheduleListServerFn = createServerFn({
   method: "GET",
 })
   .validator((data: unknown) =>
-    Effect.runSync(effectType(getEventClientQueryType("getEventList"), data)),
+    Effect.runSync(
+      effectType(getEventClientQueryType("getScheduleList"), data),
+    ),
   )
   .handler(async ({ data }) => {
     const { access_token: accessToken } = parseCookies();
@@ -126,23 +151,48 @@ export const getEventListServerFn = createServerFn({
       return { success: false } as const;
     }
 
-    const events = await Effect.runPromise(
+    const { schedules } = await Effect.runPromise(
       Effect.gen(function* () {
         const eventClient = yield* EventClient;
-        return yield* eventClient.getEventList({
+        const { schedules } = yield* eventClient.getScheduleList({
           headers: { Cookie: serialize("access_token", accessToken) },
           query: {
             ...data,
             date: data.date.toISOString(),
           },
         });
+
+        return {
+          schedules: schedules.map((schedule) => ({
+            ...schedule,
+            schedule: {
+              ...schedule.schedule,
+              startAt: yield* effectType(
+                type("string.date.parse"),
+                schedule.schedule.startAt,
+              ),
+              endAt: yield* effectType(
+                type("string.date.parse"),
+                schedule.schedule.endAt,
+              ),
+              repeatStartAt: yield* effectType(
+                type("string.date.parse"),
+                schedule.schedule.repeatStartAt,
+              ),
+              repeatEndAt: yield* effectType(
+                type("string.date.parse"),
+                schedule.schedule.repeatEndAt,
+              ),
+            },
+          })),
+        };
       }).pipe(provideEffectContext),
     );
 
-    return { success: true, events } as const;
+    return { success: true, schedules } as const;
   });
 
-export const getEventListInfiniteQueryOptions = ({
+export const getScheduleListInfiniteQueryOptions = ({
   date,
   limit,
 }: {
@@ -150,9 +200,9 @@ export const getEventListInfiniteQueryOptions = ({
   limit: number;
 }) =>
   infiniteQueryOptions({
-    queryKey: eventKeys().event().list().date({ date: date.toISOString() }),
+    queryKey: eventKeys().schedule().list().date({ date }),
     queryFn: ({ pageParam }) =>
-      getEventListServerFn({
+      getScheduleListServerFn({
         data: {
           date: date.toISOString(),
           limit,
@@ -162,8 +212,8 @@ export const getEventListInfiniteQueryOptions = ({
     initialPageParam: 0,
     getNextPageParam: (lastPage, _, lastPageParam) =>
       lastPage.success
-        ? lastPage.events.length >= limit
-          ? lastPageParam + lastPage.events.length
+        ? lastPage.schedules.length >= limit
+          ? lastPageParam + lastPage.schedules.length
           : undefined
         : undefined,
   });
@@ -203,21 +253,13 @@ export const createEventServerFn = createServerFn({
           Match.when({ creatorType: "user" }, ({ event }) =>
             eventClient.postCreateUserEvent({
               headers: { Cookie: serialize("access_token", accessToken) },
-              body: {
-                ...event,
-                startAt: event.startAt.toISOString(),
-                endAt: event.endAt.toISOString(),
-              },
+              body: event,
             }),
           ),
           Match.when({ creatorType: "club" }, ({ event }) =>
             eventClient.postCreateClubEvent({
               headers: { Cookie: serialize("access_token", accessToken) },
-              body: {
-                ...event,
-                startAt: event.startAt.toISOString(),
-                endAt: event.endAt.toISOString(),
-              },
+              body: event,
             }),
           ),
           Match.exhaustive,
@@ -235,7 +277,7 @@ export const useCreateEventMutation = () => {
     mutationFn: createEventServerFn,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: eventKeys().event().list().all(),
+        queryKey: eventKeys().all(),
       });
     },
   });

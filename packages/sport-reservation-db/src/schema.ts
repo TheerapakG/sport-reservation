@@ -380,8 +380,6 @@ export const eventEvent = pgTable(
     description: varchar("description", {}),
     location: geometry("location", { type: "point", srid: 4326 }),
     locationDescription: varchar("location_description", {}),
-    startAt: timestamp("start_at", { withTimezone: true }).notNull(),
-    endAt: timestamp("end_at", { withTimezone: true }).notNull(),
     autoAccept: boolean("auto_accept").notNull(),
     sizeLimit: integer("size_limit").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
@@ -399,11 +397,40 @@ export const eventEvent = pgTable(
   ],
 );
 
-export const eventEventMember = pgTable(
-  "event_event_member",
+export const eventEventSchedule = pgTable(
+  "event_event_schedule",
   {
     id: serial("id").primaryKey(),
+    publicId: uuid("public_id").defaultRandom().notNull(),
     eventId: uuid("event_id").notNull(),
+    startAt: timestamp("start_at", { withTimezone: true }).notNull(),
+    endAt: timestamp("end_at", { withTimezone: true }).notNull(),
+    repeatStartAt: timestamp("repeat_start_at", {
+      withTimezone: true,
+    }).notNull(),
+    repeatEndAt: timestamp("repeat_end_at", { withTimezone: true }).notNull(),
+    repeatInterval: integer("repeat_interval").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  },
+  (table) => [
+    index("event_event_schedule_event_id_idx").on(table.eventId),
+    uniqueIndex("event_event_schedule_public_id_idx").on(table.publicId),
+  ],
+);
+
+export const eventScheduleMember = pgTable(
+  "event_schedule_member",
+  {
+    id: serial("id").primaryKey(),
+    scheduleId: uuid("schedule_id").notNull(),
+    repeatIndex: integer("repeat_index").notNull(),
     userId: uuid("user_id").notNull(),
     size: integer("size").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
@@ -416,10 +443,10 @@ export const eventEventMember = pgTable(
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
   },
   (table) => [
-    index("event_event_member_event_id_idx").on(table.eventId),
-    index("event_event_member_user_id_idx").on(table.userId),
-    uniqueIndex("event_event_member_event_id_user_id_idx").on(
-      table.eventId,
+    index("event_schedule_member_schedule_id_idx").on(table.scheduleId),
+    index("event_schedule_member_user_id_idx").on(table.userId),
+    uniqueIndex("event_schedule_member_schedule_id_user_id_idx").on(
+      table.scheduleId,
       table.userId,
     ),
   ],

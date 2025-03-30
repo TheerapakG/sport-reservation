@@ -21,11 +21,8 @@ export const handlerConfig = defineEventHandlerConfig({
       "description?": "string",
       "location?": ["number", "number"],
       "locationDescription?": "string",
-      startAt: "string", // ISO string format
-      endAt: "string", // ISO string format
       autoAccept: "boolean",
       sizeLimit: "number",
-      participants: "number",
     }),
     { stream: false },
   ),
@@ -45,10 +42,9 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     } = yield* EventParamsContext.typed<typeof handlerConfig>();
 
     const eventRepository = yield* EventRepository;
-    const { event, group, participants } =
-      yield* yield* eventRepository.getEvent({
-        eventId,
-      });
+    const { event, group } = yield* yield* eventRepository.getEvent({
+      eventId,
+    });
 
     const uploadClient = yield* UploadClient;
     const { url: image } = event.image
@@ -79,13 +75,10 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
       ...(event.locationDescription && {
         locationDescription: event.locationDescription,
       }),
-      startAt: event.startAt.toISOString(),
-      endAt: event.endAt.toISOString(),
       autoAccept: event.autoAccept,
       sizeLimit: event.sizeLimit,
       eventCreatorType: event.eventCreatorType,
       creator,
-      participants,
     };
   }),
 );

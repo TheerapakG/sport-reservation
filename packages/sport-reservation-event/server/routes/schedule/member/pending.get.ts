@@ -12,10 +12,10 @@ import { userProfile } from "sport-reservation-user/models";
 import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
 import { OAuthError } from "tiara-stack/models/errors";
 import { OAuthClient } from "~/layers";
-import { EventRepository } from "~/repositories/eventRepository";
+import { ScheduleRepository } from "~/repositories/scheduleRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
-  name: "getEventMemberPending",
+  name: "getPendingScheduleMembers",
   response: response(
     type({
       members: [
@@ -31,7 +31,8 @@ export const handlerConfig = defineEventHandlerConfig({
   ),
   query: params(
     type({
-      eventId: "string",
+      scheduleId: "string",
+      repeatIndex: "number",
     }),
   ),
 });
@@ -42,13 +43,14 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     const { access_token: accessToken } = parseCookies(event);
     const {
       params: {
-        query: { eventId },
+        query: { scheduleId, repeatIndex },
       },
     } = yield* EventParamsContext.typed<typeof handlerConfig>();
 
     const { client: oauthClient } = yield* OAuthClient;
 
-    const requesterId = yield* Effect.flatMap(
+    // Authenticate user
+    const userId = yield* Effect.flatMap(
       Effect.promise(async () =>
         getSubjectTypeFromToken({
           type: "user",
@@ -61,24 +63,27 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
         user ? Effect.succeed(user.id) : Effect.fail(new OAuthError()),
     );
 
-    const eventRepository = yield* EventRepository;
+    const scheduleRepository = yield* ScheduleRepository;
+    const scheduleOption = yield* scheduleRepository.getSchedule({
+      scheduleId,
+    });
 
-    const eventOption = yield* eventRepository.getEvent({ eventId });
     if (
       !Option.getEquivalence(Equivalence.string)(
-        Option.map(eventOption, (event) => event.group.creatorId),
-        Option.some(requesterId),
+        Option.map(scheduleOption, (schedule) => schedule.group.creatorId),
+        Option.some(userId),
       )
     ) {
       yield* Effect.fail(new OAuthError());
     }
 
-    const members = yield* eventRepository.getEventPendingMembers({
-      eventId,
+    const members = yield* scheduleRepository.getSchedulePendingMembers({
+      scheduleId,
+      repeatIndex,
     });
 
     const pendingMembers = members
-      .filter((member) => member.status === "pending")
+      .filter((member) => member.status === "member")
       .map((member) => ({
         userId: member.userId,
         size: member.size,

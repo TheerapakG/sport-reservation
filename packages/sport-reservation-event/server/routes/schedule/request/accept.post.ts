@@ -10,20 +10,16 @@ import { getSubjectTypeFromToken } from "sport-reservation-oauth-common/subjects
 import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
 import { OAuthError } from "tiara-stack/models/errors";
 import { OAuthClient } from "~/layers";
-import { EventRepository } from "~/repositories/eventRepository";
+import { ScheduleRepository } from "~/repositories/scheduleRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
-  name: "postUpdateEvent",
+  name: "postScheduleRequestAccept",
   response: response(type({}), { stream: false }),
   body: params(
     type({
-      eventId: "string",
-      "name?": "string",
-      "description?": "string",
-      "location?": ["number", "number"],
-      "locationDescription?": "string",
-      "autoAccept?": "boolean",
-      "sizeLimit?": "number",
+      scheduleId: "string",
+      repeatIndex: "number",
+      userId: "string",
     }),
   ),
 });
@@ -34,21 +30,13 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     const { access_token: accessToken } = parseCookies(event);
     const {
       params: {
-        body: {
-          eventId,
-          name,
-          description,
-          location,
-          locationDescription,
-          autoAccept,
-          sizeLimit,
-        },
+        body: { scheduleId, repeatIndex, userId },
       },
     } = yield* EventParamsContext.typed<typeof handlerConfig>();
 
     const { client: oauthClient } = yield* OAuthClient;
 
-    const userId = yield* Effect.flatMap(
+    const requesterId = yield* Effect.flatMap(
       Effect.promise(async () =>
         getSubjectTypeFromToken({
           type: "user",
@@ -61,25 +49,26 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
         user ? Effect.succeed(user.id) : Effect.fail(new OAuthError()),
     );
 
-    const eventRepository = yield* EventRepository;
-    const eventData = yield* eventRepository.getEvent({ eventId });
+    const scheduleRepository = yield* ScheduleRepository;
+
+    // Verify the requester is the creator of the schedule
+    const scheduleOption = yield* scheduleRepository.getSchedule({
+      scheduleId,
+    });
+
     if (
       !Option.getEquivalence(Equivalence.string)(
-        Option.map(eventData, (eventData) => eventData.group.creatorId),
-        Option.some(userId),
+        Option.map(scheduleOption, (schedule) => schedule.group.creatorId),
+        Option.some(requesterId),
       )
     ) {
       yield* Effect.fail(new OAuthError());
     }
 
-    yield* eventRepository.updateEvent({
-      eventId,
-      name,
-      description,
-      location,
-      locationDescription,
-      autoAccept,
-      sizeLimit,
+    yield* scheduleRepository.acceptScheduleJoin({
+      scheduleId,
+      repeatIndex,
+      userId,
     });
 
     return {};

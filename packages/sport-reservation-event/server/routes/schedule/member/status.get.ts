@@ -4,21 +4,25 @@ import {
   effectEventHandler,
 } from "$/effectEventHandler";
 import { type } from "arktype";
-import { Effect } from "effect";
+import { Effect, Option } from "effect";
 import { parseCookies } from "h3";
 import { getSubjectTypeFromToken } from "sport-reservation-oauth-common/subjects";
 import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
 import { OAuthError } from "tiara-stack/models/errors";
 import { OAuthClient } from "~/layers";
-import { EventRepository } from "~/repositories/eventRepository";
+import { ScheduleRepository } from "~/repositories/scheduleRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
-  name: "postEventRequestCreate",
-  response: response(type({}), { stream: false }),
-  body: params(
+  name: "getScheduleMemberStatus",
+  response: response(
     type({
-      eventId: "string",
-      size: "number",
+      status: "string | null",
+    }),
+    { stream: false },
+  ),
+  query: params(
+    type({
+      scheduleId: "string",
     }),
   ),
 });
@@ -29,7 +33,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     const { access_token: accessToken } = parseCookies(event);
     const {
       params: {
-        body: { eventId, size },
+        query: { scheduleId },
       },
     } = yield* EventParamsContext.typed<typeof handlerConfig>();
 
@@ -48,13 +52,14 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
         user ? Effect.succeed(user.id) : Effect.fail(new OAuthError()),
     );
 
-    const eventRepository = yield* EventRepository;
-    yield* eventRepository.requestEventJoin({
-      eventId,
+    const scheduleRepository = yield* ScheduleRepository;
+    const statusOption = yield* scheduleRepository.getScheduleMemberStatus({
+      scheduleId,
       userId,
-      size,
     });
 
-    return {};
+    return {
+      status: Option.isNone(statusOption) ? null : statusOption.value.status,
+    };
   }),
 );

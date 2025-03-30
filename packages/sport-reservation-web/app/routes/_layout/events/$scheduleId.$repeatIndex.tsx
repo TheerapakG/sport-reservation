@@ -1,19 +1,24 @@
 import {
-  getEventMemberListQueryOptions,
-  getEventQueryOptions,
+  getScheduleMemberListQueryOptions,
+  getScheduleQueryOptions,
 } from "@/api/event";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { type } from "arktype";
+import { Effect } from "effect";
+import { effectType } from "tiara-stack/utils/effectType";
 
 function EventDetailPage() {
-  const { eventId } = Route.useLoaderData();
+  const { scheduleId, repeatIndex } = Route.useLoaderData();
 
-  const eventQuery = useSuspenseQuery(getEventQueryOptions({ id: eventId }));
+  const scheduleQuery = useSuspenseQuery(
+    getScheduleQueryOptions({ id: scheduleId }),
+  );
   const memberListQuery = useSuspenseQuery(
-    getEventMemberListQueryOptions({ id: eventId }),
+    getScheduleMemberListQueryOptions({ id: scheduleId, repeatIndex }),
   );
 
-  if (!eventQuery.data.success) {
+  if (!scheduleQuery.data.success) {
     return <div className="p-4">Event not found!</div>;
   }
 
@@ -29,27 +34,30 @@ function EventDetailPage() {
 
       <div className="mb-4 rounded bg-white p-4 shadow">
         <h1 className="mb-1 text-2xl font-bold">
-          {eventQuery.data.event.name}
+          {scheduleQuery.data.schedule.group.name}
         </h1>
         <p className="mb-3 text-sm text-gray-500">
-          Hosted by {eventQuery.data.event.creator?.name}
+          Hosted by {scheduleQuery.data.schedule.event.creator?.name}
         </p>
         <img
-          src={eventQuery.data.event.image}
-          alt={eventQuery.data.event.name}
+          src={
+            scheduleQuery.data.schedule.event.image ||
+            "https://via.placeholder.com/40"
+          }
+          alt={scheduleQuery.data.schedule.event.creator?.name}
           className="mb-4 h-60 w-full rounded object-cover"
         />
         <div className="flex flex-col justify-between md:flex-row md:items-center">
           <div className="space-y-1">
             <h2 className="text-lg font-semibold">When</h2>
             <p className="text-sm text-gray-600">
-              {eventQuery.data.event.startAt}
+              {scheduleQuery.data.schedule.schedule.startAt.toLocaleString()}
             </p>
           </div>
           <div className="mt-4 space-y-1 md:mt-0">
             <h2 className="text-lg font-semibold">Where</h2>
             <p className="text-sm text-gray-600">
-              {eventQuery.data.event.locationDescription}
+              {scheduleQuery.data.schedule.event.locationDescription}
             </p>
           </div>
         </div>
@@ -58,11 +66,11 @@ function EventDetailPage() {
       <div className="mb-4 rounded bg-white p-4 shadow">
         <h2 className="mb-2 text-lg font-bold">About</h2>
         <p className="mb-4 text-sm text-gray-700">
-          {eventQuery.data.event.description}
+          {scheduleQuery.data.schedule.event.description}
         </p>
         <h2 className="mb-2 text-lg font-bold">
-          Participants ({eventQuery.data.event.participants}/
-          {eventQuery.data.event.sizeLimit})
+          Participants ({scheduleQuery.data.schedule.participants}/
+          {scheduleQuery.data.schedule.event.sizeLimit})
         </h2>
         <div className="flex items-center space-x-2">
           {memberListQuery.data.members
@@ -78,9 +86,9 @@ function EventDetailPage() {
                 <span className="mt-1 text-xs">{member.user?.name}</span>
               </div>
             ))}
-          {eventQuery.data.event.participants > 4 && (
+          {scheduleQuery.data.schedule.participants > 4 && (
             <p className="text-sm text-gray-600">
-              + {eventQuery.data.event.participants - 4} more
+              + {scheduleQuery.data.schedule.participants - 4} more
             </p>
           )}
         </div>
@@ -88,8 +96,8 @@ function EventDetailPage() {
 
       <div className="flex items-center justify-between rounded bg-white p-4 shadow">
         <p className="text-sm text-gray-600">
-          {eventQuery.data.event.participants}/{eventQuery.data.event.sizeLimit}{" "}
-          joined
+          {scheduleQuery.data.schedule.participants}/
+          {scheduleQuery.data.schedule.event.sizeLimit} joined
         </p>
         <button
           onClick={handleJoin}
@@ -102,12 +110,27 @@ function EventDetailPage() {
   );
 }
 
-export const Route = createFileRoute("/_layout/events/$eventId")({
-  component: EventDetailPage,
-  loader: async ({ context: { queryClient }, params: { eventId } }) => {
-    queryClient.prefetchQuery(getEventQueryOptions({ id: eventId }));
-    queryClient.prefetchQuery(getEventMemberListQueryOptions({ id: eventId }));
+const paramsType = type({
+  scheduleId: "string",
+  repeatIndex: "string.integer.parse",
+});
 
-    return { eventId };
+export const Route = createFileRoute(
+  "/_layout/events/$scheduleId/$repeatIndex",
+)({
+  component: EventDetailPage,
+  loader: async ({ context: { queryClient }, params }) => {
+    const { scheduleId, repeatIndex } = Effect.runSync(
+      effectType(paramsType, params),
+    );
+    queryClient.prefetchQuery(getScheduleQueryOptions({ id: scheduleId }));
+    queryClient.prefetchQuery(
+      getScheduleMemberListQueryOptions({
+        id: scheduleId,
+        repeatIndex,
+      }),
+    );
+
+    return { scheduleId, repeatIndex };
   },
 });

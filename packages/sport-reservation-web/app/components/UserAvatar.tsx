@@ -1,12 +1,9 @@
-import { currentUserProfileQueryOptions } from "@/api/oauth";
 import {
   AvatarFallback as AvatarFallbackPrimitive,
   AvatarImage as AvatarImagePrimitive,
   Avatar as AvatarPrimitive,
 } from "@/components/ui/avatar";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { Suspense } from "react";
 import { subjects } from "sport-reservation-oauth-common/subjects";
 
 const AvatarFallback = () => {
@@ -46,35 +43,13 @@ const UserAvatarImageBase = ({
   );
 };
 
-const CurrentUserAvatarImage = () => {
-  const currentUserProfileQuery = useSuspenseQuery(
-    currentUserProfileQueryOptions(),
-  );
-
-  return currentUserProfileQuery.data.profile ? (
-    <UserAvatarImageBase profile={currentUserProfileQuery.data.profile} />
-  ) : (
-    <AvatarFallback />
-  );
-};
-
-const CurrentUserAvatar = () => {
-  return (
-    <AvatarPrimitive>
-      <Suspense fallback={<AvatarFallback />}>
-        <CurrentUserAvatarImage />
-      </Suspense>
-    </AvatarPrimitive>
-  );
-};
-
-const NavUserAvatarImage = () => {
-  const currentUserProfileQuery = useSuspenseQuery(
-    currentUserProfileQueryOptions(),
-  );
-
-  return currentUserProfileQuery.data.profile ? (
-    <UserAvatarImageBase profile={currentUserProfileQuery.data.profile} />
+const NavUserAvatarImage = ({
+  profile,
+}: {
+  profile?: typeof subjects.user.infer;
+}) => {
+  return profile ? (
+    <UserAvatarImageBase profile={profile} />
   ) : (
     <Link to="/login" className="h-full w-full">
       <AvatarFallback />
@@ -82,14 +57,16 @@ const NavUserAvatarImage = () => {
   );
 };
 
-const NavUserAvatar = () => {
+const NavUserAvatar = ({
+  profile,
+}: {
+  profile?: typeof subjects.user.infer;
+}) => {
   return (
     <AvatarPrimitive>
-      <Suspense fallback={<AvatarFallback />}>
-        <NavUserAvatarImage />
-      </Suspense>
+      <NavUserAvatarImage profile={profile} />
     </AvatarPrimitive>
   );
 };
 
-export { CurrentUserAvatar, NavUserAvatar };
+export { NavUserAvatar };

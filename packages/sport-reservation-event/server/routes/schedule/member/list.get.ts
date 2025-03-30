@@ -1,13 +1,21 @@
-import { EventParamsContext, effectEventHandler } from "$/effectEventHandler";
+import {
+  EventContext,
+  EventParamsContext,
+  effectEventHandler,
+} from "$/effectEventHandler";
 import { type } from "arktype";
 import { Array, Effect } from "effect";
+import { parseCookies } from "h3";
+import { getSubjectTypeFromToken } from "sport-reservation-oauth-common/subjects";
 import { UserClient } from "sport-reservation-user/client";
 import { userProfile } from "sport-reservation-user/models";
 import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
-import { EventRepository } from "~/repositories/eventRepository";
+import { OAuthError } from "tiara-stack/models/errors";
+import { OAuthClient } from "~/layers";
+import { ScheduleRepository } from "~/repositories/scheduleRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
-  name: "getEventMemberList",
+  name: "getScheduleMemberList",
   response: response(
     type({
       members: [
@@ -23,23 +31,42 @@ export const handlerConfig = defineEventHandlerConfig({
   ),
   query: params(
     type({
-      eventId: "string",
+      scheduleId: "string",
+      repeatIndex: "number",
     }),
   ),
 });
 
 export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
   Effect.gen(function* () {
+    const { event } = yield* EventContext;
+    const { access_token: accessToken } = parseCookies(event);
     const {
       params: {
-        query: { eventId },
+        query: { scheduleId, repeatIndex },
       },
     } = yield* EventParamsContext.typed<typeof handlerConfig>();
 
-    const eventRepository = yield* EventRepository;
+    const { client: oauthClient } = yield* OAuthClient;
 
-    const members = yield* eventRepository.getEventMembers({
-      eventId,
+    // Authenticate user
+    yield* Effect.flatMap(
+      Effect.promise(async () =>
+        getSubjectTypeFromToken({
+          type: "user",
+          client: oauthClient,
+          accessToken,
+          refreshToken: undefined,
+        }),
+      ),
+      (user) =>
+        user ? Effect.succeed(user.id) : Effect.fail(new OAuthError()),
+    );
+
+    const scheduleRepository = yield* ScheduleRepository;
+    const members = yield* scheduleRepository.getScheduleMembers({
+      scheduleId,
+      repeatIndex,
     });
 
     const activeMembers = members

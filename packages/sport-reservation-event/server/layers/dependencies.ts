@@ -9,6 +9,7 @@ import {
   userClient,
 } from "~/layers";
 import { eventRepositoryImpl } from "~/repositories/eventRepositoryImpl";
+import { scheduleRepositoryImpl } from "~/repositories/scheduleRepositoryImpl";
 
 /*@__NO_SIDE_EFFECTS__*/
 const createConfigLive = () =>
@@ -23,7 +24,7 @@ const baseDependenciesLive = /*@__PURE__*/ Layer.mergeAll(configLive);
 
 /*@__NO_SIDE_EFFECTS__*/
 const createRepositoryLive = () =>
-  Layer.mergeAll(eventRepositoryImpl).pipe(
+  Layer.mergeAll(eventRepositoryImpl, scheduleRepositoryImpl).pipe(
     Layer.provide(dbLive),
     Layer.provide(runtimeConfig),
   );

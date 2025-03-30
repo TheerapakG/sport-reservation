@@ -4,26 +4,21 @@ import {
   effectEventHandler,
 } from "$/effectEventHandler";
 import { type } from "arktype";
-import { Effect, Equivalence, Option } from "effect";
+import { Effect } from "effect";
 import { parseCookies } from "h3";
 import { getSubjectTypeFromToken } from "sport-reservation-oauth-common/subjects";
 import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
 import { OAuthError } from "tiara-stack/models/errors";
 import { OAuthClient } from "~/layers";
-import { EventRepository } from "~/repositories/eventRepository";
+import { ScheduleRepository } from "~/repositories/scheduleRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
-  name: "postUpdateEvent",
+  name: "postScheduleMemberLeave",
   response: response(type({}), { stream: false }),
   body: params(
     type({
-      eventId: "string",
-      "name?": "string",
-      "description?": "string",
-      "location?": ["number", "number"],
-      "locationDescription?": "string",
-      "autoAccept?": "boolean",
-      "sizeLimit?": "number",
+      scheduleId: "string",
+      repeatIndex: "number",
     }),
   ),
 });
@@ -34,15 +29,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     const { access_token: accessToken } = parseCookies(event);
     const {
       params: {
-        body: {
-          eventId,
-          name,
-          description,
-          location,
-          locationDescription,
-          autoAccept,
-          sizeLimit,
-        },
+        body: { scheduleId, repeatIndex },
       },
     } = yield* EventParamsContext.typed<typeof handlerConfig>();
 
@@ -61,25 +48,13 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
         user ? Effect.succeed(user.id) : Effect.fail(new OAuthError()),
     );
 
-    const eventRepository = yield* EventRepository;
-    const eventData = yield* eventRepository.getEvent({ eventId });
-    if (
-      !Option.getEquivalence(Equivalence.string)(
-        Option.map(eventData, (eventData) => eventData.group.creatorId),
-        Option.some(userId),
-      )
-    ) {
-      yield* Effect.fail(new OAuthError());
-    }
+    const scheduleRepository = yield* ScheduleRepository;
 
-    yield* eventRepository.updateEvent({
-      eventId,
-      name,
-      description,
-      location,
-      locationDescription,
-      autoAccept,
-      sizeLimit,
+    // User removing themselves from the schedule
+    yield* scheduleRepository.removeMember({
+      scheduleId,
+      repeatIndex,
+      userId,
     });
 
     return {};

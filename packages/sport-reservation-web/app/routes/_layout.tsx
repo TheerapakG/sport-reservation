@@ -1,4 +1,3 @@
-import { currentUserProfileQueryOptions } from "@/api/oauth";
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -6,18 +5,21 @@ import {
   NavigationMenuList,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import { NavUserAvatar } from "@/components/userAvatar";
+import { NavUserAvatar } from "@/components/UserAvatar";
 import {
   CatchBoundary,
   createFileRoute,
   Link,
   Outlet,
 } from "@tanstack/react-router";
+import { subjects } from "sport-reservation-oauth-common/subjects";
 
 const WrappingLayoutComponent = ({
   children,
+  user,
 }: {
   children: React.ReactNode;
+  user?: typeof subjects.user.infer;
 }) => {
   return (
     <>
@@ -94,7 +96,7 @@ const WrappingLayoutComponent = ({
                 </NavigationMenuItem>
               </NavigationMenuList>
             </NavigationMenu>
-            <NavUserAvatar />
+            <NavUserAvatar profile={user} />
           </div>
         </div>
       </header>
@@ -113,16 +115,20 @@ const WrappingLayoutComponent = ({
 };
 
 function LayoutComponent() {
+  const { user } = Route.useLoaderData();
+
   return (
-    <WrappingLayoutComponent>
+    <WrappingLayoutComponent user={user.profile}>
       <Outlet />
     </WrappingLayoutComponent>
   );
 }
 
 function NotFoundLayoutComponent() {
+  const { user } = Route.useLoaderData();
+
   return (
-    <WrappingLayoutComponent>
+    <WrappingLayoutComponent user={user.profile}>
       <div className="p-2">
         <h3>Not Found!</h3>
       </div>
@@ -131,8 +137,8 @@ function NotFoundLayoutComponent() {
 }
 
 export const Route = createFileRoute("/_layout")({
-  loader: async ({ context: { queryClient } }) => {
-    queryClient.prefetchQuery(currentUserProfileQueryOptions());
+  loader: async ({ context: { user } }) => {
+    return { user };
   },
   component: LayoutComponent,
   notFoundComponent: NotFoundLayoutComponent,

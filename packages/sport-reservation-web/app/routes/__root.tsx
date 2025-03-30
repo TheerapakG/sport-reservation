@@ -1,9 +1,14 @@
-import { HeadContent, Outlet, Scripts } from "@tanstack/react-router";
-import React from "react";
-
+import { currentUserProfileQueryOptions } from "@/api/oauth";
 import appCss from "@/styles/app.css?url";
 import { QueryClient } from "@tanstack/react-query";
-import { createRootRouteWithContext } from "@tanstack/react-router";
+import {
+  createRootRouteWithContext,
+  HeadContent,
+  Outlet,
+  Scripts,
+} from "@tanstack/react-router";
+import React from "react";
+import { subjects } from "sport-reservation-oauth-common/subjects";
 
 const TanStackRouterDevtools =
   import.meta.env.MODE === "production"
@@ -41,6 +46,7 @@ const RootComponent = () => {
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
+  user?: typeof subjects.user.infer;
   assessment?: {
     step: number;
     performance?: {
@@ -51,8 +57,7 @@ export const Route = createRootRouteWithContext<{
   head: () => ({
     meta: [
       {
-        title:
-          "TanStack Start | Type-Safe, Client-First, Full-Stack React Framework",
+        title: "Spark | Sport Activity Matching",
       },
       {
         charSet: "UTF-8",
@@ -67,5 +72,12 @@ export const Route = createRootRouteWithContext<{
       { rel: "manifest", href: "/manifest.json" },
     ],
   }),
+  beforeLoad: async ({ context: { queryClient } }) => {
+    const user = await queryClient.ensureQueryData(
+      currentUserProfileQueryOptions(),
+    );
+
+    return { user };
+  },
   component: RootComponent,
 });

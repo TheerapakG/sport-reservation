@@ -10,14 +10,15 @@ import { getSubjectTypeFromToken } from "sport-reservation-oauth-common/subjects
 import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
 import { OAuthError } from "tiara-stack/models/errors";
 import { OAuthClient } from "~/layers";
-import { EventRepository } from "~/repositories/eventRepository";
+import { ScheduleRepository } from "~/repositories/scheduleRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
-  name: "postEventRequestAccept",
+  name: "postScheduleRequestReject",
   response: response(type({}), { stream: false }),
   body: params(
     type({
-      eventId: "string",
+      scheduleId: "string",
+      repeatIndex: "number",
       userId: "string",
     }),
   ),
@@ -29,7 +30,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     const { access_token: accessToken } = parseCookies(event);
     const {
       params: {
-        body: { eventId, userId },
+        body: { scheduleId, repeatIndex, userId },
       },
     } = yield* EventParamsContext.typed<typeof handlerConfig>();
 
@@ -48,20 +49,28 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
         user ? Effect.succeed(user.id) : Effect.fail(new OAuthError()),
     );
 
-    const eventRepository = yield* EventRepository;
+    const scheduleRepository = yield* ScheduleRepository;
 
-    const eventOption = yield* eventRepository.getEvent({ eventId });
+    // Verify the requester is the creator of the schedule
+    const scheduleOption = yield* scheduleRepository.getSchedule({
+      scheduleId,
+    });
+    if (Option.isNone(scheduleOption)) {
+      yield* Effect.fail(new OAuthError());
+    }
+
     if (
       !Option.getEquivalence(Equivalence.string)(
-        Option.map(eventOption, (event) => event.group.creatorId),
+        Option.map(scheduleOption, (schedule) => schedule.group.creatorId),
         Option.some(requesterId),
       )
     ) {
       yield* Effect.fail(new OAuthError());
     }
 
-    yield* eventRepository.acceptEventJoin({
-      eventId,
+    yield* scheduleRepository.rejectScheduleJoin({
+      scheduleId,
+      repeatIndex,
       userId,
     });
 

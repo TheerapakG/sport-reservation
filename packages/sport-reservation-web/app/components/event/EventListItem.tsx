@@ -1,12 +1,15 @@
 // src/components/EventListing.tsx
 import { Link } from "@tanstack/react-router"; // Import Link from TanStack Router
+import { format } from "date-fns";
 import { MapPin, Users } from "lucide-react"; // or your icon library
 import React, { useState } from "react";
 
 type EventListingProps = {
-  eventId: string; // Ensure eventId is provided
+  scheduleId: string;
+  repeatIndex: number;
   image?: string;
-  dateTime: string;
+  startAt: Date;
+  endAt: Date;
   name?: string;
   description?: string;
   locationDescription?: string;
@@ -15,8 +18,11 @@ type EventListingProps = {
 };
 
 export default function EventListItem({
-  eventId,
-  dateTime,
+  scheduleId,
+  repeatIndex,
+  image,
+  startAt,
+  endAt,
   name,
   description,
   locationDescription,
@@ -56,7 +62,10 @@ export default function EventListItem({
       <div className="mb-4 flex max-w-3xl space-x-4 rounded-md bg-white p-4 shadow">
         {/* Bigger Event Image */}
         <img
-          src="https://cdn.theerapakg.moe/reservation/asset/events/badminton-default.jpg"
+          src={
+            image ??
+            "https://cdn.theerapakg.moe/reservation/asset/events/badminton-default.jpg"
+          }
           alt={name}
           className="h-32 w-48 rounded-md object-cover"
         />
@@ -64,14 +73,16 @@ export default function EventListItem({
         {/* Event Details */}
         <div className="flex w-full flex-col justify-between">
           <div>
-            <p className="mb-1 text-sm text-[#F28382]">{dateTime}</p>
+            <p className="mb-1 text-sm text-[#F28382]">
+              {format(startAt, "HH:mm")} - {format(endAt, "HH:mm")}
+            </p>
             {/*
               Using an absolute link to ensure the URL is correct.
               This will navigate to: /_layout/events/{eventId}
             */}
             <Link
-              to={`/events/$eventId`}
-              params={{ eventId }}
+              to={`/events/$scheduleId/$repeatIndex`}
+              params={{ scheduleId, repeatIndex: repeatIndex.toString() }}
               className="mb-1 block text-base font-semibold text-blue-600 underline"
             >
               {name}
@@ -113,7 +124,9 @@ export default function EventListItem({
               className="h-32 w-full rounded object-cover"
             />
             <h4 className="mt-2 text-lg font-semibold">{name}</h4>
-            <p className="text-sm text-gray-600">{dateTime}</p>
+            <p className="text-sm text-gray-600">
+              {format(startAt, "HH:mm")} - {format(endAt, "HH:mm")}
+            </p>
             <p className="mb-2 text-sm text-gray-600">{locationDescription}</p>
 
             <div className="mb-2 text-center text-lg font-semibold">
@@ -172,7 +185,9 @@ export default function EventListItem({
               className="h-32 w-full rounded object-cover"
             />
             <h4 className="mt-2 text-lg font-semibold">{name}</h4>
-            <p className="text-sm text-gray-600">{dateTime}</p>
+            <p className="text-sm text-gray-600">
+              {format(startAt, "HH:mm")} - {format(endAt, "HH:mm")}
+            </p>
             <p className="mb-2 text-sm text-gray-600">{locationDescription}</p>
             <div className="mt-4 flex flex-col items-center">
               <button

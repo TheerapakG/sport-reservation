@@ -4,21 +4,31 @@ import {
   effectEventHandler,
 } from "$/effectEventHandler";
 import { type } from "arktype";
-import { Effect, Equivalence, Option } from "effect";
+import { Effect } from "effect";
 import { parseCookies } from "h3";
 import { getSubjectTypeFromToken } from "sport-reservation-oauth-common/subjects";
 import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
 import { OAuthError } from "tiara-stack/models/errors";
 import { OAuthClient } from "~/layers";
 import { EventRepository } from "~/repositories/eventRepository";
+import { ScheduleRepository } from "~/repositories/scheduleRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
-  name: "postEventRequestReject",
-  response: response(type({}), { stream: false }),
+  name: "postCreateSchedule",
+  response: response(
+    type({
+      scheduleId: "string",
+    }),
+    { stream: false },
+  ),
   body: params(
     type({
       eventId: "string",
-      userId: "string",
+      startAt: "string.date.parse",
+      endAt: "string.date.parse",
+      repeatStartAt: "string.date.parse",
+      repeatEndAt: "string.date.parse",
+      repeatInterval: "number",
     }),
   ),
 });
@@ -29,13 +39,20 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     const { access_token: accessToken } = parseCookies(event);
     const {
       params: {
-        body: { eventId, userId },
+        body: {
+          eventId,
+          startAt,
+          endAt,
+          repeatStartAt,
+          repeatEndAt,
+          repeatInterval,
+        },
       },
     } = yield* EventParamsContext.typed<typeof handlerConfig>();
 
     const { client: oauthClient } = yield* OAuthClient;
 
-    const requesterId = yield* Effect.flatMap(
+    const userId = yield* Effect.flatMap(
       Effect.promise(async () =>
         getSubjectTypeFromToken({
           type: "user",
@@ -48,23 +65,34 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
         user ? Effect.succeed(user.id) : Effect.fail(new OAuthError()),
     );
 
+    // Verify user has access to the event
     const eventRepository = yield* EventRepository;
+    const eventData = yield* eventRepository.getEvent({ eventId });
 
-    const eventOption = yield* eventRepository.getEvent({ eventId });
+    if (!eventData) {
+      yield* Effect.fail(new OAuthError());
+    }
+
+    // Verify the user is the creator of the event
     if (
-      !Option.getEquivalence(Equivalence.string)(
-        Option.map(eventOption, (event) => event.group.creatorId),
-        Option.some(requesterId),
-      )
+      eventData._tag === "Some" &&
+      eventData.value.group.creatorId !== userId
     ) {
       yield* Effect.fail(new OAuthError());
     }
 
-    yield* eventRepository.rejectEventJoin({
+    const scheduleRepository = yield* ScheduleRepository;
+    const result = yield* scheduleRepository.createSchedule({
       eventId,
-      userId,
+      startAt,
+      endAt,
+      repeatStartAt,
+      repeatEndAt,
+      repeatInterval,
     });
 
-    return {};
+    return {
+      scheduleId: result.scheduleId,
+    };
   }),
 );

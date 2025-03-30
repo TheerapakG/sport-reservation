@@ -4,20 +4,20 @@ import {
   effectEventHandler,
 } from "$/effectEventHandler";
 import { type } from "arktype";
-import { Effect, Equivalence, Option } from "effect";
+import { Effect } from "effect";
 import { parseCookies } from "h3";
 import { getSubjectTypeFromToken } from "sport-reservation-oauth-common/subjects";
 import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
 import { OAuthError } from "tiara-stack/models/errors";
 import { OAuthClient } from "~/layers";
-import { EventRepository } from "~/repositories/eventRepository";
+import { ScheduleRepository } from "~/repositories/scheduleRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
-  name: "postEventMemberLeave",
+  name: "postDeleteSchedule",
   response: response(type({}), { stream: false }),
   body: params(
     type({
-      eventId: "string",
+      scheduleId: "string",
     }),
   ),
 });
@@ -28,7 +28,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     const { access_token: accessToken } = parseCookies(event);
     const {
       params: {
-        body: { eventId },
+        body: { scheduleId },
       },
     } = yield* EventParamsContext.typed<typeof handlerConfig>();
 
@@ -47,20 +47,25 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
         user ? Effect.succeed(user.id) : Effect.fail(new OAuthError()),
     );
 
-    const eventRepository = yield* EventRepository;
-    const eventOption = yield* eventRepository.getEvent({ eventId });
+    const scheduleRepository = yield* ScheduleRepository;
+
+    // Verify user has access to the schedule
+    const scheduleData = yield* scheduleRepository.getSchedule({ scheduleId });
+
+    if (!scheduleData) {
+      yield* Effect.fail(new OAuthError());
+    }
+
+    // Verify user is the creator of the event
     if (
-      Option.getEquivalence(Equivalence.string)(
-        Option.map(eventOption, (event) => event.group.creatorId),
-        Option.some(userId),
-      )
+      scheduleData._tag === "Some" &&
+      scheduleData.value.event.creatorId !== userId
     ) {
       yield* Effect.fail(new OAuthError());
     }
 
-    yield* eventRepository.removeMember({
-      eventId,
-      userId,
+    yield* scheduleRepository.deleteSchedule({
+      scheduleId,
     });
 
     return {};

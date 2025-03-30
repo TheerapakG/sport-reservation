@@ -1,5 +1,5 @@
 // src/routes/events.tsx
-import { getEventListInfiniteQueryOptions } from "@/api/event";
+import { getScheduleListInfiniteQueryOptions } from "@/api/event";
 import Calendar from "@/components/calendar";
 import EventListItem from "@/components/event/EventListItem";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,7 @@ import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { type } from "arktype";
-import { startOfToday } from "date-fns";
+import { addSeconds, startOfToday } from "date-fns";
 import { formatWithOptions } from "date-fns/fp";
 import { enUS } from "date-fns/locale";
 import { Suspense, useEffect, useRef, useState } from "react";
@@ -445,28 +445,28 @@ const EventList = ({ className }: { className?: string }) => {
   );
 
   const {
-    data: eventsData,
-    hasNextPage: eventsHasNextPage,
-    fetchNextPage: eventsFetchNextPage,
-    isFetchingNextPage: eventsIsFetchingNextPage,
+    data: schedulesData,
+    hasNextPage: schedulesHasNextPage,
+    fetchNextPage: schedulesFetchNextPage,
+    isFetchingNextPage: schedulesIsFetchingNextPage,
   } = useSuspenseInfiniteQuery(
-    getEventListInfiniteQueryOptions({
+    getScheduleListInfiniteQueryOptions({
       date: defaultedDate,
       limit: 10,
     }),
   );
 
-  const flattenedEvents =
-    eventsData?.pages
+  const flattenedSchedules =
+    schedulesData?.pages
       ?.filter((page) => page.success)
-      .flatMap((page) => page.events) ?? [];
+      .flatMap((page) => page.schedules) ?? [];
 
   const parentRef = useRef<HTMLDivElement>(null);
 
   const rowVirtualizer = useVirtualizer({
-    count: eventsHasNextPage
-      ? flattenedEvents.length + 1
-      : flattenedEvents.length,
+    count: schedulesHasNextPage
+      ? flattenedSchedules.length + 1
+      : flattenedSchedules.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 184,
     overscan: 5,
@@ -481,34 +481,35 @@ const EventList = ({ className }: { className?: string }) => {
 
     if (
       virtualItems[virtualItems.length - 1].index >=
-        flattenedEvents.length - 1 &&
-      eventsHasNextPage &&
-      !eventsIsFetchingNextPage
+        flattenedSchedules.length - 1 &&
+      schedulesHasNextPage &&
+      !schedulesIsFetchingNextPage
     ) {
-      eventsFetchNextPage();
+      schedulesFetchNextPage();
     }
   }, [
-    eventsHasNextPage,
-    eventsFetchNextPage,
-    flattenedEvents.length,
-    eventsIsFetchingNextPage,
+    schedulesHasNextPage,
+    schedulesFetchNextPage,
+    flattenedSchedules.length,
+    schedulesIsFetchingNextPage,
     virtualItems,
   ]);
 
   return (
     <main className={className} ref={parentRef}>
-      {flattenedEvents.length > 0 || eventsHasNextPage ? (
+      {flattenedSchedules.length > 0 || schedulesHasNextPage ? (
         <div ref={parentRef} className="overflow-y-auto">
           <div
             className="relative"
             style={{ height: `${rowVirtualizer.getTotalSize()}px` }}
           >
             {virtualItems.map((virtualRow) => {
-              const isLoaderRow = virtualRow.index > flattenedEvents.length - 1;
-              const event = flattenedEvents[virtualRow.index];
+              const isLoaderRow =
+                virtualRow.index > flattenedSchedules.length - 1;
+              const schedule = flattenedSchedules[virtualRow.index];
 
               return isLoaderRow ? (
-                eventsHasNextPage ? (
+                schedulesHasNextPage ? (
                   <div className="text-center text-gray-500">
                     Loading more...
                   </div>
@@ -519,13 +520,21 @@ const EventList = ({ className }: { className?: string }) => {
                 )
               ) : (
                 <EventListItem
-                  key={event.eventId}
-                  eventId={event.eventId}
-                  name={event.name}
-                  dateTime={event.startAt}
-                  description={event.description}
-                  locationDescription={event.locationDescription}
-                  participants={event.participants}
+                  key={schedule.schedule.id}
+                  scheduleId={schedule.schedule.id}
+                  repeatIndex={schedule.repeatIndex}
+                  name={schedule.group.name}
+                  startAt={addSeconds(
+                    schedule.schedule.startAt,
+                    schedule.repeatIndex * schedule.schedule.repeatInterval,
+                  )}
+                  endAt={addSeconds(
+                    schedule.schedule.endAt,
+                    schedule.repeatIndex * schedule.schedule.repeatInterval,
+                  )}
+                  description={schedule.event.description}
+                  locationDescription={schedule.event.locationDescription}
+                  participants={schedule.participants}
                 />
               );
             })}
@@ -567,7 +576,7 @@ export const Route = createFileRoute("/_layout/events/")({
   loader: async ({ context: { queryClient }, deps: { date } }) => {
     if (date) {
       queryClient.prefetchInfiniteQuery(
-        getEventListInfiniteQueryOptions({
+        getScheduleListInfiniteQueryOptions({
           date,
           limit: 10,
         }),

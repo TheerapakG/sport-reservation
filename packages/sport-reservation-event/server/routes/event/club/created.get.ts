@@ -19,11 +19,8 @@ export const handlerConfig = defineEventHandlerConfig({
           "description?": "string",
           "location?": ["number", "number"],
           "locationDescription?": "string",
-          startAt: "string",
-          endAt: "string",
           autoAccept: "boolean",
           sizeLimit: "number",
-          participants: "number",
         },
         "[]",
       ],
@@ -52,7 +49,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     const uploadClient = yield* UploadClient;
 
     const formattedEvents = yield* Effect.all(
-      events.map(({ event, group, participants }) =>
+      events.map(({ event, group }) =>
         Effect.gen(function* () {
           const { url: image } = event.image
             ? yield* uploadClient.getDownloadPresignedUrl({
@@ -69,13 +66,10 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
             ...(event.locationDescription && {
               locationDescription: event.locationDescription,
             }),
-            startAt: event.startAt.toISOString(),
-            endAt: event.endAt.toISOString(),
             autoAccept: event.autoAccept,
             sizeLimit: event.sizeLimit,
             eventCreatorType: event.eventCreatorType,
             creatorId: event.creatorId,
-            participants,
           };
         }),
       ),

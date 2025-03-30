@@ -4,21 +4,22 @@ import {
   effectEventHandler,
 } from "$/effectEventHandler";
 import { type } from "arktype";
-import { Effect, Equivalence, Option } from "effect";
+import { Effect } from "effect";
 import { parseCookies } from "h3";
 import { getSubjectTypeFromToken } from "sport-reservation-oauth-common/subjects";
 import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
 import { OAuthError } from "tiara-stack/models/errors";
 import { OAuthClient } from "~/layers";
-import { EventRepository } from "~/repositories/eventRepository";
+import { ScheduleRepository } from "~/repositories/scheduleRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
-  name: "postEventMemberRemove",
+  name: "postScheduleRequestCreate",
   response: response(type({}), { stream: false }),
   body: params(
     type({
-      eventId: "string",
-      userId: "string",
+      scheduleId: "string",
+      repeatIndex: "number",
+      size: "number",
     }),
   ),
 });
@@ -29,13 +30,13 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     const { access_token: accessToken } = parseCookies(event);
     const {
       params: {
-        body: { eventId, userId },
+        body: { scheduleId, repeatIndex, size },
       },
     } = yield* EventParamsContext.typed<typeof handlerConfig>();
 
     const { client: oauthClient } = yield* OAuthClient;
 
-    const requesterId = yield* Effect.flatMap(
+    const userId = yield* Effect.flatMap(
       Effect.promise(async () =>
         getSubjectTypeFromToken({
           type: "user",
@@ -48,21 +49,12 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
         user ? Effect.succeed(user.id) : Effect.fail(new OAuthError()),
     );
 
-    const eventRepository = yield* EventRepository;
-    const eventOption = yield* eventRepository.getEvent({ eventId });
-    if (
-      requesterId === userId ||
-      !Option.getEquivalence(Equivalence.string)(
-        Option.map(eventOption, (event) => event.group.creatorId),
-        Option.some(requesterId),
-      )
-    ) {
-      yield* Effect.fail(new OAuthError());
-    }
-
-    yield* eventRepository.removeMember({
-      eventId,
+    const scheduleRepository = yield* ScheduleRepository;
+    yield* scheduleRepository.requestScheduleJoin({
+      scheduleId,
+      repeatIndex,
       userId,
+      size,
     });
 
     return {};
