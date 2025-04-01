@@ -12,23 +12,20 @@ import { EventRepository } from "~/repositories/eventRepository";
 export const handlerConfig = defineEventHandlerConfig({
   name: "getUserCreatedEvents",
   response: response(
-    type({
-      events: [
-        {
-          eventId: "string",
-          eventCreatorType: "string",
-          creatorId: "string",
-          "name?": "string",
-          "image?": "string",
-          "description?": "string",
-          "location?": ["number", "number"],
-          "locationDescription?": "string",
-          autoAccept: "boolean",
-          sizeLimit: "number",
-        },
-        "[]",
-      ],
-    }),
+    type([
+      {
+        eventId: "string",
+        "name?": "string",
+        "image?": "string",
+        "description?": "string",
+        "locationDescription?": "string",
+        autoAccept: "boolean",
+        sizeLimit: "number",
+        skillLevel: "('beginner' | 'intermediate' | 'advanced')[]",
+        sportType: "('badminton' | 'tennis' | 'running')[]",
+      },
+      "[]",
+    ]),
     { stream: false },
   ),
 });
@@ -40,7 +37,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
 
     const { client: oauthClient } = yield* OAuthClient;
 
-    const userId = yield* Effect.flatMap(
+    const user = yield* Effect.flatMap(
       Effect.promise(async () =>
         getSubjectTypeFromToken({
           type: "user",
@@ -49,18 +46,19 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
           refreshToken: undefined,
         }),
       ),
-      (user) =>
-        user ? Effect.succeed(user.id) : Effect.fail(new OAuthError()),
+      (user) => (user ? Effect.succeed(user) : Effect.fail(new OAuthError())),
     );
 
     const eventRepository = yield* EventRepository;
-
-    const events = yield* eventRepository.getUserCreatedEvents({ userId });
+    const events = yield* eventRepository.getUserCreatedEvents({
+      userId: user.id,
+    });
 
     const uploadClient = yield* UploadClient;
 
-    const formattedEvents = yield* Effect.all(
-      events.map(({ event, group }) =>
+    return yield* Effect.forEach(
+      events,
+      ({ event, group, skillLevel, sportType }) =>
         Effect.gen(function* () {
           const { url: image } = event.image
             ? yield* uploadClient.getDownloadPresignedUrl({
@@ -73,19 +71,15 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
             ...(group.name && { name: group.name }),
             ...(image && { image }),
             ...(event.description && { description: event.description }),
-            ...(event.location && { location: event.location }),
             ...(event.locationDescription && {
               locationDescription: event.locationDescription,
             }),
             autoAccept: event.autoAccept,
             sizeLimit: event.sizeLimit,
-            eventCreatorType: event.eventCreatorType,
-            creatorId: event.creatorId,
+            skillLevel: skillLevel.map((sl) => sl.skillLevel),
+            sportType: sportType.map((st) => st.sportType),
           };
         }),
-      ),
     );
-
-    return { events: formattedEvents };
   }),
 );

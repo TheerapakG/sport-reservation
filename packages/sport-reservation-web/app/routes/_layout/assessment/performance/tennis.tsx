@@ -12,11 +12,11 @@ function RouteComponent() {
 
   const form = useAppForm({
     defaultValues: {
-      skillRating: "" as "" | number,
-      years: "" as "" | number,
-      stroke: "" as string,
-      format: "" as string,
-      hours: "" as "" | number,
+      skillLevel: undefined as undefined | number,
+      yearsOfExperience: undefined as undefined | number,
+      strokeStyle: undefined as undefined | string,
+      playFormat: undefined as undefined | string,
+      playDuration: undefined as undefined | number,
     },
     validators: {
       onSubmit: getMatchingClientBodyType("createTennisAssessmentV1"),
@@ -36,10 +36,17 @@ function RouteComponent() {
   });
 
   return (
-    <form className="space-y-6">
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        form.handleSubmit();
+      }}
+      className="space-y-6"
+    >
       {/* Q1: Overall tennis skill */}
       <form.AppField
-        name="skillRating"
+        name="skillLevel"
         children={(field) => (
           <field.SingleChoiceField
             label="1. How would you rate your overall tennis skill?"
@@ -50,14 +57,14 @@ function RouteComponent() {
               { label: "4: Advanced", value: 4 },
               { label: "5: Expert", value: 5 },
             ]}
-            spread
+            variant="spread"
           />
         )}
       />
 
       {/* Q2: Years playing tennis */}
       <form.AppField
-        name="years"
+        name="yearsOfExperience"
         children={(field) => (
           <field.NumericInputField
             label="2. How many years have you been playing tennis?"
@@ -71,7 +78,7 @@ function RouteComponent() {
 
       {/* Q3: Stroke proficiency */}
       <form.AppField
-        name="stroke"
+        name="strokeStyle"
         children={(field) => (
           <field.SingleChoiceField
             label="3. Which stroke do you excel at?"
@@ -87,7 +94,7 @@ function RouteComponent() {
 
       {/* Q4: Preferred format */}
       <form.AppField
-        name="format"
+        name="playFormat"
         children={(field) => (
           <field.SingleChoiceField
             label="4. Which best describes your preferred format of playing?"
@@ -102,7 +109,7 @@ function RouteComponent() {
 
       {/* Q5: Hours per week */}
       <form.AppField
-        name="hours"
+        name="playDuration"
         children={(field) => (
           <field.NumericInputField
             label="5. On average, how many hours per week do you play or practice tennis?"
@@ -131,11 +138,6 @@ function RouteComponent() {
             <button
               type="submit"
               disabled={!canSubmit}
-              onClick={() => {
-                router.navigate({
-                  to: "/assessment/matching",
-                });
-              }}
               className="rounded bg-gradient-to-r from-[#65D1F8] to-[#6CCFD0] px-4 py-2 text-white hover:opacity-90"
             >
               {isSubmitting ? "Saving..." : "Save and continue"}

@@ -1,6 +1,11 @@
 import { SqlError } from "@effect/sql";
 import { Context, Effect, Option } from "effect";
-import { eventEvent, userUserGroup } from "sport-reservation-db/schema";
+import {
+  eventEvent,
+  eventEventSkillLevel,
+  eventEventSport,
+  userUserGroup,
+} from "sport-reservation-db/schema";
 
 export class EventRepository
   extends /*@__PURE__*/ Context.Tag("EventRepository")<
@@ -14,6 +19,8 @@ export class EventRepository
         locationDescription?: string;
         autoAccept: boolean;
         sizeLimit: number;
+        skillLevel: ("beginner" | "intermediate" | "advanced")[];
+        sportType: ("badminton" | "tennis" | "running")[];
       }) => Effect.Effect<
         {
           eventId: string;
@@ -28,6 +35,8 @@ export class EventRepository
         locationDescription?: string;
         autoAccept: boolean;
         sizeLimit: number;
+        skillLevel: ("beginner" | "intermediate" | "advanced")[];
+        sportType: ("badminton" | "tennis" | "running")[];
       }) => Effect.Effect<
         Option.Option<{
           eventId: string;
@@ -37,6 +46,7 @@ export class EventRepository
       updateEvent: (data: {
         eventId: string;
         name?: string;
+        image?: string;
         description?: string;
         location?: [number, number];
         locationDescription?: string;
@@ -45,6 +55,22 @@ export class EventRepository
         autoAccept?: boolean;
         sizeLimit?: number;
       }) => Effect.Effect<void, SqlError.SqlError>;
+      addEventSkillLevel: (data: {
+        eventId: string;
+        skillLevel: ("beginner" | "intermediate" | "advanced")[];
+      }) => Effect.Effect<void, SqlError.SqlError>;
+      addEventSportType: (data: {
+        eventId: string;
+        sportType: ("badminton" | "tennis" | "running")[];
+      }) => Effect.Effect<void, SqlError.SqlError>;
+      removeEventSkillLevel: (data: {
+        eventId: string;
+        skillLevel: ("beginner" | "intermediate" | "advanced")[];
+      }) => Effect.Effect<void, SqlError.SqlError>;
+      removeEventSportType: (data: {
+        eventId: string;
+        sportType: ("badminton" | "tennis" | "running")[];
+      }) => Effect.Effect<void, SqlError.SqlError>;
       deleteEvent: (data: {
         eventId: string;
       }) => Effect.Effect<void, SqlError.SqlError>;
@@ -52,6 +78,8 @@ export class EventRepository
         Option.Option<{
           event: typeof eventEvent.$inferSelect;
           group: typeof userUserGroup.$inferSelect;
+          skillLevel: (typeof eventEventSkillLevel.$inferSelect)[];
+          sportType: (typeof eventEventSport.$inferSelect)[];
         }>,
         SqlError.SqlError
       >;
@@ -59,6 +87,8 @@ export class EventRepository
         {
           event: typeof eventEvent.$inferSelect;
           group: typeof userUserGroup.$inferSelect;
+          skillLevel: (typeof eventEventSkillLevel.$inferSelect)[];
+          sportType: (typeof eventEventSport.$inferSelect)[];
         }[],
         SqlError.SqlError
       >;
@@ -66,6 +96,8 @@ export class EventRepository
         {
           event: typeof eventEvent.$inferSelect;
           group: typeof userUserGroup.$inferSelect;
+          skillLevel: (typeof eventEventSkillLevel.$inferSelect)[];
+          sportType: (typeof eventEventSport.$inferSelect)[];
         }[],
         SqlError.SqlError
       >;

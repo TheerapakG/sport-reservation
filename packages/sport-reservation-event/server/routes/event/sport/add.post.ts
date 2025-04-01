@@ -7,27 +7,18 @@ import { type } from "arktype";
 import { Effect, Equivalence, Option } from "effect";
 import { parseCookies } from "h3";
 import { getSubjectTypeFromToken } from "sport-reservation-oauth-common/subjects";
-import { UploadClient } from "sport-reservation-upload/client";
-import { getUploadClientBodyType } from "sport-reservation-upload/models";
 import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
 import { OAuthError } from "tiara-stack/models/errors";
-import { typedFormData } from "tiara-stack/utils/formData";
 import { OAuthClient } from "~/layers";
 import { EventRepository } from "~/repositories/eventRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
-  name: "postUpdateEvent",
+  name: "postAddEventSportType",
   response: response(type({}), { stream: false }),
   body: params(
     type({
       eventId: "string",
-      "name?": "string",
-      "image?": "File",
-      "description?": "string",
-      "location?": ["number", "number"],
-      "locationDescription?": "string",
-      "autoAccept?": "boolean",
-      "sizeLimit?": "number",
+      sportType: "('badminton' | 'tennis' | 'running')[]",
     }),
   ),
 });
@@ -38,16 +29,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     const { access_token: accessToken } = parseCookies(event);
     const {
       params: {
-        body: {
-          eventId,
-          name,
-          image,
-          description,
-          location,
-          locationDescription,
-          autoAccept,
-          sizeLimit,
-        },
+        body: { eventId, sportType },
       },
     } = yield* EventParamsContext.typed<typeof handlerConfig>();
 
@@ -77,35 +59,9 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
       yield* Effect.fail(new OAuthError());
     }
 
-    const imageKey = Option.getOrUndefined(
-      yield* Option.match(Option.fromNullable(image), {
-        onSome: (image) =>
-          Effect.gen(function* () {
-            const uploadClient = yield* UploadClient;
-            const { key: imageKey } = yield* uploadClient.postUploadFromBody({
-              body: typedFormData(
-                getUploadClientBodyType("postUploadFromBody"),
-                {
-                  key: `event/${eventId}/image`,
-                  file: image,
-                },
-              ),
-            });
-            return Option.some(imageKey);
-          }),
-        onNone: () => Effect.succeed(Option.none()),
-      }),
-    );
-
-    yield* eventRepository.updateEvent({
+    yield* eventRepository.addEventSportType({
       eventId,
-      name,
-      image: imageKey,
-      description,
-      location,
-      locationDescription,
-      autoAccept,
-      sizeLimit,
+      sportType,
     });
 
     return {};

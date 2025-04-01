@@ -22,7 +22,7 @@ const WrappingLayoutComponent = ({
   user?: typeof subjects.user.infer;
 }) => {
   return (
-    <>
+    <div className="flex h-screen flex-col">
       <header className="border-grid bg-background/95 supports-backdrop-filter:bg-background/60 sticky top-0 z-50 w-full border-b backdrop-blur-sm">
         <div className="container flex h-14 items-center px-4">
           <div className="flex items-center justify-start space-x-1">
@@ -100,8 +100,8 @@ const WrappingLayoutComponent = ({
           </div>
         </div>
       </header>
-      <main className="flex flex-1 flex-col">
-        <div className="container flex-1 items-start">
+      <main className="h-full overflow-x-hidden overflow-y-auto">
+        <div className="container h-full flex-1 items-start">
           <CatchBoundary
             getResetKey={() => "reset"}
             onCatch={(error) => console.error(error)}
@@ -110,7 +110,7 @@ const WrappingLayoutComponent = ({
           </CatchBoundary>
         </div>
       </main>
-    </>
+    </div>
   );
 };
 

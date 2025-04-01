@@ -1,7 +1,15 @@
 // src/routes/events.tsx
-import { getScheduleListInfiniteQueryOptions } from "@/api/event";
+import { useGetUserClubMemberListQueryOptions } from "@/api/club";
+import {
+  createEventValidators,
+  getScheduleListInfiniteQueryOptions,
+  useCreateEventMutation,
+  useCreateScheduleMutation,
+  useRequestScheduleCreateMutation,
+} from "@/api/event";
 import Calendar from "@/components/calendar";
 import EventListItem from "@/components/event/EventListItem";
+import FormHeaderComponent from "@/components/form/FormHeaderComponent";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,373 +18,534 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { useAppForm, withForm } from "@/utils/form";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { formOptions } from "@tanstack/react-form";
+import {
+  useSuspenseInfiniteQuery,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { type } from "arktype";
 import { addSeconds, startOfToday } from "date-fns";
-import { formatWithOptions } from "date-fns/fp";
+import { formatWithOptions, setHours, setMinutes } from "date-fns/fp";
 import { enUS } from "date-fns/locale";
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Effect, pipe } from "effect";
+import { PlusCircle } from "lucide-react";
+import { Suspense, useEffect, useRef } from "react";
+import { effectType } from "tiara-stack/utils/effectType";
+import { typedFormData } from "tiara-stack/utils/formData";
+
+const formOpts = formOptions({
+  defaultValues: {
+    name: undefined as undefined | string,
+    image: undefined as undefined | File,
+    description: undefined as undefined | string,
+    date: undefined as undefined | Date,
+    startTime: undefined as undefined | [number, number],
+    endTime: undefined as undefined | [number, number],
+    locationDescription: undefined as undefined | string,
+    sizeLimit: undefined as undefined | number,
+    size: undefined as undefined | number,
+    skillLevel: [],
+    sportType: [],
+    clubId: undefined as undefined | string,
+    repeatInterval: undefined as undefined | number,
+    repeatEndAt: undefined as undefined | Date,
+    autoAccept: false,
+  },
+});
+
+const eventTypeFormValidators = type({
+  sportType: "('badminton' | 'tennis' | 'running')[]",
+  skillLevel: "('beginner' | 'intermediate' | 'advanced')[]",
+});
+
+const EventTypeForm = withForm({
+  ...formOpts,
+  render: ({ form }) => {
+    return (
+      <div className="space-y-6">
+        <FormHeaderComponent title="About your event" className="mb-2" />
+
+        <form.AppField
+          name="sportType"
+          children={(field) => (
+            <field.MultipleChoiceField
+              label="Select sport type"
+              options={[
+                { label: "Badminton", value: "badminton" },
+                { label: "Tennis", value: "tennis" },
+                { label: "Running", value: "running" },
+              ]}
+            />
+          )}
+        />
+
+        <form.AppField
+          name="skillLevel"
+          children={(field) => (
+            <field.MultipleChoiceField
+              label="Select skill level"
+              options={[
+                { label: "Beginner", value: "beginner" },
+                { label: "Intermediate", value: "intermediate" },
+                { label: "Advanced", value: "advanced" },
+              ]}
+            />
+          )}
+        />
+      </div>
+    );
+  },
+});
+
+const eventClubFormValidators = type({
+  "clubId?": "string",
+});
+
+const EventClubForm = withForm({
+  ...formOpts,
+  render: function Render({ form }) {
+    const getUserClubMemberListQueryOptions =
+      useGetUserClubMemberListQueryOptions();
+    const userClubMemberList = useSuspenseQuery(
+      getUserClubMemberListQueryOptions,
+    );
+
+    return (
+      <div className="space-y-6">
+        <FormHeaderComponent title="Select a club" className="mb-2" />
+
+        <form.AppField
+          name="clubId"
+          children={(field) => (
+            <field.ComboBoxField
+              options={[
+                { label: "None", value: undefined },
+                ...(userClubMemberList.data?.clubs ?? []).map((club) => ({
+                  label: club.name ?? "Unknown Club",
+                  value: club.id,
+                })),
+              ]}
+              placeholder="Select a club"
+            />
+          )}
+        />
+      </div>
+    );
+  },
+});
+
+const eventScheduleFormValidators = type([
+  {
+    repeatInterval: "number",
+    repeatEndAt: "Date",
+  },
+  "|",
+  {
+    repeatInterval: "2147483647",
+    "repeatEndAt?": "Date",
+  },
+]);
+
+const EventScheduleForm = withForm({
+  ...formOpts,
+  render: ({ form }) => {
+    return (
+      <div className="space-y-6">
+        <FormHeaderComponent title="Repeat Event" className="mb-2" />
+
+        <form.AppField
+          name="repeatInterval"
+          children={(field) => (
+            <field.ComboBoxField
+              label="Repeat Interval"
+              placeholder="Select repeat interval"
+              options={[
+                { label: "None", value: 2147483647 },
+                { label: "Every Day", value: 24 * 60 * 60 },
+                { label: "Every Week", value: 7 * 24 * 60 * 60 },
+                { label: "Every Month", value: 30 * 24 * 60 * 60 },
+              ]}
+            />
+          )}
+        />
+
+        <form.AppField
+          name="repeatEndAt"
+          children={(field) => (
+            <field.DatePickerField
+              label="End Date"
+              placeholder="Select end date"
+            />
+          )}
+        />
+      </div>
+    );
+  },
+});
+
+const eventFormModalValidators = eventTypeFormValidators
+  .and(eventClubFormValidators)
+  .and(eventScheduleFormValidators);
+
+const eventFormValidators = type({
+  name: "string",
+  image: "File",
+  description: "string",
+  date: "Date",
+  startTime: ["number", "number"],
+  endTime: ["number", "number"],
+  locationDescription: "string",
+  sizeLimit: "number",
+  size: "number",
+  autoAccept: "boolean",
+})
+  .and(eventTypeFormValidators)
+  .and(eventClubFormValidators)
+  .and(eventScheduleFormValidators);
 
 const CreateEventForm = () => {
-  // Main form states
-  const [sport, setSport] = useState<string>("");
-  const [performance, setPerformance] = useState<string>("");
-  const [club, setClub] = useState<string>("");
-  const [repeatOption, setRepeatOption] = useState<string>("");
-  const [endDate, setEndDate] = useState<string>("");
+  const createEventMutation = useCreateEventMutation();
+  const createScheduleMutation = useCreateScheduleMutation();
+  const requestScheduleCreateMutation = useRequestScheduleCreateMutation();
+  const form = useAppForm({
+    ...formOpts,
+    validators: {
+      onChange: eventFormModalValidators,
+      onSubmit: eventFormValidators,
+    },
+    onSubmit: async ({ value }) => {
+      const data = await Effect.runPromise(
+        effectType(eventFormValidators, value),
+      );
+      const { event } = await createEventMutation.mutateAsync({
+        data: data.clubId
+          ? typedFormData(createEventValidators, {
+              creatorType: "club",
+              clubId: data.clubId,
+              name: data.name,
+              image: data.image,
+              description: data.description,
+              location: [0, 0],
+              locationDescription: data.locationDescription,
+              autoAccept: data.autoAccept,
+              sizeLimit: data.sizeLimit,
+              skillLevel: data.skillLevel,
+              sportType: data.sportType,
+            })
+          : typedFormData(createEventValidators, {
+              creatorType: "user",
+              name: data.name,
+              image: data.image,
+              description: data.description,
+              location: [0, 0],
+              locationDescription: data.locationDescription,
+              autoAccept: data.autoAccept,
+              sizeLimit: data.sizeLimit,
+              skillLevel: data.skillLevel,
+              sportType: data.sportType,
+            }),
+      });
 
-  // Basic states for other form fields
-  const [eventName, setEventName] = useState("");
-  const [description, setDescription] = useState("");
-  const [date, setDate] = useState("");
-  const [timeRange, setTimeRange] = useState("");
-  const [location, setLocation] = useState("");
-  const [maxParticipants, setMaxParticipants] = useState<number | undefined>();
-  const [addGuest, setAddGuest] = useState<number | undefined>();
-  const [joinOption, setJoinOption] = useState<"request" | "auto">("request");
+      if (!event?.eventId) return;
 
-  // Popup visibility states
-  const [showAboutPopup, setShowAboutPopup] = useState(false);
-  const [showClubPopup, setShowClubPopup] = useState(false);
-  const [showRepeatPopup, setShowRepeatPopup] = useState(false);
+      const { schedule } = await createScheduleMutation.mutateAsync({
+        data: {
+          eventId: event.eventId,
+          startAt: pipe(
+            data.date,
+            setHours(data.startTime[0]),
+            setMinutes(data.startTime[1]),
+          ),
+          endAt: pipe(
+            data.date,
+            setHours(data.endTime[0]),
+            setMinutes(data.endTime[1]),
+          ),
+          repeatStartAt: pipe(
+            data.date,
+            setHours(data.startTime[0]),
+            setMinutes(data.startTime[1]),
+          ),
+          repeatEndAt: data.repeatEndAt
+            ? pipe(
+                data.repeatEndAt,
+                setHours(data.endTime[0]),
+                setMinutes(data.endTime[1]),
+              )
+            : pipe(
+                data.date,
+                setHours(data.endTime[0]),
+                setMinutes(data.endTime[1]),
+              ),
+          repeatInterval: data.repeatInterval,
+        },
+      });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const formData = {
-      eventName,
-      description,
-      date,
-      timeRange,
-      location,
-      maxParticipants,
-      addGuest,
-      joinOption,
-      sport,
-      performance,
-      club,
-      repeatOption,
-      endDate,
-    };
-    console.log("Form submitted with data:", formData);
-    // Submit formData to API or process further
-  };
+      if (!schedule?.scheduleId) return;
+
+      await requestScheduleCreateMutation.mutateAsync({
+        data: {
+          scheduleId: schedule.scheduleId,
+          repeatIndex: 0,
+          size: data.size + 1,
+        },
+      });
+    },
+  });
 
   return (
     <>
       <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          form.handleSubmit();
+        }}
         className="flex flex-col justify-center space-y-4 rounded-xl border-2 border-[#65D1F8] p-2"
-        onSubmit={handleSubmit}
       >
-        {/* 1) Picture Upload */}
-        <div>
-          <Label htmlFor="eventPicture">Event Picture</Label>
-          <Input id="eventPicture" type="file" />
-        </div>
-
-        {/* 2) Event Name */}
-        <div>
-          <Label htmlFor="eventName">Event Name</Label>
-          <Input
-            id="eventName"
-            type="text"
-            placeholder="e.g. Friendly Football"
-            value={eventName}
-            onChange={(e) => setEventName(e.target.value)}
-            className="border border-[#65D1F8]"
-          />
-        </div>
-
-        {/* 3) Description */}
-        <div>
-          <Label htmlFor="description">Description</Label>
-          <Textarea
-            id="description"
-            placeholder="Short description..."
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="border border-[#65D1F8]"
-          />
-        </div>
-
-        {/* 4) Date & Time Range */}
-        <div className="flex space-x-2">
-          <div className="w-1/2">
-            <Label htmlFor="date">Date</Label>
-            <Input
-              id="date"
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="border border-[#65D1F8]"
+        <form.AppField
+          name="image"
+          children={(field) => (
+            <field.FileInputField
+              label="Event Picture"
+              placeholder="Upload an image"
             />
-          </div>
-          <div className="w-1/2">
-            <Label htmlFor="timeRange">Start / End</Label>
-            <Input
-              id="timeRange"
-              type="text"
-              placeholder="e.g. 20:00-21:00"
-              value={timeRange}
-              onChange={(e) => setTimeRange(e.target.value)}
-              className="border border-[#65D1F8]"
+          )}
+        />
+
+        <form.AppField
+          name="name"
+          children={(field) => (
+            <field.TextInputField
+              label="Event Name"
+              placeholder="e.g. Friendly Football"
+              classNames={{
+                input: "w-full rounded border-1 border-[#65D1F8]",
+              }}
             />
-          </div>
-        </div>
+          )}
+        />
 
-        {/* 5) Location */}
-        <div>
-          <Label htmlFor="location">Location</Label>
-          <Input
-            id="location"
-            type="text"
-            placeholder="e.g. Google Map link or place"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            className="border border-[#65D1F8]"
-          />
-        </div>
-
-        {/* 6) Max Participant */}
-        <div>
-          <Label htmlFor="maxParticipants">Max Participant</Label>
-          <Input
-            id="maxParticipants"
-            type="number"
-            value={maxParticipants ?? ""}
-            onChange={(e) => setMaxParticipants(parseInt(e.target.value) || 0)}
-            className="border border-[#65D1F8]"
-          />
-        </div>
-
-        {/* 7) Add Guest */}
-        <div>
-          <Label htmlFor="addGuest">Add Guest</Label>
-          <Input
-            id="addGuest"
-            type="number"
-            placeholder="Number of additional guests"
-            value={addGuest ?? ""}
-            onChange={(e) => setAddGuest(parseInt(e.target.value) || 0)}
-            className="border border-[#65D1F8]"
-          />
-        </div>
-
-        {/* 8) + About your event => popup */}
-        <div>
-          <button
-            type="button"
-            className="text-[#65D1F8] underline"
-            onClick={() => setShowAboutPopup(true)}
-          >
-            + About your event
-          </button>
-        </div>
-
-        {/* 9) + Add this event to the club => popup */}
-        <div>
-          <button
-            type="button"
-            className="text-[#65D1F8] underline"
-            onClick={() => setShowClubPopup(true)}
-          >
-            + Add this event to the club
-          </button>
-        </div>
-
-        {/* 10) + Repeat Event => popup */}
-        <div>
-          <button
-            type="button"
-            className="text-[#65D1F8] underline"
-            onClick={() => setShowRepeatPopup(true)}
-          >
-            + Repeat Event
-          </button>
-        </div>
-
-        {/* 11) Joining Options */}
-        <div>
-          <p className="mb-1 text-sm font-semibold">Joining Options</p>
-          <label className="mr-4">
-            <input
-              type="radio"
-              name="joinOption"
-              value="request"
-              checked={joinOption === "request"}
-              onChange={() => setJoinOption("request")}
+        <form.AppField
+          name="description"
+          children={(field) => (
+            <field.TextInputField
+              label="Description"
+              placeholder="Short description..."
+              variant="textarea"
+              classNames={{
+                input: "w-full rounded border-1 border-[#65D1F8]",
+              }}
             />
-            <span className="ml-1 text-sm">Request to Join</span>
-          </label>
-          <label>
-            <input
-              type="radio"
-              name="joinOption"
-              value="auto"
-              checked={joinOption === "auto"}
-              onChange={() => setJoinOption("auto")}
+          )}
+        />
+
+        <form.AppField
+          name="date"
+          children={(field) => (
+            <field.DatePickerField
+              label="Date"
+              placeholder="Pick a date"
+              classNames={{
+                button: "w-full rounded border-1 border-[#65D1F8]",
+              }}
             />
-            <span className="ml-1 text-sm">Auto Join</span>
-          </label>
-        </div>
+          )}
+        />
 
-        {/* 12) Submit Button (centered) */}
-        <div className="flex justify-center">
-          <Button
-            type="submit"
-            className="bg-gradient-to-r from-[#65D1F8] to-[#6CCFD0] text-white hover:opacity-90"
-          >
-            Create Event!
-          </Button>
-        </div>
-      </form>
-
-      {/* --- POPUPS --- */}
-
-      {/* About Popup */}
-      {showAboutPopup && (
-        <div className="bg-opacity-50 fixed inset-0 flex items-center justify-center bg-black">
-          <div className="w-80 rounded-xl bg-white p-4">
-            <h3 className="mb-2 text-lg font-bold text-[#65D1F8]">
-              About Your Event
-            </h3>
-            <p className="mb-2 text-sm font-semibold">Select a sport:</p>
-            <div className="mb-4 flex flex-wrap gap-2">
-              {["Badminton", "Yoga", "Running", "Tennis", "Football"].map(
-                (s) => (
-                  <button
-                    key={s}
-                    onClick={() => setSport(s)}
-                    className={`rounded-full border px-3 py-1 ${
-                      sport === s
-                        ? "border-[#65D1F8] bg-[#E1F8FE] text-[#65D1F8]"
-                        : "border-gray-300 text-gray-500 hover:bg-gray-100"
-                    }`}
-                  >
-                    {s}
-                  </button>
-                ),
-              )}
-            </div>
-            <p className="mb-2 text-sm font-semibold">Performance Level:</p>
-            <div className="flex flex-wrap gap-2">
-              {["Beginner", "Intermediate", "Advanced"].map((lvl) => (
-                <button
-                  key={lvl}
-                  onClick={() => setPerformance(lvl)}
-                  className={`rounded-full border px-3 py-1 ${
-                    performance === lvl
-                      ? "border-[#65D1F8] bg-[#E1F8FE] text-[#65D1F8]"
-                      : "border-gray-300 text-gray-500 hover:bg-gray-100"
-                  }`}
-                >
-                  {lvl}
-                </button>
-              ))}
-            </div>
-            <div className="mt-4 flex justify-center">
-              <Button
-                type="button"
-                onClick={() => setShowAboutPopup(false)}
-                className="bg-[#65D1F8] px-4 py-1 text-white hover:opacity-90"
-              >
-                Done
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Club Popup */}
-      {showClubPopup && (
-        <div className="bg-opacity-50 fixed inset-0 flex items-center justify-center bg-black">
-          <div className="w-80 rounded-xl bg-white p-4">
-            <h3 className="mb-2 text-lg font-bold text-[#65D1F8]">
-              Select a club
-            </h3>
-            <div className="space-y-2">
-              {[
-                "Chula Football Club",
-                "101 Badminton Club",
-                "Yo! Badminton Club",
-                "Sunday Tennis Club",
-              ].map((c) => (
-                <button
-                  key={c}
-                  onClick={() => setClub(c)}
-                  className={`block w-full rounded-xl p-2 text-left ${
-                    club === c
-                      ? "border border-[#65D1F8] bg-[#E1F8FE] text-[#65D1F8]"
-                      : "bg-gray-100 text-gray-600"
-                  }`}
-                >
-                  {c}
-                </button>
-              ))}
-            </div>
-            <div className="mt-4 flex justify-center">
-              <Button
-                type="button"
-                onClick={() => setShowClubPopup(false)}
-                className="bg-gradient-to-r from-[#65D1F8] to-[#6CCFD0] text-white hover:opacity-90"
-              >
-                Done
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Repeat Popup */}
-      {showRepeatPopup && (
-        <div className="bg-opacity-50 fixed inset-0 flex items-center justify-center bg-black">
-          <div className="w-72 rounded-xl bg-white p-4">
-            <h3 className="mb-2 text-lg font-bold text-[#65D1F8]">
-              Repeat Event
-            </h3>
-            <div className="mb-4 space-y-2 text-sm">
-              {["Every Day", "Every Week", "Every Month"].map((freq) => (
-                <button
-                  key={freq}
-                  onClick={() => setRepeatOption(freq)}
-                  className={`block w-full rounded-xl p-2 text-left ${
-                    repeatOption === freq
-                      ? "border border-[#65D1F8] bg-[#E1F8FE] text-[#65D1F8]"
-                      : "bg-gray-100 text-gray-600"
-                  }`}
-                >
-                  {freq}
-                </button>
-              ))}
-            </div>
-            <div className="mb-4">
-              <Label htmlFor="endDate" className="text-sm font-semibold">
-                End Date
-              </Label>
-              <Input
-                id="endDate"
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="border border-[#65D1F8]"
+        <div className="grid grid-cols-2 gap-2">
+          <form.AppField
+            name="startTime"
+            children={(field) => (
+              <field.TimePickerField
+                label="Start Time"
+                placeholder="Pick a time"
+                classNames={{
+                  button: "w-full rounded border-1 border-[#65D1F8]",
+                }}
               />
-            </div>
-            <div className="flex justify-center">
-              <Button
-                type="button"
-                onClick={() => setShowRepeatPopup(false)}
-                className="bg-gradient-to-r from-[#65D1F8] to-[#6CCFD0] text-white hover:opacity-90"
-              >
-                Done
-              </Button>
-            </div>
-          </div>
+            )}
+          />
+          <form.AppField
+            name="endTime"
+            children={(field) => (
+              <field.TimePickerField
+                label="End Time"
+                placeholder="Pick a time"
+                classNames={{
+                  button: "w-full rounded border-1 border-[#65D1F8]",
+                }}
+              />
+            )}
+          />
         </div>
-      )}
+
+        <form.AppField
+          name="locationDescription"
+          children={(field) => (
+            <field.TextInputField
+              label="Location"
+              placeholder="e.g. Google Map link or place"
+              classNames={{
+                input: "w-full rounded border-1 border-[#65D1F8]",
+              }}
+            />
+          )}
+        />
+
+        <form.AppField
+          name="sizeLimit"
+          children={(field) => (
+            <field.NumericInputField
+              label="Max Participant"
+              placeholder="e.g. 10"
+              classNames={{
+                input: "w-full rounded border-1 border-[#65D1F8]",
+              }}
+            />
+          )}
+        />
+
+        <form.AppField
+          name="size"
+          children={(field) => (
+            <field.NumericInputField
+              label="Number of additional guests"
+              placeholder="e.g. 2"
+              classNames={{
+                input: "w-full rounded border-1 border-[#65D1F8]",
+              }}
+            />
+          )}
+        />
+
+        <div className="flex flex-col space-y-2">
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="ghost" className="font-normal text-[#65D1F8]">
+                <PlusCircle /> About your event
+              </Button>
+            </DialogTrigger>
+            <VisuallyHidden>
+              <DialogHeader>
+                <DialogTitle>Set event type</DialogTitle>
+                <DialogDescription>
+                  Select the sport type and skill level for your event
+                </DialogDescription>
+              </DialogHeader>
+            </VisuallyHidden>
+            <DialogContent>
+              <EventTypeForm form={form} />
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button className="rounded bg-gradient-to-r from-[#65D1F8] to-[#6CCFD0] px-4 py-1 text-white hover:opacity-90">
+                    Done
+                  </Button>
+                </DialogClose>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="ghost" className="font-normal text-[#65D1F8]">
+                <PlusCircle /> Add this event to the club
+              </Button>
+            </DialogTrigger>
+            <VisuallyHidden>
+              <DialogHeader>
+                <DialogTitle>Add this event to the club</DialogTitle>
+                <DialogDescription>
+                  Select the club you want to add this event to
+                </DialogDescription>
+              </DialogHeader>
+            </VisuallyHidden>
+            <DialogContent>
+              <Suspense fallback={<div>Loading clubs...</div>}>
+                <EventClubForm form={form} />
+              </Suspense>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button className="rounded bg-gradient-to-r from-[#65D1F8] to-[#6CCFD0] px-4 py-1 text-white hover:opacity-90">
+                    Done
+                  </Button>
+                </DialogClose>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          {/* 10) + Repeat Event => popup */}
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="ghost" className="font-normal text-[#65D1F8]">
+                <PlusCircle /> Repeat Event
+              </Button>
+            </DialogTrigger>
+            <VisuallyHidden>
+              <DialogHeader>
+                <DialogTitle>Repeat Event</DialogTitle>
+                <DialogDescription>
+                  Select the repeat interval and end date for your event
+                </DialogDescription>
+              </DialogHeader>
+            </VisuallyHidden>
+            <DialogContent>
+              <EventScheduleForm form={form} />
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button className="rounded bg-gradient-to-r from-[#65D1F8] to-[#6CCFD0] px-4 py-1 text-white hover:opacity-90">
+                    Done
+                  </Button>
+                </DialogClose>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        <form.AppField
+          name="autoAccept"
+          children={(field) => (
+            <field.SingleChoiceField
+              label="Joining Options"
+              options={[
+                { label: "Request to Join", value: false },
+                { label: "Auto Join", value: true },
+              ]}
+              classNames={{ button: "rounded w-1/2" }}
+              variant="connected"
+            />
+          )}
+        />
+
+        <form.Subscribe
+          selector={(state) => [state.canSubmit, state.isSubmitting]}
+          children={([canSubmit, isSubmitting]) => (
+            <div className="mt-4 flex justify-center">
+              <button
+                type="submit"
+                disabled={!canSubmit}
+                className="rounded bg-gradient-to-r from-[#65D1F8] to-[#6CCFD0] px-4 py-2 text-white hover:opacity-90"
+              >
+                {isSubmitting ? "Creating..." : "Create Event!"}
+              </button>
+            </div>
+          )}
+        />
+      </form>
     </>
   );
 };
@@ -551,9 +720,9 @@ const EventList = ({ className }: { className?: string }) => {
 
 function RouteComponent() {
   return (
-    <div className="flex h-screen flex-col">
-      <div className="flex flex-1 overflow-hidden">
-        <Sidebar className="w-96 space-y-8 overflow-auto bg-gray-50 p-4" />
+    <div className="flex h-full flex-col">
+      <div className="flex h-full flex-1">
+        <Sidebar className="h-full w-96 space-y-8 overflow-y-auto bg-gray-50 p-4" />
         <Suspense
           fallback={
             <main className="flex-1 overflow-auto bg-white p-4">

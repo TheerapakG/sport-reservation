@@ -8,23 +8,20 @@ import { EventRepository } from "~/repositories/eventRepository";
 export const handlerConfig = defineEventHandlerConfig({
   name: "getClubCreatedEvents",
   response: response(
-    type({
-      events: [
-        {
-          eventId: "string",
-          eventCreatorType: "string",
-          creatorId: "string",
-          "name?": "string",
-          "image?": "string",
-          "description?": "string",
-          "location?": ["number", "number"],
-          "locationDescription?": "string",
-          autoAccept: "boolean",
-          sizeLimit: "number",
-        },
-        "[]",
-      ],
-    }),
+    type([
+      {
+        eventId: "string",
+        "name?": "string",
+        "image?": "string",
+        "description?": "string",
+        "locationDescription?": "string",
+        autoAccept: "boolean",
+        sizeLimit: "number",
+        skillLevel: "('beginner' | 'intermediate' | 'advanced')[]",
+        sportType: "('badminton' | 'tennis' | 'running')[]",
+      },
+      "[]",
+    ]),
     { stream: false },
   ),
   query: params(
@@ -43,13 +40,13 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     } = yield* EventParamsContext.typed<typeof handlerConfig>();
 
     const eventRepository = yield* EventRepository;
-
     const events = yield* eventRepository.getClubEvents({ clubId });
 
     const uploadClient = yield* UploadClient;
 
-    const formattedEvents = yield* Effect.all(
-      events.map(({ event, group }) =>
+    return yield* Effect.forEach(
+      events,
+      ({ event, group, skillLevel, sportType }) =>
         Effect.gen(function* () {
           const { url: image } = event.image
             ? yield* uploadClient.getDownloadPresignedUrl({
@@ -62,19 +59,15 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
             ...(group.name && { name: group.name }),
             ...(image && { image }),
             ...(event.description && { description: event.description }),
-            ...(event.location && { location: event.location }),
             ...(event.locationDescription && {
               locationDescription: event.locationDescription,
             }),
             autoAccept: event.autoAccept,
             sizeLimit: event.sizeLimit,
-            eventCreatorType: event.eventCreatorType,
-            creatorId: event.creatorId,
+            skillLevel: skillLevel.map((sl) => sl.skillLevel),
+            sportType: sportType.map((st) => st.sportType),
           };
         }),
-      ),
     );
-
-    return { events: formattedEvents };
   }),
 );

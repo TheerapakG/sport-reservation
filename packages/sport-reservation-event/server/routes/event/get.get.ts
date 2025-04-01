@@ -23,6 +23,8 @@ export const handlerConfig = defineEventHandlerConfig({
       "locationDescription?": "string",
       autoAccept: "boolean",
       sizeLimit: "number",
+      skillLevel: "('beginner' | 'intermediate' | 'advanced')[]",
+      sportType: "('badminton' | 'tennis' | 'running')[]",
     }),
     { stream: false },
   ),
@@ -42,9 +44,10 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     } = yield* EventParamsContext.typed<typeof handlerConfig>();
 
     const eventRepository = yield* EventRepository;
-    const { event, group } = yield* yield* eventRepository.getEvent({
-      eventId,
-    });
+    const { event, group, skillLevel, sportType } =
+      yield* yield* eventRepository.getEvent({
+        eventId,
+      });
 
     const uploadClient = yield* UploadClient;
     const { url: image } = event.image
@@ -79,6 +82,8 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
       sizeLimit: event.sizeLimit,
       eventCreatorType: event.eventCreatorType,
       creator,
+      skillLevel: skillLevel.map((sl) => sl.skillLevel),
+      sportType: sportType.map((st) => st.sportType),
     };
   }),
 );

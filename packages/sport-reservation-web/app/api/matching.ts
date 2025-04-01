@@ -3,6 +3,7 @@ import {
   queryOptions,
   useMutation,
   useQueryClient,
+  useSuspenseQuery,
 } from "@tanstack/react-query";
 import { createServerFn } from "@tanstack/react-start";
 import { type } from "arktype";
@@ -17,6 +18,7 @@ import {
 } from "sport-reservation-matching/models";
 import { effectType } from "tiara-stack/utils/effectType";
 import { parseCookies } from "vinxi/http";
+import { currentUserProfileQueryOptions } from "./oauth";
 
 export const matchingKeys = () => {
   const all = ["matching"] as const;
@@ -26,7 +28,19 @@ export const matchingKeys = () => {
       const allCursor = [...all, "cursor"] as const;
       return {
         all: () => allCursor,
-        current: () => [...allCursor, "current"] as const,
+        user: () => {
+          const allCursorUser = [...allCursor, "user"] as const;
+          return {
+            all: () => allCursorUser,
+            id: ({ id }: { id?: string }) => {
+              const allCursorUserId = [...allCursorUser, "id", id] as const;
+              return {
+                all: () => allCursorUserId,
+                current: () => [...allCursorUserId, "current"] as const,
+              };
+            },
+          };
+        },
         id: ({ id }: { id: string }) => {
           const allCursorId = [...allCursor, "id", id] as const;
           return {
@@ -210,11 +224,18 @@ export const getMatchingCursorServerFn = createServerFn({
   return { success: true, cursor } as const;
 });
 
-export const getMatchingCursorQueryOptions = () =>
-  queryOptions({
-    queryKey: matchingKeys().cursor().current(),
+export const useGetMatchingCursorQueryOptions = () => {
+  const currentUserProfile = useSuspenseQuery(currentUserProfileQueryOptions());
+
+  return queryOptions({
+    queryKey: matchingKeys()
+      .cursor()
+      .user()
+      .id({ id: currentUserProfile.data.profile?.id })
+      .current(),
     queryFn: getMatchingCursorServerFn,
   });
+};
 
 export const createMatchingCursorServerFn = createServerFn({
   method: "POST",
@@ -239,11 +260,19 @@ export const createMatchingCursorServerFn = createServerFn({
 
 export const useCreateMatchingCursorMutation = () => {
   const queryClient = useQueryClient();
+  const currentUserProfile = useSuspenseQuery(currentUserProfileQueryOptions());
 
   return useMutation({
     mutationFn: () => createMatchingCursorServerFn(),
     onSuccess: (data) => {
-      queryClient.setQueryData(matchingKeys().cursor().current(), data);
+      queryClient.setQueryData(
+        matchingKeys()
+          .cursor()
+          .user()
+          .id({ id: currentUserProfile.data.profile?.id })
+          .current(),
+        data,
+      );
     },
   });
 };

@@ -1,6 +1,6 @@
 import { useCreateGeneralAssessmentMutation } from "@/api/matching";
-import AssessmentHeaderComponent from "@/components/assessment/AssessmentHeaderComponent";
-import AssessmentContainerComponent from "@/components/assessment/AssesssmentContainerComponent";
+import AssessmentContainerComponent from "@/components/assessment/AssessmentContainerComponent";
+import AssessmentHeaderComponent from "@/components/form/FormHeaderComponent";
 import { useAppForm } from "@/utils/form";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { type } from "arktype";
@@ -17,11 +17,11 @@ export default function AssessmentComponent() {
   const form = useAppForm({
     defaultValues: {
       vigorousDays: "" as "" | number,
-      vigorousMins: "" as "" | number,
+      vigorousMinutes: "" as "" | number,
       moderateDays: "" as "" | number,
-      moderateMins: "" as "" | number,
-      walkingDays: "" as "" | number,
-      walkingMins: "" as "" | number,
+      moderateMinutes: "" as "" | number,
+      walkDays: "" as "" | number,
+      walkMinutes: "" as "" | number,
     },
     validators: {
       onSubmit: getMatchingClientBodyType("createGeneralAssessmentV1"),
@@ -102,7 +102,7 @@ export default function AssessmentComponent() {
             )}
           />
           <form.AppField
-            name="vigorousMins"
+            name="vigorousMinutes"
             validators={{ onBlur: type("number") }}
             children={(field) => (
               <field.NumericInputField
@@ -150,7 +150,7 @@ export default function AssessmentComponent() {
             )}
           />
           <form.AppField
-            name="moderateMins"
+            name="moderateMinutes"
             validators={{ onBlur: type("number") }}
             children={(field) => (
               <field.NumericInputField
@@ -173,7 +173,7 @@ export default function AssessmentComponent() {
             Walking
           </label>
           <form.AppField
-            name="walkingDays"
+            name="walkDays"
             validators={{ onBlur: type("number") }}
             children={(field) => (
               <field.SelectInputField
@@ -185,7 +185,7 @@ export default function AssessmentComponent() {
             )}
           />
           <form.AppField
-            name="walkingMins"
+            name="walkMinutes"
             validators={{ onBlur: type("number") }}
             children={(field) => (
               <field.NumericInputField

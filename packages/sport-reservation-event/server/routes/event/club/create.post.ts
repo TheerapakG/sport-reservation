@@ -4,11 +4,14 @@ import {
   effectEventHandler,
 } from "$/effectEventHandler";
 import { type } from "arktype";
-import { Effect, Option } from "effect";
+import { Effect } from "effect";
 import { parseCookies } from "h3";
 import { getSubjectTypeFromToken } from "sport-reservation-oauth-common/subjects";
+import { UploadClient } from "sport-reservation-upload/client";
+import { getUploadClientBodyType } from "sport-reservation-upload/models";
 import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
 import { OAuthError } from "tiara-stack/models/errors";
+import { typedFormData } from "tiara-stack/utils/formData";
 import { OAuthClient } from "~/layers";
 import { EventRepository } from "~/repositories/eventRepository";
 
@@ -19,11 +22,14 @@ export const handlerConfig = defineEventHandlerConfig({
     type({
       clubId: "string",
       name: "string",
+      image: "File",
       description: "string",
       location: ["number", "number"],
       locationDescription: "string",
       autoAccept: "boolean",
       sizeLimit: "number",
+      skillLevel: "('beginner' | 'intermediate' | 'advanced')[]",
+      sportType: "('badminton' | 'tennis' | 'running')[]",
     }),
   ),
 });
@@ -37,11 +43,14 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
         body: {
           clubId,
           name,
+          image,
           description,
           location,
           locationDescription,
           autoAccept,
           sizeLimit,
+          skillLevel,
+          sportType,
         },
       },
     } = yield* EventParamsContext.typed<typeof handlerConfig>();
@@ -63,7 +72,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
 
     // Create event for the club
     const eventRepository = yield* EventRepository;
-    const resultOption = yield* eventRepository.createEventByClub({
+    const { eventId } = yield* yield* eventRepository.createEventByClub({
       clubId,
       name,
       description,
@@ -71,12 +80,23 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
       locationDescription,
       autoAccept,
       sizeLimit,
+      skillLevel,
+      sportType,
     });
 
-    // Handle the Option result
-    return yield* Option.match(resultOption, {
-      onNone: () => Effect.fail(new Error("Failed to create event for club")),
-      onSome: (result) => Effect.succeed(result),
+    const uploadClient = yield* UploadClient;
+    const { key: imageKey } = yield* uploadClient.postUploadFromBody({
+      body: typedFormData(getUploadClientBodyType("postUploadFromBody"), {
+        key: `event/${eventId}/image`,
+        file: image,
+      }),
     });
+
+    yield* eventRepository.updateEvent({
+      eventId,
+      image: imageKey,
+    });
+
+    return { eventId };
   }),
 );

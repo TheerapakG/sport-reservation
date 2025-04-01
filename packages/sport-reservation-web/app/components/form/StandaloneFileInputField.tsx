@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { useFieldContext } from "@/utils/form/context";
 import { useStore } from "@tanstack/react-form";
 
-export default function StandaloneNumericInputField({
+export default function StandaloneFileInputField({
   classNames,
   placeholder,
   trailingText,
@@ -14,13 +14,13 @@ export default function StandaloneNumericInputField({
   placeholder?: string;
   trailingText?: string;
 }) {
-  const field = useFieldContext<undefined | number>();
+  const field = useFieldContext<undefined | File>();
   const fieldValue = useStore(field.store, (state) => state.value);
 
   return (
     <div className="flex items-center gap-2">
       <Input
-        type="number"
+        type="file"
         className={cn(
           "h-7 rounded-none border-0 px-2 py-1 shadow focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none aria-[invalid]:ring-1 aria-[invalid]:ring-red-500 aria-[invalid]:ring-offset-2",
           classNames?.input,
@@ -31,8 +31,8 @@ export default function StandaloneNumericInputField({
             }
           : {})}
         placeholder={placeholder}
-        value={fieldValue === undefined ? "" : fieldValue}
-        onChange={(e) => field.handleChange(e.target.valueAsNumber)}
+        value={fieldValue === undefined ? "" : fieldValue.name}
+        onChange={(e) => field.handleChange(e.target.files?.[0])}
         onBlur={field.handleBlur}
       />
       {trailingText && (

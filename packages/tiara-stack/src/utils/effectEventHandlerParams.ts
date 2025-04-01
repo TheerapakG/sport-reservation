@@ -1,12 +1,14 @@
 import { destr } from "destr";
-import { Effect } from "effect";
+import { Effect, Match } from "effect";
 import { Simplify } from "effect/Types";
 import {
   EventHandlerRequest,
   getQuery,
+  getRequestHeader,
   getRouterParams,
   H3Event,
   readBody,
+  readFormData,
 } from "h3";
 import { ArktypeError } from "~~/src/models/errors";
 import {
@@ -17,6 +19,7 @@ import {
   FetchTypeConfig,
 } from "../config/fetchConfig";
 import { effectType } from "./effectType";
+import { readTypedFormData } from "./formData";
 
 type EventHandlerQueryType<C extends FetchTypeConfig> = Simplify<
   C["query"] extends infer Q
@@ -79,9 +82,30 @@ export const effectEventHandlerParams = <
         : {}) as { query: EventHandlerQueryType<C> }),
       ...((body && body.config.decode
         ? {
-            body: yield* effectType(
-              body.type,
-              yield* Effect.promise(async () => await readBody(event)),
+            body: yield* Match.value(
+              getRequestHeader(event, "content-type"),
+            ).pipe(
+              Match.when("application/json", () =>
+                effectType(
+                  body.type,
+                  Effect.promise(async () => await readBody(event)),
+                ),
+              ),
+              Match.when("application/x-www-form-urlencoded", () =>
+                effectType(
+                  body.type,
+                  Effect.promise(async () => await readBody(event)),
+                ),
+              ),
+              Match.when("multipart/form-data", () =>
+                Effect.gen(function* () {
+                  const formData = yield* Effect.promise(() =>
+                    readFormData(event),
+                  );
+                  return yield* readTypedFormData(body.type, formData);
+                }),
+              ),
+              Match.orElseAbsurd,
             ),
           }
         : {}) as { body: EventHandlerBodyType<C> }),

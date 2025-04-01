@@ -1,5 +1,5 @@
-import AssessmentHeaderComponent from "@/components/assessment/AssessmentHeaderComponent";
-import AssessmentContainerComponent from "@/components/assessment/AssesssmentContainerComponent";
+import AssessmentContainerComponent from "@/components/assessment/AssessmentContainerComponent";
+import AssessmentHeaderComponent from "@/components/form/FormHeaderComponent";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useEffect } from "react";
 

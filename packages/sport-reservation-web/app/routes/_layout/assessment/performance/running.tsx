@@ -12,13 +12,13 @@ function RouteComponent() {
 
   const form = useAppForm({
     defaultValues: {
-      distance: "" as "" | number,
-      pace: "" as "" | number,
-      frequency: "" as "" | string,
-      goal: "" as string,
+      distance: undefined as undefined | number,
+      pace: undefined as undefined | number,
+      frequency: undefined as undefined | string,
+      goal: undefined as undefined | string,
       bestPerformance: {
-        distance: "" as "" | number,
-        time: "" as "" | number,
+        distance: undefined as undefined | number,
+        time: undefined as undefined | number,
       },
     },
     validators: {
@@ -51,11 +51,12 @@ function RouteComponent() {
 
   return (
     <form
-      className="space-y-6"
       onSubmit={(e) => {
         e.preventDefault();
+        e.stopPropagation();
         form.handleSubmit();
       }}
+      className="space-y-6"
     >
       {/* Q1: Typical distance */}
       <form.AppField
@@ -172,11 +173,6 @@ function RouteComponent() {
             <button
               type="submit"
               disabled={!canSubmit}
-              onClick={() => {
-                router.navigate({
-                  to: "/assessment/matching",
-                });
-              }}
               className="rounded bg-gradient-to-r from-[#65D1F8] to-[#6CCFD0] px-4 py-2 text-white hover:opacity-90"
             >
               {isSubmitting ? "Saving..." : "Save and continue"}

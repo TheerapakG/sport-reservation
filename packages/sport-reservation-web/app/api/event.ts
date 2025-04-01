@@ -11,11 +11,12 @@ import { serialize } from "cookie-es";
 import { Effect, Match } from "effect";
 import { EventClient } from "sport-reservation-event/client";
 import {
+  EventClientBodyType,
   getEventClientBodyType,
   getEventClientQueryType,
 } from "sport-reservation-event/models";
 import { effectType } from "tiara-stack/utils/effectType";
-
+import { readTypedFormData } from "tiara-stack/utils/formData";
 import { parseCookies } from "vinxi/http";
 
 export const eventKeys = () => {
@@ -163,28 +164,34 @@ export const getScheduleListServerFn = createServerFn({
         });
 
         return {
-          schedules: schedules.map((schedule) => ({
-            ...schedule,
-            schedule: {
-              ...schedule.schedule,
-              startAt: yield* effectType(
-                type("string.date.parse"),
-                schedule.schedule.startAt,
-              ),
-              endAt: yield* effectType(
-                type("string.date.parse"),
-                schedule.schedule.endAt,
-              ),
-              repeatStartAt: yield* effectType(
-                type("string.date.parse"),
-                schedule.schedule.repeatStartAt,
-              ),
-              repeatEndAt: yield* effectType(
-                type("string.date.parse"),
-                schedule.schedule.repeatEndAt,
-              ),
-            },
-          })),
+          schedules: yield* Effect.all(
+            schedules.map((schedule) =>
+              Effect.gen(function* () {
+                return {
+                  ...schedule,
+                  schedule: {
+                    ...schedule.schedule,
+                    startAt: yield* effectType(
+                      type("string.date.parse"),
+                      schedule.schedule.startAt,
+                    ),
+                    endAt: yield* effectType(
+                      type("string.date.parse"),
+                      schedule.schedule.endAt,
+                    ),
+                    repeatStartAt: yield* effectType(
+                      type("string.date.parse"),
+                      schedule.schedule.repeatStartAt,
+                    ),
+                    repeatEndAt: yield* effectType(
+                      type("string.date.parse"),
+                      schedule.schedule.repeatEndAt,
+                    ),
+                  },
+                };
+              }),
+            ),
+          ),
         };
       }).pipe(provideEffectContext),
     );
@@ -218,26 +225,21 @@ export const getScheduleListInfiniteQueryOptions = ({
         : undefined,
   });
 
+export const createEventValidators = type([
+  type({
+    creatorType: "'user'",
+  }).and(getEventClientBodyType("postCreateUserEvent")),
+  "|",
+  type({
+    creatorType: "'club'",
+  }).and(getEventClientBodyType("postCreateClubEvent")),
+]);
+
 export const createEventServerFn = createServerFn({
   method: "POST",
 })
   .validator((data: unknown) =>
-    Effect.runSync(
-      effectType(
-        type([
-          {
-            creatorType: "'user'",
-            event: getEventClientBodyType("postCreateUserEvent"),
-          },
-          "|",
-          {
-            creatorType: "'club'",
-            event: getEventClientBodyType("postCreateClubEvent"),
-          },
-        ]),
-        data,
-      ),
-    ),
+    Effect.runSync(effectType(type("FormData"), data)),
   )
   .handler(async ({ data }) => {
     const { access_token: accessToken } = parseCookies();
@@ -248,15 +250,17 @@ export const createEventServerFn = createServerFn({
 
     const event = await Effect.runPromise(
       Effect.gen(function* () {
+        const eventData = yield* readTypedFormData(createEventValidators, data);
+
         const eventClient = yield* EventClient;
-        return yield* Match.value(data).pipe(
-          Match.when({ creatorType: "user" }, ({ event }) =>
+        return yield* Match.value(eventData).pipe(
+          Match.when({ creatorType: "user" }, ({ creatorType, ...event }) =>
             eventClient.postCreateUserEvent({
               headers: { Cookie: serialize("access_token", accessToken) },
               body: event,
             }),
           ),
-          Match.when({ creatorType: "club" }, ({ event }) =>
+          Match.when({ creatorType: "club" }, ({ creatorType, ...event }) =>
             eventClient.postCreateClubEvent({
               headers: { Cookie: serialize("access_token", accessToken) },
               body: event,
@@ -275,6 +279,98 @@ export const useCreateEventMutation = () => {
 
   return useMutation({
     mutationFn: createEventServerFn,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: eventKeys().all(),
+      });
+    },
+  });
+};
+
+export const createScheduleServerFn = createServerFn({
+  method: "POST",
+})
+  .validator((data: unknown) =>
+    Effect.runSync(
+      effectType(getEventClientBodyType("postCreateSchedule"), data),
+    ),
+  )
+  .handler(async ({ data }) => {
+    const { access_token: accessToken } = parseCookies();
+
+    if (!accessToken) {
+      return { success: false } as const;
+    }
+
+    const schedule = await Effect.runPromise(
+      Effect.gen(function* () {
+        const eventClient = yield* EventClient;
+        return yield* eventClient.postCreateSchedule({
+          headers: { Cookie: serialize("access_token", accessToken) },
+          body: {
+            ...data,
+            startAt: data.startAt.toISOString(),
+            endAt: data.endAt.toISOString(),
+            repeatStartAt: data.repeatStartAt.toISOString(),
+            repeatEndAt: data.repeatEndAt.toISOString(),
+          },
+        });
+      }).pipe(provideEffectContext),
+    );
+
+    return { success: true, schedule } as const;
+  });
+
+export const useCreateScheduleMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: createScheduleServerFn,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: eventKeys().all(),
+      });
+    },
+  });
+};
+
+export const requestScheduleCreateServerFn = createServerFn({
+  method: "POST",
+})
+  .validator((data: unknown) =>
+    Effect.runSync(
+      effectType(getEventClientBodyType("postScheduleRequestCreate"), data),
+    ),
+  )
+  .handler(async ({ data }) => {
+    const { access_token: accessToken } = parseCookies();
+
+    if (!accessToken) {
+      return { success: false } as const;
+    }
+
+    const scheduleRequest = await Effect.runPromise(
+      Effect.gen(function* () {
+        const eventClient = yield* EventClient;
+        return yield* eventClient.postScheduleRequestCreate({
+          headers: { Cookie: serialize("access_token", accessToken) },
+          body: data,
+        });
+      }).pipe(provideEffectContext),
+    );
+
+    return { success: true, scheduleRequest } as const;
+  });
+
+export const useRequestScheduleCreateMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      data,
+    }: {
+      data: EventClientBodyType<"postScheduleRequestCreate">["inferIn"];
+    }) => requestScheduleCreateServerFn({ data }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: eventKeys().all(),

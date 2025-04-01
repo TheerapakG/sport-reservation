@@ -1,4 +1,4 @@
-export default function AssessmentContainerComponent({
+export default function AssessmenContainerComponent({
   children,
 }: {
   children: React.ReactNode;

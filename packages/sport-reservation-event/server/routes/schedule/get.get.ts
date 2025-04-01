@@ -38,6 +38,8 @@ export const handlerConfig = defineEventHandlerConfig({
         "locationDescription?": "string",
         autoAccept: "boolean",
         sizeLimit: "number",
+        skillLevel: "('beginner' | 'intermediate' | 'advanced')[]",
+        sportType: "('badminton' | 'tennis' | 'running')[]",
       },
       group: {
         groupId: "string",
@@ -87,6 +89,8 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
       event: eventData,
       group,
       participants,
+      skillLevel,
+      sportType,
     } = yield* yield* scheduleRepository.getSchedule({
       scheduleId: id,
     });
@@ -134,6 +138,8 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
         }),
         autoAccept: eventData.autoAccept,
         sizeLimit: eventData.sizeLimit,
+        skillLevel: skillLevel.map((sl) => sl.skillLevel),
+        sportType: sportType.map((st) => st.sportType),
       },
       group: {
         groupId: group.publicId,

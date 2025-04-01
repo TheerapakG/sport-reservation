@@ -2,32 +2,28 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useFieldContext } from "@/utils/form/context";
 import { useStore } from "@tanstack/react-form";
+import { Array, pipe } from "effect";
 
-export default function StandaloneSingleChoiceField<T>({
+export default function StandaloneMultipleChoiceField<T>({
   classNames,
-  variant = "normal",
+  spread,
   options,
-  optional,
 }: {
   classNames?: {
     button?: string;
   };
-  variant?: "normal" | "spread" | "connected";
+  spread?: boolean;
   options: { label: string; value: T }[];
-  optional?: boolean;
 }) {
-  const field = useFieldContext<undefined | T>();
+  const field = useFieldContext<T[]>();
+  const fieldIsPristine = useStore(
+    field.store,
+    (state) => state.meta.isPristine,
+  );
   const fieldValue = useStore(field.store, (state) => state.value);
 
   return (
-    <div
-      className={cn({
-        "flex flex-wrap gap-2": variant === "normal",
-        "flex justify-between": variant === "spread",
-        "flex [&>*:not(:first-child)]:rounded-l-none [&>*:not(:last-child)]:rounded-r-none":
-          variant === "connected",
-      })}
-    >
+    <div className={spread ? "flex justify-between" : "flex flex-wrap gap-2"}>
       {options.map((option) => (
         <Button
           key={option.label}
@@ -35,7 +31,7 @@ export default function StandaloneSingleChoiceField<T>({
           variant="outline"
           className={cn(
             "h-auto rounded-full px-3 py-1 aria-[invalid]:ring-1 aria-[invalid]:ring-red-500 aria-[invalid]:ring-offset-2",
-            fieldValue !== option.value
+            fieldIsPristine || !Array.contains(option.value)(fieldValue)
               ? "border-gray-300 text-gray-500 hover:bg-gray-100"
               : "border-[#65D1F8] bg-[#E1F8FE] text-[#65D1F8] hover:bg-[#E1F8FE] hover:text-[#65D1F8] dark:bg-[#E1F8FE]",
             classNames?.button,
@@ -46,11 +42,23 @@ export default function StandaloneSingleChoiceField<T>({
               }
             : {})}
           onClick={() => {
-            if (optional && fieldValue === option.value) {
-              field.handleChange(undefined);
-            } else {
-              field.handleChange(option.value);
-            }
+            console.log(
+              fieldValue,
+              pipe(
+                fieldValue,
+                Array.contains(option.value)(fieldValue)
+                  ? Array.filter((value) => value !== option.value)
+                  : Array.append(option.value),
+              ),
+            );
+            field.handleChange(
+              pipe(
+                fieldValue,
+                Array.contains(option.value)(fieldValue)
+                  ? Array.filter((value) => value !== option.value)
+                  : Array.append(option.value),
+              ),
+            );
             field.handleBlur();
           }}
         >

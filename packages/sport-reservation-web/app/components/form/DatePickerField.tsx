@@ -1,30 +1,24 @@
+import StandaloneDatePickerField from "./StandaloneDatePickerField";
 import { StandaloneFieldLabel } from "./StandaloneFieldLabel";
-import StandaloneTextInputField from "./StandaloneTextInputField";
 
-export default function TextInputField({
+export default function DatePickerField({
   classNames,
   label,
   placeholder,
-  trailingText,
-  variant = "input",
 }: {
   classNames?: {
     label?: string;
-    input?: string;
+    button?: string;
   };
   label?: string;
   placeholder?: string;
-  trailingText?: string;
-  variant?: "input" | "textarea";
 }) {
   return (
     <div className="space-y-2">
       <StandaloneFieldLabel label={label} className={classNames?.label} />
-      <StandaloneTextInputField
+      <StandaloneDatePickerField
         placeholder={placeholder}
-        trailingText={trailingText}
         classNames={classNames}
-        variant={variant}
       />
     </div>
   );

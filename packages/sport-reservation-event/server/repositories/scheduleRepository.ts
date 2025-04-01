@@ -3,6 +3,8 @@ import { Context, Effect, Option } from "effect";
 import {
   eventEvent,
   eventEventSchedule,
+  eventEventSkillLevel,
+  eventEventSport,
   userUserGroup,
   userUserGroupMember,
 } from "sport-reservation-db/schema";
@@ -41,6 +43,8 @@ export class ScheduleRepository
           schedule: typeof eventEventSchedule.$inferSelect;
           event: typeof eventEvent.$inferSelect;
           group: typeof userUserGroup.$inferSelect;
+          skillLevel: (typeof eventEventSkillLevel.$inferSelect)[];
+          sportType: (typeof eventEventSport.$inferSelect)[];
           participants: number;
         }>,
         SqlError.SqlError
@@ -85,6 +89,8 @@ export class ScheduleRepository
           schedule: typeof eventEventSchedule.$inferSelect;
           event: typeof eventEvent.$inferSelect;
           group: typeof userUserGroup.$inferSelect;
+          skillLevel: (typeof eventEventSkillLevel.$inferSelect)[];
+          sportType: (typeof eventEventSport.$inferSelect)[];
           participants: number;
         }[],
         SqlError.SqlError
@@ -94,6 +100,8 @@ export class ScheduleRepository
           schedule: typeof eventEventSchedule.$inferSelect;
           event: typeof eventEvent.$inferSelect;
           group: typeof userUserGroup.$inferSelect;
+          skillLevel: (typeof eventEventSkillLevel.$inferSelect)[];
+          sportType: (typeof eventEventSport.$inferSelect)[];
           participants: number;
         }[],
         SqlError.SqlError
@@ -103,6 +111,8 @@ export class ScheduleRepository
           schedule: typeof eventEventSchedule.$inferSelect;
           event: typeof eventEvent.$inferSelect;
           group: typeof userUserGroup.$inferSelect;
+          skillLevel: (typeof eventEventSkillLevel.$inferSelect)[];
+          sportType: (typeof eventEventSport.$inferSelect)[];
           participants: number;
         }[],
         SqlError.SqlError
@@ -112,6 +122,8 @@ export class ScheduleRepository
           schedule: typeof eventEventSchedule.$inferSelect;
           event: typeof eventEvent.$inferSelect;
           group: typeof userUserGroup.$inferSelect;
+          skillLevel: (typeof eventEventSkillLevel.$inferSelect)[];
+          sportType: (typeof eventEventSport.$inferSelect)[];
           participants: number;
         }[],
         SqlError.SqlError
@@ -133,6 +145,8 @@ export class ScheduleRepository
           repeatIndex: number;
           event: typeof eventEvent.$inferSelect;
           group: typeof userUserGroup.$inferSelect;
+          skillLevel: (typeof eventEventSkillLevel.$inferSelect)[];
+          sportType: (typeof eventEventSport.$inferSelect)[];
           participants: number;
         }[],
         SqlError.SqlError

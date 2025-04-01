@@ -1,7 +1,7 @@
 import {
   getAllMatchedUsersQueryOptions,
-  getMatchingCursorQueryOptions,
   useCreateMatchingCursorMutation,
+  useGetMatchingCursorQueryOptions,
   useMatchUsersMutation,
 } from "@/api/matching";
 import { getCurrentUserProfileQueryOptions } from "@/api/user";
@@ -185,7 +185,8 @@ const MatchedUsersPage = ({ cursorId }: { cursorId: string }) => {
 };
 
 function MatchingPage() {
-  const cursorQuery = useSuspenseQuery(getMatchingCursorQueryOptions());
+  const matchingCursorQueryOptions = useGetMatchingCursorQueryOptions();
+  const cursorQuery = useSuspenseQuery(matchingCursorQueryOptions);
 
   return cursorQuery.data.success ? (
     <Suspense fallback={<div>Loading...</div>}>
@@ -197,18 +198,5 @@ function MatchingPage() {
 }
 
 export const Route = createFileRoute("/_layout/matching/")({
-  loader: async ({ context: { queryClient } }) => {
-    const matchingCursor = await queryClient.ensureQueryData(
-      getMatchingCursorQueryOptions(),
-    );
-    if (matchingCursor.success) {
-      queryClient.prefetchQuery(getCurrentUserProfileQueryOptions());
-      queryClient.prefetchQuery(
-        getAllMatchedUsersQueryOptions({
-          cursorId: matchingCursor.cursor.cursorId,
-        }),
-      );
-    }
-  },
   component: MatchingPage,
 });

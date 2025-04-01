@@ -369,6 +369,18 @@ export const eventEventCreatorType = pgEnum("event_event_creator_type", [
   "club",
 ]);
 
+export const eventSportType = pgEnum("event_sport_type", [
+  "badminton",
+  "tennis",
+  "running",
+]);
+
+export const eventSkillLevel = pgEnum("event_skill_level", [
+  "beginner",
+  "intermediate",
+  "advanced",
+]);
+
 export const eventEvent = pgTable(
   "event_event",
   {
@@ -395,6 +407,42 @@ export const eventEvent = pgTable(
     index("event_event_group_id_idx").on(table.groupId),
     index("event_event_creator_id_idx").on(table.creatorId),
   ],
+);
+
+export const eventEventSkillLevel = pgTable(
+  "event_event_skill_level",
+  {
+    id: serial("id").primaryKey(),
+    eventId: uuid("event_id").notNull(),
+    skillLevel: eventSkillLevel("skill_level").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  },
+  (table) => [index("event_event_skill_level_event_id_idx").on(table.eventId)],
+);
+
+export const eventEventSport = pgTable(
+  "event_event_sport",
+  {
+    id: serial("id").primaryKey(),
+    eventId: uuid("event_id").notNull(),
+    sportType: eventSportType("sport_type").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  },
+  (table) => [index("event_event_sport_event_id_idx").on(table.eventId)],
 );
 
 export const eventEventSchedule = pgTable(

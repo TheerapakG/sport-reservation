@@ -36,6 +36,8 @@ export const handlerConfig = defineEventHandlerConfig({
             "locationDescription?": "string",
             autoAccept: "boolean",
             sizeLimit: "number",
+            skillLevel: "('beginner' | 'intermediate' | 'advanced')[]",
+            sportType: "('badminton' | 'tennis' | 'running')[]",
           },
           group: {
             groupId: "string",
@@ -78,7 +80,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
 
     const scheduleRepository = yield* ScheduleRepository;
     const schedules = yield* scheduleRepository.getUserPendingSchedules({
-      userId: userId,
+      userId,
     });
 
     const uploadClient = yield* UploadClient;
@@ -86,54 +88,56 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     const clubClient = yield* ClubClient;
 
     const formattedSchedules = yield* Effect.all(
-      schedules.map(({ schedule, event, group, participants }) =>
-        Effect.gen(function* () {
-          // Get image URL if exists
-          const { url: image } = event.image
-            ? yield* uploadClient.getDownloadPresignedUrl({
-                query: { key: event.image },
-              })
-            : { url: undefined };
+      schedules.map(
+        ({ schedule, event, group, participants, skillLevel, sportType }) =>
+          Effect.gen(function* () {
+            const { url: image } = event.image
+              ? yield* uploadClient.getDownloadPresignedUrl({
+                  query: { key: event.image },
+                })
+              : { url: undefined };
 
-          const creator = yield* Match.value(event.eventCreatorType).pipe(
-            Match.when("club", () =>
-              clubClient.getClub({ query: { clubId: event.creatorId } }),
-            ),
-            Match.when("user", () =>
-              userClient.getUserProfile({ query: { id: event.creatorId } }),
-            ),
-            Match.exhaustive,
-          );
+            const creator = yield* Match.value(event.eventCreatorType).pipe(
+              Match.when("club", () =>
+                clubClient.getClub({ query: { clubId: event.creatorId } }),
+              ),
+              Match.when("user", () =>
+                userClient.getUserProfile({ query: { id: event.creatorId } }),
+              ),
+              Match.exhaustive,
+            );
 
-          return {
-            schedule: {
-              id: schedule.publicId,
-              startAt: schedule.startAt.toISOString(),
-              endAt: schedule.endAt.toISOString(),
-              repeatStartAt: schedule.repeatStartAt?.toISOString() || "",
-              repeatEndAt: schedule.repeatEndAt?.toISOString() || "",
-              repeatInterval: schedule.repeatInterval,
-            },
-            event: {
-              eventId: event.groupId,
-              ...(image && { image }),
-              eventCreatorType: event.eventCreatorType,
-              creator,
-              ...(event.description && { description: event.description }),
-              ...(event.locationDescription && {
-                locationDescription: event.locationDescription,
-              }),
-              autoAccept: event.autoAccept,
-              sizeLimit: event.sizeLimit,
-            },
-            group: {
-              groupId: group.publicId,
-              ...(group.name && { name: group.name }),
-              type: group.type,
-            },
-            participants,
-          };
-        }),
+            return {
+              schedule: {
+                id: schedule.publicId,
+                startAt: schedule.startAt.toISOString(),
+                endAt: schedule.endAt.toISOString(),
+                repeatStartAt: schedule.repeatStartAt?.toISOString() || "",
+                repeatEndAt: schedule.repeatEndAt?.toISOString() || "",
+                repeatInterval: schedule.repeatInterval,
+              },
+              event: {
+                eventId: event.groupId,
+                ...(image && { image }),
+                eventCreatorType: event.eventCreatorType,
+                creator,
+                ...(event.description && { description: event.description }),
+                ...(event.locationDescription && {
+                  locationDescription: event.locationDescription,
+                }),
+                autoAccept: event.autoAccept,
+                sizeLimit: event.sizeLimit,
+                skillLevel: skillLevel.map((sl) => sl.skillLevel),
+                sportType: sportType.map((st) => st.sportType),
+              },
+              group: {
+                groupId: group.publicId,
+                ...(group.name && { name: group.name }),
+                type: group.type,
+              },
+              participants,
+            };
+          }),
       ),
     );
 

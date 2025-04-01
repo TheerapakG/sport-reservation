@@ -19,7 +19,7 @@ export default function SelectInputField<T>({
   placeholder?: string;
   options: { label: string; value: T }[];
 }) {
-  const field = useFieldContext<"" | T>();
+  const field = useFieldContext<undefined | T>();
 
   return (
     <Select

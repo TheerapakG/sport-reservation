@@ -38,7 +38,7 @@ function IndexComponent() {
       </section>
 
       {/* Hear From Our Players - Horizontal Scroll */}
-      <section className="mx-auto max-w-7xl flex-col px-4 py-8">
+      <section className="mx-auto w-full flex-col px-4 py-8">
         <div className="flex justify-center">
           <h2 className="mb-6 pr-2 text-center text-2xl font-bold text-[#514747] md:text-3xl">
             Hear From

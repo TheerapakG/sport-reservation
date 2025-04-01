@@ -1,29 +1,26 @@
 import { StandaloneFieldLabel } from "./StandaloneFieldLabel";
-import StandaloneSingleChoiceField from "./StandaloneSingleChoiceField";
+import StandaloneMultipleChoiceField from "./StandaloneMultipleChoiceField";
 
-export default function SingleChoiceField<T>({
+export default function MultipleChoiceField<T>({
   classNames,
   label,
-  variant,
+  spread,
   options,
-  optional,
 }: {
   classNames?: {
     label?: string;
     button?: string;
   };
   label?: string;
-  variant?: "normal" | "spread" | "connected";
+  spread?: boolean;
   options: { label: string; value: T }[];
-  optional?: boolean;
 }) {
   return (
     <div className="space-y-2">
       <StandaloneFieldLabel label={label} className={classNames?.label} />
-      <StandaloneSingleChoiceField
-        variant={variant}
+      <StandaloneMultipleChoiceField
+        spread={spread}
         options={options}
-        optional={optional}
         classNames={classNames}
       />
     </div>

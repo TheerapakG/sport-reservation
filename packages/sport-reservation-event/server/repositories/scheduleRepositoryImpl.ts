@@ -1,9 +1,22 @@
 import { PgDrizzle } from "@effect/sql-drizzle/Pg";
-import { and, eq, gt, inArray, isNull, lte, not, sql, sum } from "drizzle-orm";
+import {
+  and,
+  eq,
+  gt,
+  inArray,
+  isNotNull,
+  isNull,
+  lte,
+  not,
+  sql,
+  sum,
+} from "drizzle-orm";
 import { Effect, Layer, Option } from "effect";
 import {
   eventEvent,
   eventEventSchedule,
+  eventEventSkillLevel,
+  eventEventSport,
   eventScheduleMember,
   userUserGroup,
   userUserGroupMember,
@@ -116,7 +129,7 @@ export const scheduleRepositoryImpl = Layer.effect(
               endAt,
               repeatStartAt,
               repeatEndAt,
-              repeatInterval: repeatInterval ?? 0,
+              repeatInterval,
             })
             .returning();
 
@@ -124,7 +137,6 @@ export const scheduleRepositoryImpl = Layer.effect(
             scheduleId: schedule.publicId,
           };
         }).pipe(Effect.withSpan("scheduleRepositoryImpl.createSchedule")),
-
       updateSchedule: ({
         scheduleId,
         startAt,
@@ -215,7 +227,35 @@ export const scheduleRepositoryImpl = Layer.effect(
             return Option.none();
           }
 
-          return Option.some(result[0]);
+          const eventId = result[0].event.groupId;
+
+          // Get event skill levels
+          const skillLevel = yield* db
+            .select()
+            .from(eventEventSkillLevel)
+            .where(
+              and(
+                eq(eventEventSkillLevel.eventId, eventId),
+                isNull(eventEventSkillLevel.deletedAt),
+              ),
+            );
+
+          // Get event sport types
+          const sportType = yield* db
+            .select()
+            .from(eventEventSport)
+            .where(
+              and(
+                eq(eventEventSport.eventId, eventId),
+                isNull(eventEventSport.deletedAt),
+              ),
+            );
+
+          return Option.some({
+            ...result[0],
+            skillLevel,
+            sportType,
+          });
         }).pipe(Effect.withSpan("scheduleRepositoryImpl.getSchedule")),
       requestScheduleJoin: ({ scheduleId, repeatIndex, userId, size }) =>
         Effect.gen(function* () {
@@ -241,7 +281,22 @@ export const scheduleRepositoryImpl = Layer.effect(
 
           const schedule = schedules[0];
 
-          if (schedule.event.autoAccept && schedule.event.sizeLimit > 0) {
+          // Check if user is the creator of the event
+          const creators = yield* db
+            .select()
+            .from(userUserGroup)
+            .where(
+              and(
+                eq(userUserGroup.publicId, schedule.event.groupId),
+                eq(userUserGroup.creatorId, userId),
+                isNull(userUserGroup.deletedAt),
+              ),
+            );
+
+          if (
+            creators.length > 0 ||
+            (schedule.event.autoAccept && schedule.event.sizeLimit > 0)
+          ) {
             const currentTotalSizes = yield* db
               .select({
                 size: sum(eventScheduleMember.size).mapWith(Number).as("size"),
@@ -289,7 +344,7 @@ export const scheduleRepositoryImpl = Layer.effect(
                 status: schedule.event.autoAccept ? "member" : "pending",
                 deletedAt: null,
               },
-              setWhere: not(eq(userUserGroupMember.status, "member")),
+              setWhere: isNotNull(userUserGroupMember.deletedAt),
             });
 
           yield* db
@@ -310,6 +365,7 @@ export const scheduleRepositoryImpl = Layer.effect(
                 size,
                 deletedAt: null,
               },
+              setWhere: isNotNull(eventScheduleMember.deletedAt),
             });
         }).pipe(Effect.withSpan("scheduleRepositoryImpl.requestScheduleJoin")),
       acceptScheduleJoin: ({ scheduleId, repeatIndex, userId }) =>
@@ -626,7 +682,7 @@ export const scheduleRepositoryImpl = Layer.effect(
         Effect.gen(function* () {
           const scheduleParticipants = scheduleParticipantsCTE();
 
-          return yield* db
+          const schedules = yield* db
             .with(scheduleParticipants)
             .select({
               schedule: eventEventSchedule,
@@ -656,6 +712,45 @@ export const scheduleRepositoryImpl = Layer.effect(
                 isNull(userUserGroup.deletedAt),
               ),
             );
+
+          // For each schedule, get skill levels and sport types
+          const schedulesWithDetails = yield* Effect.forEach(
+            schedules,
+            (schedule) =>
+              Effect.gen(function* () {
+                const eventId = schedule.event.groupId;
+
+                // Get event skill levels
+                const skillLevel = yield* db
+                  .select()
+                  .from(eventEventSkillLevel)
+                  .where(
+                    and(
+                      eq(eventEventSkillLevel.eventId, eventId),
+                      isNull(eventEventSkillLevel.deletedAt),
+                    ),
+                  );
+
+                // Get event sport types
+                const sportType = yield* db
+                  .select()
+                  .from(eventEventSport)
+                  .where(
+                    and(
+                      eq(eventEventSport.eventId, eventId),
+                      isNull(eventEventSport.deletedAt),
+                    ),
+                  );
+
+                return {
+                  ...schedule,
+                  skillLevel,
+                  sportType,
+                };
+              }),
+          );
+
+          return schedulesWithDetails;
         }).pipe(
           Effect.withSpan("scheduleRepositoryImpl.getUserCreatedSchedules"),
         ),
@@ -691,7 +786,7 @@ export const scheduleRepositoryImpl = Layer.effect(
               ),
           );
 
-          return yield* db
+          const schedules = yield* db
             .with(scheduleParticipants, userMemberSchedules)
             .select({
               schedule: eventEventSchedule,
@@ -732,6 +827,45 @@ export const scheduleRepositoryImpl = Layer.effect(
                 isNull(userUserGroup.deletedAt),
               ),
             );
+
+          // For each schedule, get skill levels and sport types
+          const schedulesWithDetails = yield* Effect.forEach(
+            schedules,
+            (schedule) =>
+              Effect.gen(function* () {
+                const eventId = schedule.event.groupId;
+
+                // Get event skill levels
+                const skillLevel = yield* db
+                  .select()
+                  .from(eventEventSkillLevel)
+                  .where(
+                    and(
+                      eq(eventEventSkillLevel.eventId, eventId),
+                      isNull(eventEventSkillLevel.deletedAt),
+                    ),
+                  );
+
+                // Get event sport types
+                const sportType = yield* db
+                  .select()
+                  .from(eventEventSport)
+                  .where(
+                    and(
+                      eq(eventEventSport.eventId, eventId),
+                      isNull(eventEventSport.deletedAt),
+                    ),
+                  );
+
+                return {
+                  ...schedule,
+                  skillLevel,
+                  sportType,
+                };
+              }),
+          );
+
+          return schedulesWithDetails;
         }).pipe(
           Effect.withSpan("scheduleRepositoryImpl.getUserMemberSchedules"),
         ),
@@ -767,7 +901,7 @@ export const scheduleRepositoryImpl = Layer.effect(
               ),
           );
 
-          return yield* db
+          const schedules = yield* db
             .with(scheduleParticipants, userPendingSchedules)
             .select({
               schedule: eventEventSchedule,
@@ -808,6 +942,45 @@ export const scheduleRepositoryImpl = Layer.effect(
                 isNull(userUserGroup.deletedAt),
               ),
             );
+
+          // For each schedule, get skill levels and sport types
+          const schedulesWithDetails = yield* Effect.forEach(
+            schedules,
+            (schedule) =>
+              Effect.gen(function* () {
+                const eventId = schedule.event.groupId;
+
+                // Get event skill levels
+                const skillLevel = yield* db
+                  .select()
+                  .from(eventEventSkillLevel)
+                  .where(
+                    and(
+                      eq(eventEventSkillLevel.eventId, eventId),
+                      isNull(eventEventSkillLevel.deletedAt),
+                    ),
+                  );
+
+                // Get event sport types
+                const sportType = yield* db
+                  .select()
+                  .from(eventEventSport)
+                  .where(
+                    and(
+                      eq(eventEventSport.eventId, eventId),
+                      isNull(eventEventSport.deletedAt),
+                    ),
+                  );
+
+                return {
+                  ...schedule,
+                  skillLevel,
+                  sportType,
+                };
+              }),
+          );
+
+          return schedulesWithDetails;
         }).pipe(
           Effect.withSpan("scheduleRepositoryImpl.getUserPendingSchedules"),
         ),
@@ -815,7 +988,7 @@ export const scheduleRepositoryImpl = Layer.effect(
         Effect.gen(function* () {
           const scheduleParticipants = scheduleParticipantsCTE();
 
-          return yield* db
+          const schedules = yield* db
             .with(scheduleParticipants)
             .select({
               schedule: eventEventSchedule,
@@ -845,6 +1018,45 @@ export const scheduleRepositoryImpl = Layer.effect(
                 isNull(userUserGroup.deletedAt),
               ),
             );
+
+          // For each schedule, get skill levels and sport types
+          const schedulesWithDetails = yield* Effect.forEach(
+            schedules,
+            (schedule) =>
+              Effect.gen(function* () {
+                const eventId = schedule.event.groupId;
+
+                // Get event skill levels
+                const skillLevel = yield* db
+                  .select()
+                  .from(eventEventSkillLevel)
+                  .where(
+                    and(
+                      eq(eventEventSkillLevel.eventId, eventId),
+                      isNull(eventEventSkillLevel.deletedAt),
+                    ),
+                  );
+
+                // Get event sport types
+                const sportType = yield* db
+                  .select()
+                  .from(eventEventSport)
+                  .where(
+                    and(
+                      eq(eventEventSport.eventId, eventId),
+                      isNull(eventEventSport.deletedAt),
+                    ),
+                  );
+
+                return {
+                  ...schedule,
+                  skillLevel,
+                  sportType,
+                };
+              }),
+          );
+
+          return schedulesWithDetails;
         }).pipe(Effect.withSpan("scheduleRepositoryImpl.getClubSchedules")),
 
       getScheduleMemberStatus: ({ scheduleId, userId }) =>
@@ -897,7 +1109,7 @@ export const scheduleRepositoryImpl = Layer.effect(
 
           const scheduleRepeatIndex = getScheduleRepeatIndex(date);
 
-          return yield* db
+          const schedules = yield* db
             .with(scheduleParticipants)
             .select({
               schedule: eventEventSchedule,
@@ -929,6 +1141,45 @@ export const scheduleRepositoryImpl = Layer.effect(
             )
             .offset(offset)
             .limit(limit);
+
+          // For each schedule, get skill levels and sport types
+          const schedulesWithDetails = yield* Effect.forEach(
+            schedules,
+            (schedule) =>
+              Effect.gen(function* () {
+                const eventId = schedule.event.groupId;
+
+                // Get event skill levels
+                const skillLevel = yield* db
+                  .select()
+                  .from(eventEventSkillLevel)
+                  .where(
+                    and(
+                      eq(eventEventSkillLevel.eventId, eventId),
+                      isNull(eventEventSkillLevel.deletedAt),
+                    ),
+                  );
+
+                // Get event sport types
+                const sportType = yield* db
+                  .select()
+                  .from(eventEventSport)
+                  .where(
+                    and(
+                      eq(eventEventSport.eventId, eventId),
+                      isNull(eventEventSport.deletedAt),
+                    ),
+                  );
+
+                return {
+                  ...schedule,
+                  skillLevel,
+                  sportType,
+                };
+              }),
+          );
+
+          return schedulesWithDetails;
         }).pipe(Effect.withSpan("scheduleRepositoryImpl.getSchedulesByDate")),
     });
   }),
