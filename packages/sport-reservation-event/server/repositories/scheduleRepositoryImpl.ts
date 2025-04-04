@@ -28,7 +28,10 @@ export const scheduleRepositoryImpl = Layer.effect(
   Effect.gen(function* () {
     const db = yield* PgDrizzle;
 
-    const scheduleParticipantsCTE = (scheduleIds?: string[]) => {
+    const scheduleParticipantsCTE = (
+      scheduleIds?: string[],
+      repeatIndex?: number,
+    ) => {
       const allScheduleParticipants = db.$with("all_schedule_participants").as(
         db
           .select({
@@ -67,7 +70,10 @@ export const scheduleRepositoryImpl = Layer.effect(
         .with(allScheduleParticipants)
         .select({
           scheduleId: eventEventSchedule.publicId,
-          repeatIndex: allScheduleParticipants.repeatIndex,
+          repeatIndex:
+            sql`coalesce(${allScheduleParticipants.repeatIndex}, ${repeatIndex ?? 0})`
+              .mapWith(Number)
+              .as("repeatIndex"),
           participants:
             sql`coalesce(${allScheduleParticipants.participants}, 0)`
               .mapWith(Number)
@@ -79,13 +85,29 @@ export const scheduleRepositoryImpl = Layer.effect(
           eq(eventEventSchedule.publicId, allScheduleParticipants.scheduleId),
         );
 
+      const wheres = [
+        scheduleIds
+          ? inArray(eventEventSchedule.publicId, scheduleIds)
+          : undefined,
+        repeatIndex
+          ? lte(
+              sql`extract(epoch from ${eventEventSchedule.repeatStartAt})`,
+              sql`extract(epoch from ${eventEventSchedule.startAt}) + ${eventEventSchedule.repeatInterval} * ${repeatIndex}`,
+            )
+          : undefined,
+        repeatIndex
+          ? gt(
+              sql`extract(epoch from ${eventEventSchedule.repeatEndAt})`,
+              sql`extract(epoch from ${eventEventSchedule.endAt}) + ${eventEventSchedule.repeatInterval} * ${repeatIndex}`,
+            )
+          : undefined,
+      ].filter(Boolean);
+
       return db
         .$with("schedule_participants")
         .as(
-          scheduleIds
-            ? scheduleParticipants.where(
-                inArray(eventEventSchedule.publicId, scheduleIds),
-              )
+          wheres.length > 0
+            ? scheduleParticipants.where(and(...wheres))
             : scheduleParticipants,
         );
     };
@@ -190,9 +212,12 @@ export const scheduleRepositoryImpl = Layer.effect(
             );
         }).pipe(Effect.withSpan("scheduleRepositoryImpl.deleteSchedule")),
 
-      getSchedule: ({ scheduleId }) =>
+      getSchedule: ({ scheduleId, repeatIndex }) =>
         Effect.gen(function* () {
-          const scheduleParticipants = scheduleParticipantsCTE([scheduleId]);
+          const scheduleParticipants = scheduleParticipantsCTE(
+            [scheduleId],
+            repeatIndex,
+          );
 
           const result = yield* db
             .with(scheduleParticipants)
@@ -200,12 +225,21 @@ export const scheduleRepositoryImpl = Layer.effect(
               schedule: eventEventSchedule,
               event: eventEvent,
               group: userUserGroup,
-              participants: scheduleParticipants.participants,
+              participants: {
+                repeatIndex: scheduleParticipants.repeatIndex,
+                participants: scheduleParticipants.participants,
+              },
             })
             .from(scheduleParticipants)
             .innerJoin(
               eventEventSchedule,
-              eq(scheduleParticipants.scheduleId, eventEventSchedule.publicId),
+              and(
+                eq(
+                  scheduleParticipants.scheduleId,
+                  eventEventSchedule.publicId,
+                ),
+                eq(scheduleParticipants.repeatIndex, repeatIndex),
+              ),
             )
             .innerJoin(
               eventEvent,
@@ -688,7 +722,10 @@ export const scheduleRepositoryImpl = Layer.effect(
               schedule: eventEventSchedule,
               event: eventEvent,
               group: userUserGroup,
-              participants: scheduleParticipants.participants,
+              participants: {
+                repeatIndex: scheduleParticipants.repeatIndex,
+                participants: scheduleParticipants.participants,
+              },
             })
             .from(eventEventSchedule)
             .innerJoin(
@@ -792,7 +829,10 @@ export const scheduleRepositoryImpl = Layer.effect(
               schedule: eventEventSchedule,
               event: eventEvent,
               group: userUserGroup,
-              participants: scheduleParticipants.participants,
+              participants: {
+                repeatIndex: scheduleParticipants.repeatIndex,
+                participants: scheduleParticipants.participants,
+              },
             })
             .from(userMemberSchedules)
             .innerJoin(
@@ -907,7 +947,10 @@ export const scheduleRepositoryImpl = Layer.effect(
               schedule: eventEventSchedule,
               event: eventEvent,
               group: userUserGroup,
-              participants: scheduleParticipants.participants,
+              participants: {
+                repeatIndex: scheduleParticipants.repeatIndex,
+                participants: scheduleParticipants.participants,
+              },
             })
             .from(userPendingSchedules)
             .innerJoin(
@@ -994,7 +1037,10 @@ export const scheduleRepositoryImpl = Layer.effect(
               schedule: eventEventSchedule,
               event: eventEvent,
               group: userUserGroup,
-              participants: scheduleParticipants.participants,
+              participants: {
+                repeatIndex: scheduleParticipants.repeatIndex,
+                participants: scheduleParticipants.participants,
+              },
             })
             .from(eventEventSchedule)
             .innerJoin(
@@ -1113,10 +1159,12 @@ export const scheduleRepositoryImpl = Layer.effect(
             .with(scheduleParticipants)
             .select({
               schedule: eventEventSchedule,
-              repeatIndex: scheduleRepeatIndex,
               event: eventEvent,
               group: userUserGroup,
-              participants: scheduleParticipants.participants,
+              participants: {
+                repeatIndex: scheduleParticipants.repeatIndex,
+                participants: scheduleParticipants.participants,
+              },
             })
             .from(eventEventSchedule)
             .innerJoin(
@@ -1129,7 +1177,13 @@ export const scheduleRepositoryImpl = Layer.effect(
             )
             .leftJoin(
               scheduleParticipants,
-              eq(eventEventSchedule.publicId, scheduleParticipants.scheduleId),
+              and(
+                eq(
+                  eventEventSchedule.publicId,
+                  scheduleParticipants.scheduleId,
+                ),
+                eq(scheduleParticipants.repeatIndex, scheduleRepeatIndex),
+              ),
             )
             .where(
               and(

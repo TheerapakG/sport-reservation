@@ -48,7 +48,9 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     );
 
     const clubRepository = yield* ClubRepository;
-    const club = (yield* clubRepository.getClubs({ clubIds: [clubId] }))[0];
+    const club = (yield* clubRepository.getClubsByIds({
+      clubIds: [clubId],
+    }))[0];
     if (
       !Option.getEquivalence(Equivalence.string)(
         Option.map(club, (club) => club.group.creatorId),

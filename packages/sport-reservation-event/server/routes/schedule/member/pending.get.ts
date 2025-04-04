@@ -66,6 +66,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     const scheduleRepository = yield* ScheduleRepository;
     const scheduleOption = yield* scheduleRepository.getSchedule({
       scheduleId,
+      repeatIndex,
     });
 
     if (

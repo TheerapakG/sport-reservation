@@ -1,5 +1,5 @@
 import { PgDrizzle } from "@effect/sql-drizzle/Pg";
-import { and, eq, inArray, isNull, not, sql } from "drizzle-orm";
+import { and, count, eq, inArray, isNull, not, sql } from "drizzle-orm";
 import { Effect, HashMap, Layer } from "effect";
 import {
   clubClub,
@@ -12,6 +12,49 @@ export const clubRepositoryImpl = /*@__PURE__*/ Layer.effect(
   ClubRepository,
   /*@__PURE__*/ Effect.gen(function* () {
     const db = yield* PgDrizzle;
+
+    const clubSizesCTE = (clubIds?: string[]) => {
+      const allClubSizes = db.$with("all_club_sizes").as(
+        db
+          .select({
+            clubId: clubClub.groupId,
+            size: count(userUserGroupMember.userId).mapWith(Number).as("size"),
+          })
+          .from(clubClub)
+          .innerJoin(
+            userUserGroupMember,
+            and(eq(clubClub.groupId, userUserGroupMember.groupId)),
+          )
+          .where(
+            and(
+              eq(userUserGroupMember.status, "member"),
+              isNull(clubClub.deletedAt),
+              isNull(userUserGroupMember.deletedAt),
+            ),
+          )
+          .groupBy(clubClub.groupId),
+      );
+
+      const clubSizes = db
+        .with(allClubSizes)
+        .select({
+          clubId: clubClub.groupId,
+          size: sql`coalesce(${allClubSizes.size}, 0)`
+            .mapWith(Number)
+            .as("size"),
+        })
+        .from(clubClub)
+        .leftJoin(allClubSizes, eq(clubClub.groupId, allClubSizes.clubId));
+
+      const wheres = [
+        clubIds ? inArray(clubClub.groupId, clubIds) : undefined,
+      ].filter(Boolean);
+
+      return db
+        .$with("club_sizes")
+        .as(wheres.length > 0 ? clubSizes.where(and(...wheres)) : clubSizes);
+    };
+
     return ClubRepository.of({
       createClub: ({
         userId,
@@ -132,18 +175,23 @@ export const clubRepositoryImpl = /*@__PURE__*/ Layer.effect(
               ),
             );
         }).pipe(Effect.withSpan("clubRepositoryImpl.deleteClub")),
-      getClubs: ({ clubIds }) =>
+      getClubsByIds: ({ clubIds }) =>
         Effect.gen(function* () {
+          const clubSizes = clubSizesCTE(clubIds);
+
           const result = yield* db
+            .with(clubSizes)
             .select({
               club: clubClub,
               group: userUserGroup,
+              size: clubSizes.size,
             })
             .from(clubClub)
             .innerJoin(
               userUserGroup,
               eq(clubClub.groupId, userUserGroup.publicId),
             )
+            .innerJoin(clubSizes, eq(clubClub.groupId, clubSizes.clubId))
             .where(
               and(
                 inArray(clubClub.groupId, clubIds),
@@ -157,6 +205,29 @@ export const clubRepositoryImpl = /*@__PURE__*/ Layer.effect(
           );
 
           return clubIds.map((clubId) => HashMap.get(clubHashmap, clubId));
+        }).pipe(Effect.withSpan("clubRepositoryImpl.getClub")),
+      getClubsByLimit: ({ limit, offset }) =>
+        Effect.gen(function* () {
+          const clubSizes = clubSizesCTE();
+
+          return yield* db
+            .with(clubSizes)
+            .select({
+              club: clubClub,
+              group: userUserGroup,
+              size: clubSizes.size,
+            })
+            .from(clubClub)
+            .innerJoin(
+              userUserGroup,
+              eq(clubClub.groupId, userUserGroup.publicId),
+            )
+            .innerJoin(clubSizes, eq(clubClub.groupId, clubSizes.clubId))
+            .where(
+              and(isNull(clubClub.deletedAt), isNull(userUserGroup.deletedAt)),
+            )
+            .limit(limit)
+            .offset(offset);
         }).pipe(Effect.withSpan("clubRepositoryImpl.getClub")),
       requestClubMembership: ({ clubId, userId }) =>
         Effect.gen(function* () {
@@ -294,10 +365,14 @@ export const clubRepositoryImpl = /*@__PURE__*/ Layer.effect(
         }).pipe(Effect.withSpan("clubRepositoryImpl.getClubPendingMembers")),
       getUserClubs: ({ userId }) =>
         Effect.gen(function* () {
+          const clubSizes = clubSizesCTE();
+
           return yield* db
+            .with(clubSizes)
             .select({
               club: clubClub,
               group: userUserGroup,
+              size: clubSizes.size,
             })
             .from(userUserGroupMember)
             .innerJoin(
@@ -305,6 +380,7 @@ export const clubRepositoryImpl = /*@__PURE__*/ Layer.effect(
               eq(userUserGroupMember.groupId, userUserGroup.publicId),
             )
             .innerJoin(clubClub, eq(userUserGroup.publicId, clubClub.groupId))
+            .innerJoin(clubSizes, eq(clubClub.groupId, clubSizes.clubId))
             .where(
               and(
                 eq(userUserGroupMember.userId, userId),
@@ -318,13 +394,18 @@ export const clubRepositoryImpl = /*@__PURE__*/ Layer.effect(
         }).pipe(Effect.withSpan("clubRepositoryImpl.getUserClubs")),
       getUserCreatedClubs: ({ userId }) =>
         Effect.gen(function* () {
+          const clubSizes = clubSizesCTE();
+
           return yield* db
+            .with(clubSizes)
             .select({
               club: clubClub,
               group: userUserGroup,
+              size: clubSizes.size,
             })
             .from(userUserGroup)
             .innerJoin(clubClub, eq(userUserGroup.publicId, clubClub.groupId))
+            .innerJoin(clubSizes, eq(clubClub.groupId, clubSizes.clubId))
             .where(
               and(
                 eq(userUserGroup.creatorId, userId),
@@ -336,10 +417,14 @@ export const clubRepositoryImpl = /*@__PURE__*/ Layer.effect(
         }).pipe(Effect.withSpan("clubRepositoryImpl.getUserCreatedClubs")),
       getUserMemberClubs: ({ userId }) =>
         Effect.gen(function* () {
+          const clubSizes = clubSizesCTE();
+
           return yield* db
+            .with(clubSizes)
             .select({
               club: clubClub,
               group: userUserGroup,
+              size: clubSizes.size,
             })
             .from(userUserGroupMember)
             .innerJoin(
@@ -347,6 +432,7 @@ export const clubRepositoryImpl = /*@__PURE__*/ Layer.effect(
               eq(userUserGroupMember.groupId, userUserGroup.publicId),
             )
             .innerJoin(clubClub, eq(userUserGroup.publicId, clubClub.groupId))
+            .innerJoin(clubSizes, eq(clubClub.groupId, clubSizes.clubId))
             .where(
               and(
                 eq(userUserGroupMember.userId, userId),
@@ -361,10 +447,14 @@ export const clubRepositoryImpl = /*@__PURE__*/ Layer.effect(
         }).pipe(Effect.withSpan("clubRepositoryImpl.getUserMemberClubs")),
       getUserPendingClubs: ({ userId }) =>
         Effect.gen(function* () {
+          const clubSizes = clubSizesCTE();
+
           return yield* db
+            .with(clubSizes)
             .select({
               club: clubClub,
               group: userUserGroup,
+              size: clubSizes.size,
             })
             .from(userUserGroupMember)
             .innerJoin(
@@ -372,6 +462,7 @@ export const clubRepositoryImpl = /*@__PURE__*/ Layer.effect(
               eq(userUserGroupMember.groupId, userUserGroup.publicId),
             )
             .innerJoin(clubClub, eq(userUserGroup.publicId, clubClub.groupId))
+            .innerJoin(clubSizes, eq(clubClub.groupId, clubSizes.clubId))
             .where(
               and(
                 eq(userUserGroupMember.userId, userId),

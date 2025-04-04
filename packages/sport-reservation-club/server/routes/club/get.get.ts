@@ -2,6 +2,7 @@ import { EventParamsContext, effectEventHandler } from "$/effectEventHandler";
 import { type } from "arktype";
 import { Effect } from "effect";
 import { UploadClient } from "sport-reservation-upload/client";
+import { UserClient } from "sport-reservation-user/client";
 import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
 import { clubType } from "~/models";
 import { ClubRepository } from "~/repositories/clubRepository";
@@ -25,7 +26,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     } = yield* EventParamsContext.typed<typeof handlerConfig>();
 
     const clubRepository = yield* ClubRepository;
-    const { club, group } = yield* (yield* clubRepository.getClubs({
+    const { club, group, size } = yield* (yield* clubRepository.getClubsByIds({
       clubIds: [clubId],
     }))[0];
 
@@ -36,9 +37,14 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
         })
       : { url: undefined };
 
+    const userClient = yield* UserClient;
+    const creator = yield* userClient.getUserProfile({
+      query: { id: group.creatorId },
+    });
+
     return {
       id: group.publicId,
-      creatorId: group.creatorId,
+      creator,
       ...(group.name && { name: group.name }),
       ...(image && { image }),
       ...(club.description && { description: club.description }),
@@ -46,6 +52,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
       ...(club.locationDescription && {
         locationDescription: club.locationDescription,
       }),
+      size,
     };
   }),
 );

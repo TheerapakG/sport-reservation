@@ -32,11 +32,23 @@ export class ClubRepository
       deleteClub: (data: {
         clubId: string;
       }) => Effect.Effect<void, SqlError.SqlError>;
-      getClubs: (data: { clubIds: string[] }) => Effect.Effect<
+      getClubsByIds: (data: { clubIds: string[] }) => Effect.Effect<
         Option.Option<{
           club: typeof clubClub.$inferSelect;
           group: typeof userUserGroup.$inferSelect;
+          size: number;
         }>[],
+        SqlError.SqlError
+      >;
+      getClubsByLimit: (data: {
+        limit: number;
+        offset: number;
+      }) => Effect.Effect<
+        {
+          club: typeof clubClub.$inferSelect;
+          group: typeof userUserGroup.$inferSelect;
+          size: number;
+        }[],
         SqlError.SqlError
       >;
       requestClubMembership: (data: {
@@ -71,6 +83,7 @@ export class ClubRepository
         {
           club: typeof clubClub.$inferSelect;
           group: typeof userUserGroup.$inferSelect;
+          size: number;
         }[],
         SqlError.SqlError
       >;
@@ -78,6 +91,7 @@ export class ClubRepository
         {
           club: typeof clubClub.$inferSelect;
           group: typeof userUserGroup.$inferSelect;
+          size: number;
         }[],
         SqlError.SqlError
       >;
@@ -85,6 +99,7 @@ export class ClubRepository
         {
           club: typeof clubClub.$inferSelect;
           group: typeof userUserGroup.$inferSelect;
+          size: number;
         }[],
         SqlError.SqlError
       >;
@@ -92,6 +107,7 @@ export class ClubRepository
         {
           club: typeof clubClub.$inferSelect;
           group: typeof userUserGroup.$inferSelect;
+          size: number;
         }[],
         SqlError.SqlError
       >;

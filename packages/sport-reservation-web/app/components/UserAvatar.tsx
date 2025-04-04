@@ -57,6 +57,18 @@ const NavUserAvatarImage = ({
   );
 };
 
+const UserAvatarImage = ({
+  profile,
+}: {
+  profile?: typeof subjects.user.infer;
+}) => {
+  return profile ? (
+    <UserAvatarImageBase profile={profile} />
+  ) : (
+    <AvatarFallback />
+  );
+};
+
 const NavUserAvatar = ({
   profile,
 }: {
@@ -69,4 +81,18 @@ const NavUserAvatar = ({
   );
 };
 
-export { NavUserAvatar };
+const UserAvatar = ({
+  profile,
+  className,
+}: {
+  profile?: typeof subjects.user.infer;
+  className?: string;
+}) => {
+  return (
+    <AvatarPrimitive className={className}>
+      <UserAvatarImage profile={profile} />
+    </AvatarPrimitive>
+  );
+};
+
+export { NavUserAvatar, UserAvatar };

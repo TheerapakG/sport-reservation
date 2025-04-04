@@ -38,14 +38,20 @@ export class ScheduleRepository
       deleteSchedule: (data: {
         scheduleId: string;
       }) => Effect.Effect<void, SqlError.SqlError>;
-      getSchedule: (data: { scheduleId: string }) => Effect.Effect<
+      getSchedule: (data: {
+        scheduleId: string;
+        repeatIndex: number;
+      }) => Effect.Effect<
         Option.Option<{
           schedule: typeof eventEventSchedule.$inferSelect;
           event: typeof eventEvent.$inferSelect;
           group: typeof userUserGroup.$inferSelect;
           skillLevel: (typeof eventEventSkillLevel.$inferSelect)[];
           sportType: (typeof eventEventSport.$inferSelect)[];
-          participants: number;
+          participants: {
+            repeatIndex: number;
+            participants: number;
+          };
         }>,
         SqlError.SqlError
       >;
@@ -91,7 +97,10 @@ export class ScheduleRepository
           group: typeof userUserGroup.$inferSelect;
           skillLevel: (typeof eventEventSkillLevel.$inferSelect)[];
           sportType: (typeof eventEventSport.$inferSelect)[];
-          participants: number;
+          participants: {
+            repeatIndex: number;
+            participants: number;
+          };
         }[],
         SqlError.SqlError
       >;
@@ -102,7 +111,10 @@ export class ScheduleRepository
           group: typeof userUserGroup.$inferSelect;
           skillLevel: (typeof eventEventSkillLevel.$inferSelect)[];
           sportType: (typeof eventEventSport.$inferSelect)[];
-          participants: number;
+          participants: {
+            repeatIndex: number;
+            participants: number;
+          };
         }[],
         SqlError.SqlError
       >;
@@ -113,7 +125,10 @@ export class ScheduleRepository
           group: typeof userUserGroup.$inferSelect;
           skillLevel: (typeof eventEventSkillLevel.$inferSelect)[];
           sportType: (typeof eventEventSport.$inferSelect)[];
-          participants: number;
+          participants: {
+            repeatIndex: number;
+            participants: number;
+          };
         }[],
         SqlError.SqlError
       >;
@@ -124,7 +139,10 @@ export class ScheduleRepository
           group: typeof userUserGroup.$inferSelect;
           skillLevel: (typeof eventEventSkillLevel.$inferSelect)[];
           sportType: (typeof eventEventSport.$inferSelect)[];
-          participants: number;
+          participants: {
+            repeatIndex: number;
+            participants: number;
+          };
         }[],
         SqlError.SqlError
       >;
@@ -142,12 +160,14 @@ export class ScheduleRepository
       }) => Effect.Effect<
         {
           schedule: typeof eventEventSchedule.$inferSelect;
-          repeatIndex: number;
           event: typeof eventEvent.$inferSelect;
           group: typeof userUserGroup.$inferSelect;
           skillLevel: (typeof eventEventSkillLevel.$inferSelect)[];
           sportType: (typeof eventEventSport.$inferSelect)[];
-          participants: number;
+          participants: {
+            repeatIndex: number;
+            participants: number;
+          };
         }[],
         SqlError.SqlError
       >;

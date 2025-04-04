@@ -54,6 +54,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     // Verify the requester is the creator of the schedule
     const scheduleOption = yield* scheduleRepository.getSchedule({
       scheduleId,
+      repeatIndex,
     });
 
     if (

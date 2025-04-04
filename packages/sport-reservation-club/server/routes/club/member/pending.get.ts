@@ -62,7 +62,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
 
     const clubRepository = yield* ClubRepository;
 
-    const clubOption = (yield* clubRepository.getClubs({
+    const clubOption = (yield* clubRepository.getClubsByIds({
       clubIds: [clubId],
     }))[0];
     if (

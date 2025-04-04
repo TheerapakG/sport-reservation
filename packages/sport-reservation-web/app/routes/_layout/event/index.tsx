@@ -1,4 +1,4 @@
-// src/routes/events.tsx
+// src/routes/event.tsx
 import { useGetUserClubMemberListQueryOptions } from "@/api/club";
 import {
   createEventValidators,
@@ -30,7 +30,7 @@ import {
 } from "@/components/ui/dialog";
 import { useAppForm, withForm } from "@/utils/form";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { formOptions } from "@tanstack/react-form";
+import { formOptions, useStore } from "@tanstack/react-form";
 import {
   useSuspenseInfiniteQuery,
   useSuspenseQuery,
@@ -38,7 +38,7 @@ import {
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { type } from "arktype";
-import { addSeconds, startOfToday } from "date-fns";
+import { endOfToday, startOfToday } from "date-fns";
 import { formatWithOptions, setHours, setMinutes } from "date-fns/fp";
 import { enUS } from "date-fns/locale";
 import { Effect, pipe } from "effect";
@@ -307,6 +307,8 @@ const CreateEventForm = () => {
     },
   });
 
+  const sizeLimit = useStore(form.store, (state) => state.values.sizeLimit);
+
   return (
     <>
       <form
@@ -413,6 +415,8 @@ const CreateEventForm = () => {
             <field.NumericInputField
               label="Max Participant"
               placeholder="e.g. 10"
+              buttons
+              min={1}
               classNames={{
                 input: "w-full rounded border-1 border-[#65D1F8]",
               }}
@@ -424,8 +428,11 @@ const CreateEventForm = () => {
           name="size"
           children={(field) => (
             <field.NumericInputField
-              label="Number of additional guests"
+              label="Add guests"
               placeholder="e.g. 2"
+              buttons
+              min={0}
+              max={sizeLimit ? sizeLimit - 1 : undefined}
               classNames={{
                 input: "w-full rounded border-1 border-[#65D1F8]",
               }}
@@ -569,7 +576,7 @@ const SidebarCalendarCard = () => {
           onSelect={(date) =>
             date &&
             router.navigate({
-              to: "/events",
+              to: "/event",
               search: { date: date.toISOString() },
             })
           }
@@ -625,10 +632,45 @@ const EventList = ({ className }: { className?: string }) => {
     }),
   );
 
-  const flattenedSchedules =
+  const _flattenedSchedules =
     schedulesData?.pages
       ?.filter((page) => page.success)
       .flatMap((page) => page.schedules) ?? [];
+  const flattenedSchedules =
+    _flattenedSchedules.length > 0
+      ? _flattenedSchedules
+      : [
+          {
+            schedule: {
+              schedule: {
+                id: "1",
+                startAt: startOfToday().toISOString(),
+                endAt: endOfToday().toISOString(),
+                repeatStartAt: startOfToday().toISOString(),
+                repeatEndAt: endOfToday().toISOString(),
+                repeatInterval: 1,
+              },
+              event: {
+                eventId: "1",
+                autoAccept: false,
+                sizeLimit: 10,
+                image: undefined,
+                creator: undefined,
+                skillLevel: [],
+                sportType: [],
+                name: "Test Event",
+                description: "Test Description",
+                location: [0, 0],
+                locationDescription: "Test Location",
+                eventCreatorType: "user",
+              },
+            },
+            participants: {
+              repeatIndex: 0,
+              participants: 1,
+            },
+          } satisfies (typeof _flattenedSchedules)[0],
+        ];
 
   const parentRef = useRef<HTMLDivElement>(null);
 
@@ -667,7 +709,7 @@ const EventList = ({ className }: { className?: string }) => {
   return (
     <main className={className} ref={parentRef}>
       {flattenedSchedules.length > 0 || schedulesHasNextPage ? (
-        <div ref={parentRef} className="overflow-y-auto">
+        <div ref={parentRef} className="flex flex-col gap-y-4 overflow-y-auto">
           <div
             className="relative"
             style={{ height: `${rowVirtualizer.getTotalSize()}px` }}
@@ -675,7 +717,8 @@ const EventList = ({ className }: { className?: string }) => {
             {virtualItems.map((virtualRow) => {
               const isLoaderRow =
                 virtualRow.index > flattenedSchedules.length - 1;
-              const schedule = flattenedSchedules[virtualRow.index];
+              const { schedule, participants } =
+                flattenedSchedules[virtualRow.index];
 
               return isLoaderRow ? (
                 schedulesHasNextPage ? (
@@ -690,20 +733,7 @@ const EventList = ({ className }: { className?: string }) => {
               ) : (
                 <EventListItem
                   key={schedule.schedule.id}
-                  scheduleId={schedule.schedule.id}
-                  repeatIndex={schedule.repeatIndex}
-                  name={schedule.group.name}
-                  startAt={addSeconds(
-                    schedule.schedule.startAt,
-                    schedule.repeatIndex * schedule.schedule.repeatInterval,
-                  )}
-                  endAt={addSeconds(
-                    schedule.schedule.endAt,
-                    schedule.repeatIndex * schedule.schedule.repeatInterval,
-                  )}
-                  description={schedule.event.description}
-                  locationDescription={schedule.event.locationDescription}
-                  participants={schedule.participants}
+                  schedule={{ schedule, participants }}
                 />
               );
             })}
@@ -739,7 +769,7 @@ function RouteComponent() {
 
 const validateSearch = type({ "date?": "string.date.parse" });
 
-export const Route = createFileRoute("/_layout/events/")({
+export const Route = createFileRoute("/_layout/event/")({
   validateSearch,
   loaderDeps: ({ search }) => search,
   loader: async ({ context: { queryClient }, deps: { date } }) => {

@@ -7,52 +7,20 @@ import { type } from "arktype";
 import { Effect, Match } from "effect";
 import { parseCookies } from "h3";
 import { ClubClient } from "sport-reservation-club/client";
-import { clubType } from "sport-reservation-club/models";
 import { getSubjectTypeFromToken } from "sport-reservation-oauth-common/subjects";
 import { UploadClient } from "sport-reservation-upload/client";
 import { UserClient } from "sport-reservation-user/client";
-import { userProfile } from "sport-reservation-user/models";
 import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
 import { OAuthError } from "tiara-stack/models/errors";
 import { OAuthClient } from "~/layers";
+import { scheduleInstanceType } from "~/models/schedule";
 import { ScheduleRepository } from "~/repositories/scheduleRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
   name: "getScheduleList",
   response: response(
     type({
-      schedules: [
-        {
-          schedule: {
-            id: "string",
-            startAt: "string",
-            endAt: "string",
-            repeatStartAt: "string",
-            repeatEndAt: "string",
-            repeatInterval: "number",
-          },
-          repeatIndex: "number",
-          event: {
-            eventId: "string",
-            "image?": "string",
-            eventCreatorType: "'user' | 'club'",
-            creator: [[userProfile, "|", clubType], "|", "undefined"],
-            "description?": "string",
-            "locationDescription?": "string",
-            autoAccept: "boolean",
-            sizeLimit: "number",
-            skillLevel: "('beginner' | 'intermediate' | 'advanced')[]",
-            sportType: "('badminton' | 'tennis' | 'running')[]",
-          },
-          group: {
-            groupId: "string",
-            "name?": "string",
-            type: "string",
-          },
-          participants: "number",
-        },
-        "[]",
-      ],
+      schedules: [scheduleInstanceType, "[]"],
     }),
     { stream: false },
   ),
@@ -104,15 +72,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
 
     const formattedSchedules = yield* Effect.all(
       schedules.map(
-        ({
-          schedule,
-          repeatIndex,
-          event,
-          group,
-          participants,
-          skillLevel,
-          sportType,
-        }) =>
+        ({ schedule, event, group, participants, skillLevel, sportType }) =>
           Effect.gen(function* () {
             // Get image URL if it exists
             const { url: image } = event.image
@@ -123,42 +83,54 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
 
             const creator = yield* Match.value(event.eventCreatorType).pipe(
               Match.when("club", () =>
-                clubClient.getClub({ query: { clubId: event.creatorId } }),
+                Effect.gen(function* () {
+                  const club = yield* clubClient.getClub({
+                    query: { clubId: event.creatorId },
+                  });
+                  return {
+                    eventCreatorType: "club" as const,
+                    creator: club,
+                  };
+                }),
               ),
               Match.when("user", () =>
-                userClient.getUserProfile({ query: { id: event.creatorId } }),
+                Effect.gen(function* () {
+                  const user = yield* userClient.getUserProfile({
+                    query: { id: event.creatorId },
+                  });
+                  return {
+                    eventCreatorType: "user" as const,
+                    creator: user,
+                  };
+                }),
               ),
               Match.exhaustive,
             );
 
             return {
               schedule: {
-                id: schedule.publicId,
-                startAt: schedule.startAt.toISOString(),
-                endAt: schedule.endAt.toISOString(),
-                repeatStartAt: schedule.repeatStartAt.toISOString(),
-                repeatEndAt: schedule.repeatEndAt.toISOString(),
-                repeatInterval: schedule.repeatInterval,
-              },
-              repeatIndex,
-              event: {
-                eventId: event.groupId,
-                ...(image && { image }),
-                eventCreatorType: event.eventCreatorType,
-                creator,
-                ...(event.description && { description: event.description }),
-                ...(event.locationDescription && {
-                  locationDescription: event.locationDescription,
-                }),
-                autoAccept: event.autoAccept,
-                sizeLimit: event.sizeLimit,
-                skillLevel: skillLevel.map((sl) => sl.skillLevel),
-                sportType: sportType.map((st) => st.sportType),
-              },
-              group: {
-                groupId: group.publicId,
-                ...(group.name && { name: group.name }),
-                type: group.type,
+                schedule: {
+                  id: schedule.publicId,
+                  startAt: schedule.startAt.toISOString(),
+                  endAt: schedule.endAt.toISOString(),
+                  repeatStartAt: schedule.repeatStartAt.toISOString(),
+                  repeatEndAt: schedule.repeatEndAt.toISOString(),
+                  repeatInterval: schedule.repeatInterval,
+                },
+                event: {
+                  eventId: event.groupId,
+                  ...creator,
+                  ...(group.name && { name: group.name }),
+                  ...(image && { image }),
+                  ...(event.description && { description: event.description }),
+                  ...(event.locationDescription && {
+                    locationDescription: event.locationDescription,
+                  }),
+                  autoAccept: event.autoAccept,
+                  sizeLimit: event.sizeLimit,
+                  skillLevel: skillLevel.map((sl) => sl.skillLevel),
+                  sportType: sportType.map((st) => st.sportType),
+                },
               },
               participants,
             };

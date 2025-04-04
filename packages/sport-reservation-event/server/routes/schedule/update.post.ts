@@ -62,7 +62,10 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     const scheduleRepository = yield* ScheduleRepository;
 
     // Verify user has access to the schedule
-    const scheduleData = yield* scheduleRepository.getSchedule({ scheduleId });
+    const scheduleData = yield* scheduleRepository.getSchedule({
+      scheduleId,
+      repeatIndex: 0,
+    });
 
     if (!scheduleData) {
       yield* Effect.fail(new OAuthError());

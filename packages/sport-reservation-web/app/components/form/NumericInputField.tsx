@@ -6,14 +6,21 @@ export default function NumericInputField({
   label,
   placeholder,
   trailingText,
+  buttons,
+  min,
+  max,
 }: {
   classNames?: {
     label?: string;
     input?: string;
+    container?: string;
   };
   label?: string;
   placeholder?: string;
   trailingText?: string;
+  buttons?: boolean;
+  min?: number;
+  max?: number;
 }) {
   return (
     <div className="space-y-2">
@@ -21,7 +28,10 @@ export default function NumericInputField({
       <StandaloneNumericInputField
         placeholder={placeholder}
         trailingText={trailingText}
+        buttons={buttons}
         classNames={classNames}
+        min={min}
+        max={max}
       />
     </div>
   );

@@ -1,7 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useFieldContext } from "@/utils/form/context";
-import { useStore } from "@tanstack/react-form";
 
 export default function StandaloneFileInputField({
   classNames,
@@ -15,7 +14,6 @@ export default function StandaloneFileInputField({
   trailingText?: string;
 }) {
   const field = useFieldContext<undefined | File>();
-  const fieldValue = useStore(field.store, (state) => state.value);
 
   return (
     <div className="flex items-center gap-2">
@@ -31,7 +29,6 @@ export default function StandaloneFileInputField({
             }
           : {})}
         placeholder={placeholder}
-        value={fieldValue === undefined ? "" : fieldValue.name}
         onChange={(e) => field.handleChange(e.target.files?.[0])}
         onBlur={field.handleBlur}
       />

@@ -2,15 +2,21 @@ import { effectEventHandler, EventParamsContext } from "$/effectEventHandler";
 import { type } from "arktype";
 import { Effect, Option } from "effect";
 import { UploadClient } from "sport-reservation-upload/client";
+import { UserClient } from "sport-reservation-user/client";
 import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
 import { clubType } from "~/models";
 import { ClubRepository } from "~/repositories/clubRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
   name: "getClubs",
-  response: response(type([[clubType, "|", "undefined"], "[]"]), {
-    stream: false,
-  }),
+  response: response(
+    type({
+      clubs: [[clubType, "|", "undefined"], "[]"],
+    }),
+    {
+      stream: false,
+    },
+  ),
   query: params(
     type({
       clubIds: "string[]",
@@ -27,7 +33,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     } = yield* EventParamsContext.typed<typeof handlerConfig>();
 
     const clubRepository = yield* ClubRepository;
-    const clubs = yield* clubRepository.getClubs({
+    const clubs = yield* clubRepository.getClubsByIds({
       clubIds,
     });
 
@@ -43,9 +49,15 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
                   })
                 : { url: undefined };
 
+              const userClient = yield* UserClient;
+              const creator = yield* userClient.getUserProfile({
+                query: { id: club.group.creatorId },
+              });
+
               return Option.some({
                 club,
                 image,
+                creator,
               });
             }),
           onNone: () => Effect.succeed(Option.none()),
@@ -53,23 +65,26 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
       ),
     );
 
-    return extendedClubs.map((club) =>
-      Option.match(club, {
-        onSome: ({ club, image }) => ({
-          id: club.group.publicId,
-          creatorId: club.group.creatorId,
-          ...(club.group.name ? { name: club.group.name } : {}),
-          ...(image ? { image } : {}),
-          ...(club.club.description
-            ? { description: club.club.description }
-            : {}),
-          ...(club.club.location ? { location: club.club.location } : {}),
-          ...(club.club.locationDescription
-            ? { locationDescription: club.club.locationDescription }
-            : {}),
+    return {
+      clubs: extendedClubs.map((club) =>
+        Option.match(club, {
+          onSome: ({ club, image, creator }) => ({
+            id: club.group.publicId,
+            creator,
+            ...(club.group.name ? { name: club.group.name } : {}),
+            ...(image ? { image } : {}),
+            ...(club.club.description
+              ? { description: club.club.description }
+              : {}),
+            ...(club.club.location ? { location: club.club.location } : {}),
+            ...(club.club.locationDescription
+              ? { locationDescription: club.club.locationDescription }
+              : {}),
+            size: club.size,
+          }),
+          onNone: () => undefined,
         }),
-        onNone: () => undefined,
-      }),
-    );
+      ),
+    };
   }),
 );

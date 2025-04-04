@@ -101,7 +101,7 @@ const WrappingLayoutComponent = ({
         </div>
       </header>
       <main className="h-full overflow-x-hidden overflow-y-auto">
-        <div className="container h-full flex-1 items-start">
+        <div className="relative container h-full flex-1 items-start">
           <CatchBoundary
             getResetKey={() => "reset"}
             onCatch={(error) => console.error(error)}

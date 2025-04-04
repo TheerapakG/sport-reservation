@@ -55,6 +55,19 @@ export const eventKeys = () => {
               [...allScheduleList, "date", date.toISOString()] as const,
           };
         },
+        club: () => {
+          const allScheduleClub = [...allSchedule, "club"] as const;
+          return {
+            all: () => allScheduleClub,
+            id: ({ id }: { id: string }) => {
+              const allScheduleClubId = [...allScheduleClub, "id", id] as const;
+              return {
+                all: () => allScheduleClubId,
+                list: () => [...allScheduleClubId, "list"] as const,
+              };
+            },
+          };
+        },
       };
     },
   };
@@ -78,7 +91,7 @@ export const getScheduleServerFn = createServerFn({
         const eventClient = yield* EventClient;
         return yield* eventClient.getSchedule({
           headers: { Cookie: serialize("access_token", accessToken) },
-          query: { id: data.id },
+          query: { id: data.id, repeatIndex: data.repeatIndex },
         });
       }).pipe(provideEffectContext),
     );
@@ -86,10 +99,20 @@ export const getScheduleServerFn = createServerFn({
     return { success: true, schedule } as const;
   });
 
-export const getScheduleQueryOptions = ({ id }: { id: string }) =>
+export const getScheduleQueryOptions = ({
+  id,
+  repeatIndex,
+}: {
+  id: string;
+  repeatIndex: number;
+}) =>
   queryOptions({
-    queryKey: eventKeys().schedule().id({ id }).detail(),
-    queryFn: () => getScheduleServerFn({ data: { scheduleId: id } }),
+    queryKey: eventKeys()
+      .schedule()
+      .id({ id })
+      .repeatIndex({ repeatIndex })
+      .detail(),
+    queryFn: () => getScheduleServerFn({ data: { id, repeatIndex } }),
   });
 
 export const getScheduleMemberListServerFn = createServerFn({
@@ -155,44 +178,13 @@ export const getScheduleListServerFn = createServerFn({
     const { schedules } = await Effect.runPromise(
       Effect.gen(function* () {
         const eventClient = yield* EventClient;
-        const { schedules } = yield* eventClient.getScheduleList({
+        return yield* eventClient.getScheduleList({
           headers: { Cookie: serialize("access_token", accessToken) },
           query: {
             ...data,
             date: data.date.toISOString(),
           },
         });
-
-        return {
-          schedules: yield* Effect.all(
-            schedules.map((schedule) =>
-              Effect.gen(function* () {
-                return {
-                  ...schedule,
-                  schedule: {
-                    ...schedule.schedule,
-                    startAt: yield* effectType(
-                      type("string.date.parse"),
-                      schedule.schedule.startAt,
-                    ),
-                    endAt: yield* effectType(
-                      type("string.date.parse"),
-                      schedule.schedule.endAt,
-                    ),
-                    repeatStartAt: yield* effectType(
-                      type("string.date.parse"),
-                      schedule.schedule.repeatStartAt,
-                    ),
-                    repeatEndAt: yield* effectType(
-                      type("string.date.parse"),
-                      schedule.schedule.repeatEndAt,
-                    ),
-                  },
-                };
-              }),
-            ),
-          ),
-        };
       }).pipe(provideEffectContext),
     );
 
@@ -378,3 +370,37 @@ export const useRequestScheduleCreateMutation = () => {
     },
   });
 };
+
+export const getScheduleClubListServerFn = createServerFn({
+  method: "GET",
+})
+  .validator((data: unknown) =>
+    Effect.runSync(
+      effectType(getEventClientQueryType("getClubCreatedSchedules"), data),
+    ),
+  )
+  .handler(async ({ data }) => {
+    const { access_token: accessToken } = parseCookies();
+
+    if (!accessToken) {
+      return { success: false } as const;
+    }
+
+    const { schedules } = await Effect.runPromise(
+      Effect.gen(function* () {
+        const eventClient = yield* EventClient;
+        return yield* eventClient.getClubCreatedSchedules({
+          headers: { Cookie: serialize("access_token", accessToken) },
+          query: { clubId: data.clubId },
+        });
+      }).pipe(provideEffectContext),
+    );
+
+    return { success: true, schedules } as const;
+  });
+
+export const getScheduleClubListQueryOptions = ({ id }: { id: string }) =>
+  queryOptions({
+    queryKey: eventKeys().schedule().club().id({ id }).list(),
+    queryFn: () => getScheduleClubListServerFn({ data: { clubId: id } }),
+  });

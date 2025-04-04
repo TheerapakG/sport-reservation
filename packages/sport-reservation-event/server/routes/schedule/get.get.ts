@@ -7,52 +7,22 @@ import { type } from "arktype";
 import { Effect, Match } from "effect";
 import { parseCookies } from "h3";
 import { ClubClient } from "sport-reservation-club/client";
-import { clubType } from "sport-reservation-club/models";
 import { getSubjectTypeFromToken } from "sport-reservation-oauth-common/subjects";
 import { UploadClient } from "sport-reservation-upload/client";
 import { UserClient } from "sport-reservation-user/client";
-import { userProfile } from "sport-reservation-user/models";
 import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
 import { OAuthError } from "tiara-stack/models/errors";
 import { OAuthClient } from "~/layers";
+import { scheduleInstanceType } from "~/models/schedule";
 import { ScheduleRepository } from "~/repositories/scheduleRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
   name: "getSchedule",
-  response: response(
-    type({
-      schedule: {
-        id: "string",
-        startAt: "string",
-        endAt: "string",
-        repeatStartAt: "string",
-        repeatEndAt: "string",
-        repeatInterval: "number",
-      },
-      event: {
-        eventId: "string",
-        "image?": "string",
-        eventCreatorType: "'user' | 'club'",
-        creator: [[userProfile, "|", clubType], "|", "undefined"],
-        "description?": "string",
-        "locationDescription?": "string",
-        autoAccept: "boolean",
-        sizeLimit: "number",
-        skillLevel: "('beginner' | 'intermediate' | 'advanced')[]",
-        sportType: "('badminton' | 'tennis' | 'running')[]",
-      },
-      group: {
-        groupId: "string",
-        "name?": "string",
-        type: "string",
-      },
-      participants: "number",
-    }),
-    { stream: false },
-  ),
+  response: response(scheduleInstanceType, { stream: false }),
   query: params(
     type({
       id: "string",
+      repeatIndex: "number",
     }),
   ),
 });
@@ -63,7 +33,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     const { access_token: accessToken } = parseCookies(event);
     const {
       params: {
-        query: { id },
+        query: { id, repeatIndex },
       },
     } = yield* EventParamsContext.typed<typeof handlerConfig>();
 
@@ -93,6 +63,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
       sportType,
     } = yield* yield* scheduleRepository.getSchedule({
       scheduleId: id,
+      repeatIndex,
     });
 
     // Get clients for image and creator info
@@ -109,42 +80,54 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
 
     const creator = yield* Match.value(eventData.eventCreatorType).pipe(
       Match.when("club", () =>
-        clubClient.getClub({ query: { clubId: eventData.creatorId } }),
+        Effect.gen(function* () {
+          const club = yield* clubClient.getClub({
+            query: { clubId: eventData.creatorId },
+          });
+          return {
+            eventCreatorType: "club" as const,
+            creator: club,
+          };
+        }),
       ),
       Match.when("user", () =>
-        userClient.getUserProfile({ query: { id: eventData.creatorId } }),
+        Effect.gen(function* () {
+          const user = yield* userClient.getUserProfile({
+            query: { id: eventData.creatorId },
+          });
+          return {
+            eventCreatorType: "user" as const,
+            creator: user,
+          };
+        }),
       ),
       Match.exhaustive,
     );
 
     return {
       schedule: {
-        id: schedule.publicId,
-        startAt: schedule.startAt.toISOString(),
-        endAt: schedule.endAt.toISOString(),
-        repeatStartAt: schedule.repeatStartAt?.toISOString() || "",
-        repeatEndAt: schedule.repeatEndAt?.toISOString() || "",
-        repeatInterval: schedule.repeatInterval,
-      },
-      event: {
-        eventId: eventData.groupId,
-        ...(image && { image }),
-        eventCreatorType: eventData.eventCreatorType,
-        creatorId: eventData.creatorId,
-        creator,
-        ...(eventData.description && { description: eventData.description }),
-        ...(eventData.locationDescription && {
-          locationDescription: eventData.locationDescription,
-        }),
-        autoAccept: eventData.autoAccept,
-        sizeLimit: eventData.sizeLimit,
-        skillLevel: skillLevel.map((sl) => sl.skillLevel),
-        sportType: sportType.map((st) => st.sportType),
-      },
-      group: {
-        groupId: group.publicId,
-        ...(group.name && { name: group.name }),
-        type: group.type,
+        schedule: {
+          id: schedule.publicId,
+          startAt: schedule.startAt.toISOString(),
+          endAt: schedule.endAt.toISOString(),
+          repeatStartAt: schedule.repeatStartAt?.toISOString() || "",
+          repeatEndAt: schedule.repeatEndAt?.toISOString() || "",
+          repeatInterval: schedule.repeatInterval,
+        },
+        event: {
+          eventId: eventData.groupId,
+          ...creator,
+          ...(group.name && { name: group.name }),
+          ...(image && { image }),
+          ...(eventData.description && { description: eventData.description }),
+          ...(eventData.locationDescription && {
+            locationDescription: eventData.locationDescription,
+          }),
+          autoAccept: eventData.autoAccept,
+          sizeLimit: eventData.sizeLimit,
+          skillLevel: skillLevel.map((sl) => sl.skillLevel),
+          sportType: sportType.map((st) => st.sportType),
+        },
       },
       participants,
     };

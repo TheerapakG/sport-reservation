@@ -2,32 +2,15 @@ import { EventParamsContext, effectEventHandler } from "$/effectEventHandler";
 import { type } from "arktype";
 import { Effect, Match } from "effect";
 import { ClubClient } from "sport-reservation-club/client";
-import { clubType } from "sport-reservation-club/models";
 import { UploadClient } from "sport-reservation-upload/client";
 import { UserClient } from "sport-reservation-user/client";
-import { userProfile } from "sport-reservation-user/models";
 import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
+import { eventType } from "~/models/event";
 import { EventRepository } from "~/repositories/eventRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
   name: "getEvent",
-  response: response(
-    type({
-      eventId: "string",
-      eventCreatorType: "string",
-      creator: [[userProfile, "|", clubType], "|", "undefined"],
-      "name?": "string",
-      "image?": "string",
-      "description?": "string",
-      "location?": ["number", "number"],
-      "locationDescription?": "string",
-      autoAccept: "boolean",
-      sizeLimit: "number",
-      skillLevel: "('beginner' | 'intermediate' | 'advanced')[]",
-      sportType: "('badminton' | 'tennis' | 'running')[]",
-    }),
-    { stream: false },
-  ),
+  response: response(eventType, { stream: false }),
   query: params(
     type({
       eventId: "string",
@@ -61,10 +44,26 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
 
     const creator = yield* Match.value(event.eventCreatorType).pipe(
       Match.when("club", () =>
-        clubClient.getClub({ query: { clubId: event.creatorId } }),
+        Effect.gen(function* () {
+          const club = yield* clubClient.getClub({
+            query: { clubId: event.creatorId },
+          });
+          return {
+            eventCreatorType: "club" as const,
+            creator: club,
+          };
+        }),
       ),
       Match.when("user", () =>
-        userClient.getUserProfile({ query: { id: event.creatorId } }),
+        Effect.gen(function* () {
+          const user = yield* userClient.getUserProfile({
+            query: { id: event.creatorId },
+          });
+          return {
+            eventCreatorType: "user" as const,
+            creator: user,
+          };
+        }),
       ),
       Match.exhaustive,
     );
@@ -80,8 +79,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
       }),
       autoAccept: event.autoAccept,
       sizeLimit: event.sizeLimit,
-      eventCreatorType: event.eventCreatorType,
-      creator,
+      ...creator,
       skillLevel: skillLevel.map((sl) => sl.skillLevel),
       sportType: sportType.map((st) => st.sportType),
     };
