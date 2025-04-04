@@ -1,6 +1,6 @@
 import { type } from "arktype";
 import destr from "destr";
-import { effectType } from "~~/dist/utils/effectType";
+import { effectType } from "~~/src/utils/effectType";
 
 export const typedFormData = <T extends type.Any<Record<string, unknown>>>(
   _type: T,
