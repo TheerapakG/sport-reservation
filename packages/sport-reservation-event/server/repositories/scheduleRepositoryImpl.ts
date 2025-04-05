@@ -32,6 +32,18 @@ export const scheduleRepositoryImpl = Layer.effect(
       scheduleIds?: string[],
       repeatIndex?: number,
     ) => {
+      const allScheduleRepeats = db.$with("all_schedule_repeats").as(
+        db
+          .select({
+            scheduleId: eventEventSchedule.publicId,
+            repeatIndex: sql`generate_series(0, ${eventEventSchedule.repeat}-1)`
+              .mapWith(Number)
+              .as("repeatIndex"),
+          })
+          .from(eventEventSchedule)
+          .where(and(isNull(eventEventSchedule.deletedAt))),
+      );
+
       const allScheduleParticipants = db.$with("all_schedule_participants").as(
         db
           .select({
@@ -67,39 +79,36 @@ export const scheduleRepositoryImpl = Layer.effect(
       );
 
       const scheduleParticipants = db
-        .with(allScheduleParticipants)
+        .with(allScheduleRepeats, allScheduleParticipants)
         .select({
-          scheduleId: eventEventSchedule.publicId,
-          repeatIndex:
-            sql`coalesce(${allScheduleParticipants.repeatIndex}, ${repeatIndex ?? 0})`
-              .mapWith(Number)
-              .as("repeatIndex"),
+          scheduleId: allScheduleRepeats.scheduleId,
+          repeatIndex: allScheduleRepeats.repeatIndex,
           participants:
             sql`coalesce(${allScheduleParticipants.participants}, 0)`
               .mapWith(Number)
               .as("participants"),
         })
-        .from(eventEventSchedule)
+        .from(allScheduleRepeats)
         .leftJoin(
           allScheduleParticipants,
-          eq(eventEventSchedule.publicId, allScheduleParticipants.scheduleId),
+          and(
+            eq(
+              allScheduleRepeats.scheduleId,
+              allScheduleParticipants.scheduleId,
+            ),
+            eq(
+              allScheduleRepeats.repeatIndex,
+              allScheduleParticipants.repeatIndex,
+            ),
+          ),
         );
 
       const wheres = [
         scheduleIds
-          ? inArray(eventEventSchedule.publicId, scheduleIds)
+          ? inArray(allScheduleRepeats.scheduleId, scheduleIds)
           : undefined,
         repeatIndex
-          ? lte(
-              sql`extract(epoch from ${eventEventSchedule.repeatStartAt})`,
-              sql`extract(epoch from ${eventEventSchedule.startAt}) + ${eventEventSchedule.repeatInterval} * ${repeatIndex}`,
-            )
-          : undefined,
-        repeatIndex
-          ? gt(
-              sql`extract(epoch from ${eventEventSchedule.repeatEndAt})`,
-              sql`extract(epoch from ${eventEventSchedule.endAt}) + ${eventEventSchedule.repeatInterval} * ${repeatIndex}`,
-            )
+          ? eq(allScheduleRepeats.repeatIndex, repeatIndex)
           : undefined,
       ].filter(Boolean);
 
@@ -113,35 +122,30 @@ export const scheduleRepositoryImpl = Layer.effect(
     };
 
     const getScheduleRepeatCondition = (date: Date) => {
+      const dateEpoch = Math.floor(date.getTime() / 1000);
+
       return and(
-        lte(eventEventSchedule.repeatStartAt, date),
-        gt(eventEventSchedule.repeatEndAt, date),
         lte(
-          sql`extract(epoch from ${eventEventSchedule.startAt}) - extract(epoch from ${eventEventSchedule.repeatStartAt})`,
-          sql`mod(extract(epoch from ${date}) - extract(epoch from ${eventEventSchedule.repeatStartAt}), ${eventEventSchedule.repeatInterval})`,
+          sql`extract(epoch from ${eventEventSchedule.startAt}) + (${eventEventSchedule.repeatInterval} * floor((${dateEpoch} - extract(epoch from ${eventEventSchedule.startAt})) / ${eventEventSchedule.repeatInterval}))`,
+          dateEpoch,
         ),
         gt(
-          sql`extract(epoch from ${eventEventSchedule.endAt}) - extract(epoch from ${eventEventSchedule.repeatStartAt})`,
-          sql`mod(extract(epoch from ${date}) - extract(epoch from ${eventEventSchedule.repeatStartAt}), ${eventEventSchedule.repeatInterval})`,
+          sql`extract(epoch from ${eventEventSchedule.endAt})  + (${eventEventSchedule.repeatInterval} * floor((${dateEpoch} - extract(epoch from ${eventEventSchedule.startAt})) / ${eventEventSchedule.repeatInterval}))`,
+          dateEpoch,
         ),
       );
     };
 
     const getScheduleRepeatIndex = (date: Date) => {
-      return sql`floor((${date} - ${eventEventSchedule.repeatStartAt}) / ${eventEventSchedule.repeatInterval})`.mapWith(
+      const dateEpoch = Math.floor(date.getTime() / 1000);
+
+      return sql`floor((${dateEpoch} - extract(epoch from ${eventEventSchedule.startAt})) / ${eventEventSchedule.repeatInterval})`.mapWith(
         Number,
       );
     };
 
     return ScheduleRepository.of({
-      createSchedule: ({
-        eventId,
-        startAt,
-        endAt,
-        repeatStartAt,
-        repeatEndAt,
-        repeatInterval,
-      }) =>
+      createSchedule: ({ eventId, startAt, endAt, repeat, repeatInterval }) =>
         Effect.gen(function* () {
           const [schedule] = yield* db
             .insert(eventEventSchedule)
@@ -149,8 +153,7 @@ export const scheduleRepositoryImpl = Layer.effect(
               eventId,
               startAt,
               endAt,
-              repeatStartAt,
-              repeatEndAt,
+              repeat,
               repeatInterval,
             })
             .returning();
@@ -163,8 +166,7 @@ export const scheduleRepositoryImpl = Layer.effect(
         scheduleId,
         startAt,
         endAt,
-        repeatStartAt,
-        repeatEndAt,
+        repeat,
         repeatInterval,
       }) =>
         Effect.gen(function* () {
@@ -173,8 +175,7 @@ export const scheduleRepositoryImpl = Layer.effect(
             .set({
               ...(startAt ? { startAt } : {}),
               ...(endAt ? { endAt } : {}),
-              ...(repeatStartAt ? { repeatStartAt } : {}),
-              ...(repeatEndAt ? { repeatEndAt } : {}),
+              ...(repeat !== undefined ? { repeat } : {}),
               ...(repeatInterval !== undefined ? { repeatInterval } : {}),
             })
             .where(
@@ -184,7 +185,6 @@ export const scheduleRepositoryImpl = Layer.effect(
               ),
             );
         }).pipe(Effect.withSpan("scheduleRepositoryImpl.updateSchedule")),
-
       deleteSchedule: ({ scheduleId }) =>
         Effect.gen(function* () {
           yield* db
@@ -211,7 +211,6 @@ export const scheduleRepositoryImpl = Layer.effect(
               ),
             );
         }).pipe(Effect.withSpan("scheduleRepositoryImpl.deleteSchedule")),
-
       getSchedule: ({ scheduleId, repeatIndex }) =>
         Effect.gen(function* () {
           const scheduleParticipants = scheduleParticipantsCTE(

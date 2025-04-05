@@ -18,8 +18,7 @@ export class ScheduleRepository
         eventId: string;
         startAt: Date;
         endAt: Date;
-        repeatStartAt: Date;
-        repeatEndAt: Date;
+        repeat: number;
         repeatInterval: number;
       }) => Effect.Effect<
         {
@@ -31,8 +30,7 @@ export class ScheduleRepository
         scheduleId: string;
         startAt?: Date;
         endAt?: Date;
-        repeatStartAt?: Date;
-        repeatEndAt?: Date;
+        repeat?: number;
         repeatInterval?: number;
       }) => Effect.Effect<void, SqlError.SqlError>;
       deleteSchedule: (data: {

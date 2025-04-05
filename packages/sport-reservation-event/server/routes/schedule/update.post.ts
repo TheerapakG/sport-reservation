@@ -4,7 +4,7 @@ import {
   effectEventHandler,
 } from "$/effectEventHandler";
 import { type } from "arktype";
-import { Effect } from "effect";
+import { Effect, Equivalence, Option } from "effect";
 import { parseCookies } from "h3";
 import { getSubjectTypeFromToken } from "sport-reservation-oauth-common/subjects";
 import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
@@ -20,8 +20,7 @@ export const handlerConfig = defineEventHandlerConfig({
       scheduleId: "string",
       startAt: "Date | undefined",
       endAt: "Date | undefined",
-      repeatStartAt: "Date | undefined",
-      repeatEndAt: "Date | undefined",
+      repeat: "number | undefined",
       repeatInterval: "number | undefined",
     }),
   ),
@@ -33,14 +32,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     const { access_token: accessToken } = parseCookies(event);
     const {
       params: {
-        body: {
-          scheduleId,
-          startAt,
-          endAt,
-          repeatStartAt,
-          repeatEndAt,
-          repeatInterval,
-        },
+        body: { scheduleId, startAt, endAt, repeat, repeatInterval },
       },
     } = yield* EventParamsContext.typed<typeof handlerConfig>();
 
@@ -67,14 +59,14 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
       repeatIndex: 0,
     });
 
-    if (!scheduleData) {
-      yield* Effect.fail(new OAuthError());
-    }
-
-    // Verify user is the creator of the event
     if (
-      scheduleData._tag === "Some" &&
-      scheduleData.value.event.creatorId !== userId
+      !Option.getEquivalence(Equivalence.string)(
+        Option.map(
+          scheduleData,
+          (scheduleData) => scheduleData.group.creatorId,
+        ),
+        Option.some(userId),
+      )
     ) {
       yield* Effect.fail(new OAuthError());
     }
@@ -83,8 +75,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
       scheduleId,
       startAt,
       endAt,
-      repeatStartAt,
-      repeatEndAt,
+      repeat,
       repeatInterval,
     });
 

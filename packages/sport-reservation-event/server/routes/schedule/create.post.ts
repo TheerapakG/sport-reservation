@@ -26,8 +26,7 @@ export const handlerConfig = defineEventHandlerConfig({
       eventId: "string",
       startAt: "string.date.parse",
       endAt: "string.date.parse",
-      repeatStartAt: "string.date.parse",
-      repeatEndAt: "string.date.parse",
+      repeat: "number",
       repeatInterval: "number",
     }),
   ),
@@ -39,14 +38,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     const { access_token: accessToken } = parseCookies(event);
     const {
       params: {
-        body: {
-          eventId,
-          startAt,
-          endAt,
-          repeatStartAt,
-          repeatEndAt,
-          repeatInterval,
-        },
+        body: { eventId, startAt, endAt, repeat, repeatInterval },
       },
     } = yield* EventParamsContext.typed<typeof handlerConfig>();
 
@@ -86,8 +78,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
       eventId,
       startAt,
       endAt,
-      repeatStartAt,
-      repeatEndAt,
+      repeat,
       repeatInterval,
     });
 

@@ -113,8 +113,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
                   id: schedule.publicId,
                   startAt: schedule.startAt.toISOString(),
                   endAt: schedule.endAt.toISOString(),
-                  repeatStartAt: schedule.repeatStartAt.toISOString(),
-                  repeatEndAt: schedule.repeatEndAt.toISOString(),
+                  repeat: schedule.repeat,
                   repeatInterval: schedule.repeatInterval,
                 },
                 event: {

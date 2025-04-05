@@ -453,10 +453,7 @@ export const eventEventSchedule = pgTable(
     eventId: uuid("event_id").notNull(),
     startAt: timestamp("start_at", { withTimezone: true }).notNull(),
     endAt: timestamp("end_at", { withTimezone: true }).notNull(),
-    repeatStartAt: timestamp("repeat_start_at", {
-      withTimezone: true,
-    }).notNull(),
-    repeatEndAt: timestamp("repeat_end_at", { withTimezone: true }).notNull(),
+    repeat: integer("repeat").notNull(),
     repeatInterval: integer("repeat_interval").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()

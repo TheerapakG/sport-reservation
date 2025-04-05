@@ -303,8 +303,6 @@ export const createScheduleServerFn = createServerFn({
             ...data,
             startAt: data.startAt.toISOString(),
             endAt: data.endAt.toISOString(),
-            repeatStartAt: data.repeatStartAt.toISOString(),
-            repeatEndAt: data.repeatEndAt.toISOString(),
           },
         });
       }).pipe(provideEffectContext),

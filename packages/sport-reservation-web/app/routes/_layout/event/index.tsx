@@ -38,7 +38,7 @@ import {
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { type } from "arktype";
-import { endOfToday, startOfToday } from "date-fns";
+import { startOfToday } from "date-fns";
 import { formatWithOptions, setHours, setMinutes } from "date-fns/fp";
 import { enUS } from "date-fns/locale";
 import { Effect, pipe } from "effect";
@@ -262,35 +262,30 @@ const CreateEventForm = () => {
 
       if (!event?.eventId) return;
 
+      const startAt = pipe(
+        data.date,
+        setHours(data.startTime[0]),
+        setMinutes(data.startTime[1]),
+      );
+
+      const endAt = pipe(
+        data.date,
+        setHours(data.endTime[0]),
+        setMinutes(data.endTime[1]),
+      );
+
+      const repeat = data.repeatEndAt
+        ? (data.repeatEndAt.getTime() - endAt.getTime()) /
+            (data.repeatInterval * 1000) +
+          1
+        : 1;
+
       const { schedule } = await createScheduleMutation.mutateAsync({
         data: {
           eventId: event.eventId,
-          startAt: pipe(
-            data.date,
-            setHours(data.startTime[0]),
-            setMinutes(data.startTime[1]),
-          ),
-          endAt: pipe(
-            data.date,
-            setHours(data.endTime[0]),
-            setMinutes(data.endTime[1]),
-          ),
-          repeatStartAt: pipe(
-            data.date,
-            setHours(data.startTime[0]),
-            setMinutes(data.startTime[1]),
-          ),
-          repeatEndAt: data.repeatEndAt
-            ? pipe(
-                data.repeatEndAt,
-                setHours(data.endTime[0]),
-                setMinutes(data.endTime[1]),
-              )
-            : pipe(
-                data.date,
-                setHours(data.endTime[0]),
-                setMinutes(data.endTime[1]),
-              ),
+          startAt,
+          endAt,
+          repeat,
           repeatInterval: data.repeatInterval,
         },
       });
@@ -632,45 +627,10 @@ const EventList = ({ className }: { className?: string }) => {
     }),
   );
 
-  const _flattenedSchedules =
+  const flattenedSchedules =
     schedulesData?.pages
       ?.filter((page) => page.success)
       .flatMap((page) => page.schedules) ?? [];
-  const flattenedSchedules =
-    _flattenedSchedules.length > 0
-      ? _flattenedSchedules
-      : [
-          {
-            schedule: {
-              schedule: {
-                id: "1",
-                startAt: startOfToday().toISOString(),
-                endAt: endOfToday().toISOString(),
-                repeatStartAt: startOfToday().toISOString(),
-                repeatEndAt: endOfToday().toISOString(),
-                repeatInterval: 1,
-              },
-              event: {
-                eventId: "1",
-                autoAccept: false,
-                sizeLimit: 10,
-                image: undefined,
-                creator: undefined,
-                skillLevel: [],
-                sportType: [],
-                name: "Test Event",
-                description: "Test Description",
-                location: [0, 0],
-                locationDescription: "Test Location",
-                eventCreatorType: "user",
-              },
-            },
-            participants: {
-              repeatIndex: 0,
-              participants: 1,
-            },
-          } satisfies (typeof _flattenedSchedules)[0],
-        ];
 
   const parentRef = useRef<HTMLDivElement>(null);
 
