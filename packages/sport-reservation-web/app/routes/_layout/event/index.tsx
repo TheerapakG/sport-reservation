@@ -598,10 +598,10 @@ const SidebarCreateEventCard = () => {
 
 const Sidebar = ({ className }: { className?: string }) => {
   return (
-    <aside className={className}>
+    <div className={className}>
       <SidebarCalendarCard />
       <SidebarCreateEventCard />
-    </aside>
+    </div>
   );
 };
 
@@ -667,9 +667,12 @@ const EventList = ({ className }: { className?: string }) => {
   ]);
 
   return (
-    <main className={className} ref={parentRef}>
+    <div className={className} ref={parentRef}>
       {flattenedSchedules.length > 0 || schedulesHasNextPage ? (
-        <div ref={parentRef} className="flex flex-col gap-y-4 overflow-y-auto">
+        <div
+          ref={parentRef}
+          className="flex h-full flex-col gap-y-4 overflow-y-auto"
+        >
           <div
             className="relative"
             style={{ height: `${rowVirtualizer.getTotalSize()}px` }}
@@ -704,25 +707,23 @@ const EventList = ({ className }: { className?: string }) => {
           No events found for {selectedDateStr}.
         </div>
       )}
-    </main>
+    </div>
   );
 };
 
 function RouteComponent() {
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex h-full flex-1">
-        <Sidebar className="h-full w-96 space-y-8 overflow-y-auto bg-gray-50 p-4" />
-        <Suspense
-          fallback={
-            <main className="flex-1 overflow-auto bg-white p-4">
-              <div className="text-center text-gray-500">Loading...</div>
-            </main>
-          }
-        >
-          <EventList className="flex-1 overflow-auto bg-white p-4" />
-        </Suspense>
-      </div>
+    <div className="flex flex-1 flex-col overflow-hidden md:h-full md:flex-row">
+      <Sidebar className="h-full w-full space-y-8 overflow-y-auto p-4 md:max-w-96" />
+      <Suspense
+        fallback={
+          <div className="flex-1 overflow-auto bg-white p-4">
+            <div className="text-center text-gray-500">Loading...</div>
+          </div>
+        }
+      >
+        <EventList className="h-full flex-1 overflow-y-auto bg-white p-4" />
+      </Suspense>
     </div>
   );
 }
