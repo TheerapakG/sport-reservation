@@ -99,6 +99,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
             ? { availability: profile.availability }
             : {}),
           ...(profile.gender ? { gender: profile.gender } : {}),
+          membership: profile.membership,
           ...(profile.birthDate
             ? { birthDate: profile.birthDate.toISOString() }
             : {}),

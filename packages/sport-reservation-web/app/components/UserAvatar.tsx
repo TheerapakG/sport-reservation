@@ -3,7 +3,6 @@ import {
   AvatarImage as AvatarImagePrimitive,
   Avatar as AvatarPrimitive,
 } from "@/components/ui/avatar";
-import { Link } from "@tanstack/react-router";
 import { subjects } from "sport-reservation-oauth-common/subjects";
 
 const AvatarFallback = () => {
@@ -43,20 +42,6 @@ const UserAvatarImageBase = ({
   );
 };
 
-const NavUserAvatarImage = ({
-  profile,
-}: {
-  profile?: typeof subjects.user.infer;
-}) => {
-  return profile ? (
-    <UserAvatarImageBase profile={profile} />
-  ) : (
-    <Link to="/login" className="h-full w-full">
-      <AvatarFallback />
-    </Link>
-  );
-};
-
 const UserAvatarImage = ({
   profile,
 }: {
@@ -66,18 +51,6 @@ const UserAvatarImage = ({
     <UserAvatarImageBase profile={profile} />
   ) : (
     <AvatarFallback />
-  );
-};
-
-const NavUserAvatar = ({
-  profile,
-}: {
-  profile?: typeof subjects.user.infer;
-}) => {
-  return (
-    <AvatarPrimitive>
-      <NavUserAvatarImage profile={profile} />
-    </AvatarPrimitive>
   );
 };
 
@@ -95,4 +68,4 @@ const UserAvatar = ({
   );
 };
 
-export { NavUserAvatar, UserAvatar };
+export { UserAvatar };

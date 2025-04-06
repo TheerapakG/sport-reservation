@@ -6,6 +6,7 @@ const user = type({
   id: "string",
   "name?": "string",
   "avatar?": "string",
+  membership: "'free' | 'plus'",
 });
 
 export const subjects = createSubjects({

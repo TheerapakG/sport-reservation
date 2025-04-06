@@ -12,6 +12,7 @@ export const userProfile = /*@__PURE__*/ type({
   "availability?": "string",
   "gender?": "string",
   "birthDate?": "string",
+  membership: "'free' | 'plus'",
   sports: [
     {
       sportId: "string",

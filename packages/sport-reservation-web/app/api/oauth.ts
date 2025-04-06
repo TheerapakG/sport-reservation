@@ -127,3 +127,22 @@ export const useExchangeMutation = () => {
     },
   });
 };
+
+export const logoutServerFn = createServerFn({ method: "POST" }).handler(
+  async () => {
+    setCookie("access_token", "", {});
+    setCookie("refresh_token", "", {});
+    return { success: true };
+  },
+);
+
+export const useLogoutMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: logoutServerFn,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: oauthKeys().all() });
+    },
+  });
+};

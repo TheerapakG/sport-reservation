@@ -114,6 +114,7 @@ export const issuerLive = Layer.effect(
                               id: profile.id,
                               name: profile.name,
                               avatar: profile.avatar,
+                              membership: profile.membership,
                             };
                           }),
                         onNone: () =>
@@ -149,6 +150,7 @@ export const issuerLive = Layer.effect(
                               id: updatedProfile.id,
                               name: updatedProfile.name,
                               avatar: updatedProfile.avatar,
+                              membership: updatedProfile.membership,
                             };
                           }),
                       },
@@ -185,6 +187,7 @@ export const issuerLive = Layer.effect(
                               id: profile.id,
                               name: profile.name,
                               avatar: profile.avatar,
+                              membership: profile.membership,
                             };
                           }),
                         onNone: () =>
@@ -220,6 +223,7 @@ export const issuerLive = Layer.effect(
                               id: updatedProfile.id,
                               name: updatedProfile.name,
                               avatar: updatedProfile.avatar,
+                              membership: updatedProfile.membership,
                             };
                           }),
                       },
@@ -259,6 +263,7 @@ export const issuerLive = Layer.effect(
                               id: profile.id,
                               name: profile.name,
                               avatar: profile.avatar,
+                              membership: profile.membership,
                             };
                           }),
                         onNone: () =>
@@ -294,6 +299,7 @@ export const issuerLive = Layer.effect(
                               id: updatedProfile.id,
                               name: updatedProfile.name,
                               avatar: updatedProfile.avatar,
+                              membership: updatedProfile.membership,
                             };
                           }),
                       },

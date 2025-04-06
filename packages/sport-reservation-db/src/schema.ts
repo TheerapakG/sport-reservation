@@ -113,6 +113,11 @@ export const userUserProfileGender = pgEnum("user_user_profile_gender", [
   "prefer_not_to_say",
 ]);
 
+export const userUserProfileMembership = pgEnum(
+  "user_user_profile_membership",
+  ["free", "plus"],
+);
+
 export const userUserProfile = pgTable(
   "user_user_profile",
   {
@@ -122,6 +127,9 @@ export const userUserProfile = pgTable(
     avatar: varchar("avatar", {}),
     availability: varchar("availability", {}),
     gender: userUserProfileGender("gender"),
+    membership: userUserProfileMembership("membership")
+      .default("free")
+      .notNull(),
     birthDate: timestamp("birth_date", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
