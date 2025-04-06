@@ -42,15 +42,15 @@ export default function ClubJoinModal({
       }}
     >
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <VisuallyHidden>
-        <DialogHeader>
-          <DialogTitle>Join club</DialogTitle>
-          <DialogDescription>
-            Join the club to participate with the club's users
-          </DialogDescription>
-        </DialogHeader>
-      </VisuallyHidden>
       <DialogContent>
+        <VisuallyHidden>
+          <DialogHeader>
+            <DialogTitle>Join club</DialogTitle>
+            <DialogDescription>
+              Join the club to participate with the club's users
+            </DialogDescription>
+          </DialogHeader>
+        </VisuallyHidden>
         <div className="mt-6 flex flex-col gap-y-2">
           {requestClubMembershipCreateMutation.isSuccess && (
             <div className="flex flex-col gap-y-2">

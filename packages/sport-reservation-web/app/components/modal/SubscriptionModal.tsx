@@ -1,24 +1,24 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Card } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "../ui/button";
 
-export const Route = createFileRoute("/_layout/subscription")({
-  component: RouteComponent,
-});
-
-function RouteComponent() {
+export function SubscriptionModal({ children }: { children: React.ReactNode }) {
   return (
-    <Card className="relative mx-auto w-full max-w-3xl rounded-2xl bg-gradient-to-b from-[#65D1F8] to-[#6CCFD0] p-[2px] shadow-lg">
-      {/* Inner Content with White Background */}
-      <div className="rounded-2xl bg-white p-6">
-        {/* Title with Gradient Text */}
-        <h2 className="bg-gradient-to-r from-[#65D1F8] to-[#6CCFD0] bg-clip-text text-center text-2xl font-extrabold text-transparent">
+    <Dialog>
+      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogContent className="w-full max-w-3xl">
+        <DialogHeader className="bg-gradient-to-r from-[#65D1F8] to-[#6CCFD0] bg-clip-text text-3xl font-extrabold text-transparent sm:text-center">
           Spark Plus+ Membership
-        </h2>
-        <p className="mb-6 text-center text-gray-600">
+        </DialogHeader>
+        <DialogDescription className="text-center text-lg text-gray-600">
           Unlock Exclusive Perks and Elevate Your Sports Experience!
-        </p>
-
-        {/* Table */}
+        </DialogDescription>
         <div className="overflow-hidden rounded-lg border">
           <table className="w-full border-collapse">
             <thead>
@@ -72,14 +72,12 @@ function RouteComponent() {
             </tbody>
           </table>
         </div>
-
-        {/* Call to Action Button */}
-        <div className="mt-6 flex justify-center">
-          <button className="transform rounded-lg bg-gradient-to-r from-[#65D1F8] to-[#6CCFD0] px-6 py-3 font-semibold text-white shadow-md transition-transform hover:scale-105 hover:from-[#65D1F8] hover:to-[#6CCFD0]">
+        <DialogFooter className="sm:justify-center">
+          <Button className="transform rounded-lg bg-gradient-to-r from-[#65D1F8] to-[#6CCFD0] px-6 py-3 font-semibold text-white shadow-md transition-transform hover:scale-105 hover:from-[#65D1F8] hover:to-[#6CCFD0]">
             Join Spark Plus+ Now
-          </button>
-        </div>
-      </div>
-    </Card>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

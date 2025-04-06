@@ -2,12 +2,11 @@
 import { useGetUserClubMemberListQueryOptions } from "@/api/club";
 import {
   createEventValidators,
-  getScheduleListInfiniteQueryOptions,
   useCreateEventMutation,
   useCreateScheduleMutation,
+  useGetUserMemberSchedulesQueryOptions,
   useRequestScheduleCreateMutation,
 } from "@/api/event";
-import Calendar from "@/components/calendar";
 import EventListItem from "@/components/event/EventListItem";
 import FormHeaderComponent from "@/components/form/FormHeaderComponent";
 import { Button } from "@/components/ui/button";
@@ -31,11 +30,8 @@ import {
 import { useAppForm, withForm } from "@/utils/form";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { formOptions, useStore } from "@tanstack/react-form";
-import {
-  useSuspenseInfiniteQuery,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { type } from "arktype";
 import { startOfToday } from "date-fns";
@@ -43,7 +39,7 @@ import { formatWithOptions, setHours, setMinutes } from "date-fns/fp";
 import { enUS } from "date-fns/locale";
 import { Effect, pipe } from "effect";
 import { PlusCircle } from "lucide-react";
-import { Suspense, useEffect, useRef } from "react";
+import { Suspense, useCallback, useEffect, useRef } from "react";
 import { effectType } from "tiara-stack/utils/effectType";
 import { typedFormData } from "tiara-stack/utils/formData";
 
@@ -552,36 +548,6 @@ const CreateEventForm = () => {
   );
 };
 
-const SidebarCalendarCard = () => {
-  const { date } = Route.useLoaderData();
-  const defaultedDate = date ?? startOfToday();
-
-  const router = useRouter();
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-[#F28382]">Calendar</CardTitle>
-        <CardDescription>Select a date</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Calendar
-          mode="single"
-          selected={defaultedDate}
-          onSelect={(date) =>
-            date &&
-            router.navigate({
-              to: "/event",
-              search: { date: date.toISOString() },
-            })
-          }
-          className="flex justify-center rounded-xl border-2 border-[#65D1F8] p-2"
-        />
-      </CardContent>
-    </Card>
-  );
-};
-
 const SidebarCreateEventCard = () => {
   return (
     <Card>
@@ -599,7 +565,6 @@ const SidebarCreateEventCard = () => {
 const Sidebar = ({ className }: { className?: string }) => {
   return (
     <div className={className}>
-      <SidebarCalendarCard />
       <SidebarCreateEventCard />
     </div>
   );
@@ -615,22 +580,17 @@ const EventList = ({ className }: { className?: string }) => {
     defaultedDate,
   );
 
-  const {
-    data: schedulesData,
-    hasNextPage: schedulesHasNextPage,
-    fetchNextPage: schedulesFetchNextPage,
-    isFetchingNextPage: schedulesIsFetchingNextPage,
-  } = useSuspenseInfiniteQuery(
-    getScheduleListInfiniteQueryOptions({
-      date: defaultedDate,
-      limit: 10,
-    }),
+  const getUserMemberSchedulesQueryOptions =
+    useGetUserMemberSchedulesQueryOptions();
+  const userMemberSchedules = useSuspenseQuery(
+    getUserMemberSchedulesQueryOptions,
   );
 
-  const flattenedSchedules =
-    schedulesData?.pages
-      ?.filter((page) => page.success)
-      .flatMap((page) => page.schedules) ?? [];
+  const schedulesHasNextPage = false;
+  const schedulesIsFetchingNextPage = false;
+  const schedulesFetchNextPage = useCallback(() => {}, []);
+
+  const flattenedSchedules = userMemberSchedules.data?.schedules ?? [];
 
   const parentRef = useRef<HTMLDivElement>(null);
 
@@ -730,19 +690,10 @@ function RouteComponent() {
 
 const validateSearch = type({ "date?": "string.date.parse" });
 
-export const Route = createFileRoute("/_layout/event/")({
+export const Route = createFileRoute("/_layout/event/user")({
   validateSearch,
   loaderDeps: ({ search }) => search,
-  loader: async ({ context: { queryClient }, deps: { date } }) => {
-    if (date) {
-      queryClient.prefetchInfiniteQuery(
-        getScheduleListInfiniteQueryOptions({
-          date,
-          limit: 10,
-        }),
-      );
-    }
-
+  loader: async ({ deps: { date } }) => {
     return { date };
   },
   component: RouteComponent,

@@ -1,3 +1,4 @@
+import { SubscriptionModal } from "@/components/modal/SubscriptionModal";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -14,6 +15,7 @@ import {
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { UserAvatar } from "@/components/UserAvatar";
+import { cn } from "@/lib/utils";
 import {
   CatchBoundary,
   createFileRoute,
@@ -21,7 +23,13 @@ import {
   Outlet,
   useRouter,
 } from "@tanstack/react-router";
-import { ChevronDownIcon } from "lucide-react";
+import {
+  ChevronDownIcon,
+  MessageSquareIcon,
+  SparklesIcon,
+  TicketCheckIcon,
+  UsersIcon,
+} from "lucide-react";
 import { subjects } from "sport-reservation-oauth-common/subjects";
 
 const LoggedOutNavigationMenuList = () => {
@@ -52,23 +60,47 @@ const LoggedInNavigationMenuList = ({
       <NavigationMenu>
         <NavigationMenuList>
           <NavigationMenuItem>
+            {user.membership === "free" ? (
+              <SubscriptionModal>
+                <NavigationMenuLink
+                  className={navigationMenuTriggerStyle()}
+                  asChild
+                >
+                  <Button
+                    variant="ghost"
+                    className="flex w-16 flex-col items-center justify-center gap-y-1"
+                  >
+                    <TicketCheckIcon className="size-6" />
+                    <span className="text-xs">Spark Plus+</span>
+                  </Button>
+                </NavigationMenuLink>
+              </SubscriptionModal>
+            ) : undefined}
+          </NavigationMenuItem>
+          <NavigationMenuItem>
             <NavigationMenuLink
-              className={navigationMenuTriggerStyle()}
+              className={cn(navigationMenuTriggerStyle(), "p-0")}
               asChild
             >
               <Link
-                to="/"
+                to="/matching"
                 activeProps={{
                   className: "font-bold",
                 }}
               >
-                Home
+                <Button
+                  variant="ghost"
+                  className="flex w-16 flex-col items-center justify-center gap-y-1"
+                >
+                  <SparklesIcon className="size-6" />
+                  <span className="text-xs">Matching</span>
+                </Button>
               </Link>
             </NavigationMenuLink>
           </NavigationMenuItem>
           <NavigationMenuItem>
             <NavigationMenuLink
-              className={navigationMenuTriggerStyle()}
+              className={cn(navigationMenuTriggerStyle(), "p-0")}
               asChild
             >
               <Link
@@ -77,13 +109,19 @@ const LoggedInNavigationMenuList = ({
                   className: "font-bold",
                 }}
               >
-                Features
+                <Button
+                  variant="ghost"
+                  className="flex w-16 flex-col items-center justify-center gap-y-1"
+                >
+                  <UsersIcon className="size-6" />
+                  <span className="text-xs">Friends</span>
+                </Button>
               </Link>
             </NavigationMenuLink>
           </NavigationMenuItem>
           <NavigationMenuItem>
             <NavigationMenuLink
-              className={navigationMenuTriggerStyle()}
+              className={cn(navigationMenuTriggerStyle(), "p-0")}
               asChild
             >
               <Link
@@ -92,7 +130,13 @@ const LoggedInNavigationMenuList = ({
                   className: "font-bold",
                 }}
               >
-                Inbox
+                <Button
+                  variant="ghost"
+                  className="flex w-16 flex-col items-center justify-center gap-y-1"
+                >
+                  <MessageSquareIcon className="size-6" />
+                  <span className="text-xs">Messages</span>
+                </Button>
               </Link>
             </NavigationMenuLink>
           </NavigationMenuItem>
@@ -107,10 +151,10 @@ const LoggedInNavigationMenuList = ({
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           <DropdownMenuItem>
-            <Link to="/event">Your Events</Link>
+            <Link to="/event/user">Your Events</Link>
           </DropdownMenuItem>
           <DropdownMenuItem>
-            <Link to="/club">Your Clubs</Link>
+            <Link to="/club/user">Your Clubs</Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem>

@@ -4,6 +4,7 @@ import {
   queryOptions,
   useMutation,
   useQueryClient,
+  useSuspenseQuery,
 } from "@tanstack/react-query";
 import { createServerFn } from "@tanstack/react-start";
 import { type } from "arktype";
@@ -18,6 +19,7 @@ import {
 import { effectType } from "tiara-stack/utils/effectType";
 import { readTypedFormData } from "tiara-stack/utils/formData";
 import { parseCookies } from "vinxi/http";
+import { currentUserProfileQueryOptions } from "./oauth";
 
 export const eventKeys = () => {
   const all = ["event"] as const;
@@ -64,6 +66,28 @@ export const eventKeys = () => {
               return {
                 all: () => allScheduleClubId,
                 list: () => [...allScheduleClubId, "list"] as const,
+              };
+            },
+          };
+        },
+        user: () => {
+          const allScheduleUser = [...allSchedule, "user"] as const;
+          return {
+            all: () => allScheduleUser,
+            id: ({ id }: { id?: string }) => {
+              const allScheduleUserId = [...allScheduleUser, "id", id] as const;
+              return {
+                all: () => allScheduleUserId,
+                list: () => {
+                  const allScheduleUserIdList = [
+                    ...allScheduleUserId,
+                    "list",
+                  ] as const;
+                  return {
+                    all: () => allScheduleUserIdList,
+                    member: () => [...allScheduleUserIdList, "member"] as const,
+                  };
+                },
               };
             },
           };
@@ -216,6 +240,41 @@ export const getScheduleListInfiniteQueryOptions = ({
           : undefined
         : undefined,
   });
+
+export const getUserMemberSchedulesServerFn = createServerFn({
+  method: "GET",
+}).handler(async () => {
+  const { access_token: accessToken } = parseCookies();
+
+  if (!accessToken) {
+    return { success: false } as const;
+  }
+
+  const { schedules } = await Effect.runPromise(
+    Effect.gen(function* () {
+      const eventClient = yield* EventClient;
+      return yield* eventClient.getUserMemberSchedules({
+        headers: { Cookie: serialize("access_token", accessToken) },
+      });
+    }).pipe(provideEffectContext),
+  );
+
+  return { success: true, schedules } as const;
+});
+
+export const useGetUserMemberSchedulesQueryOptions = () => {
+  const currentUserProfile = useSuspenseQuery(currentUserProfileQueryOptions());
+
+  return queryOptions({
+    queryKey: eventKeys()
+      .schedule()
+      .user()
+      .id({ id: currentUserProfile.data.profile?.id })
+      .list()
+      .member(),
+    queryFn: () => getUserMemberSchedulesServerFn(),
+  });
+};
 
 export const createEventValidators = type([
   type({
