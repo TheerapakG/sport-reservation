@@ -29,7 +29,6 @@ export default function StandaloneDatePickerField({
         <Button
           variant="outline"
           role="combobox"
-          onBlur={field.handleBlur}
           className={cn(
             "h-7 w-72 appearance-none justify-between rounded-none border-0 border-l-4 border-l-[#65D1F8] bg-white px-2 py-1 text-gray-700 shadow focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none aria-[invalid]:ring-1 aria-[invalid]:ring-red-500 aria-[invalid]:ring-offset-2",
             classNames?.button,
@@ -44,12 +43,12 @@ export default function StandaloneDatePickerField({
           <CalendarIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0">
+      <PopoverContent className="w-auto p-4">
         <Calendar
           mode="single"
           selected={fieldValue}
           onSelect={(date) => field.setValue(date)}
-          initialFocus
+          autoFocus
         />
       </PopoverContent>
     </Popover>

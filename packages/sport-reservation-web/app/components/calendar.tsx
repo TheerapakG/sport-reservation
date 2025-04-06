@@ -11,42 +11,58 @@ export default function Calendar({
 }: ComponentProps<typeof CalendarPrimitive>) {
   return (
     <CalendarPrimitive
+      captionLayout="dropdown"
+      showOutsideDays
       className={cn("p-0", className)}
       classNames={{
-        caption_label: "text-[#F28382] font-semibold",
-        nav_button: cn(
+        months: "relative flex flex-col space-y-4 sm:space-x-4 sm:space-y-0",
+        dropdown: "text-[#F28382] font-semibold",
+        month_caption: "flex justify-center pt-1 relative items-center",
+        caption_label: "hidden",
+        nav: "absolute w-full inset-x-0 h-8 space-x-1 flex items-center",
+        button_previous: cn(
           buttonVariants({ variant: "ghost" }),
           "h-8 w-8 rounded-full bg-transparent p-0 opacity-50 hover:opacity-100",
+          "absolute left-1 z-10",
         ),
-        head_cell:
-          "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
-        cell: cn(
-          "relative px-0.5 py-0 text-center text-sm focus-within:relative focus-within:z-20[&:has([aria-selected].day-range-end)]:rounded-r-full [&:has([aria-selected].day-range-end)]:rounded-r-full",
-          props.mode === "range"
-            ? "[&:has(>.day-range-end)]:rounded-r-full [&:has(>.day-range-start)]:rounded-l-full first:[&:has([aria-selected])]:rounded-l-full last:[&:has([aria-selected])]:rounded-r-full"
-            : "[&:has([aria-selected])]:rounded-full",
-        ),
-        day: cn(
+        button_next: cn(
           buttonVariants({ variant: "ghost" }),
-          "h-8 w-8 rounded-full p-0 font-normal aria-selected:bg-[#65D1F8] aria-selected:text-white aria-selected:opacity-100",
+          "h-8 w-8 rounded-full bg-transparent p-0 opacity-50 hover:opacity-100",
+          "absolute right-1 z-10",
         ),
-        day_outside:
-          "day-outside text-gray-400 aria-selected:[#65D1F8]/50 aria-selected:text-white",
+        month_grid: "w-full border-collapse space-y-1",
+        weekdays: "flex",
+        weekday:
+          "text-muted-foreground rounded-md w-9 font-normal text-[0.8rem]",
+        week: "flex w-full mt-2",
+        day: cn(
+          "relative rounded-full font-normal px-0.5 py-0 text-center text-sm focus-within:relative",
+          "aria-selected:rounded-full aria-selected:bg-[#65D1F8] aria-selected:text-white aria-selected:opacity-100",
+          "[&[data-outside=true]]:text-gray-400 [&[data-outside=true]]:aria-selected:[#65D1F8]/50 [&[data-outside=true]]:aria-selected:text-white",
+        ),
+        day_button: cn(
+          buttonVariants({ variant: "ghost" }),
+          "h-8 w-8 p-0 font-normal hover:bg-transparent",
+        ),
         ...classNames,
       }}
       components={{
-        IconLeft: ({ className, ...props }) => (
-          <ChevronLeft
-            className={cn("h-8 w-8 rounded-full text-[#F28382]", className)}
-            {...props}
-          />
-        ),
-        IconRight: ({ className, ...props }) => (
-          <ChevronRight
-            className={cn("h-8 w-8 rounded-full text-[#F28382]", className)}
-            {...props}
-          />
-        ),
+        Chevron: ({ className, ...props }) => {
+          if (props.orientation === "left") {
+            return (
+              <ChevronLeft
+                className={cn("h-8 w-8 rounded-full text-[#F28382]", className)}
+                {...props}
+              />
+            );
+          }
+          return (
+            <ChevronRight
+              className={cn("h-8 w-8 rounded-full text-[#F28382]", className)}
+              {...props}
+            />
+          );
+        },
       }}
       {...props}
     />

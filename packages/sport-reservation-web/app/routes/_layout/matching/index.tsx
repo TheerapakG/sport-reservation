@@ -4,47 +4,34 @@ import {
   useGetMatchingCursorQueryOptions,
   useMatchUsersMutation,
 } from "@/api/matching";
-import { getCurrentUserProfileQueryOptions } from "@/api/user";
-import UserCardComponent from "@/components/matching/UserCardComponent";
+import UserCardComponent from "@/components/UserCardComponent";
 import { Button } from "@/components/ui/button";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Effect, Sink, Stream } from "effect";
 import { Suspense } from "react";
 import { userProfile } from "sport-reservation-user/models";
 
-const exampleUser = {
-  name: "Butter Bear",
-  avatar: "app/components/Assets/Image/ProfileButterBear.png",
-  distance: 2.3,
-  sports: ["Badminton", "Tennis"],
-  objectives: [
-    "Stay active",
-    "Just for fun",
-    "Meet new friend",
-    "Casual match",
-  ],
-  availability: "Weekends & Evenings",
-  locations: ["81 Badminton Court", "Tennis Sport Hub"],
-};
-
-const haversineDistance = (
-  [lon1, lat1]: [number, number],
-  [lon2, lat2]: [number, number],
-) => {
-  const toRadians = (deg: number) => deg * (Math.PI / 180);
-  const dLon = toRadians(lon2 - lon1);
-  const dLat = toRadians(lat2 - lat1);
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(toRadians(lat1)) *
-      Math.cos(toRadians(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-  return c * 6378137;
-};
+const useExampleUser = () =>
+  ({
+    id: "1",
+    name: "Butter Bear",
+    avatar: "app/components/Assets/Image/ProfileButterBear.png",
+    sports: [
+      { sportId: "1", sportType: "badminton" },
+      { sportId: "2", sportType: "tennis" },
+    ],
+    objectives: [
+      { objectiveId: "1", objectiveType: "stay_active" },
+      { objectiveId: "2", objectiveType: "for_fun" },
+      { objectiveId: "3", objectiveType: "meet_new_friends" },
+      { objectiveId: "4", objectiveType: "casual_match" },
+    ],
+    availability: "Weekends & Evenings",
+    locations: [
+      { locationId: "1", locationDescription: "81 Badminton Court" },
+      { locationId: "2", locationDescription: "Tennis Sport Hub" },
+    ],
+  }) satisfies typeof userProfile.infer;
 
 const MatchingButton = () => {
   const createMatchingCursorMutation = useCreateMatchingCursorMutation();
@@ -73,16 +60,20 @@ const MatchingButton = () => {
 };
 
 const NoCursorMatchingPage = () => {
+  const exampleUser = useExampleUser();
+
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center p-4">
       <div className="relative w-72">
         <UserCardComponent
           user={exampleUser}
+          matchedUser={exampleUser}
           className="absolute top-0 left-0 z-0 -translate-x-3 -rotate-6"
           disabled={true}
         />
         <UserCardComponent
           user={exampleUser}
+          matchedUser={exampleUser}
           className="z-10"
           disabled={true}
         />
@@ -106,55 +97,6 @@ const NoCursorMatchingPage = () => {
   );
 };
 
-const MatchedUserCardComponent = ({
-  currentUser,
-  matchedUser,
-}: {
-  currentUser: typeof userProfile.infer;
-  matchedUser: typeof userProfile.infer;
-}) => {
-  const currentUserLocations = currentUser.locations
-    .map(({ location }) => location)
-    .filter(Boolean);
-  const matchedUserLocations = matchedUser.locations
-    .map(({ location }) => location)
-    .filter(Boolean);
-
-  const minDistance = Effect.runSync(
-    Stream.cross(
-      Stream.fromIterable(currentUserLocations),
-      Stream.fromIterable(matchedUserLocations),
-    ).pipe(
-      Stream.map(([currentUserLocation, matchedUserLocation]) =>
-        haversineDistance(currentUserLocation, matchedUserLocation),
-      ),
-      Stream.run(
-        Sink.foldLeft(Number.MAX_SAFE_INTEGER, (min, distance) =>
-          Math.min(min, distance),
-        ),
-      ),
-    ),
-  );
-
-  return (
-    <UserCardComponent
-      user={{
-        name: matchedUser.name,
-        avatar: matchedUser.avatar,
-        distance: minDistance,
-        sports: matchedUser.sports.map((sport) => sport.sportType),
-        objectives: matchedUser.objectives.map(
-          (objective) => objective.objectiveType,
-        ),
-        availability: matchedUser.availability,
-        locations: matchedUser.locations
-          .map((location) => location.locationDescription)
-          .filter(Boolean),
-      }}
-    />
-  );
-};
-
 const MatchedUsersPage = ({ cursorId }: { cursorId: string }) => {
   const getAllMatchedUsersQuery = useSuspenseQuery(
     getAllMatchedUsersQueryOptions({
@@ -162,21 +104,12 @@ const MatchedUsersPage = ({ cursorId }: { cursorId: string }) => {
     }),
   );
 
-  const getCurrentUserProfileQuery = useSuspenseQuery(
-    getCurrentUserProfileQueryOptions(),
-  );
-
   const matchedUsers = getAllMatchedUsersQuery.data?.matches;
-  const currentUser = getCurrentUserProfileQuery.data?.profile;
 
-  return matchedUsers && currentUser && matchedUsers.length > 0 ? (
+  return matchedUsers && matchedUsers.length > 0 ? (
     <div className="container mx-auto flex min-h-screen flex-wrap items-center justify-center gap-4">
       {matchedUsers.map(({ user }) => (
-        <MatchedUserCardComponent
-          key={user.id}
-          currentUser={currentUser}
-          matchedUser={user}
-        />
+        <UserCardComponent key={user.id} matchedUser={user} />
       ))}
     </div>
   ) : (

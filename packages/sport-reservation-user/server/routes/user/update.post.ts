@@ -26,6 +26,7 @@ export const handlerConfig = defineEventHandlerConfig({
       "id?": "string",
       "name?": "string",
       "avatar?": "string",
+      "availability?": "string",
       "gender?": "'male' | 'female' | 'prefer_not_to_say'",
       "birthDate?": "string.date.parse",
     }),

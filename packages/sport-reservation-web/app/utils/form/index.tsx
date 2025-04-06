@@ -1,6 +1,8 @@
 import ComboBoxField from "@/components/form/ComboBoxField";
 import DatePickerField from "@/components/form/DatePickerField";
 import FileInputField from "@/components/form/FileInputField";
+import ListSelectInputField from "@/components/form/ListSelectInputField";
+import ListTextInputField from "@/components/form/ListTextInputField";
 import MultipleChoiceField from "@/components/form/MultipleChoiceField";
 import NumericInputField from "@/components/form/NumericInputField";
 import SelectInputField from "@/components/form/SelectInputField";
@@ -8,6 +10,8 @@ import SingleChoiceField from "@/components/form/SingleChoiceField";
 import StandaloneComboBoxField from "@/components/form/StandaloneComboBoxField";
 import StandaloneDatePickerField from "@/components/form/StandaloneDatePickerField";
 import StandaloneFileInputField from "@/components/form/StandaloneFileInputField";
+import StandaloneListSelectInputField from "@/components/form/StandaloneListSelectInputField";
+import StandaloneListTextInputField from "@/components/form/StandaloneListTextInputField";
 import StandaloneMultipleChoiceField from "@/components/form/StandaloneMultipleChoiceField";
 import StandaloneNumericInputField from "@/components/form/StandaloneNumericInputField";
 import StandaloneSelectInputField from "@/components/form/StandaloneSelectInputField";
@@ -33,6 +37,8 @@ export const { useAppForm, withForm } = createFormHook({
     DatePickerField,
     TimePickerField,
     FileInputField,
+    ListSelectInputField,
+    ListTextInputField,
     StandaloneNumericInputField,
     StandaloneSelectInputField,
     StandaloneSingleChoiceField,
@@ -42,5 +48,7 @@ export const { useAppForm, withForm } = createFormHook({
     StandaloneDatePickerField,
     StandaloneTimePickerField,
     StandaloneFileInputField,
+    StandaloneListSelectInputField,
+    StandaloneListTextInputField,
   },
 });
