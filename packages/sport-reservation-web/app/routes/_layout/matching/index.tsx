@@ -16,6 +16,7 @@ const useExampleUser = () =>
     id: "1",
     name: "Butter Bear",
     avatar: "app/components/Assets/Image/ProfileButterBear.png",
+    membership: "free",
     sports: [
       { sportId: "1", sportType: "badminton" },
       { sportId: "2", sportType: "tennis" },
