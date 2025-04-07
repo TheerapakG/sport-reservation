@@ -332,16 +332,19 @@ export const friendRepositoryImpl = /*@__PURE__*/ Layer.effect(
               status: userUserGroupMember.status,
             })
             .from(userUserGroupMember)
+            .innerJoin(
+              userFriendGroupIds,
+              eq(userUserGroupMember.groupId, userFriendGroupIds.id),
+            )
             .where(
               and(
                 isNull(userUserGroupMember.deletedAt),
-                eq(userUserGroupMember.groupId, userFriendGroupIds.id),
                 not(eq(userUserGroupMember.userId, userId)),
               ),
             )
             .limit(limit)
             .offset(offset);
-        }).pipe(Effect.withSpan("friendRepositoryImpl.getFriends")),
+        }).pipe(Effect.withSpan("friendRepositoryImpl.getFriendsByLimit")),
       getFriendGroupId: (userId, friendId) =>
         Effect.gen(function* () {
           const userFriendGroupIds = yield* intersect(
