@@ -67,13 +67,17 @@ function IndexComponent() {
         value: location.locationDescription,
       })) as { id: string | undefined; value: string | undefined }[],
     },
-    onSubmit: ({ value }) => {
-      updateCurrentUserProfileMutation.mutate({
-        data: {
-          name: value.name,
-          birthDate: value.birthDate?.toISOString(),
-        },
-      });
+    onSubmit: async ({ value }) => {
+      const mutations = [];
+
+      mutations.push(
+        updateCurrentUserProfileMutation.mutateAsync({
+          data: {
+            name: value.name,
+            birthDate: value.birthDate?.toISOString(),
+          },
+        }),
+      );
 
       const removedSports = currentUser?.sports.filter(
         (sport) => !value.sports?.some((s) => s.id === sport.sportId),
@@ -98,58 +102,72 @@ function IndexComponent() {
       );
 
       if (removedSports && removedSports.length > 0) {
-        dissociateSportMutation.mutate({
-          data: { sportIds: removedSports.map((sport) => sport.sportId) },
-        });
+        mutations.push(
+          dissociateSportMutation.mutateAsync({
+            data: { sportIds: removedSports.map((sport) => sport.sportId) },
+          }),
+        );
       }
 
       if (removedObjectives && removedObjectives.length > 0) {
-        dissociateObjectiveMutation.mutate({
-          data: {
-            objectiveIds: removedObjectives.map(
-              (objective) => objective.objectiveId,
-            ),
-          },
-        });
+        mutations.push(
+          dissociateObjectiveMutation.mutateAsync({
+            data: {
+              objectiveIds: removedObjectives.map(
+                (objective) => objective.objectiveId,
+              ),
+            },
+          }),
+        );
       }
 
       if (removedLocations && removedLocations.length > 0) {
-        dissociateLocationMutation.mutate({
-          data: {
-            locationIds: removedLocations.map(
-              (location) => location.locationId,
-            ),
-          },
-        });
+        mutations.push(
+          dissociateLocationMutation.mutateAsync({
+            data: {
+              locationIds: removedLocations.map(
+                (location) => location.locationId,
+              ),
+            },
+          }),
+        );
       }
 
       if (addedSports && addedSports.length > 0) {
-        associateSportMutation.mutate({
-          data: {
-            sports: addedSports.map((sport) => ({ sportType: sport.value })),
-          },
-        });
+        mutations.push(
+          associateSportMutation.mutateAsync({
+            data: {
+              sports: addedSports.map((sport) => ({ sportType: sport.value })),
+            },
+          }),
+        );
       }
 
       if (addedObjectives && addedObjectives.length > 0) {
-        associateObjectiveMutation.mutate({
-          data: {
-            objectives: addedObjectives.map((objective) => ({
-              objectiveType: objective.value,
-            })),
-          },
-        });
+        mutations.push(
+          associateObjectiveMutation.mutateAsync({
+            data: {
+              objectives: addedObjectives.map((objective) => ({
+                objectiveType: objective.value,
+              })),
+            },
+          }),
+        );
       }
 
       if (addedLocations && addedLocations.length > 0) {
-        associateLocationMutation.mutate({
-          data: {
-            locations: addedLocations.map((location) => ({
-              locationDescription: location.value,
-            })),
-          },
-        });
+        mutations.push(
+          associateLocationMutation.mutateAsync({
+            data: {
+              locations: addedLocations.map((location) => ({
+                locationDescription: location.value,
+              })),
+            },
+          }),
+        );
       }
+
+      await Promise.allSettled(mutations);
     },
   });
 
