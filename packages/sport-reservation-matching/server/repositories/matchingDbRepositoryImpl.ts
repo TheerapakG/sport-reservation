@@ -50,18 +50,6 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
             (value) => value + (Math.random() - 0.5) * 0.05,
           );
 
-          console.log(
-            db
-              .insert(matchingCursor)
-              .values({
-                userId,
-                vectorVersion: Array.pad([1, 1, 1, 1], 16, 0),
-                vector: randomNoiseUserAssessmentVectors,
-              })
-              .returning()
-              .getSQL(),
-          );
-
           const cursors = yield* db
             .insert(matchingCursor)
             .values({

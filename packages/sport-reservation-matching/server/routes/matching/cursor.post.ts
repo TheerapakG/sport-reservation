@@ -44,7 +44,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     });
 
     const cursor = yield* yield* Effect.if(
-      lastCursorTime + 1000 * 60 * 60 * 24 < Date.now(),
+      lastCursorTime + 1000 * 60 * 60 * 24 > Date.now(),
       {
         onTrue: () => Effect.succeed(lastCursor),
         onFalse: () => matchingDbRepository.createMatchUserCursor(userId),
