@@ -86,16 +86,20 @@ export const effectEventHandlerParams = <
               getRequestHeader(event, "content-type"),
             ).pipe(
               Match.when("application/json", () =>
-                effectType(
-                  body.type,
-                  Effect.promise(async () => await readBody(event)),
-                ),
+                Effect.gen(function* () {
+                  const bodyValue = yield* Effect.promise(() =>
+                    readBody(event),
+                  );
+                  return yield* effectType(body.type, bodyValue);
+                }),
               ),
               Match.when("application/x-www-form-urlencoded", () =>
-                effectType(
-                  body.type,
-                  Effect.promise(async () => await readBody(event)),
-                ),
+                Effect.gen(function* () {
+                  const bodyValue = yield* Effect.promise(() =>
+                    readBody(event),
+                  );
+                  return yield* effectType(body.type, bodyValue);
+                }),
               ),
               Match.when("multipart/form-data", () =>
                 Effect.gen(function* () {
@@ -118,6 +122,6 @@ export const effectEventHandlerParams = <
           }
         : {}) as { router: EventHandlerRouterType<C> }),
     };
-    console.log(params);
+
     return params;
   });
