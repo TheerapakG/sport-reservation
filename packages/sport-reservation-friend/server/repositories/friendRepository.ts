@@ -67,9 +67,11 @@ export class FriendRepository
         >[],
         SqlError.SqlError
       >;
-      getFriends: (
-        userId: string,
-      ) => Effect.Effect<
+      getFriendsByLimit: (data: {
+        userId: string;
+        limit: number;
+        offset: number;
+      }) => Effect.Effect<
         Pick<
           typeof userUserGroupMember.$inferSelect,
           "groupId" | "userId" | "status"

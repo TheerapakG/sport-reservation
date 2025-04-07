@@ -1,16 +1,27 @@
+import { getUserMemberClubCountQueryOptions } from "@/api/club";
+import { getUserMemberSchedulesCountQueryOptions } from "@/api/event";
 import { Card } from "@/components/ui/card";
 import { sports } from "@/utils/lookup/sport";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import type { userProfile } from "sport-reservation-user/models";
 
 export default function UserCardComponent({
   user,
-  clubCount,
-  scheduleCount,
 }: {
   user: typeof userProfile.infer;
-  clubCount: number;
-  scheduleCount: number;
 }) {
+  const userMemberClubCountQueryOptions = getUserMemberClubCountQueryOptions({
+    id: user.id,
+  });
+  const userMemberClubCountQuery = useSuspenseQuery(
+    userMemberClubCountQueryOptions,
+  );
+  const userMemberSchedulesCountQueryOptions =
+    getUserMemberSchedulesCountQueryOptions({ id: user.id });
+  const userMemberSchedulesCountQuery = useSuspenseQuery(
+    userMemberSchedulesCountQueryOptions,
+  );
+
   return (
     <Card className="w-72 rounded-2xl border-2 border-[#65D1F8] p-4 text-center">
       <img
@@ -38,12 +49,16 @@ export default function UserCardComponent({
       </div>
       <div className="mt-4 flex justify-around border-t pt-4">
         <div className="flex flex-col items-center text-center">
-          <p className="text-2xl font-bold">{clubCount}</p>
+          <p className="text-2xl font-bold">
+            {userMemberClubCountQuery.data.count}
+          </p>
           <p className="text-sm text-gray-600">Clubs</p>
         </div>
         <div className="border-l"></div> {/* Vertical separator */}
         <div className="flex flex-col items-center text-center">
-          <p className="text-2xl font-bold">{scheduleCount}</p>
+          <p className="text-2xl font-bold">
+            {userMemberSchedulesCountQuery.data.count}
+          </p>
           <p className="text-sm text-gray-600">Participations</p>
         </div>
       </div>

@@ -667,7 +667,7 @@ const EventList = ({ className }: { className?: string }) => {
   ]);
 
   return (
-    <div className={className} ref={parentRef}>
+    <div className={className}>
       {flattenedSchedules.length > 0 || schedulesHasNextPage ? (
         <div
           ref={parentRef}

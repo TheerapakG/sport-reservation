@@ -303,7 +303,7 @@ export const friendRepositoryImpl = /*@__PURE__*/ Layer.effect(
             });
           return members;
         }).pipe(Effect.withSpan("friendRepositoryImpl.removeFriend")),
-      getFriends: (userId) =>
+      getFriendsByLimit: ({ userId, limit, offset }) =>
         Effect.gen(function* () {
           const userFriendGroupIds = db.$with("user_friend_group_ids").as(
             db
@@ -338,7 +338,9 @@ export const friendRepositoryImpl = /*@__PURE__*/ Layer.effect(
                 eq(userUserGroupMember.groupId, userFriendGroupIds.id),
                 not(eq(userUserGroupMember.userId, userId)),
               ),
-            );
+            )
+            .limit(limit)
+            .offset(offset);
         }).pipe(Effect.withSpan("friendRepositoryImpl.getFriends")),
       getFriendGroupId: (userId, friendId) =>
         Effect.gen(function* () {

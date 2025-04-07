@@ -56,7 +56,7 @@ const ClubList = ({ className }: { className?: string }) => {
   ]);
 
   return (
-    <main className={className} ref={parentRef}>
+    <main className={className}>
       {flattenedClubs.length > 0 || clubsHasNextPage ? (
         <div ref={parentRef} className="overflow-y-auto">
           <div
