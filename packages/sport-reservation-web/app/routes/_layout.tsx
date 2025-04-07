@@ -103,7 +103,7 @@ const LoggedInNavigationMenuList = ({
               asChild
             >
               <Link
-                to="/"
+                to="/friend"
                 activeProps={{
                   className: "font-bold",
                 }}
