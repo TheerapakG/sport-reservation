@@ -214,7 +214,6 @@ function IndexComponent() {
           />
           <form.AppField
             name="birthDate"
-            validators={{ onBlur: type("Date") }}
             children={(field) => <field.DatePickerField label="Birthdate" />}
           />
           <form.AppField
