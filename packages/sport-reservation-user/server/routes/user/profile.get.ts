@@ -42,6 +42,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
             Effect.gen(function* () {
               const { client: oauthClient } = yield* OAuthClient;
               const { access_token: accessToken } = parseCookies(event);
+              console.log(parseCookies(event));
               return yield* Effect.promise(() =>
                 getSubjectTypeFromToken({
                   type: "user",
