@@ -445,6 +445,32 @@ export const clubRepositoryImpl = /*@__PURE__*/ Layer.effect(
               ),
             );
         }).pipe(Effect.withSpan("clubRepositoryImpl.getUserMemberClubs")),
+      getUserMemberClubsCount: ({ userId }) =>
+        Effect.gen(function* () {
+          const counts = yield* db
+            .select({
+              count: count(),
+            })
+            .from(userUserGroupMember)
+            .innerJoin(
+              userUserGroup,
+              eq(userUserGroupMember.groupId, userUserGroup.publicId),
+            )
+            .innerJoin(clubClub, eq(userUserGroup.publicId, clubClub.groupId))
+            .where(
+              and(
+                eq(userUserGroupMember.userId, userId),
+                eq(userUserGroupMember.status, "member"),
+                eq(userUserGroup.type, "club"),
+                not(eq(userUserGroup.creatorId, userId)),
+                isNull(userUserGroupMember.deletedAt),
+                isNull(userUserGroup.deletedAt),
+                isNull(clubClub.deletedAt),
+              ),
+            );
+
+          return counts[0].count;
+        }).pipe(Effect.withSpan("clubRepositoryImpl.getUserMemberClubsCount")),
       getUserPendingClubs: ({ userId }) =>
         Effect.gen(function* () {
           const clubSizes = clubSizesCTE();

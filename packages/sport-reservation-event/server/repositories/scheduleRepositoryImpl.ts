@@ -1,6 +1,7 @@
 import { PgDrizzle } from "@effect/sql-drizzle/Pg";
 import {
   and,
+  count,
   eq,
   gt,
   inArray,
@@ -907,6 +908,66 @@ export const scheduleRepositoryImpl = Layer.effect(
           return schedulesWithDetails;
         }).pipe(
           Effect.withSpan("scheduleRepositoryImpl.getUserMemberSchedules"),
+        ),
+      getUserMemberSchedulesCount: ({ userId }) =>
+        Effect.gen(function* () {
+          const userMemberSchedules = db.$with("user_member_schedules").as(
+            db
+              .select({
+                scheduleId: eventScheduleMember.scheduleId,
+                repeatIndex: eventScheduleMember.repeatIndex,
+              })
+              .from(eventScheduleMember)
+              .innerJoin(
+                eventEventSchedule,
+                eq(eventScheduleMember.scheduleId, eventEventSchedule.publicId),
+              )
+              .innerJoin(
+                userUserGroupMember,
+                and(
+                  eq(eventEventSchedule.eventId, userUserGroupMember.groupId),
+                  eq(eventScheduleMember.userId, userUserGroupMember.userId),
+                ),
+              )
+              .where(
+                and(
+                  eq(eventScheduleMember.userId, userId),
+                  eq(userUserGroupMember.status, "member"),
+                  isNull(eventScheduleMember.deletedAt),
+                  isNull(userUserGroupMember.deletedAt),
+                ),
+              ),
+          );
+
+          const counts = yield* db
+            .with(userMemberSchedules)
+            .select({
+              count: count(),
+            })
+            .from(userMemberSchedules)
+            .innerJoin(
+              eventEventSchedule,
+              eq(userMemberSchedules.scheduleId, eventEventSchedule.publicId),
+            )
+            .innerJoin(
+              eventEvent,
+              eq(eventEventSchedule.eventId, eventEvent.groupId),
+            )
+            .innerJoin(
+              userUserGroup,
+              eq(eventEvent.groupId, userUserGroup.publicId),
+            )
+            .where(
+              and(
+                isNull(eventEventSchedule.deletedAt),
+                isNull(eventEvent.deletedAt),
+                isNull(userUserGroup.deletedAt),
+              ),
+            );
+
+          return counts[0].count;
+        }).pipe(
+          Effect.withSpan("scheduleRepositoryImpl.getUserMemberSchedulesCount"),
         ),
       getUserPendingSchedules: ({ userId }) =>
         Effect.gen(function* () {

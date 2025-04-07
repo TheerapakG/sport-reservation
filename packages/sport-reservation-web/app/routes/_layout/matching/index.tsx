@@ -4,7 +4,7 @@ import {
   useGetMatchingCursorQueryOptions,
   useMatchUsersMutation,
 } from "@/api/matching";
-import UserCardComponent from "@/components/UserCardComponent";
+import MatchingCardComponent from "@/components/matching/MatchingCardComponent";
 import { Button } from "@/components/ui/button";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
@@ -66,13 +66,13 @@ const NoCursorMatchingPage = () => {
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center p-4">
       <div className="relative w-72">
-        <UserCardComponent
+        <MatchingCardComponent
           user={exampleUser}
           matchedUser={exampleUser}
           className="absolute top-0 left-0 z-0 -translate-x-3 -rotate-6"
           disabled={true}
         />
-        <UserCardComponent
+        <MatchingCardComponent
           user={exampleUser}
           matchedUser={exampleUser}
           className="z-10"
@@ -110,7 +110,7 @@ const MatchedUsersPage = ({ cursorId }: { cursorId: string }) => {
   return matchedUsers && matchedUsers.length > 0 ? (
     <div className="container mx-auto flex min-h-screen flex-wrap items-center justify-center gap-4">
       {matchedUsers.map(({ user }) => (
-        <UserCardComponent key={user.id} matchedUser={user} />
+        <MatchingCardComponent key={user.id} matchedUser={user} />
       ))}
     </div>
   ) : (

@@ -28,7 +28,7 @@ const haversineDistance = (
   return c * 6378137;
 };
 
-export default function UserCard({
+export default function MatchingCardComponent({
   user: providedUser,
   matchedUser,
   className,

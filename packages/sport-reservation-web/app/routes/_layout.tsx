@@ -158,7 +158,7 @@ const LoggedInNavigationMenuList = ({
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem>
-            <Link to="/profile">View Profile</Link>
+            <Link to="/profile/user">View Profile</Link>
           </DropdownMenuItem>
           <DropdownMenuItem>
             <Link to="/logout">Log Out</Link>

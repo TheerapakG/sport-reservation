@@ -1,5 +1,5 @@
 // src/routes/event.tsx
-import { useGetUserClubMemberListQueryOptions } from "@/api/club";
+import { useGetUserMemberClubListQueryOptions } from "@/api/club";
 import {
   createEventValidators,
   useCreateEventMutation,
@@ -115,7 +115,7 @@ const EventClubForm = withForm({
   ...formOpts,
   render: function Render({ form }) {
     const getUserClubMemberListQueryOptions =
-      useGetUserClubMemberListQueryOptions();
+      useGetUserMemberClubListQueryOptions();
     const userClubMemberList = useSuspenseQuery(
       getUserClubMemberListQueryOptions,
     );

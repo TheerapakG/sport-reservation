@@ -116,6 +116,9 @@ export class ScheduleRepository
         }[],
         SqlError.SqlError
       >;
+      getUserMemberSchedulesCount: (data: {
+        userId: string;
+      }) => Effect.Effect<number, SqlError.SqlError>;
       getUserPendingSchedules: (data: { userId: string }) => Effect.Effect<
         {
           schedule: typeof eventEventSchedule.$inferSelect;

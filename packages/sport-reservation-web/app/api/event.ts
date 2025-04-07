@@ -78,14 +78,15 @@ export const eventKeys = () => {
               const allScheduleUserId = [...allScheduleUser, "id", id] as const;
               return {
                 all: () => allScheduleUserId,
-                list: () => {
-                  const allScheduleUserIdList = [
+                member: () => {
+                  const allScheduleUserIdMember = [
                     ...allScheduleUserId,
-                    "list",
+                    "member",
                   ] as const;
                   return {
-                    all: () => allScheduleUserIdList,
-                    member: () => [...allScheduleUserIdList, "member"] as const,
+                    all: () => allScheduleUserIdMember,
+                    count: () => [...allScheduleUserIdMember, "count"] as const,
+                    list: () => [...allScheduleUserIdMember, "list"] as const,
                   };
                 },
               };
@@ -241,6 +242,46 @@ export const getScheduleListInfiniteQueryOptions = ({
         : undefined,
   });
 
+export const getUserMemberSchedulesCountServerFn = createServerFn({
+  method: "GET",
+})
+  .validator((data: unknown) =>
+    Effect.runSync(
+      effectType(getEventClientQueryType("getUserMemberSchedulesCount"), data),
+    ),
+  )
+  .handler(async ({ data }) => {
+    const { access_token: accessToken } = parseCookies();
+
+    if (!accessToken) {
+      return { success: false } as const;
+    }
+
+    const { count } = await Effect.runPromise(
+      Effect.gen(function* () {
+        const eventClient = yield* EventClient;
+        return yield* eventClient.getUserMemberSchedulesCount({
+          headers: { Cookie: serialize("access_token", accessToken) },
+          query: data,
+        });
+      }).pipe(provideEffectContext),
+    );
+
+    return { success: true, count } as const;
+  });
+
+export const getUserMemberSchedulesCountQueryOptions = ({
+  id,
+}: {
+  id: string;
+}) => {
+  return queryOptions({
+    queryKey: eventKeys().schedule().user().id({ id }).member().count(),
+    queryFn: () =>
+      getUserMemberSchedulesCountServerFn({ data: { userId: id } }),
+  });
+};
+
 export const getUserMemberSchedulesServerFn = createServerFn({
   method: "GET",
 }).handler(async () => {
@@ -270,8 +311,8 @@ export const useGetUserMemberSchedulesQueryOptions = () => {
       .schedule()
       .user()
       .id({ id: currentUserProfile.data.profile?.id })
-      .list()
-      .member(),
+      .member()
+      .list(),
     queryFn: () => getUserMemberSchedulesServerFn(),
   });
 };

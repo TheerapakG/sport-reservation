@@ -103,6 +103,9 @@ export class ClubRepository
         }[],
         SqlError.SqlError
       >;
+      getUserMemberClubsCount: (data: {
+        userId: string;
+      }) => Effect.Effect<number, SqlError.SqlError>;
       getUserPendingClubs: (data: { userId: string }) => Effect.Effect<
         {
           club: typeof clubClub.$inferSelect;

@@ -44,11 +44,15 @@ export const clubKeys = () => {
               const allClubUserId = [...allClubUser, "id", id] as const;
               return {
                 all: () => allClubUserId,
-                list: () => {
-                  const allClubUserIdList = [...allClubUserId, "list"] as const;
+                member: () => {
+                  const allClubUserIdMember = [
+                    ...allClubUserId,
+                    "member",
+                  ] as const;
                   return {
-                    all: () => allClubUserIdList,
-                    member: () => [...allClubUserIdList, "member"] as const,
+                    all: () => allClubUserIdMember,
+                    count: () => [...allClubUserIdMember, "count"] as const,
+                    list: () => [...allClubUserIdMember, "list"] as const,
                   };
                 },
               };
@@ -124,7 +128,42 @@ export const getClubMemberListQueryOptions = ({ id }: { id: string }) =>
     queryFn: () => getClubMemberListServerFn({ data: { clubId: id } }),
   });
 
-export const getUserClubMemberListServerFn = createServerFn({
+export const getUserMemberClubCountServerFn = createServerFn({
+  method: "GET",
+})
+  .validator((data: unknown) =>
+    Effect.runSync(
+      effectType(getClubClientQueryType("getUserMemberClubsCount"), data),
+    ),
+  )
+  .handler(async ({ data }) => {
+    const { access_token: accessToken } = parseCookies();
+
+    if (!accessToken) {
+      return { success: false } as const;
+    }
+
+    const { count } = await Effect.runPromise(
+      Effect.gen(function* () {
+        const clubClient = yield* ClubClient;
+        return yield* clubClient.getUserMemberClubsCount({
+          headers: { Cookie: serialize("access_token", accessToken) },
+          query: data,
+        });
+      }).pipe(provideEffectContext),
+    );
+
+    return { success: true, count } as const;
+  });
+
+export const getUserMemberClubCountQueryOptions = ({ id }: { id: string }) => {
+  return queryOptions({
+    queryKey: clubKeys().club().user().id({ id }).member().count(),
+    queryFn: () => getUserMemberClubCountServerFn({ data: { userId: id } }),
+  });
+};
+
+export const getUserMemberClubListServerFn = createServerFn({
   method: "GET",
 }).handler(async () => {
   const { access_token: accessToken } = parseCookies();
@@ -145,7 +184,7 @@ export const getUserClubMemberListServerFn = createServerFn({
   return { success: true, clubs } as const;
 });
 
-export const useGetUserClubMemberListQueryOptions = () => {
+export const useGetUserMemberClubListQueryOptions = () => {
   const currentUserProfile = useSuspenseQuery(currentUserProfileQueryOptions());
 
   return queryOptions({
@@ -153,9 +192,9 @@ export const useGetUserClubMemberListQueryOptions = () => {
       .club()
       .user()
       .id({ id: currentUserProfile.data.profile?.id })
-      .list()
-      .member(),
-    queryFn: getUserClubMemberListServerFn,
+      .member()
+      .list(),
+    queryFn: getUserMemberClubListServerFn,
   });
 };
 

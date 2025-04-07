@@ -8,7 +8,7 @@ import {
   useDissociateSportMutation,
   useUpdateCurrentUserProfileMutation,
 } from "@/api/user";
-import UserCardComponent from "@/components/UserCardComponent";
+import MatchingCardComponent from "@/components/matching/MatchingCardComponent";
 import { useAppForm } from "@/utils/form";
 import { objectives, objectivesList } from "@/utils/lookup/objective";
 import { sports, sportsList } from "@/utils/lookup/sport";
@@ -188,11 +188,11 @@ function IndexComponent() {
       <div className="flex items-center justify-center gap-x-8">
         {mergedCurrentUserWithFormValues && (
           <div className="flex items-center justify-center gap-x-4">
-            <UserCardComponent
+            <MatchingCardComponent
               user={mergedCurrentUserWithFormValues}
               matchedUser={mergedCurrentUserWithFormValues}
             />
-            <UserCardComponent
+            <MatchingCardComponent
               user={mergedCurrentUserWithFormValues}
               matchedUser={mergedCurrentUserWithFormValues}
               flipped={true}
@@ -262,6 +262,6 @@ function IndexComponent() {
   );
 }
 
-export const Route = createFileRoute("/_layout/profile/")({
+export const Route = createFileRoute("/_layout/profile/user")({
   component: IndexComponent,
 });

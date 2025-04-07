@@ -8,7 +8,10 @@ import { createServerFn } from "@tanstack/react-start";
 import { serialize } from "cookie-es";
 import { Effect } from "effect";
 import { UserClient } from "sport-reservation-user/client";
-import { getUserClientBodyType } from "sport-reservation-user/models";
+import {
+  getUserClientBodyType,
+  getUserClientQueryType,
+} from "sport-reservation-user/models";
 import { effectType } from "tiara-stack/utils/effectType";
 
 import { parseCookies } from "vinxi/http";
@@ -20,6 +23,7 @@ export const userKeys = {
     return {
       all: () => allUser,
       current: () => [...allUser, "current"] as const,
+      id: ({ id }: { id: string }) => [...allUser, "id", id] as const,
     };
   },
 };
@@ -50,6 +54,38 @@ export const getCurrentUserProfileQueryOptions = () =>
   queryOptions({
     queryKey: userKeys.user().current(),
     queryFn: getCurrentUserProfileServerFn,
+  });
+
+export const getUserProfileServerFn = createServerFn({
+  method: "GET",
+})
+  .validator((data: unknown) =>
+    Effect.runSync(effectType(getUserClientQueryType("getUserProfile"), data)),
+  )
+  .handler(async ({ data }) => {
+    const { access_token: accessToken } = parseCookies();
+
+    if (!accessToken) {
+      return { success: false } as const;
+    }
+
+    const profile = await Effect.runPromise(
+      Effect.gen(function* () {
+        const userClient = yield* UserClient;
+        return yield* userClient.getUserProfile({
+          headers: { Cookie: serialize("access_token", accessToken) },
+          query: data,
+        });
+      }).pipe(provideEffectContext),
+    );
+
+    return { success: true, profile } as const;
+  });
+
+export const getUserProfileQueryOptions = ({ id }: { id: string }) =>
+  queryOptions({
+    queryKey: userKeys.user().id({ id }),
+    queryFn: () => getUserProfileServerFn({ data: { id } }),
   });
 
 export const updateCurrentUserProfileServerFn = createServerFn({

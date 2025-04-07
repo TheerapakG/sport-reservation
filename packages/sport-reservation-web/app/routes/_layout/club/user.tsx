@@ -1,5 +1,5 @@
 // src/routes/event.tsx
-import { useGetUserClubMemberListQueryOptions } from "@/api/club";
+import { useGetUserMemberClubListQueryOptions } from "@/api/club";
 import ClubListItem from "@/components/club/ClubListItem";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
@@ -8,7 +8,7 @@ import { Suspense, useCallback, useEffect, useRef } from "react";
 
 const ClubList = ({ className }: { className?: string }) => {
   const getUserClubMemberListQueryOptions =
-    useGetUserClubMemberListQueryOptions();
+    useGetUserMemberClubListQueryOptions();
   const userClubMemberList = useSuspenseQuery(
     getUserClubMemberListQueryOptions,
   );
