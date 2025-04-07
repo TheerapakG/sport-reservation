@@ -1,3 +1,5 @@
+import { currentUserProfileQueryOptions } from "@/api/oauth";
+import { LoginSignupModal } from "@/components/modal/LoginSignupModal";
 import { SubscriptionModal } from "@/components/modal/SubscriptionModal";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,12 +18,12 @@ import {
 } from "@/components/ui/navigation-menu";
 import { UserAvatar } from "@/components/UserAvatar";
 import { cn } from "@/lib/utils";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import {
   CatchBoundary,
   createFileRoute,
   Link,
   Outlet,
-  useRouter,
 } from "@tanstack/react-router";
 import {
   ChevronDownIcon,
@@ -33,19 +35,16 @@ import {
 import { subjects } from "sport-reservation-oauth-common/subjects";
 
 const LoggedOutNavigationMenuList = () => {
-  const router = useRouter();
-
   return (
     <div className="flex flex-1 items-center justify-end space-x-1">
-      <Button variant="ghost" onClick={() => router.navigate({ to: "/login" })}>
-        Login
-      </Button>
-      <Button
-        className="bg-gradient-to-r from-[#65D1F8] to-[#6CCFD0] text-white hover:bg-[#AED6F1]"
-        onClick={() => router.navigate({ to: "/login" })}
-      >
-        Sign Up
-      </Button>
+      <LoginSignupModal initialView="login">
+        <Button variant="ghost">Login</Button>
+      </LoginSignupModal>
+      <LoginSignupModal initialView="signup">
+        <Button className="bg-gradient-to-r from-[#65D1F8] to-[#6CCFD0] text-white hover:bg-[#AED6F1]">
+          Sign Up
+        </Button>
+      </LoginSignupModal>
     </div>
   );
 };
@@ -216,20 +215,20 @@ const WrappingLayoutComponent = ({
 };
 
 function LayoutComponent() {
-  const { user } = Route.useLoaderData();
+  const user = useSuspenseQuery(currentUserProfileQueryOptions());
 
   return (
-    <WrappingLayoutComponent user={user.profile}>
+    <WrappingLayoutComponent user={user.data?.profile}>
       <Outlet />
     </WrappingLayoutComponent>
   );
 }
 
 function NotFoundLayoutComponent() {
-  const { user } = Route.useLoaderData();
+  const user = useSuspenseQuery(currentUserProfileQueryOptions());
 
   return (
-    <WrappingLayoutComponent user={user.profile}>
+    <WrappingLayoutComponent user={user.data?.profile}>
       <div className="p-2">
         <h3>Not Found!</h3>
       </div>
@@ -238,9 +237,6 @@ function NotFoundLayoutComponent() {
 }
 
 export const Route = createFileRoute("/_layout")({
-  loader: async ({ context: { user } }) => {
-    return { user };
-  },
   component: LayoutComponent,
   notFoundComponent: NotFoundLayoutComponent,
 });

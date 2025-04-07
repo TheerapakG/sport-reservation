@@ -4,6 +4,7 @@ import StandaloneTextInputField from "./StandaloneTextInputField";
 export default function TextInputField({
   classNames,
   label,
+  type,
   placeholder,
   trailingText,
   variant = "input",
@@ -13,6 +14,7 @@ export default function TextInputField({
     input?: string;
   };
   label?: string;
+  type?: "text" | "email" | "password" | "date";
   placeholder?: string;
   trailingText?: string;
   variant?: "input" | "textarea";
@@ -21,6 +23,7 @@ export default function TextInputField({
     <div className="space-y-2">
       <StandaloneFieldLabel label={label} className={classNames?.label} />
       <StandaloneTextInputField
+        type={type}
         placeholder={placeholder}
         trailingText={trailingText}
         classNames={classNames}

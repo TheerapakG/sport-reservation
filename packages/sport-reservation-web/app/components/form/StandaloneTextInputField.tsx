@@ -6,6 +6,7 @@ import { useStore } from "@tanstack/react-form";
 
 export default function TextInputField({
   classNames,
+  type,
   placeholder,
   trailingText,
   variant = "input",
@@ -13,6 +14,7 @@ export default function TextInputField({
   classNames?: {
     input?: string;
   };
+  type?: "text" | "email" | "password" | "date";
   placeholder?: string;
   trailingText?: string;
   variant?: "input" | "textarea";
@@ -24,7 +26,7 @@ export default function TextInputField({
     <div className="flex items-center gap-2">
       {variant === "input" ? (
         <Input
-          type="text"
+          type={type}
           className={cn(
             "h-7 rounded-none border-0 px-2 py-1 shadow focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none aria-[invalid]:ring-1 aria-[invalid]:ring-red-500 aria-[invalid]:ring-offset-2",
             classNames?.input,

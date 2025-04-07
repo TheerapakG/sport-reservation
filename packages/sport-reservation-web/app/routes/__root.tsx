@@ -73,11 +73,7 @@ export const Route = createRootRouteWithContext<{
     ],
   }),
   beforeLoad: async ({ context: { queryClient } }) => {
-    const user = await queryClient.ensureQueryData(
-      currentUserProfileQueryOptions(),
-    );
-
-    return { user };
+    await queryClient.ensureQueryData(currentUserProfileQueryOptions());
   },
   component: RootComponent,
 });
