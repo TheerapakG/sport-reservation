@@ -44,11 +44,13 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
               ),
             );
 
-          const randomNoiseUserAssessmentVectors = (
-            matchUserAssessmentVectors[0] ?? Array.replicate(0, 256)
-          ).activeMatchingVector.map(
-            (value) => value + (Math.random() - 0.5) * 0.05,
-          );
+          const randomNoiseUserAssessmentVectors = Array.isEmptyArray(
+            matchUserAssessmentVectors,
+          )
+            ? Array.replicate(0, 256)
+            : matchUserAssessmentVectors[0].activeMatchingVector.map(
+                (value) => value + (Math.random() - 0.5) * 0.05,
+              );
 
           const cursors = yield* db
             .insert(matchingCursor)
