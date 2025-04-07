@@ -21,7 +21,7 @@ function IndexComponent() {
         </section>
         <section className="flex h-48 w-2/5 items-center justify-center">
           <img
-            src="app/components/Assets/Element/LandingPageIcon.png"
+            src="https://cdn.theerapakg.moe/reservation/asset/landing/HeroIcon.png"
             alt="Component"
             className="h-auto w-4/9 p-4"
           />
@@ -31,7 +31,7 @@ function IndexComponent() {
       {/* How It Works (Replaced with an image) */}
       <section className="w-full">
         <img
-          src="app/components/Assets/Image/HowItWorks.png"
+          src="https://cdn.theerapakg.moe/reservation/asset/landing/HowItWorks.png"
           alt="How It Works"
           className="w-full"
         />
@@ -147,7 +147,7 @@ function IndexComponent() {
             {/* Perk Item */}
             <div className="flex flex-col items-center rounded-2xl bg-white p-6 text-center shadow-lg">
               <img
-                src="app/components/Assets/Element/LP_FilterIcon.png"
+                src="https://cdn.theerapakg.moe/reservation/asset/landing/FilterIcon.png"
                 alt="Filter Icon"
                 className="mb-2 h-12 w-12"
               />
@@ -162,7 +162,7 @@ function IndexComponent() {
 
             <div className="flex flex-col items-center rounded-2xl bg-white p-6 text-center shadow-lg">
               <img
-                src="app/components/Assets/Element/LPMatchingIcon.png"
+                src="https://cdn.theerapakg.moe/reservation/asset/landing/MatchingIcon.png"
                 alt="Matching Icon"
                 className="mb-2 h-12 w-12"
               />
@@ -177,7 +177,7 @@ function IndexComponent() {
 
             <div className="flex flex-col items-center rounded-2xl bg-white p-6 text-center shadow-lg">
               <img
-                src="app/components/Assets/Element/LPPriorityIcon.png"
+                src="https://cdn.theerapakg.moe/reservation/asset/landing/PriorityIcon.png"
                 alt="Event Icon"
                 className="mb-2 h-12 w-12"
               />
@@ -192,7 +192,7 @@ function IndexComponent() {
 
             <div className="flex flex-col items-center rounded-2xl bg-white p-6 text-center shadow-lg">
               <img
-                src="app/components/Assets/Element/LPExclusiveIcon.png"
+                src="https://cdn.theerapakg.moe/reservation/asset/landing/ExclusiveIcon.png"
                 alt="Club Icon"
                 className="mb-2 h-12 w-12"
               />
