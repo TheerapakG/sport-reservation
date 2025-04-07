@@ -66,6 +66,15 @@ export const assessmentDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
               assessmentVersion: 1,
               assessment: userGeneralAssessment,
             })
+            .onConflictDoUpdate({
+              target: [
+                matchingUserGeneralAssessment.userId,
+                matchingUserGeneralAssessment.assessmentVersion,
+              ],
+              set: {
+                assessment: userGeneralAssessment,
+              },
+            })
             .returning({ id: matchingUserGeneralAssessment.id });
 
           yield* db
@@ -170,11 +179,22 @@ export const assessmentDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
             0,
           );
 
-          yield* db.insert(matchingUserBadmintonAssessment).values({
-            userId,
-            assessmentVersion: 1,
-            assessment: userBadmintonAssessment,
-          });
+          yield* db
+            .insert(matchingUserBadmintonAssessment)
+            .values({
+              userId,
+              assessmentVersion: 1,
+              assessment: userBadmintonAssessment,
+            })
+            .onConflictDoUpdate({
+              target: [
+                matchingUserBadmintonAssessment.userId,
+                matchingUserBadmintonAssessment.assessmentVersion,
+              ],
+              set: {
+                assessment: userBadmintonAssessment,
+              },
+            });
 
           yield* db
             .insert(matchingUserAssessmentVector)
@@ -295,7 +315,15 @@ export const assessmentDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
               assessmentVersion: 1,
               assessment: userTennisAssessment,
             })
-            .returning({ id: matchingUserTennisAssessment.id });
+            .onConflictDoUpdate({
+              target: [
+                matchingUserTennisAssessment.userId,
+                matchingUserTennisAssessment.assessmentVersion,
+              ],
+              set: {
+                assessment: userTennisAssessment,
+              },
+            });
 
           yield* db
             .insert(matchingUserAssessmentVector)
@@ -411,7 +439,15 @@ export const assessmentDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
               assessmentVersion: 1,
               assessment: userRunningAssessment,
             })
-            .returning({ id: matchingUserRunningAssessment.id });
+            .onConflictDoUpdate({
+              target: [
+                matchingUserRunningAssessment.userId,
+                matchingUserRunningAssessment.assessmentVersion,
+              ],
+              set: {
+                assessment: userRunningAssessment,
+              },
+            });
 
           yield* db
             .insert(matchingUserAssessmentVector)
