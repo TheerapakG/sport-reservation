@@ -1,6 +1,6 @@
 import { EventContext, effectEventHandler } from "$/effectEventHandler";
 import { type } from "arktype";
-import { Effect, pipe } from "effect";
+import { Effect, Option, pipe } from "effect";
 import { parseCookies } from "h3";
 import { getSubjectTypeFromToken } from "sport-reservation-oauth-common/subjects";
 import { defineEventHandlerConfig, response } from "tiara-stack/config";
@@ -10,9 +10,12 @@ import { MatchingDbRepository } from "~/repositories/matchingDbRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
   name: "getMatchingCursor",
-  response: response(type({ cursorId: "string", createdAt: "string" }), {
-    stream: false,
-  }),
+  response: response(
+    type([{ cursorId: "string", createdAt: "string" }, "|", "undefined"]),
+    {
+      stream: false,
+    },
+  ),
 });
 
 export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
@@ -36,12 +39,15 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     );
 
     const matchingDbRepository = yield* MatchingDbRepository;
-    const cursor =
-      yield* yield* matchingDbRepository.getMatchUserCursor(userId);
+    const cursor = yield* matchingDbRepository.getMatchUserCursor(userId);
 
-    return {
-      cursorId: cursor.publicId,
-      createdAt: cursor.createdAt.toISOString(),
-    };
+    return pipe(
+      cursor,
+      Option.map((cursor) => ({
+        cursorId: cursor.publicId,
+        createdAt: cursor.createdAt.toISOString(),
+      })),
+      Option.getOrElse(() => undefined),
+    );
   }),
 );

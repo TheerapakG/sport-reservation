@@ -122,7 +122,7 @@ function MatchingPage() {
   const matchingCursorQueryOptions = useGetMatchingCursorQueryOptions();
   const cursorQuery = useSuspenseQuery(matchingCursorQueryOptions);
 
-  return cursorQuery.data.success ? (
+  return cursorQuery.data?.cursor ? (
     <Suspense fallback={<div>Loading...</div>}>
       <MatchedUsersPage cursorId={cursorQuery.data.cursor.cursorId} />
     </Suspense>
