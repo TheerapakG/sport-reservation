@@ -184,7 +184,14 @@ function IndexComponent() {
   }
 
   return (
-    <form className="relative flex min-h-screen flex-col items-center justify-center gap-y-4 p-4">
+    <form
+      className="relative flex min-h-screen flex-col items-center justify-center gap-y-4 p-4"
+      onSubmit={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        form.handleSubmit();
+      }}
+    >
       <div className="flex items-center justify-center gap-x-8">
         {mergedCurrentUserWithFormValues && (
           <div className="flex items-center justify-center gap-x-4">
