@@ -26,9 +26,9 @@ function IndexComponent() {
   );
 
   if (
-    !userProfileQuery.data?.profile ||
-    !userMemberClubCountQuery.data?.count ||
-    !userMemberSchedulesCountQuery.data?.count
+    !userProfileQuery.data.success ||
+    !userMemberClubCountQuery.data.success ||
+    !userMemberSchedulesCountQuery.data.success
   ) {
     return <div>No profile found</div>;
   }
