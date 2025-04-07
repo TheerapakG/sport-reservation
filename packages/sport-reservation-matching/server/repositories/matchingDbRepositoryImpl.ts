@@ -50,7 +50,7 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
             (value) => value + (Math.random() - 0.5) * 0.05,
           );
 
-          const cursor = yield* db
+          const cursors = yield* db
             .insert(matchingCursor)
             .values({
               userId,
@@ -59,11 +59,11 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
             })
             .returning();
 
-          if (cursor.length === 0) {
+          if (Array.isEmptyArray(cursors)) {
             return Option.none();
           }
 
-          return Option.some(cursor[0]);
+          return Option.some(cursors[0]);
         }),
       getMatchUserCursor: (userId) =>
         Effect.gen(function* () {

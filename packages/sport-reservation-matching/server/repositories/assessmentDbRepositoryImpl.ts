@@ -98,11 +98,11 @@ export const assessmentDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
               ],
               set: {
                 passiveMatchingVector: sql`
-                    '${passiveMatchingVector}'::vector || 
+                    '${JSON.stringify(passiveMatchingVector)}'::vector || 
                     subvector(${matchingUserAssessmentVector.passiveMatchingVector}, 17, 240)
                   `,
                 activeMatchingVector: sql`
-                    '${activeMatchingVector}'::vector || 
+                    '${JSON.stringify(activeMatchingVector)}'::vector || 
                     subvector(${matchingUserAssessmentVector.activeMatchingVector}, 17, 240)
                   `,
               },
@@ -220,12 +220,12 @@ export const assessmentDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
               set: {
                 passiveMatchingVector: sql`
                     subvector(${matchingUserAssessmentVector.passiveMatchingVector}, 1, 16) || 
-                    '${passiveMatchingVector}'::vector || 
+                    '${JSON.stringify(passiveMatchingVector)}'::vector || 
                     subvector(${matchingUserAssessmentVector.passiveMatchingVector}, 33, 224)
                   `,
                 activeMatchingVector: sql`
                     subvector(${matchingUserAssessmentVector.activeMatchingVector}, 1, 16) || 
-                    '${activeMatchingVector}'::vector || 
+                    '${JSON.stringify(activeMatchingVector)}'::vector || 
                     subvector(${matchingUserAssessmentVector.activeMatchingVector}, 33, 224)
                   `,
               },
@@ -349,12 +349,12 @@ export const assessmentDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
               set: {
                 passiveMatchingVector: sql`
                     subvector(${matchingUserAssessmentVector.passiveMatchingVector}, 1, 32) || 
-                    '${passiveMatchingVector}'::vector || 
+                    '${JSON.stringify(passiveMatchingVector)}'::vector || 
                     subvector(${matchingUserAssessmentVector.passiveMatchingVector}, 49, 208)
                   `,
                 activeMatchingVector: sql`
                     subvector(${matchingUserAssessmentVector.activeMatchingVector}, 1, 32) || 
-                    '${activeMatchingVector}'::vector || 
+                    '${JSON.stringify(activeMatchingVector)}'::vector || 
                     subvector(${matchingUserAssessmentVector.activeMatchingVector}, 49, 208)
                   `,
               },
@@ -473,12 +473,12 @@ export const assessmentDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
               set: {
                 passiveMatchingVector: sql`
                   subvector(${matchingUserAssessmentVector.passiveMatchingVector}, 1, 48) || 
-                  '${passiveMatchingVector}'::vector || 
+                  '${JSON.stringify(passiveMatchingVector)}'::vector || 
                   subvector(${matchingUserAssessmentVector.passiveMatchingVector}, 65, 192)
                 `,
                 activeMatchingVector: sql`
                   subvector(${matchingUserAssessmentVector.activeMatchingVector}, 1, 48) || 
-                  '${activeMatchingVector}'::vector || 
+                  '${JSON.stringify(activeMatchingVector)}'::vector || 
                   subvector(${matchingUserAssessmentVector.activeMatchingVector}, 65, 192)
                 `,
               },
