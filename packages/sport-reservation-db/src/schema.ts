@@ -1,4 +1,3 @@
-import { sql } from "drizzle-orm";
 import {
   boolean,
   doublePrecision,
@@ -29,7 +28,7 @@ export const authUserEmailConnection = pgTable(
     updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true })
       .defaultNow()
       .notNull()
-      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+      .$onUpdate(() => new Date()),
     deletedAt: timestamp("deleted_at", { mode: "date", withTimezone: true }),
   },
   (table) => [
@@ -54,7 +53,7 @@ export const authUserLineConnection = pgTable(
     updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true })
       .defaultNow()
       .notNull()
-      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+      .$onUpdate(() => new Date()),
     deletedAt: timestamp("deleted_at", { mode: "date", withTimezone: true }),
   },
   (table) => [
@@ -75,7 +74,7 @@ export const authUserGoogleConnection = pgTable(
     updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true })
       .defaultNow()
       .notNull()
-      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+      .$onUpdate(() => new Date()),
     deletedAt: timestamp("deleted_at", { mode: "date", withTimezone: true }),
   },
   (table) => [
@@ -96,7 +95,7 @@ export const authUserFacebookConnection = pgTable(
     updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true })
       .defaultNow()
       .notNull()
-      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+      .$onUpdate(() => new Date()),
     deletedAt: timestamp("deleted_at", { mode: "date", withTimezone: true }),
   },
   (table) => [
@@ -137,7 +136,7 @@ export const userUserProfile = pgTable(
     updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true })
       .defaultNow()
       .notNull()
-      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+      .$onUpdate(() => new Date()),
     deletedAt: timestamp("deleted_at", { mode: "date", withTimezone: true }),
   },
   (table) => [
@@ -163,7 +162,7 @@ export const userSport = pgTable(
     updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true })
       .defaultNow()
       .notNull()
-      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+      .$onUpdate(() => new Date()),
     deletedAt: timestamp("deleted_at", { mode: "date", withTimezone: true }),
   },
   (table) => [uniqueIndex("user_sport_public_id_idx").on(table.publicId)],
@@ -181,7 +180,7 @@ export const userUserProfileSport = pgTable(
     updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true })
       .defaultNow()
       .notNull()
-      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+      .$onUpdate(() => new Date()),
     deletedAt: timestamp("deleted_at", { mode: "date", withTimezone: true }),
   },
   (table) => [
@@ -219,7 +218,7 @@ export const userObjective = pgTable(
     updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true })
       .defaultNow()
       .notNull()
-      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+      .$onUpdate(() => new Date()),
     deletedAt: timestamp("deleted_at", { mode: "date", withTimezone: true }),
   },
   (table) => [uniqueIndex("user_objective_public_id_idx").on(table.publicId)],
@@ -237,7 +236,7 @@ export const userUserProfileObjective = pgTable(
     updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true })
       .defaultNow()
       .notNull()
-      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+      .$onUpdate(() => new Date()),
     deletedAt: timestamp("deleted_at", { mode: "date", withTimezone: true }),
   },
   (table) => [
@@ -261,7 +260,7 @@ export const userLocation = pgTable(
     updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true })
       .defaultNow()
       .notNull()
-      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+      .$onUpdate(() => new Date()),
     deletedAt: timestamp("deleted_at", { mode: "date", withTimezone: true }),
   },
   (table) => [uniqueIndex("user_location_public_id_idx").on(table.publicId)],
@@ -279,7 +278,7 @@ export const userUserProfileLocation = pgTable(
     updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true })
       .defaultNow()
       .notNull()
-      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+      .$onUpdate(() => new Date()),
     deletedAt: timestamp("deleted_at", { mode: "date", withTimezone: true }),
   },
   (table) => [
@@ -311,7 +310,7 @@ export const userUserGroup = pgTable(
     updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true })
       .defaultNow()
       .notNull()
-      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+      .$onUpdate(() => new Date()),
     deletedAt: timestamp("deleted_at", { mode: "date", withTimezone: true }),
   },
   (table) => [
@@ -338,7 +337,7 @@ export const userUserGroupMember = pgTable(
     updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true })
       .defaultNow()
       .notNull()
-      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+      .$onUpdate(() => new Date()),
     deletedAt: timestamp("deleted_at", { mode: "date", withTimezone: true }),
   },
   (table) => [
@@ -366,7 +365,7 @@ export const clubClub = pgTable(
     updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true })
       .defaultNow()
       .notNull()
-      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+      .$onUpdate(() => new Date()),
     deletedAt: timestamp("deleted_at", { mode: "date", withTimezone: true }),
   },
   (table) => [index("user_club_group_id_idx").on(table.groupId)],
@@ -408,7 +407,7 @@ export const eventEvent = pgTable(
     updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true })
       .defaultNow()
       .notNull()
-      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+      .$onUpdate(() => new Date()),
     deletedAt: timestamp("deleted_at", { mode: "date", withTimezone: true }),
   },
   (table) => [
@@ -429,7 +428,7 @@ export const eventEventSkillLevel = pgTable(
     updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true })
       .defaultNow()
       .notNull()
-      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+      .$onUpdate(() => new Date()),
     deletedAt: timestamp("deleted_at", { mode: "date", withTimezone: true }),
   },
   (table) => [index("event_event_skill_level_event_id_idx").on(table.eventId)],
@@ -447,7 +446,7 @@ export const eventEventSport = pgTable(
     updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true })
       .defaultNow()
       .notNull()
-      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+      .$onUpdate(() => new Date()),
     deletedAt: timestamp("deleted_at", { mode: "date", withTimezone: true }),
   },
   (table) => [index("event_event_sport_event_id_idx").on(table.eventId)],
@@ -473,7 +472,7 @@ export const eventEventSchedule = pgTable(
     updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true })
       .defaultNow()
       .notNull()
-      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+      .$onUpdate(() => new Date()),
     deletedAt: timestamp("deleted_at", { mode: "date", withTimezone: true }),
   },
   (table) => [
@@ -496,7 +495,7 @@ export const eventScheduleMember = pgTable(
     updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true })
       .defaultNow()
       .notNull()
-      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+      .$onUpdate(() => new Date()),
     deletedAt: timestamp("deleted_at", { mode: "date", withTimezone: true }),
   },
   (table) => [
@@ -521,7 +520,7 @@ export const chatChat = pgTable(
     updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true })
       .defaultNow()
       .notNull()
-      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+      .$onUpdate(() => new Date()),
     deletedAt: timestamp("deleted_at", { mode: "date", withTimezone: true }),
   },
   (table) => [
@@ -545,7 +544,7 @@ export const chatChatMessage = pgTable(
     updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true })
       .defaultNow()
       .notNull()
-      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+      .$onUpdate(() => new Date()),
     deletedAt: timestamp("deleted_at", { mode: "date", withTimezone: true }),
   },
   (table) => [
@@ -571,7 +570,7 @@ export const chatChatSubscription = pgTable(
     updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true })
       .defaultNow()
       .notNull()
-      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+      .$onUpdate(() => new Date()),
     deletedAt: timestamp("deleted_at", { mode: "date", withTimezone: true }),
   },
   (table) => [
@@ -593,7 +592,7 @@ export const matchingUserGeneralAssessment = pgTable(
     updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true })
       .defaultNow()
       .notNull()
-      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+      .$onUpdate(() => new Date()),
     deletedAt: timestamp("deleted_at", { mode: "date", withTimezone: true }),
   },
   (table) => [
@@ -617,7 +616,7 @@ export const matchingUserBadmintonAssessment = pgTable(
     updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true })
       .defaultNow()
       .notNull()
-      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+      .$onUpdate(() => new Date()),
     deletedAt: timestamp("deleted_at", { mode: "date", withTimezone: true }),
   },
   (table) => [
@@ -641,7 +640,7 @@ export const matchingUserTennisAssessment = pgTable(
     updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true })
       .defaultNow()
       .notNull()
-      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+      .$onUpdate(() => new Date()),
     deletedAt: timestamp("deleted_at", { mode: "date", withTimezone: true }),
   },
   (table) => [
@@ -665,7 +664,7 @@ export const matchingUserRunningAssessment = pgTable(
     updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true })
       .defaultNow()
       .notNull()
-      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+      .$onUpdate(() => new Date()),
     deletedAt: timestamp("deleted_at", { mode: "date", withTimezone: true }),
   },
   (table) => [
@@ -703,7 +702,7 @@ export const matchingUserAssessmentVector = pgTable(
     updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true })
       .defaultNow()
       .notNull()
-      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+      .$onUpdate(() => new Date()),
     deletedAt: timestamp("deleted_at", { mode: "date", withTimezone: true }),
   },
   (table) => [
@@ -729,7 +728,7 @@ export const matchingCursor = pgTable(
     updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true })
       .defaultNow()
       .notNull()
-      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+      .$onUpdate(() => new Date()),
     deletedAt: timestamp("deleted_at", { mode: "date", withTimezone: true }),
   },
   (table) => [
@@ -753,7 +752,7 @@ export const matchingCursorMatches = pgTable(
     updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true })
       .defaultNow()
       .notNull()
-      .$onUpdate(() => sql`(now() AT TIME ZONE 'utc'::text)`),
+      .$onUpdate(() => new Date()),
     deletedAt: timestamp("deleted_at", { mode: "date", withTimezone: true }),
   },
   (table) => [
