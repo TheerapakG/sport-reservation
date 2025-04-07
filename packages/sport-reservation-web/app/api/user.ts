@@ -11,6 +11,8 @@ import { UserClient } from "sport-reservation-user/client";
 import {
   getUserClientBodyType,
   getUserClientQueryType,
+  UserClientBodyType,
+  UserClientQueryType,
 } from "sport-reservation-user/models";
 import { effectType } from "tiara-stack/utils/effectType";
 
@@ -59,7 +61,7 @@ export const getCurrentUserProfileQueryOptions = () =>
 export const getUserProfileServerFn = createServerFn({
   method: "GET",
 })
-  .validator((data: unknown) =>
+  .validator((data: UserClientQueryType<"getUserProfile">["inferIn"]) =>
     Effect.runSync(effectType(getUserClientQueryType("getUserProfile"), data)),
   )
   .handler(async ({ data }) => {
@@ -91,13 +93,16 @@ export const getUserProfileQueryOptions = ({ id }: { id: string }) =>
 export const updateCurrentUserProfileServerFn = createServerFn({
   method: "POST",
 })
-  .validator((data: unknown) =>
-    Effect.runSync(
-      effectType(
-        getUserClientBodyType("postUpdateUserProfile").omit("id"),
-        data,
+  .validator(
+    (
+      data: Omit<UserClientBodyType<"postUpdateUserProfile">["inferIn"], "id">,
+    ) =>
+      Effect.runSync(
+        effectType(
+          getUserClientBodyType("postUpdateUserProfile").omit("id"),
+          data,
+        ),
       ),
-    ),
   )
   .handler(async ({ data }) => {
     const { access_token: accessToken } = parseCookies();
@@ -139,10 +144,14 @@ export const useUpdateCurrentUserProfileMutation = () => {
 export const associateSportServerFn = createServerFn({
   method: "POST",
 })
-  .validator((data: unknown) =>
-    Effect.runSync(
-      effectType(getUserClientBodyType("postCreateUserSportAssociation"), data),
-    ),
+  .validator(
+    (data: UserClientBodyType<"postCreateUserSportAssociation">["inferIn"]) =>
+      Effect.runSync(
+        effectType(
+          getUserClientBodyType("postCreateUserSportAssociation"),
+          data,
+        ),
+      ),
   )
   .handler(async ({ data }) => {
     const { access_token: accessToken } = parseCookies();
@@ -180,13 +189,14 @@ export const useAssociateSportMutation = () => {
 export const dissociateSportServerFn = createServerFn({
   method: "POST",
 })
-  .validator((data: unknown) =>
-    Effect.runSync(
-      effectType(
-        getUserClientBodyType("postDeleteUserSportAssociations"),
-        data,
+  .validator(
+    (data: UserClientBodyType<"postDeleteUserSportAssociations">["inferIn"]) =>
+      Effect.runSync(
+        effectType(
+          getUserClientBodyType("postDeleteUserSportAssociations"),
+          data,
+        ),
       ),
-    ),
   )
   .handler(async ({ data }) => {
     const { access_token: accessToken } = parseCookies();
@@ -225,13 +235,16 @@ export const useDissociateSportMutation = () => {
 export const associateObjectiveServerFn = createServerFn({
   method: "POST",
 })
-  .validator((data: unknown) =>
-    Effect.runSync(
-      effectType(
-        getUserClientBodyType("postCreateUserObjectiveAssociation"),
-        data,
+  .validator(
+    (
+      data: UserClientBodyType<"postCreateUserObjectiveAssociation">["inferIn"],
+    ) =>
+      Effect.runSync(
+        effectType(
+          getUserClientBodyType("postCreateUserObjectiveAssociation"),
+          data,
+        ),
       ),
-    ),
   )
   .handler(async ({ data }) => {
     const { access_token: accessToken } = parseCookies();
@@ -269,13 +282,16 @@ export const useAssociateObjectiveMutation = () => {
 export const dissociateObjectiveServerFn = createServerFn({
   method: "POST",
 })
-  .validator((data: unknown) =>
-    Effect.runSync(
-      effectType(
-        getUserClientBodyType("postDeleteUserObjectiveAssociations"),
-        data,
+  .validator(
+    (
+      data: UserClientBodyType<"postDeleteUserObjectiveAssociations">["inferIn"],
+    ) =>
+      Effect.runSync(
+        effectType(
+          getUserClientBodyType("postDeleteUserObjectiveAssociations"),
+          data,
+        ),
       ),
-    ),
   )
   .handler(async ({ data }) => {
     const { access_token: accessToken } = parseCookies();
@@ -314,13 +330,16 @@ export const useDissociateObjectiveMutation = () => {
 export const associateLocationServerFn = createServerFn({
   method: "POST",
 })
-  .validator((data: unknown) =>
-    Effect.runSync(
-      effectType(
-        getUserClientBodyType("postCreateUserLocationAssociation"),
-        data,
+  .validator(
+    (
+      data: UserClientBodyType<"postCreateUserLocationAssociation">["inferIn"],
+    ) =>
+      Effect.runSync(
+        effectType(
+          getUserClientBodyType("postCreateUserLocationAssociation"),
+          data,
+        ),
       ),
-    ),
   )
   .handler(async ({ data }) => {
     const { access_token: accessToken } = parseCookies();
@@ -358,13 +377,16 @@ export const useAssociateLocationMutation = () => {
 export const dissociateLocationServerFn = createServerFn({
   method: "POST",
 })
-  .validator((data: unknown) =>
-    Effect.runSync(
-      effectType(
-        getUserClientBodyType("postDeleteUserLocationAssociations"),
-        data,
+  .validator(
+    (
+      data: UserClientBodyType<"postDeleteUserLocationAssociations">["inferIn"],
+    ) =>
+      Effect.runSync(
+        effectType(
+          getUserClientBodyType("postDeleteUserLocationAssociations"),
+          data,
+        ),
       ),
-    ),
   )
   .handler(async ({ data }) => {
     const { access_token: accessToken } = parseCookies();

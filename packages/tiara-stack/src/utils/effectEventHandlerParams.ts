@@ -66,7 +66,7 @@ export const effectEventHandlerParams = <
   { query, body, router }: C,
 ): Effect.Effect<Simplify<EffectEventHandlerParams<C>>, ArktypeError> =>
   Effect.gen(function* () {
-    return {
+    const params = {
       ...((query && query.config.decode
         ? {
             query: yield* effectType(
@@ -118,4 +118,6 @@ export const effectEventHandlerParams = <
           }
         : {}) as { router: EventHandlerRouterType<C> }),
     };
+    console.log(params);
+    return params;
   });
