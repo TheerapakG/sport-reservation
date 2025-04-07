@@ -90,7 +90,15 @@ export const effectEventHandlerParams = <
                   const bodyValue = yield* Effect.promise(() =>
                     readBody(event),
                   );
-                  return yield* effectType(body.type, destr(bodyValue));
+                  return yield* effectType(
+                    body.type,
+                    Object.fromEntries(
+                      Object.entries(bodyValue).map(([key, value]) => [
+                        key,
+                        destr(value),
+                      ]),
+                    ),
+                  );
                 }),
               ),
               Match.when("application/x-www-form-urlencoded", () =>
@@ -98,7 +106,15 @@ export const effectEventHandlerParams = <
                   const bodyValue = yield* Effect.promise(() =>
                     readBody(event),
                   );
-                  return yield* effectType(body.type, destr(bodyValue));
+                  return yield* effectType(
+                    body.type,
+                    Object.fromEntries(
+                      Object.entries(bodyValue).map(([key, value]) => [
+                        key,
+                        destr(value),
+                      ]),
+                    ),
+                  );
                 }),
               ),
               Match.when("multipart/form-data", () =>
