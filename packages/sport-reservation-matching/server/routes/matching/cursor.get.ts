@@ -19,35 +19,47 @@ export const handlerConfig = defineEventHandlerConfig({
 });
 
 export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
-  Effect.gen(function* () {
-    const { client: oauthClient } = yield* OAuthClient;
-    const { event } = yield* EventContext;
-    const { access_token: accessToken } = parseCookies(event);
-
-    const userId = yield* pipe(
-      Effect.promise(() =>
-        getSubjectTypeFromToken({
-          type: "user",
-          client: oauthClient,
-          accessToken,
-          refreshToken: undefined,
-        }),
+  pipe(
+    Effect.Do,
+    Effect.bindAll(() => ({
+      oauthClient: pipe(
+        OAuthClient,
+        Effect.map(({ client }) => client),
       ),
-      Effect.flatMap((user) =>
-        user ? Effect.succeed(user.id) : Effect.fail(new OAuthError()),
+      event: pipe(
+        EventContext,
+        Effect.map(({ event }) => event),
       ),
-    );
-
-    const matchingDbRepository = yield* MatchingDbRepository;
-    const cursor = yield* matchingDbRepository.getMatchUserCursor(userId);
-
-    return pipe(
-      cursor,
-      Option.map((cursor) => ({
-        cursorId: cursor.publicId,
-        createdAt: cursor.createdAt.toISOString(),
-      })),
-      Option.getOrElse(() => undefined),
-    );
-  }),
+      matchingDbRepository: MatchingDbRepository,
+    })),
+    Effect.let("accessToken", ({ event }) => parseCookies(event).access_token),
+    Effect.bind("userId", ({ oauthClient, accessToken }) =>
+      pipe(
+        Effect.promise(() =>
+          getSubjectTypeFromToken({
+            type: "user",
+            client: oauthClient,
+            accessToken,
+            refreshToken: undefined,
+          }),
+        ),
+        Effect.flatMap((user) =>
+          user ? Effect.succeed(user.id) : Effect.fail(new OAuthError()),
+        ),
+      ),
+    ),
+    Effect.bind("cursor", ({ matchingDbRepository, userId }) =>
+      pipe(
+        matchingDbRepository.getMatchUserCursor(userId),
+        Effect.map(
+          Option.map((cursor) => ({
+            cursorId: cursor.publicId,
+            createdAt: cursor.createdAt.toISOString(),
+          })),
+        ),
+        Effect.map(Option.getOrUndefined),
+      ),
+    ),
+    Effect.map(({ cursor }) => cursor),
+  ),
 );

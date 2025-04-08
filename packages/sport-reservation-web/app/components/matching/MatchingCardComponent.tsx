@@ -28,25 +28,21 @@ const haversineDistance = (
   return c * 6378137;
 };
 
-export default function MatchingCardComponent({
-  user: providedUser,
+const InternalMatchingCardComponent = ({
+  user,
   matchedUser,
   className,
   flipped = false,
   onFlipped,
   disabled,
 }: {
-  user?: typeof userProfile.infer;
+  user: typeof userProfile.infer;
   matchedUser: typeof userProfile.infer;
   className?: string;
   flipped?: boolean;
   onFlipped?: (flipped: boolean) => void;
   disabled?: boolean;
-}) {
-  const currentUserProfileQuery = useSuspenseQuery(
-    getCurrentUserProfileQueryOptions(),
-  );
-
+}) => {
   const [previousFlipped, setPreviousFlipped] = useState(flipped);
   const [flippedState, setFlippedState] = useState(flipped);
 
@@ -54,9 +50,6 @@ export default function MatchingCardComponent({
     setPreviousFlipped(flipped);
     setFlippedState(flipped);
   }
-
-  const currentUser = currentUserProfileQuery.data.profile;
-  const user = providedUser ?? currentUser;
 
   const userLocations = user
     ? user.locations.map(({ location }) => location).filter(Boolean)
@@ -94,110 +87,153 @@ export default function MatchingCardComponent({
   };
 
   return (
-    <div className={cn("relative w-72 [perspective:1000px]", className)}>
+    <div
+      className={cn("relative h-[480px] w-72 [perspective:1000px]", className)}
+    >
       <motion.div
-        className="[transform-style:preserve-3d]"
+        className="h-full [transform-style:preserve-3d]"
         initial={{ rotateY: flipped ? 180 : 0 }}
         animate={{ rotateY: flippedState ? 180 : 0 }}
         transition={{ duration: 0.5 }}
       >
-        <Card className="w-full rotate-y-0 rounded-2xl border-[#65D1F8] p-4 text-center shadow-lg [backface-visibility:hidden]">
+        <Card className="flex h-full w-full rotate-y-0 flex-col rounded-2xl border-[#65D1F8] p-4 shadow-lg [backface-visibility:hidden]">
           <img
             src={matchedUser.avatar}
             alt={matchedUser.name}
-            className="h-48 w-full rounded-lg object-cover"
+            className="h-72 w-full rounded-lg object-cover"
           />
-          <h3 className="mt-2 text-lg font-bold">{matchedUser.name}</h3>
-          <p className="text-sm text-gray-600">Common Sports:</p>
-          <div className="mt-1 flex justify-center gap-2">
-            {commonSports.map((sportType) => {
-              const icon = sports[sportType].icon;
-              const label = sports[sportType].label;
+          <div className="flex flex-grow flex-col justify-between pt-3 text-left">
+            <div>
+              <h3 className="text-xl font-bold">{matchedUser.name}</h3>
+              <p className="mt-1 text-sm text-gray-600">Common Sports:</p>
+              <div className="mt-1.5 flex flex-wrap gap-0.5">
+                {commonSports.map((sportType) => {
+                  const icon = sports[sportType].icon;
+                  const label = sports[sportType].label;
 
-              return (
-                <span
-                  key={sportType}
-                  className="flex items-center gap-1 rounded-lg border border-[#65D1F8] bg-[#CAF2FF]/40 px-2 py-1 text-xs"
-                >
-                  {icon && icon({ className: "h-4 w-4" })} <span>{label}</span>
-                </span>
-              );
-            })}
-          </div>
-          <div className="mt-3 flex justify-between">
-            <Button
-              type="button"
-              onClick={handleFlipped}
-              variant="outline"
-              className="bg-gradient-to-r from-[#65D1F8] to-[#6CCFD0] text-white hover:bg-[#AED6F1]"
-              disabled={disabled}
-            >
-              See More
-            </Button>
-            <Button
-              type="button"
-              variant="default"
-              className="bg-gradient-to-r from-[#65D1F8] to-[#6CCFD0] text-white hover:bg-[#AED6F1]"
-              disabled={disabled}
-            >
-              Message
-            </Button>
+                  return (
+                    <span
+                      key={sportType}
+                      className="flex items-center gap-0.5 rounded-lg border border-[#65D1F8] bg-[#CAF2FF]/40 px-1 py-0.5 text-sm"
+                    >
+                      {icon && icon({ className: "h-5 w-5" })}
+                      <span>{label}</span>
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="my-3 border-t border-[#65D1F8]" />
+            <div className="flex justify-between gap-2">
+              <Button
+                type="button"
+                onClick={handleFlipped}
+                variant="outline"
+                className="flex-1 rounded-lg border-[#65D1F8] px-6 py-2 text-base font-medium text-[#65D1F8] hover:bg-[#CAF2FF]/40 hover:text-[#65D1F8]"
+                disabled={disabled}
+              >
+                See More
+              </Button>
+              <Button
+                type="button"
+                variant="default"
+                className="flex-1 rounded-lg bg-gradient-to-r from-[#65D1F8] to-[#6CCFD0] px-6 py-2 text-base font-medium text-white hover:opacity-90"
+                disabled={disabled}
+              >
+                Message
+              </Button>
+            </div>
           </div>
         </Card>
 
-        <Card className="absolute inset-0 rotate-y-180 rounded-2xl border-[#65D1F8] p-4 text-center shadow-lg [backface-visibility:hidden]">
-          <h3 className="text-lg font-bold">{matchedUser.name}</h3>
-          {minDistance !== Number.MAX_SAFE_INTEGER && (
-            <p className="text-xs text-gray-500">📍 {minDistance} km away</p>
-          )}
-          <p className="mt-2 text-sm text-gray-600">
-            You both are interested in:
-          </p>
-          <div className="mt-1 flex justify-center gap-2">
-            {commonSports.map((sportType) => {
-              const icon = sports[sportType].icon;
-              const label = sports[sportType].label;
-
-              return (
-                <span
-                  key={sportType}
-                  className="rounded-lg border border-[#65D1F8] bg-[#CAF2FF]/40 px-2 py-1 text-xs"
-                >
-                  {icon && icon({ className: "h-4 w-4" })} <span>{label}</span>
-                </span>
-              );
-            })}
+        <Card className="absolute inset-0 flex h-full rotate-y-180 flex-col rounded-2xl border-[#65D1F8] p-4 shadow-lg [backface-visibility:hidden]">
+          <div className="flex items-center gap-3">
+            <img
+              src={matchedUser.avatar}
+              alt={matchedUser.name}
+              className="h-16 w-16 rounded-full object-cover"
+            />
+            <div className="text-left">
+              <h3 className="text-xl font-bold">{matchedUser.name}</h3>
+              {minDistance !== Number.MAX_SAFE_INTEGER && (
+                <p className="text-sm text-gray-500">
+                  📍 {(minDistance / 1000).toFixed(1)} km away
+                </p>
+              )}
+            </div>
           </div>
-          <p className="mt-2 text-sm text-gray-600">Why I'm here...</p>
-          <div className="mt-1 flex flex-wrap justify-center gap-1">
-            {matchedUser.objectives.map(({ objectiveType }) => {
-              const icon = objectives[objectiveType].icon;
-              const label = objectives[objectiveType].label;
+          <div className="my-3 border-t border-[#65D1F8]" />
+          <div className="flex-grow overflow-y-auto pr-2">
+            <div className="pb-3 text-left">
+              <p className="text-base font-semibold text-gray-700">
+                You both are interested in:
+              </p>
+              <div className="mt-1.5 flex flex-wrap gap-0.5">
+                {commonSports.map((sportType) => {
+                  const icon = sports[sportType].icon;
+                  const label = sports[sportType].label;
 
-              return (
-                <span
-                  key={objectiveType}
-                  className="rounded-lg border border-[#6CCFD0] bg-white px-2 py-1 text-xs"
-                >
-                  {icon && icon({ className: "h-4 w-4" })} <span>{label}</span>
-                </span>
-              );
-            })}
+                  return (
+                    <span
+                      key={sportType}
+                      className="flex items-center gap-0.5 rounded-lg border border-[#65D1F8] bg-[#CAF2FF]/40 px-1 py-0.5 text-sm"
+                    >
+                      {icon && icon({ className: "h-5 w-5" })}
+                      <span>{label}</span>
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="pb-3 text-left">
+              <p className="text-base font-semibold text-gray-700">
+                Why I'm here...
+              </p>
+              <div className="mt-1.5 flex flex-wrap gap-0.5">
+                {matchedUser.objectives.map(({ objectiveType }) => {
+                  const icon = objectives[objectiveType].icon;
+                  const label = objectives[objectiveType].label;
+
+                  return (
+                    <span
+                      key={objectiveType}
+                      className="flex items-center gap-0.5 rounded-lg border border-[#6CCFD0] bg-white px-1 py-0.5 text-sm"
+                    >
+                      {icon && icon({ className: "h-5 w-5" })}
+                      <span>{label}</span>
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="pb-3 text-left">
+              <p className="text-base font-semibold text-gray-700">
+                Preferred Play Times:
+              </p>
+              <p className="mt-1 text-sm text-gray-500">
+                🕒 {matchedUser.availability}
+              </p>
+            </div>
+            <div className="text-left">
+              <p className="text-base font-semibold text-gray-700">
+                Preferred Locations:
+              </p>
+              {matchedUser.locations.map(
+                ({ locationDescription, locationId }) => (
+                  <p key={locationId} className="mt-1 text-sm text-gray-500">
+                    📍 {locationDescription}
+                  </p>
+                ),
+              )}
+            </div>
           </div>
-          <p className="mt-2 text-sm text-gray-600">Preferred Play Times:</p>
-          <p className="text-xs text-gray-500">{matchedUser.availability}</p>
-          <p className="mt-2 text-sm text-gray-600">Preferred Locations:</p>
-          <p className="text-xs text-gray-500">
-            {matchedUser.locations
-              .map(({ locationDescription }) => locationDescription)
-              .join(", ")}
-          </p>
-          <div className="mt-3 flex justify-between">
+          <div className="my-3 border-t border-[#65D1F8]" />
+          <div className="flex justify-between gap-2">
             <Button
               type="button"
               onClick={handleFlipped}
               variant="outline"
-              className="bg-gradient-to-r from-[#65D1F8] to-[#6CCFD0] text-white hover:bg-[#AED6F1]"
+              className="flex-1 rounded-lg border-[#65D1F8] px-6 py-2 text-base font-medium text-[#65D1F8] hover:bg-[#CAF2FF]/40 hover:text-[#65D1F8]"
               disabled={disabled}
             >
               Back
@@ -205,7 +241,7 @@ export default function MatchingCardComponent({
             <Button
               type="button"
               variant="default"
-              className="bg-gradient-to-r from-[#65D1F8] to-[#6CCFD0] text-white hover:bg-[#AED6F1]"
+              className="flex-1 rounded-lg bg-gradient-to-r from-[#65D1F8] to-[#6CCFD0] px-6 py-2 text-base font-medium text-white hover:opacity-90"
               disabled={disabled}
             >
               Message
@@ -215,4 +251,43 @@ export default function MatchingCardComponent({
       </motion.div>
     </div>
   );
-}
+};
+
+const UserMatchingCardComponent = ({
+  ...props
+}: {
+  matchedUser: typeof userProfile.infer;
+  className?: string;
+  flipped?: boolean;
+  onFlipped?: (flipped: boolean) => void;
+  disabled?: boolean;
+}) => {
+  const currentUserProfileQuery = useSuspenseQuery(
+    getCurrentUserProfileQueryOptions(),
+  );
+  const currentUser = currentUserProfileQuery.data.profile;
+
+  return currentUser ? (
+    <InternalMatchingCardComponent user={currentUser} {...props} />
+  ) : null;
+};
+
+const MatchingCardComponent = ({
+  user,
+  ...props
+}: {
+  user?: typeof userProfile.infer;
+  matchedUser: typeof userProfile.infer;
+  className?: string;
+  flipped?: boolean;
+  onFlipped?: (flipped: boolean) => void;
+  disabled?: boolean;
+}) => {
+  return user ? (
+    <InternalMatchingCardComponent user={user} {...props} />
+  ) : (
+    <UserMatchingCardComponent {...props} />
+  );
+};
+
+export default MatchingCardComponent;
