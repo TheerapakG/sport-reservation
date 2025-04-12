@@ -43,6 +43,8 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
       }),
     ) ?? { userId: undefined };
 
+    console.log("userId", userId);
+
     return {
       id: userId,
     };

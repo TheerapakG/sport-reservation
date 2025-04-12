@@ -11,6 +11,14 @@ import {
 } from "drizzle-seed";
 import postgres from "postgres";
 import {
+  authUserEmailConnection,
+  authUserEmailConnectionRelations,
+  authUserFacebookConnection,
+  authUserFacebookConnectionRelations,
+  authUserGoogleConnection,
+  authUserGoogleConnectionRelations,
+  authUserLineConnection,
+  authUserLineConnectionRelations,
   clubClub,
   clubClubRelations,
   userObjective,
@@ -389,7 +397,17 @@ async function main() {
     userUserGroupMember,
     userUserGroupMemberRelations,
   };
-  await reset(db, schema);
+  await reset(db, {
+    authUserEmailConnection,
+    authUserEmailConnectionRelations,
+    authUserLineConnection,
+    authUserLineConnectionRelations,
+    authUserGoogleConnection,
+    authUserGoogleConnectionRelations,
+    authUserFacebookConnection,
+    authUserFacebookConnectionRelations,
+    ...schema,
+  });
   console.log("seeding");
   await seed(db, schema).refine((funcs) => {
     const userProfilePublicId = createCachedGenerator(funcs.uuid());
