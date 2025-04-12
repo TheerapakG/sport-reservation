@@ -14,7 +14,7 @@ export const handlerConfig = defineEventHandlerConfig({
   name: "getIdByFacebookId",
   response: response(
     type({
-      id: "string?",
+      "id?": "string",
     }),
     { stream: false },
   ),

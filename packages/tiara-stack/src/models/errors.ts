@@ -6,10 +6,14 @@ type BaseErrorType = Error | ArkErrors;
 export class BaseError<ErrorType extends BaseErrorType = BaseErrorType> {
   readonly _type = "BaseError";
 
+  readonly message: string;
+
   constructor(
     readonly _tag: string,
-    readonly error?: ErrorType,
-  ) {}
+    readonly cause?: ErrorType,
+  ) {
+    this.message = this.cause?.message ?? "unknown error";
+  }
 }
 
 export const isBaseError = (error: unknown): error is BaseError => {

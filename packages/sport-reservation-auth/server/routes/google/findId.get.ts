@@ -14,7 +14,7 @@ export const handlerConfig = defineEventHandlerConfig({
   name: "getIdByGoogleId",
   response: response(
     type({
-      id: "string?",
+      "id?": "string",
     }),
     { stream: false },
   ),

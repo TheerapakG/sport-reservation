@@ -143,7 +143,9 @@ const handleOrThrowEffect = async <A, E = never>(
       const error = cause.error;
       if (isBaseError(error)) {
         Effect.runSync(Console.log("[fail]", Cause.prettyErrors(cause)));
-        throw createError(error.error?.message ?? "unknown error cause");
+        throw createError(
+          error.cause?.message ?? "unknown error cause message",
+        );
       }
     }
     Effect.runSync(Console.log("[fail]", Cause.prettyErrors(cause)));

@@ -14,7 +14,7 @@ export const handlerConfig = defineEventHandlerConfig({
   name: "getIdByLineId",
   response: response(
     type({
-      id: "string?",
+      "id?": "string",
     }),
     { stream: false },
   ),
@@ -42,8 +42,6 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
         platformId: query.lineId,
       }),
     ) ?? { userId: undefined };
-
-    console.log("userId", userId);
 
     return {
       id: userId,
