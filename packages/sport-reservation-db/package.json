@@ -38,6 +38,7 @@
     "eslint": "catalog:",
     "globals": "catalog:",
     "pathe": "catalog:",
+    "postgres": "^3.4.5",
     "prettier": "catalog:",
     "vite": "catalog:",
     "vite-plugin-dts": "catalog:"
