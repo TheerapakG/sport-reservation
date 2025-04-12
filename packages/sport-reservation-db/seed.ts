@@ -1,5 +1,6 @@
 import { ArkErrors, type } from "arktype";
 import "dotenv/config";
+import { is, sql, Table } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import {
   AbstractGenerator,
@@ -397,7 +398,7 @@ async function main() {
     userUserGroupMember,
     userUserGroupMemberRelations,
   };
-  await reset(db, {
+  const resetSchema = {
     authUserEmailConnection,
     authUserEmailConnectionRelations,
     authUserLineConnection,
@@ -407,7 +408,8 @@ async function main() {
     authUserFacebookConnection,
     authUserFacebookConnectionRelations,
     ...schema,
-  });
+  };
+  await reset(db, resetSchema);
   console.log("seeding");
   await seed(db, schema).refine((funcs) => {
     const userProfilePublicId = createCachedGenerator(funcs.uuid());
@@ -499,6 +501,7 @@ async function main() {
     return {
       userUserProfile: {
         columns: {
+          id: funcs.intPrimaryKey(),
           publicId: userProfilePublicId,
           name: funcs.fullName(),
           avatar: funcs.default({
@@ -530,6 +533,7 @@ async function main() {
       },
       userSport: {
         columns: {
+          id: funcs.intPrimaryKey(),
           publicId: sportPublicId,
           sportType: sportSportType,
           createdAt: funcs.default({
@@ -546,6 +550,7 @@ async function main() {
       },
       userUserProfileSport: {
         columns: {
+          id: funcs.intPrimaryKey(),
           userId: forkedUserProfileSportUserProfilePublicId,
           sportId: forkedUserProfileSportSportPublicId,
           createdAt: funcs.default({
@@ -562,6 +567,7 @@ async function main() {
       },
       userObjectiveCategory: {
         columns: {
+          id: funcs.intPrimaryKey(),
           objectiveType: objectiveCategoryObjectiveType,
           categoryType: objectiveCategoryCategoryType,
           createdAt: funcs.default({
@@ -578,6 +584,7 @@ async function main() {
       },
       userObjective: {
         columns: {
+          id: funcs.intPrimaryKey(),
           publicId: objectivePublicId,
           objectiveType: objectiveObjectiveType,
           createdAt: funcs.default({
@@ -594,6 +601,7 @@ async function main() {
       },
       userUserProfileObjective: {
         columns: {
+          id: funcs.intPrimaryKey(),
           userId: forkedUserProfileObjectiveUserProfilePublicId,
           objectiveId: forkedUserProfileObjectiveObjectivePublicId,
           createdAt: funcs.default({
@@ -610,6 +618,7 @@ async function main() {
       },
       clubClub: {
         columns: {
+          id: funcs.intPrimaryKey(),
           groupId: clubGroupId,
           image: funcs.default({
             defaultValue:
@@ -634,6 +643,7 @@ async function main() {
       },
       userUserGroup: {
         columns: {
+          id: funcs.intPrimaryKey(),
           publicId: forkedUserUserGroupPublicId,
           creatorId: forkedUserUserGroupCreator,
           name: forkedUserUserGroupName,
@@ -651,6 +661,17 @@ async function main() {
         count: clubCount,
       },
     };
+  });
+  await db.transaction(async (tx) => {
+    await Promise.all(
+      Object.entries(resetSchema).map(async ([_, table]) => {
+        if (is(table, Table)) {
+          await tx.execute(
+            sql`SELECT setval(pg_get_serial_sequence('${table.getSQL()}', 'id'), coalesce(max(id), 0) + 1, false) FROM ${table.getSQL()}`,
+          );
+        }
+      }),
+    );
   });
   console.log("seeded");
   process.exit(0);

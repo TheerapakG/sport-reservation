@@ -37,9 +37,9 @@ export const facebookLoginDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
             .insert(authUserFacebookConnection)
             .values({ userId, facebookId: platformId })
             .onConflictDoUpdate({
-              target: authUserFacebookConnection.userId,
-              set: { facebookId: platformId },
-              setWhere: eq(authUserFacebookConnection.userId, userId),
+              target: authUserFacebookConnection.facebookId,
+              set: { userId },
+              setWhere: eq(authUserFacebookConnection.facebookId, platformId),
             });
         }).pipe(
           Effect.withSpan(

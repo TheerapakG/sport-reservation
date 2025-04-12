@@ -35,9 +35,9 @@ export const lineLoginDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
             .insert(authUserLineConnection)
             .values({ userId, lineId: platformId })
             .onConflictDoUpdate({
-              target: authUserLineConnection.userId,
-              set: { lineId: platformId },
-              setWhere: eq(authUserLineConnection.userId, userId),
+              target: authUserLineConnection.lineId,
+              set: { userId },
+              setWhere: eq(authUserLineConnection.lineId, platformId),
             });
         }).pipe(
           Effect.withSpan(

@@ -35,9 +35,9 @@ export const googleLoginDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
             .insert(authUserGoogleConnection)
             .values({ userId, googleId: platformId })
             .onConflictDoUpdate({
-              target: authUserGoogleConnection.userId,
-              set: { googleId: platformId },
-              setWhere: eq(authUserGoogleConnection.userId, userId),
+              target: authUserGoogleConnection.googleId,
+              set: { userId },
+              setWhere: eq(authUserGoogleConnection.googleId, platformId),
             });
         }).pipe(
           Effect.withSpan(
