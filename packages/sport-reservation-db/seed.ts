@@ -504,8 +504,14 @@ async function main() {
           id: funcs.intPrimaryKey(),
           publicId: userProfilePublicId,
           name: funcs.fullName(),
-          avatar: funcs.default({
-            defaultValue: "/user/avatar/butter_bear.png",
+          avatar: funcs.valuesFromArray({
+            values: [
+              "/user/avatar/beth.jpeg",
+              "/user/avatar/butter_bear.png",
+              "/user/avatar/lisa.png",
+              "/user/avatar/sarah-lee.png",
+              "/user/avatar/victoria-k.png",
+            ],
           }),
           availability: funcs.valuesFromArray({
             values: ["06:00-08:00", "08:00-10:00", "10:00-12:00"],

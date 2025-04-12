@@ -16,13 +16,13 @@ const BackButton = ({ className }: { className?: string }) => {
   const router = useRouter();
   return (
     <Button
-      onClick={() => router.navigate({ to: "/event" })}
+      onClick={() => router.navigate({ to: "/club" })}
       className={cn(
         "h-auto rounded border-1 border-[#65D1F8] bg-[#E1F8FE] px-3 py-1 align-middle font-semibold text-[#65D1F8] hover:bg-[#E1F8FE] hover:text-[#65D1F8] dark:bg-[#E1F8FE]",
         className,
       )}
     >
-      <ChevronLeftIcon className="h-4 w-4" /> Back to Events
+      <ChevronLeftIcon className="h-4 w-4" /> Back to Clubs
     </Button>
   );
 };
