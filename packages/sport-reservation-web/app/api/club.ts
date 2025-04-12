@@ -15,7 +15,6 @@ import {
   getClubClientBodyType,
   getClubClientQueryType,
 } from "sport-reservation-club/models";
-import { effectType } from "tiara-stack/utils/effectType";
 import { parseCookies } from "vinxi/http";
 import { currentUserProfileQueryOptions } from "./oauth";
 
@@ -67,9 +66,7 @@ export const clubKeys = () => {
 export const getClubServerFn = createServerFn({
   method: "GET",
 })
-  .validator((data: unknown) =>
-    Effect.runSync(effectType(getClubClientQueryType("getClub"), data)),
-  )
+  .validator(getClubClientQueryType("getClub"))
   .handler(async ({ data }) => {
     const { access_token: accessToken } = parseCookies();
 
@@ -93,15 +90,13 @@ export const getClubServerFn = createServerFn({
 export const getClubQueryOptions = ({ id }: { id: string }) =>
   queryOptions({
     queryKey: clubKeys().club().id({ id }).detail(),
-    queryFn: () => getClubServerFn({ data: { id } }),
+    queryFn: () => getClubServerFn({ data: { clubId: id } }),
   });
 
 export const getClubMemberListServerFn = createServerFn({
   method: "GET",
 })
-  .validator((data: unknown) =>
-    Effect.runSync(effectType(getClubClientQueryType("getClubMembers"), data)),
-  )
+  .validator(getClubClientQueryType("getClubMembers"))
   .handler(async ({ data }) => {
     const { access_token: accessToken } = parseCookies();
 
@@ -131,11 +126,7 @@ export const getClubMemberListQueryOptions = ({ id }: { id: string }) =>
 export const getUserMemberClubCountServerFn = createServerFn({
   method: "GET",
 })
-  .validator((data: unknown) =>
-    Effect.runSync(
-      effectType(getClubClientQueryType("getUserMemberClubsCount"), data),
-    ),
-  )
+  .validator(getClubClientQueryType("getUserMemberClubsCount"))
   .handler(async ({ data }) => {
     const { access_token: accessToken } = parseCookies();
 
@@ -201,9 +192,7 @@ export const useGetUserMemberClubListQueryOptions = () => {
 export const getClubListServerFn = createServerFn({
   method: "GET",
 })
-  .validator((data: unknown) =>
-    Effect.runSync(effectType(getClubClientQueryType("getClubList"), data)),
-  )
+  .validator(getClubClientQueryType("getClubList"))
   .handler(async ({ data }) => {
     const { access_token: accessToken } = parseCookies();
 
@@ -246,14 +235,7 @@ export const getClubListInfiniteQueryOptions = ({ limit }: { limit: number }) =>
 export const requestClubMembershipCreateServerFn = createServerFn({
   method: "POST",
 })
-  .validator((data: unknown) =>
-    Effect.runSync(
-      effectType(
-        getClubClientBodyType("postCreateClubMembershipRequest"),
-        data,
-      ),
-    ),
-  )
+  .validator(getClubClientBodyType("postCreateClubMembershipRequest"))
   .handler(async ({ data }) => {
     const { access_token: accessToken } = parseCookies();
 

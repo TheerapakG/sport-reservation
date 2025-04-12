@@ -505,8 +505,7 @@ async function main() {
           publicId: userProfilePublicId,
           name: funcs.fullName(),
           avatar: funcs.default({
-            defaultValue:
-              "https://cdn.theerapakg.moe/reservation/user/avatar/butter_bear.png",
+            defaultValue: "/user/avatar/butter_bear.png",
           }),
           availability: funcs.valuesFromArray({
             values: ["06:00-08:00", "08:00-10:00", "10:00-12:00"],
@@ -621,8 +620,7 @@ async function main() {
           id: funcs.intPrimaryKey(),
           groupId: clubGroupId,
           image: funcs.default({
-            defaultValue:
-              "https://cdn.theerapakg.moe/reservation/asset/event/badminton-default.jpg",
+            defaultValue: "/asset/club/badminton-default.jpg",
           }),
           description: funcs.loremIpsum({ sentencesCount: 4 }),
           location: funcs.default({
