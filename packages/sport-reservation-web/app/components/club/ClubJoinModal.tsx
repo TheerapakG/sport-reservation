@@ -88,6 +88,7 @@ export default function ClubJoinModal({
           ) : (
             <form
               onSubmit={(e) => {
+                console.log("submit");
                 e.preventDefault();
                 e.stopPropagation();
                 form.handleSubmit();
