@@ -33,6 +33,7 @@ export const clubKeys = () => {
             all: () => allClubId,
             detail: () => [...allClubId, "detail"] as const,
             memberList: () => [...allClubId, "memberList"] as const,
+            status: () => [...allClubId, "status"] as const,
           };
         },
         user: () => {
@@ -270,5 +271,44 @@ export const useRequestClubMembershipCreateMutation = () => {
         queryKey: clubKeys().all(),
       });
     },
+  });
+};
+
+export const getClubMemberStatusServerFn = createServerFn({
+  method: "GET",
+})
+  .validator(getClubClientQueryType("getClubMemberStatus"))
+  .handler(async ({ data }) => {
+    const { access_token: accessToken } = parseCookies();
+
+    if (!accessToken) {
+      return { success: false } as const;
+    }
+
+    const clubMemberStatus = await Effect.runPromise(
+      Effect.gen(function* () {
+        const clubClient = yield* ClubClient;
+        return yield* clubClient.getClubMemberStatus({
+          headers: { Cookie: serialize("access_token", accessToken) },
+          query: data,
+        });
+      }).pipe(provideEffectContext),
+    );
+
+    return { success: true, clubMemberStatus } as const;
+  });
+
+export const useGetClubMemberStatusQueryOptions = ({ id }: { id: string }) => {
+  const currentUserProfile = useSuspenseQuery(currentUserProfileQueryOptions());
+
+  return queryOptions({
+    queryKey: clubKeys().club().id({ id }).status(),
+    queryFn: () =>
+      getClubMemberStatusServerFn({
+        data: {
+          clubId: id,
+          userId: currentUserProfile.data.profile?.id ?? "",
+        },
+      }),
   });
 };

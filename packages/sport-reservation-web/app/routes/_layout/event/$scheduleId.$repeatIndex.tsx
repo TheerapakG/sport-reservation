@@ -1,6 +1,7 @@
 import {
   getScheduleMemberListQueryOptions,
   getScheduleQueryOptions,
+  useGetScheduleMemberStatusQueryOptions,
 } from "@/api/event";
 import EventJoinModal from "@/components/event/EventJoinModal";
 import { Button } from "@/components/ui/button";
@@ -40,6 +41,14 @@ function EventDetailPage() {
   );
   const memberListQuery = useSuspenseQuery(
     getScheduleMemberListQueryOptions({ id: scheduleId, repeatIndex }),
+  );
+
+  const getScheduleMemberStatusQueryOptions =
+    useGetScheduleMemberStatusQueryOptions({
+      id: scheduleId,
+    });
+  const scheduleMemberStatusQuery = useSuspenseQuery(
+    getScheduleMemberStatusQueryOptions,
   );
 
   if (!scheduleQuery.data.success) {
@@ -209,7 +218,12 @@ function EventDetailPage() {
               {participants.participants}/{schedule.event.sizeLimit}
             </div>
             <div className="flex h-auto items-center gap-x-2 rounded-l-none rounded-r border-1 border-[#65D1F8] bg-[#65D1F8] px-3 py-1 align-middle text-2xl text-[#E1F8FE] hover:bg-[#65D1F8] hover:text-[#E1F8FE] dark:bg-[#65D1F8]">
-              Join
+              {scheduleMemberStatusQuery.data.scheduleMemberStatus
+                ? scheduleMemberStatusQuery.data.scheduleMemberStatus.status ===
+                  "pending"
+                  ? "Pending"
+                  : "Joined"
+                : "Join"}
             </div>
           </button>
         </EventJoinModal>

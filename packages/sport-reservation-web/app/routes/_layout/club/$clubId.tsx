@@ -1,4 +1,8 @@
-import { getClubMemberListQueryOptions, getClubQueryOptions } from "@/api/club";
+import {
+  getClubMemberListQueryOptions,
+  getClubQueryOptions,
+  useGetClubMemberStatusQueryOptions,
+} from "@/api/club";
 import { getScheduleClubListQueryOptions } from "@/api/event";
 import ClubJoinModal from "@/components/club/ClubJoinModal";
 import EventListItem from "@/components/event/EventListItem";
@@ -33,6 +37,13 @@ function EventDetailPage() {
   const clubQuery = useSuspenseQuery(getClubQueryOptions({ id: clubId }));
   const scheduleQuery = useSuspenseQuery(
     getScheduleClubListQueryOptions({ id: clubId }),
+  );
+
+  const getClubMemberStatusQueryOptions = useGetClubMemberStatusQueryOptions({
+    id: clubId,
+  });
+  const clubMemberStatusQuery = useSuspenseQuery(
+    getClubMemberStatusQueryOptions,
   );
 
   if (!clubQuery.data.success || !scheduleQuery.data.success) {
@@ -107,7 +118,12 @@ function EventDetailPage() {
               {club.size}
             </div>
             <div className="flex h-auto items-center gap-x-2 rounded-l-none rounded-r border-1 border-[#65D1F8] bg-[#65D1F8] px-3 py-1 align-middle text-2xl text-[#E1F8FE] hover:bg-[#65D1F8] hover:text-[#E1F8FE] dark:bg-[#65D1F8]">
-              Join
+              {clubMemberStatusQuery.data.clubMemberStatus
+                ? clubMemberStatusQuery.data.clubMemberStatus.status ===
+                  "pending"
+                  ? "Pending"
+                  : "Joined"
+                : "Join"}
             </div>
           </button>
         </ClubJoinModal>

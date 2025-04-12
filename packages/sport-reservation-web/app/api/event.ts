@@ -47,6 +47,7 @@ export const eventKeys = () => {
                   [...allScheduleIdRepeatIndex, "memberList"] as const,
               };
             },
+            memberStatus: () => [...allScheduleId, "memberStatus"] as const,
           };
         },
         list: () => {
@@ -501,4 +502,39 @@ export const getScheduleClubListQueryOptions = ({ id }: { id: string }) =>
   queryOptions({
     queryKey: eventKeys().schedule().club().id({ id }).list(),
     queryFn: () => getScheduleClubListServerFn({ data: { clubId: id } }),
+  });
+
+export const getScheduleMemberStatusServerFn = createServerFn({
+  method: "GET",
+})
+  .validator(getEventClientQueryType("getScheduleMemberStatus"))
+  .handler(async ({ data }) => {
+    const { access_token: accessToken } = parseCookies();
+
+    if (!accessToken) {
+      return { success: false } as const;
+    }
+
+    const scheduleMemberStatus = await Effect.runPromise(
+      Effect.gen(function* () {
+        const eventClient = yield* EventClient;
+        return yield* eventClient.getScheduleMemberStatus({
+          headers: { Cookie: serialize("access_token", accessToken) },
+          query: data,
+        });
+      }).pipe(provideEffectContext),
+    );
+
+    return { success: true, scheduleMemberStatus } as const;
+  });
+
+export const useGetScheduleMemberStatusQueryOptions = ({
+  id,
+}: {
+  id: string;
+}) =>
+  queryOptions({
+    queryKey: eventKeys().schedule().id({ id }).memberStatus(),
+    queryFn: () =>
+      getScheduleMemberStatusServerFn({ data: { scheduleId: id } }),
   });
