@@ -6,6 +6,7 @@ import { getSubjectTypeFromToken } from "sport-reservation-oauth-common/subjects
 import { defineEventHandlerConfig, response } from "tiara-stack/config";
 import { OAuthError } from "tiara-stack/models/errors";
 import { OAuthClient } from "~/layers";
+import { objectiveType } from "~/models";
 import { ObjectiveRepository } from "~/repositories/objectiveRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
@@ -16,7 +17,7 @@ export const handlerConfig = defineEventHandlerConfig({
         {
           userId: "string",
           objectiveId: "string",
-          objectiveType: "string",
+          objectiveType,
         },
         "[]",
       ],

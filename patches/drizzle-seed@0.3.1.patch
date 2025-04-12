@@ -1,0 +1,99 @@
+diff --git a/index.cjs b/index.cjs
+index fb21262a1d43ca032a9a67179743f89b3fdc0395..1b2a991197f4334bdb091de0c0509e73b0e56236 100644
+--- a/index.cjs
++++ b/index.cjs
+@@ -134220,6 +134220,7 @@ const generatorsMap = {
+         GenerateWeightedCount,
+     ],
+ };
++exports.generatorsMap = generatorsMap;
+ 
+ const latestVersion = 2;
+ 
+@@ -136152,4 +136153,6 @@ exports.lastNames = lastNames;
+ exports.reset = reset;
+ exports.seed = seed;
+ exports.seedForDrizzleStudio = seedForDrizzleStudio;
++exports.AbstractGenerator = AbstractGenerator;
++exports.GenerateUniqueInt = GenerateUniqueInt;
+ //# sourceMappingURL=index.cjs.map
+diff --git a/index.d.cts b/index.d.cts
+index 62d3bd37a0fee9a619e45c118ee7be6cd7db2ec6..0e420d97af12cc0900cdc7b36c0d4d936f5a38aa 100644
+--- a/index.d.cts
++++ b/index.d.cts
+@@ -332,4 +332,9 @@ export { default as cities } from './datasets/cityNames.js';
+ export { default as countries } from './datasets/countries.js';
+ export { default as firstNames } from './datasets/firstNames.js';
+ export { default as lastNames } from './datasets/lastNames.js';
++export { AbstractGenerator, GenerateUniqueInt } from './services/Generators.js';
+ export { SeedService } from './services/SeedService.js';
++export declare const generatorsMap: {
++    [key: string]: (new (params: any) => AbstractGenerator<any>)[];
++};
++
+diff --git a/index.d.mts b/index.d.mts
+index 62d3bd37a0fee9a619e45c118ee7be6cd7db2ec6..5c34032d78f5693013d48633ca54310a542b4e0e 100644
+--- a/index.d.mts
++++ b/index.d.mts
+@@ -332,4 +332,9 @@ export { default as cities } from './datasets/cityNames.js';
+ export { default as countries } from './datasets/countries.js';
+ export { default as firstNames } from './datasets/firstNames.js';
+ export { default as lastNames } from './datasets/lastNames.js';
++export { AbstractGenerator, GenerateUniqueInt } from './services/Generators.js';
+ export { SeedService } from './services/SeedService.js';
++export const generatorsMap: {
++    [key: string]: (new (params: any) => AbstractGenerator<any>)[];
++};
++
+diff --git a/index.d.ts b/index.d.ts
+index 62d3bd37a0fee9a619e45c118ee7be6cd7db2ec6..5c34032d78f5693013d48633ca54310a542b4e0e 100644
+--- a/index.d.ts
++++ b/index.d.ts
+@@ -332,4 +332,9 @@ export { default as cities } from './datasets/cityNames.js';
+ export { default as countries } from './datasets/countries.js';
+ export { default as firstNames } from './datasets/firstNames.js';
+ export { default as lastNames } from './datasets/lastNames.js';
++export { AbstractGenerator, GenerateUniqueInt } from './services/Generators.js';
+ export { SeedService } from './services/SeedService.js';
++export const generatorsMap: {
++    [key: string]: (new (params: any) => AbstractGenerator<any>)[];
++};
++
+diff --git a/index.mjs b/index.mjs
+index eea287112b637953183ab3e520cc41ddf6f6f1f0..d4d77a8886f74205c317446a175e8e32e7161c0e 100644
+--- a/index.mjs
++++ b/index.mjs
+@@ -1,6 +1,6 @@
+-import { is, entityKind, eq, sql, Relations, getTableName, extractTablesRelationalConfig, createTableRelationsHelpers, One } from 'drizzle-orm';
++import { One, Relations, createTableRelationsHelpers, entityKind, eq, extractTablesRelationalConfig, getTableName, is, sql } from 'drizzle-orm';
+ import { MySqlDatabase, MySqlTable, getTableConfig as getTableConfig$1 } from 'drizzle-orm/mysql-core';
+-import { PgDatabase, getTableConfig, PgTable } from 'drizzle-orm/pg-core';
++import { PgDatabase, PgTable, getTableConfig } from 'drizzle-orm/pg-core';
+ import { BaseSQLiteDatabase, SQLiteTable, getTableConfig as getTableConfig$2 } from 'drizzle-orm/sqlite-core';
+ import prand from 'pure-rand';
+ 
+@@ -131635,7 +131635,7 @@ class GenerateInt extends AbstractGenerator {
+         return value;
+     }
+ }
+-class GenerateUniqueInt extends AbstractGenerator {
++export class GenerateUniqueInt extends AbstractGenerator {
+     static entityKind = 'GenerateUniqueInt';
+     genMaxRepeatedValuesCount;
+     skipCheck = false;
+@@ -134063,7 +134063,7 @@ const generatorsFuncs = {
+ const generatorsFuncsV2 = {
+     ...generatorsFuncs,
+ };
+-const generatorsMap = {
++export const generatorsMap = {
+     HollowGenerator: [
+         HollowGenerator,
+     ],
+@@ -136141,5 +136141,5 @@ const getSqliteInfo = (sqliteSchema, sqliteTables) => {
+     return { tables, relations: isCyclicRelations, tableRelations };
+ };
+ 
+-export { SeedService, cityNames as cities, countries, firstNames, getGeneratorsFunctions, lastNames, reset, seed, seedForDrizzleStudio };
++export { AbstractGenerator, SeedService, cityNames as cities, countries, firstNames, getGeneratorsFunctions, lastNames, reset, seed, seedForDrizzleStudio };
+ //# sourceMappingURL=index.mjs.map

@@ -11,5 +11,10 @@
     "prepare": "husky",
     "initialize": "nx run tiara-stack:generate && pnpm install && pnpm generate",
     "generate": "nx run-many -t generate --output-style=stream"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "drizzle-seed@0.3.1": "patches/drizzle-seed@0.3.1.patch"
+    }
   }
 }

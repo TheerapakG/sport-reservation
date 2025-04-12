@@ -13,7 +13,7 @@ const CallbackComponent = () => {
   useEffect(() => {
     (async () => {
       await exchangeMutation.mutateAsync({ code });
-      await router.navigate({ to: "/" });
+      await router.navigate({ to: "/event" });
     })();
   }, [code, router, exchangeMutation]);
 

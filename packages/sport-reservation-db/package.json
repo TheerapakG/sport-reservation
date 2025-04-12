@@ -22,6 +22,7 @@
     "generate": "vite build"
   },
   "peerDependencies": {
+    "arktype": "catalog:",
     "drizzle-orm": "catalog:"
   },
   "devDependencies": {
@@ -40,5 +41,9 @@
     "prettier": "catalog:",
     "vite": "catalog:",
     "vite-plugin-dts": "catalog:"
+  },
+  "dependencies": {
+    "drizzle-arktype": "^0.1.2",
+    "drizzle-seed": "0.3.1"
   }
 }

@@ -26,10 +26,12 @@ import {
   Outlet,
 } from "@tanstack/react-router";
 import {
+  CalendarIcon,
   ChevronDownIcon,
   MessageSquareIcon,
   SparklesIcon,
   TicketCheckIcon,
+  UniversityIcon,
   UsersIcon,
 } from "lucide-react";
 import { subjects } from "sport-reservation-oauth-common/subjects";
@@ -75,6 +77,48 @@ const LoggedInNavigationMenuList = ({
                 </NavigationMenuLink>
               </SubscriptionModal>
             ) : undefined}
+          </NavigationMenuItem>
+          <NavigationMenuItem>
+            <NavigationMenuLink
+              className={cn(navigationMenuTriggerStyle(), "p-0")}
+              asChild
+            >
+              <Link
+                to="/event"
+                activeProps={{
+                  className: "font-bold",
+                }}
+              >
+                <Button
+                  variant="ghost"
+                  className="flex w-16 flex-col items-center justify-center gap-y-1"
+                >
+                  <CalendarIcon className="size-6" />
+                  <span className="text-xs">Events</span>
+                </Button>
+              </Link>
+            </NavigationMenuLink>
+          </NavigationMenuItem>
+          <NavigationMenuItem>
+            <NavigationMenuLink
+              className={cn(navigationMenuTriggerStyle(), "p-0")}
+              asChild
+            >
+              <Link
+                to="/club"
+                activeProps={{
+                  className: "font-bold",
+                }}
+              >
+                <Button
+                  variant="ghost"
+                  className="flex w-16 flex-col items-center justify-center gap-y-1"
+                >
+                  <UniversityIcon className="size-6" />
+                  <span className="text-xs">Clubs</span>
+                </Button>
+              </Link>
+            </NavigationMenuLink>
           </NavigationMenuItem>
           <NavigationMenuItem>
             <NavigationMenuLink
@@ -187,7 +231,7 @@ const WrappingLayoutComponent = ({
                     className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-gradient-to-r from-[#65D1F8] to-[#6CCFD0] bg-clip-text px-4 py-2 text-2xl font-bold text-transparent"
                     asChild
                   >
-                    <Link to="/">Spark</Link>
+                    <Link to={user ? "/event" : "/"}>Spark</Link>
                   </NavigationMenuLink>
                 </NavigationMenuItem>
               </NavigationMenuList>

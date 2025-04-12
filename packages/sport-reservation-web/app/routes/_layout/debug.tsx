@@ -13,10 +13,10 @@ const useExampleUser = () =>
       { sportId: "2", sportType: "tennis" },
     ],
     objectives: [
-      { objectiveId: "1", objectiveType: "stay_active" },
-      { objectiveId: "2", objectiveType: "for_fun" },
+      { objectiveId: "1", objectiveType: "train_improve" },
+      { objectiveId: "2", objectiveType: "just_for_fun" },
       { objectiveId: "3", objectiveType: "meet_new_friends" },
-      { objectiveId: "4", objectiveType: "casual_match" },
+      { objectiveId: "4", objectiveType: "casual_matches" },
     ],
     availability: "Weekends & Evenings",
     locations: [

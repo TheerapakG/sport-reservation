@@ -22,7 +22,7 @@ catalog:
   arktype: ^2.0.0
   c12: ^2.0.1
   destr: ^2.0.3
-  drizzle-orm: ^0.39.0
+  drizzle-orm: ^0.41.0
   effect: ^3.12.7
   ofetch: ^1.4.1
   ufo: ^1.5.4

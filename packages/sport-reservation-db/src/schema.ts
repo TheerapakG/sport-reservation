@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import {
   boolean,
   doublePrecision,
@@ -41,6 +42,16 @@ export const authUserEmailConnection = pgTable(
   ],
 );
 
+export const authUserEmailConnectionRelations = relations(
+  authUserEmailConnection,
+  ({ one }) => ({
+    user: one(userUserProfile, {
+      fields: [authUserEmailConnection.userId],
+      references: [userUserProfile.publicId],
+    }),
+  }),
+);
+
 export const authUserLineConnection = pgTable(
   "auth_user_line_connection",
   {
@@ -60,6 +71,16 @@ export const authUserLineConnection = pgTable(
     index("auth_user_line_connection_user_id_idx").on(table.userId),
     uniqueIndex("auth_user_line_connection_line_id_idx").on(table.lineId),
   ],
+);
+
+export const authUserLineConnectionRelations = relations(
+  authUserLineConnection,
+  ({ one }) => ({
+    user: one(userUserProfile, {
+      fields: [authUserLineConnection.userId],
+      references: [userUserProfile.publicId],
+    }),
+  }),
 );
 
 export const authUserGoogleConnection = pgTable(
@@ -83,6 +104,16 @@ export const authUserGoogleConnection = pgTable(
   ],
 );
 
+export const authUserGoogleConnectionRelations = relations(
+  authUserGoogleConnection,
+  ({ one }) => ({
+    user: one(userUserProfile, {
+      fields: [authUserGoogleConnection.userId],
+      references: [userUserProfile.publicId],
+    }),
+  }),
+);
+
 export const authUserFacebookConnection = pgTable(
   "auth_user_facebook_connection",
   {
@@ -104,6 +135,16 @@ export const authUserFacebookConnection = pgTable(
       table.facebookId,
     ),
   ],
+);
+
+export const authUserFacebookConnectionRelations = relations(
+  authUserFacebookConnection,
+  ({ one }) => ({
+    user: one(userUserProfile, {
+      fields: [authUserFacebookConnection.userId],
+      references: [userUserProfile.publicId],
+    }),
+  }),
 );
 
 export const userUserProfileGender = pgEnum("user_user_profile_gender", [
@@ -144,6 +185,22 @@ export const userUserProfile = pgTable(
   ],
 );
 
+export const userUserProfileRelations = relations(
+  userUserProfile,
+  ({ many }) => ({
+    authUserEmailConnection: many(authUserEmailConnection),
+    authUserLineConnection: many(authUserLineConnection),
+    authUserGoogleConnection: many(authUserGoogleConnection),
+    authUserFacebookConnection: many(authUserFacebookConnection),
+    userUserProfileSport: many(userUserProfileSport),
+    userUserProfileObjective: many(userUserProfileObjective),
+    userUserProfileLocation: many(userUserProfileLocation),
+    userUserGroupMember: many(userUserGroupMember),
+    userUserGroup: many(userUserGroup),
+    eventEvent: many(eventEvent),
+  }),
+);
+
 export const userSportType = pgEnum("user_sport_type", [
   "badminton",
   "tennis",
@@ -168,6 +225,10 @@ export const userSport = pgTable(
   (table) => [uniqueIndex("user_sport_public_id_idx").on(table.publicId)],
 );
 
+export const userSportRelations = relations(userSport, ({ many }) => ({
+  userUserProfileSport: many(userUserProfileSport),
+}));
+
 export const userUserProfileSport = pgTable(
   "user_user_profile_sport",
   {
@@ -191,20 +252,91 @@ export const userUserProfileSport = pgTable(
   ],
 );
 
+export const userUserProfileSportRelations = relations(
+  userUserProfileSport,
+  ({ one }) => ({
+    user: one(userUserProfile, {
+      fields: [userUserProfileSport.userId],
+      references: [userUserProfile.publicId],
+    }),
+    sport: one(userSport, {
+      fields: [userUserProfileSport.sportId],
+      references: [userSport.publicId],
+    }),
+  }),
+);
+
 export const userObjectiveType = pgEnum("user_objective_type", [
-  "casual_match",
-  "for_fitness",
-  "for_fun",
-  "love_challenge",
-  "love_competition",
-  "meet_new_friends",
-  "play_to_win",
-  "push_limits",
+  // casual
+  "just_for_fun",
+  "easygoing_games",
+  "good_vibes_only",
+  "no_pressure_just_play",
+  "here_to_enjoy",
   "relax_rally",
-  "self_improvement",
+  "casual_matches",
+  // competitive
+  "train_improve",
+  "bring_the_heat",
+  "love_a_tough_match",
+  "lets_push_limits",
+  "winning_mindset",
   "serious_play",
-  "stay_active",
+  "always_leveling_up",
+  // fitness
+  "stay_fit_have_fun",
+  "game_workout",
+  "cardio_with_a_racket",
+  "move_groove",
+  "sweat_play",
+  "sports_my_gym",
+  // social
+  "meet_new_friends",
+  "social_sporty",
+  "looking_for_teammates",
+  "here_to_connect",
+  "sports_smiles",
+  "join_my_club",
+  "game_chill",
+  "flexible_open_to_anything",
+  "casual_or_serious",
+  "down_for_anything",
+  "lets_just_play",
+  "depends_on_the_day",
+  "mix_of_fun_competition",
 ]);
+
+export const userObjectiveCategoryType = pgEnum(
+  "user_objective_category_type",
+  ["casual", "competitive", "fitness", "social"],
+);
+
+export const userObjectiveCategory = pgTable(
+  "user_objective_category",
+  {
+    id: serial("id").primaryKey(),
+    objectiveType: userObjectiveType("objective_type").notNull(),
+    categoryType: userObjectiveCategoryType("category_type").notNull(),
+    createdAt: timestamp("created_at", { mode: "date", withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true })
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => new Date()),
+    deletedAt: timestamp("deleted_at", { mode: "date", withTimezone: true }),
+  },
+  (table) => [
+    index("user_objective_category_objective_type_idx").on(table.objectiveType),
+  ],
+);
+
+export const userObjectiveCategoryRelations = relations(
+  userObjectiveCategory,
+  ({ many }) => ({
+    userObjective: many(userObjective),
+  }),
+);
 
 export const userObjective = pgTable(
   "user_objective",
@@ -223,6 +355,11 @@ export const userObjective = pgTable(
   },
   (table) => [uniqueIndex("user_objective_public_id_idx").on(table.publicId)],
 );
+
+export const userObjectiveRelations = relations(userObjective, ({ many }) => ({
+  userUserProfileObjective: many(userUserProfileObjective),
+  userObjectiveCategory: many(userObjectiveCategory),
+}));
 
 export const userUserProfileObjective = pgTable(
   "user_user_profile_objective",
@@ -247,6 +384,20 @@ export const userUserProfileObjective = pgTable(
   ],
 );
 
+export const userUserProfileObjectiveRelations = relations(
+  userUserProfileObjective,
+  ({ one }) => ({
+    user: one(userUserProfile, {
+      fields: [userUserProfileObjective.userId],
+      references: [userUserProfile.publicId],
+    }),
+    objective: one(userObjective, {
+      fields: [userUserProfileObjective.objectiveId],
+      references: [userObjective.publicId],
+    }),
+  }),
+);
+
 export const userLocation = pgTable(
   "user_location",
   {
@@ -265,6 +416,10 @@ export const userLocation = pgTable(
   },
   (table) => [uniqueIndex("user_location_public_id_idx").on(table.publicId)],
 );
+
+export const userLocationRelations = relations(userLocation, ({ many }) => ({
+  userUserProfileLocation: many(userUserProfileLocation),
+}));
 
 export const userUserProfileLocation = pgTable(
   "user_user_profile_location",
@@ -287,6 +442,20 @@ export const userUserProfileLocation = pgTable(
       table.locationId,
     ),
   ],
+);
+
+export const userUserProfileLocationRelations = relations(
+  userUserProfileLocation,
+  ({ one }) => ({
+    user: one(userUserProfile, {
+      fields: [userUserProfileLocation.userId],
+      references: [userUserProfile.publicId],
+    }),
+    location: one(userLocation, {
+      fields: [userUserProfileLocation.locationId],
+      references: [userLocation.publicId],
+    }),
+  }),
 );
 
 export const userUserGroupType = pgEnum("user_user_group_type", [
@@ -317,6 +486,17 @@ export const userUserGroup = pgTable(
     uniqueIndex("user_user_group_public_id_idx").on(table.publicId),
     index("user_user_group_creator_id_idx").on(table.creatorId),
   ],
+);
+
+export const userUserGroupRelations = relations(
+  userUserGroup,
+  ({ one, many }) => ({
+    clubClub: one(clubClub, {
+      fields: [userUserGroup.publicId],
+      references: [clubClub.groupId],
+    }),
+    userUserGroupMember: many(userUserGroupMember),
+  }),
 );
 
 export const userUserGroupMemberStatus = pgEnum(
@@ -350,6 +530,20 @@ export const userUserGroupMember = pgTable(
   ],
 );
 
+export const userUserGroupMemberRelations = relations(
+  userUserGroupMember,
+  ({ one }) => ({
+    userUserGroup: one(userUserGroup, {
+      fields: [userUserGroupMember.groupId],
+      references: [userUserGroup.publicId],
+    }),
+    user: one(userUserProfile, {
+      fields: [userUserGroupMember.userId],
+      references: [userUserProfile.publicId],
+    }),
+  }),
+);
+
 export const clubClub = pgTable(
   "club_club",
   {
@@ -370,6 +564,12 @@ export const clubClub = pgTable(
   },
   (table) => [index("user_club_group_id_idx").on(table.groupId)],
 );
+
+export const clubClubRelations = relations(clubClub, ({ one, many }) => ({
+  userUserGroup: many(userUserGroup),
+  userUserProfile: one(userUserProfile),
+  eventEvent: many(eventEvent),
+}));
 
 export const eventEventCreatorType = pgEnum("event_event_creator_type", [
   "user",
@@ -416,6 +616,16 @@ export const eventEvent = pgTable(
   ],
 );
 
+export const eventEventRelations = relations(eventEvent, ({ many, one }) => ({
+  eventEventSkillLevel: many(eventEventSkillLevel),
+  eventEventSport: many(eventEventSport),
+  eventEventSchedule: many(eventEventSchedule),
+  userUserGroup: one(userUserGroup, {
+    fields: [eventEvent.groupId],
+    references: [userUserGroup.publicId],
+  }),
+}));
+
 export const eventEventSkillLevel = pgTable(
   "event_event_skill_level",
   {
@@ -434,6 +644,16 @@ export const eventEventSkillLevel = pgTable(
   (table) => [index("event_event_skill_level_event_id_idx").on(table.eventId)],
 );
 
+export const eventEventSkillLevelRelations = relations(
+  eventEventSkillLevel,
+  ({ one }) => ({
+    event: one(eventEvent, {
+      fields: [eventEventSkillLevel.eventId],
+      references: [eventEvent.groupId],
+    }),
+  }),
+);
+
 export const eventEventSport = pgTable(
   "event_event_sport",
   {
@@ -450,6 +670,16 @@ export const eventEventSport = pgTable(
     deletedAt: timestamp("deleted_at", { mode: "date", withTimezone: true }),
   },
   (table) => [index("event_event_sport_event_id_idx").on(table.eventId)],
+);
+
+export const eventEventSportRelations = relations(
+  eventEventSport,
+  ({ one }) => ({
+    event: one(eventEvent, {
+      fields: [eventEventSport.eventId],
+      references: [eventEvent.groupId],
+    }),
+  }),
 );
 
 export const eventEventSchedule = pgTable(
@@ -481,6 +711,16 @@ export const eventEventSchedule = pgTable(
   ],
 );
 
+export const eventEventScheduleRelations = relations(
+  eventEventSchedule,
+  ({ one }) => ({
+    event: one(eventEvent, {
+      fields: [eventEventSchedule.eventId],
+      references: [eventEvent.groupId],
+    }),
+  }),
+);
+
 export const eventScheduleMember = pgTable(
   "event_schedule_member",
   {
@@ -508,6 +748,20 @@ export const eventScheduleMember = pgTable(
   ],
 );
 
+export const eventScheduleMemberRelations = relations(
+  eventScheduleMember,
+  ({ one }) => ({
+    eventSchedule: one(eventEventSchedule, {
+      fields: [eventScheduleMember.scheduleId],
+      references: [eventEventSchedule.publicId],
+    }),
+    user: one(userUserProfile, {
+      fields: [eventScheduleMember.userId],
+      references: [userUserProfile.publicId],
+    }),
+  }),
+);
+
 export const chatChat = pgTable(
   "chat_chat",
   {
@@ -528,6 +782,10 @@ export const chatChat = pgTable(
     index("chat_chat_group_id_idx").on(table.groupId),
   ],
 );
+
+export const chatChatRelations = relations(chatChat, ({ many }) => ({
+  chatChatMessage: many(chatChatMessage),
+}));
 
 export const chatChatMessage = pgTable(
   "chat_chat_message",
@@ -557,6 +815,20 @@ export const chatChatMessage = pgTable(
   ],
 );
 
+export const chatChatMessageRelations = relations(
+  chatChatMessage,
+  ({ one }) => ({
+    chat: one(chatChat, {
+      fields: [chatChatMessage.chatId],
+      references: [chatChat.publicId],
+    }),
+    sender: one(userUserProfile, {
+      fields: [chatChatMessage.senderId],
+      references: [userUserProfile.publicId],
+    }),
+  }),
+);
+
 export const chatChatSubscription = pgTable(
   "chat_chat_subscription",
   {
@@ -577,6 +849,16 @@ export const chatChatSubscription = pgTable(
     uniqueIndex("chat_chat_subscription_public_id_idx").on(table.publicId),
     index("chat_chat_subscription_user_id_idx").on(table.userId),
   ],
+);
+
+export const chatChatSubscriptionRelations = relations(
+  chatChatSubscription,
+  ({ one }) => ({
+    user: one(userUserProfile, {
+      fields: [chatChatSubscription.userId],
+      references: [userUserProfile.publicId],
+    }),
+  }),
 );
 
 export const matchingUserGeneralAssessment = pgTable(
@@ -603,6 +885,16 @@ export const matchingUserGeneralAssessment = pgTable(
   ],
 );
 
+export const matchingUserGeneralAssessmentRelations = relations(
+  matchingUserGeneralAssessment,
+  ({ one }) => ({
+    user: one(userUserProfile, {
+      fields: [matchingUserGeneralAssessment.userId],
+      references: [userUserProfile.publicId],
+    }),
+  }),
+);
+
 export const matchingUserBadmintonAssessment = pgTable(
   "matching_user_badminton_assessment",
   {
@@ -625,6 +917,16 @@ export const matchingUserBadmintonAssessment = pgTable(
       table.assessmentVersion,
     ),
   ],
+);
+
+export const matchingUserBadmintonAssessmentRelations = relations(
+  matchingUserBadmintonAssessment,
+  ({ one }) => ({
+    user: one(userUserProfile, {
+      fields: [matchingUserBadmintonAssessment.userId],
+      references: [userUserProfile.publicId],
+    }),
+  }),
 );
 
 export const matchingUserTennisAssessment = pgTable(
@@ -651,6 +953,16 @@ export const matchingUserTennisAssessment = pgTable(
   ],
 );
 
+export const matchingUserTennisAssessmentRelations = relations(
+  matchingUserTennisAssessment,
+  ({ one }) => ({
+    user: one(userUserProfile, {
+      fields: [matchingUserTennisAssessment.userId],
+      references: [userUserProfile.publicId],
+    }),
+  }),
+);
+
 export const matchingUserRunningAssessment = pgTable(
   "matching_user_running_assessment",
   {
@@ -673,6 +985,16 @@ export const matchingUserRunningAssessment = pgTable(
       table.assessmentVersion,
     ),
   ],
+);
+
+export const matchingUserRunningAssessmentRelations = relations(
+  matchingUserRunningAssessment,
+  ({ one }) => ({
+    user: one(userUserProfile, {
+      fields: [matchingUserRunningAssessment.userId],
+      references: [userUserProfile.publicId],
+    }),
+  }),
 );
 
 export const VECTOR_PARTITIONS = {
@@ -710,6 +1032,16 @@ export const matchingUserAssessmentVector = pgTable(
   ],
 );
 
+export const matchingUserAssessmentVectorRelations = relations(
+  matchingUserAssessmentVector,
+  ({ one }) => ({
+    user: one(userUserProfile, {
+      fields: [matchingUserAssessmentVector.userId],
+      references: [userUserProfile.publicId],
+    }),
+  }),
+);
+
 export const matchingCursor = pgTable(
   "matching_cursor",
   {
@@ -737,6 +1069,17 @@ export const matchingCursor = pgTable(
   ],
 );
 
+export const matchingCursorRelations = relations(
+  matchingCursor,
+  ({ one, many }) => ({
+    user: one(userUserProfile, {
+      fields: [matchingCursor.userId],
+      references: [userUserProfile.publicId],
+    }),
+    cursorMatches: many(matchingCursorMatches),
+  }),
+);
+
 export const matchingCursorMatches = pgTable(
   "matching_cursor_matches",
   {
@@ -761,4 +1104,18 @@ export const matchingCursorMatches = pgTable(
       table.userId,
     ),
   ],
+);
+
+export const matchingCursorMatchesRelations = relations(
+  matchingCursorMatches,
+  ({ one }) => ({
+    cursor: one(matchingCursor, {
+      fields: [matchingCursorMatches.cursorId],
+      references: [matchingCursor.publicId],
+    }),
+    user: one(userUserProfile, {
+      fields: [matchingCursorMatches.userId],
+      references: [userUserProfile.publicId],
+    }),
+  }),
 );

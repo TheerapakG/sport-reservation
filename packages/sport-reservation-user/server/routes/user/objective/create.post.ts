@@ -10,6 +10,7 @@ import { getSubjectTypeFromToken } from "sport-reservation-oauth-common/subjects
 import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
 import { OAuthError } from "tiara-stack/models/errors";
 import { OAuthClient } from "~/layers";
+import { objectiveType } from "~/models";
 import { ObjectiveRepository } from "~/repositories/objectiveRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
@@ -18,8 +19,7 @@ export const handlerConfig = defineEventHandlerConfig({
     type({
       objectives: [
         {
-          objectiveType:
-            "'casual_match' | 'for_fitness' | 'for_fun' | 'love_challenge' | 'love_competition' | 'meet_new_friends' | 'play_to_win' | 'push_limits' | 'relax_rally' | 'self_improvement' | 'serious_play' | 'stay_active'",
+          objectiveType,
         },
         "[]",
       ],
@@ -31,8 +31,7 @@ export const handlerConfig = defineEventHandlerConfig({
         {
           userId: "string",
           objectiveId: "string",
-          objectiveType:
-            "'casual_match' | 'for_fitness' | 'for_fun' | 'love_challenge' | 'love_competition' | 'meet_new_friends' | 'play_to_win' | 'push_limits' | 'relax_rally' | 'self_improvement' | 'serious_play' | 'stay_active'",
+          objectiveType,
         },
         "[]",
       ],
