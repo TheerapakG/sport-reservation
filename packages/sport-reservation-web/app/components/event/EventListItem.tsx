@@ -27,7 +27,13 @@ const EventJoinButton = ({
   return (
     <div>
       <EventJoinModal schedule={{ schedule, participants }}>
-        <button type="button" className="flex py-2 pr-4">
+        <button
+          type="button"
+          className="flex py-2 pr-4"
+          disabled={
+            scheduleMemberStatus.data.scheduleMemberStatus !== undefined
+          }
+        >
           <div className="flex h-auto items-center gap-x-2 rounded-l rounded-r-none border-1 border-[#65D1F8] bg-[#E1F8FE] px-3 py-1 align-middle text-sm text-[#65D1F8] hover:bg-[#E1F8FE] hover:text-[#65D1F8] dark:bg-[#E1F8FE]">
             <UsersIcon className="h-4 w-4" />
             {participants.participants}/{schedule.event.sizeLimit}

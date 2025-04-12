@@ -112,7 +112,11 @@ function EventDetailPage() {
           <p className="text-2xl font-bold text-gray-600">{club.name}</p>
         </div>
         <ClubJoinModal club={club}>
-          <button type="button" className="flex py-2 pr-4">
+          <button
+            type="button"
+            className="flex py-2 pr-4"
+            disabled={clubMemberStatusQuery.data.clubMemberStatus !== undefined}
+          >
             <div className="flex h-auto items-center gap-x-2 rounded-l rounded-r-none border-1 border-[#65D1F8] bg-[#E1F8FE] px-3 py-1 align-middle text-2xl text-[#65D1F8] hover:bg-[#E1F8FE] hover:text-[#65D1F8] dark:bg-[#E1F8FE]">
               <UsersIcon className="h-4 w-4" />
               {club.size}
