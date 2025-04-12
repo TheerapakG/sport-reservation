@@ -1,5 +1,5 @@
 import { type } from "arktype";
-import { Context, Effect } from "effect";
+import { Console, Context, Effect, pipe } from "effect";
 import { Simplify } from "effect/Types";
 import {
   $Fetch,
@@ -113,7 +113,7 @@ export const typedFetch = <
       })
       .join("/");
 
-    const fetchResponse = yield* Effect.mapError(
+    const fetchResponse = yield* pipe(
       Effect.tryPromise(() =>
         fetch(parsedRequest, {
           ...opts,
@@ -121,7 +121,8 @@ export const typedFetch = <
           ...(parsedBody ? { body: parsedBody } : {}),
         }),
       ),
-      (error) => new FetchError(error.error as OFetchError),
+      Effect.mapError((error) => new FetchError(error.error as OFetchError)),
+      Effect.tapError((error) => Console.log("[ERROR]", error)),
     );
 
     if (
@@ -194,15 +195,16 @@ export const typedRawFetch = <
       })
       .join("/");
 
-    const fetchResponse = yield* Effect.mapError(
+    const fetchResponse = yield* pipe(
       Effect.tryPromise(() =>
-        fetch.raw(parsedRequest, {
+        fetch(parsedRequest, {
           ...opts,
           ...(parsedQuery ? { query: parsedQuery } : {}),
           ...(parsedBody ? { body: parsedBody } : {}),
         }),
       ),
-      (error) => new FetchError(error.error as OFetchError),
+      Effect.mapError((error) => new FetchError(error.error as OFetchError)),
+      Effect.tapError((error) => Console.log("[ERROR]", error)),
     );
 
     if (
