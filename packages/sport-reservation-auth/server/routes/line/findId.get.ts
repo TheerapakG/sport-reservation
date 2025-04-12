@@ -44,7 +44,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     ) ?? { userId: undefined };
 
     return {
-      id: userId,
+      ...(userId ? { id: userId } : {}),
     };
   }),
 );
