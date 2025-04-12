@@ -10,29 +10,38 @@ export default function ClubListItem({
   club: typeof clubType.infer;
 }) {
   return (
-    <Link
-      to={`/club/$clubId`}
-      params={{
-        clubId: club.id,
-      }}
-      className="flex space-x-4 rounded-md bg-white p-4 shadow"
-    >
-      <img
-        src={
-          club.image ??
-          "https://cdn.theerapakg.moe/reservation/asset/event/badminton-default.jpg"
-        }
-        alt={club.name}
-        className="h-32 w-48 rounded-md object-cover"
-      />
+    <div className="flex space-x-4 rounded-md bg-white p-4 shadow">
+      <Link
+        to={`/club/$clubId`}
+        params={{
+          clubId: club.id,
+        }}
+      >
+        <img
+          src={
+            club.image ??
+            "https://cdn.theerapakg.moe/reservation/asset/event/badminton-default.jpg"
+          }
+          alt={club.name}
+          className="h-32 w-48 rounded-md object-cover"
+        />
+      </Link>
 
-      <div className="flex w-full flex-col justify-between space-x-1">
-        <p className="text-xl font-semibold">{club.name}</p>
-        <p className="text-sm text-gray-600">{club.description}</p>
-        <p className="flex items-center text-sm text-gray-600">
-          <MapPin size={16} className="mr-1" />
-          {club.locationDescription}
-        </p>
+      <div className="flex w-full flex-col justify-between">
+        <Link
+          to={`/club/$clubId`}
+          params={{
+            clubId: club.id,
+          }}
+          className="flex w-full flex-col justify-between"
+        >
+          <p className="text-xl font-semibold">{club.name}</p>
+          <p className="text-sm text-gray-600">{club.description}</p>
+          <p className="flex items-center text-sm text-gray-600">
+            <MapPin size={16} className="mr-1" />
+            {club.locationDescription}
+          </p>
+        </Link>
         <div
           onClick={(e) => {
             e.stopPropagation();
@@ -52,6 +61,6 @@ export default function ClubListItem({
           </ClubJoinModal>
         </div>
       </div>
-    </Link>
+    </div>
   );
 }

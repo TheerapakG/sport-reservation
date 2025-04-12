@@ -22,34 +22,44 @@ export default function EventListItem({
   );
 
   return (
-    <Link
-      to={`/event/$scheduleId/$repeatIndex`}
-      params={{
-        scheduleId: schedule.schedule.id,
-        repeatIndex: participants.repeatIndex.toString(),
-      }}
-      className="flex space-x-4 rounded-md bg-white p-4 shadow"
-    >
-      <img
-        src={
-          schedule.event.image ??
-          "https://cdn.theerapakg.moe/reservation/asset/event/badminton-default.jpg"
-        }
-        alt={schedule.event.name}
-        className="h-32 w-48 rounded-md object-cover"
-      />
+    <div className="flex space-x-4 rounded-md bg-white p-4 shadow">
+      <Link
+        to={`/event/$scheduleId/$repeatIndex`}
+        params={{
+          scheduleId: schedule.schedule.id,
+          repeatIndex: participants.repeatIndex.toString(),
+        }}
+      >
+        <img
+          src={
+            schedule.event.image ??
+            "https://cdn.theerapakg.moe/reservation/asset/event/badminton-default.jpg"
+          }
+          alt={schedule.event.name}
+          className="h-32 w-48 rounded-md object-cover"
+        />
+      </Link>
 
-      <div className="flex w-full flex-col justify-between space-x-1">
-        <p className="text-sm text-[#F28382]">
-          {format(actualStartAt, "EEEE PPP HH:mm")} -{" "}
-          {format(actualEndAt, "EEEE PPP HH:mm")}
-        </p>
-        <p className="text-xl font-semibold">{schedule.event.name}</p>
-        <p className="text-sm text-gray-600">{schedule.event.description}</p>
-        <p className="flex items-center text-sm text-gray-600">
-          <MapPin size={16} className="mr-1" />
-          {schedule.event.locationDescription}
-        </p>
+      <div className="flex w-full flex-col justify-between">
+        <Link
+          to={`/event/$scheduleId/$repeatIndex`}
+          params={{
+            scheduleId: schedule.schedule.id,
+            repeatIndex: participants.repeatIndex.toString(),
+          }}
+          className="flex w-full flex-col justify-between"
+        >
+          <p className="text-sm text-[#F28382]">
+            {format(actualStartAt, "EEEE PPP HH:mm")} -{" "}
+            {format(actualEndAt, "EEEE PPP HH:mm")}
+          </p>
+          <p className="text-xl font-semibold">{schedule.event.name}</p>
+          <p className="text-sm text-gray-600">{schedule.event.description}</p>
+          <p className="flex items-center text-sm text-gray-600">
+            <MapPin size={16} className="mr-1" />
+            {schedule.event.locationDescription}
+          </p>
+        </Link>
         <div
           onClick={(e) => {
             e.stopPropagation();
@@ -69,6 +79,6 @@ export default function EventListItem({
           </EventJoinModal>
         </div>
       </div>
-    </Link>
+    </div>
   );
 }
