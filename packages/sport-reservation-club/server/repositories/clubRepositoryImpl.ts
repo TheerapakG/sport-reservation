@@ -1,6 +1,6 @@
 import { PgDrizzle } from "@effect/sql-drizzle/Pg";
 import { and, count, eq, inArray, isNull, not, sql } from "drizzle-orm";
-import { Effect, HashMap, Layer } from "effect";
+import { Effect, HashMap, Layer, Option } from "effect";
 import {
   clubClub,
   userUserGroup,
@@ -513,7 +513,7 @@ export const clubRepositoryImpl = /*@__PURE__*/ Layer.effect(
               ),
             );
 
-          if (club.length === 0) return { status: "pending" as const };
+          if (club.length === 0) return Option.none();
 
           const memberStatus = yield* db
             .select({
@@ -529,10 +529,10 @@ export const clubRepositoryImpl = /*@__PURE__*/ Layer.effect(
             );
 
           if (memberStatus.length === 0) {
-            return { status: "pending" as const };
+            return Option.none();
           }
 
-          return { status: memberStatus[0].status };
+          return Option.some({ status: memberStatus[0].status });
         }).pipe(Effect.withSpan("clubRepositoryImpl.getClubMemberStatus")),
     });
   }),

@@ -1,15 +1,19 @@
 import { EventParamsContext, effectEventHandler } from "$/effectEventHandler";
 import { type } from "arktype";
-import { Effect } from "effect";
+import { Effect, Option } from "effect";
 import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
 import { ClubRepository } from "~/repositories/clubRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
   name: "getClubMemberStatus",
   response: response(
-    type({
-      status: "'pending' | 'member'",
-    }),
+    type([
+      {
+        status: "'pending' | 'member'",
+      },
+      "|",
+      "undefined",
+    ]),
     { stream: false },
   ),
   query: params(
@@ -30,9 +34,11 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
 
     const clubRepository = yield* ClubRepository;
 
-    return yield* clubRepository.getClubMemberStatus({
-      clubId,
-      userId,
-    });
+    return Option.getOrUndefined(
+      yield* clubRepository.getClubMemberStatus({
+        clubId,
+        userId,
+      }),
+    );
   }),
 );

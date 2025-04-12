@@ -117,6 +117,9 @@ export class ClubRepository
       getClubMemberStatus: (data: {
         clubId: string;
         userId: string;
-      }) => Effect.Effect<{ status: "pending" | "member" }, SqlError.SqlError>;
+      }) => Effect.Effect<
+        Option.Option<{ status: "pending" | "member" }>,
+        SqlError.SqlError
+      >;
     }
   >() {}

@@ -15,9 +15,13 @@ import { ScheduleRepository } from "~/repositories/scheduleRepository";
 export const handlerConfig = defineEventHandlerConfig({
   name: "getScheduleMemberStatus",
   response: response(
-    type({
-      status: "string | null",
-    }),
+    type([
+      {
+        status: "'pending' | 'member'",
+      },
+      "|",
+      "undefined",
+    ]),
     { stream: false },
   ),
   query: params(
@@ -58,8 +62,6 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
       userId,
     });
 
-    return {
-      status: Option.isNone(statusOption) ? null : statusOption.value.status,
-    };
+    return Option.getOrUndefined(statusOption);
   }),
 );
