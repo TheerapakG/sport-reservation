@@ -197,7 +197,7 @@ export const typedRawFetch = <
 
     const fetchResponse = yield* pipe(
       Effect.tryPromise(() =>
-        fetch(parsedRequest, {
+        fetch.raw(parsedRequest, {
           ...opts,
           ...(parsedQuery ? { query: parsedQuery } : {}),
           ...(parsedBody ? { body: parsedBody } : {}),
