@@ -24,7 +24,6 @@
     "preview": "node .output/server/index.mjs"
   },
   "dependencies": {
-    "@date-fns/tz": "^1.2.0",
     "@effect/experimental": "catalog:",
     "@effect/platform": "catalog:",
     "@effect/platform-node": "catalog:",
@@ -32,7 +31,6 @@
     "@effect/sql": "catalog:",
     "@effect/sql-drizzle": "catalog:",
     "@effect/sql-pg": "catalog:",
-    "date-fns": "^3.6.0",
     "jsonwebtoken": "catalog:",
     "unstorage": "^1.12.0",
     "validator": "^13.12.0"

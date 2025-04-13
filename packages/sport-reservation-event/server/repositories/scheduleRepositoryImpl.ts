@@ -1,6 +1,4 @@
-import { TZDate } from "@date-fns/tz";
 import { PgDrizzle } from "@effect/sql-drizzle/Pg";
-import { endOfDay, startOfDay } from "date-fns";
 import {
   and,
   count,
@@ -14,7 +12,7 @@ import {
   sql,
   sum,
 } from "drizzle-orm";
-import { Effect, Layer, Option } from "effect";
+import { DateTime, Effect, Layer, Option, pipe } from "effect";
 import {
   eventEvent,
   eventEventSchedule,
@@ -1191,13 +1189,17 @@ export const scheduleRepositoryImpl = Layer.effect(
       getSchedulesByDate: ({ date, offset, limit }) =>
         Effect.gen(function* () {
           const scheduleParticipants = scheduleParticipantsCTE();
+
+          const effectDate = DateTime.unsafeMakeZoned(date, {
+            timeZone: "Asia/Bangkok",
+            adjustForTimeZone: true,
+          });
           const startDateEpoch = Math.floor(
-            startOfDay(
-              new TZDate(date).withTimeZone("Asia/Bangkok"),
-            ).getTime() / 1000,
+            pipe(effectDate, DateTime.startOf("day"), DateTime.toEpochMillis) /
+              1000,
           );
           const endDateEpoch = Math.floor(
-            endOfDay(new TZDate(date).withTimeZone("Asia/Bangkok")).getTime() /
+            pipe(effectDate, DateTime.endOf("day"), DateTime.toEpochMillis) /
               1000,
           );
 
