@@ -10,6 +10,7 @@ import {
   reset,
   seed,
 } from "drizzle-seed";
+import { Array } from "effect";
 import postgres from "postgres";
 import {
   authUserEmailConnection,
@@ -28,6 +29,8 @@ import {
   eventEventScheduleRelations,
   eventScheduleMember,
   eventScheduleMemberRelations,
+  matchingUserAssessmentVector,
+  matchingUserAssessmentVectorRelations,
   userObjective,
   userObjectiveCategory,
   userObjectiveCategoryRelations,
@@ -578,6 +581,8 @@ async function main() {
     userUserGroupRelations,
     userUserGroupMember,
     userUserGroupMemberRelations,
+    matchingUserAssessmentVector,
+    matchingUserAssessmentVectorRelations,
   };
   const resetSchema = {
     authUserEmailConnection,
@@ -758,6 +763,10 @@ async function main() {
         createForkableCachedValues([eventGroupId]),
         createForkableCachedValues([cachedForkedEventUserGroupCreatorId]),
       ]).getAllForkedGenerators();
+
+    const [forkedMatchingUserUserId] = createForkableCachedValues([
+      userProfilePublicId,
+    ]).getAllForkedGenerators();
 
     return {
       userUserProfile: {
@@ -1024,6 +1033,22 @@ async function main() {
             defaultValue: null,
           }),
         },
+      },
+      matchingUserAssessmentVector: {
+        columns: {
+          id: funcs.intPrimaryKey(),
+          userId: forkedMatchingUserUserId,
+          vectorVersion: funcs.default({
+            defaultValue: Array.pad([1, 1, 1, 1], 16, 0),
+          }),
+          passiveMatchingVector: funcs.default({
+            defaultValue: Array.replicate(0, 256),
+          }),
+          activeMatchingVector: funcs.default({
+            defaultValue: Array.replicate(0, 256),
+          }),
+        },
+        count: 100,
       },
     };
   });

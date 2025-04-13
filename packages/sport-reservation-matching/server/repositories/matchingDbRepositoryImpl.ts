@@ -6,7 +6,7 @@ import {
   desc,
   eq,
   inArray,
-  isNotNull,
+  isNull,
   l2Distance,
   max,
   min,
@@ -35,7 +35,7 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
             .from(matchingUserAssessmentVector)
             .where(
               and(
-                isNotNull(matchingUserAssessmentVector.deletedAt),
+                isNull(matchingUserAssessmentVector.deletedAt),
                 eq(
                   matchingUserAssessmentVector.vectorVersion,
                   Array.pad([1, 1, 1, 1], 16, 0),
@@ -72,7 +72,7 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
             .from(matchingCursor)
             .where(
               and(
-                isNotNull(matchingCursor.deletedAt),
+                isNull(matchingCursor.deletedAt),
                 eq(matchingCursor.userId, userId),
               ),
             )
@@ -91,7 +91,7 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
             .from(matchingCursorMatches)
             .where(
               and(
-                isNotNull(matchingCursorMatches.deletedAt),
+                isNull(matchingCursorMatches.deletedAt),
                 eq(matchingCursorMatches.cursorId, cursorId),
               ),
             );
@@ -109,7 +109,7 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
             .from(matchingCursorMatches)
             .where(
               and(
-                isNotNull(matchingCursorMatches.deletedAt),
+                isNull(matchingCursorMatches.deletedAt),
                 eq(matchingCursorMatches.cursorId, cursorId),
               ),
             );
@@ -121,7 +121,7 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
             .from(matchingCursor)
             .where(
               and(
-                isNotNull(matchingCursor.deletedAt),
+                isNull(matchingCursor.deletedAt),
                 eq(
                   matchingCursor.vectorVersion,
                   Array.pad([1, 1, 1, 1], 16, 0),
@@ -141,7 +141,7 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
             .from(matchingUserAssessmentVector)
             .where(
               and(
-                isNotNull(matchingUserAssessmentVector.deletedAt),
+                isNull(matchingUserAssessmentVector.deletedAt),
                 eq(
                   matchingUserAssessmentVector.vectorVersion,
                   Array.pad([1, 1, 1, 1], 16, 0),
@@ -184,7 +184,7 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
               .from(matchingUserAssessmentVector)
               .where(
                 and(
-                  isNotNull(matchingUserAssessmentVector.deletedAt),
+                  isNull(matchingUserAssessmentVector.deletedAt),
                   eq(
                     matchingUserAssessmentVector.vectorVersion,
                     Array.pad([1, 1, 1, 1], 16, 0),
