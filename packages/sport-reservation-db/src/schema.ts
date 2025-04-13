@@ -491,10 +491,8 @@ export const userUserGroup = pgTable(
 export const userUserGroupRelations = relations(
   userUserGroup,
   ({ one, many }) => ({
-    clubClub: one(clubClub, {
-      fields: [userUserGroup.publicId],
-      references: [clubClub.groupId],
-    }),
+    clubClub: one(clubClub),
+    eventEvent: one(eventEvent),
     userUserGroupMember: many(userUserGroupMember),
   }),
 );
@@ -620,10 +618,11 @@ export const eventEventRelations = relations(eventEvent, ({ many, one }) => ({
   eventEventSkillLevel: many(eventEventSkillLevel),
   eventEventSport: many(eventEventSport),
   eventEventSchedule: many(eventEventSchedule),
-  userUserGroup: one(userUserGroup, {
-    fields: [eventEvent.groupId],
-    references: [userUserGroup.publicId],
+  clubClub: one(clubClub, {
+    fields: [eventEvent.creatorId],
+    references: [clubClub.groupId],
   }),
+  userUserGroup: many(userUserGroup),
 }));
 
 export const eventEventSkillLevel = pgTable(

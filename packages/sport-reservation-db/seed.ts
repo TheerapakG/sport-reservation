@@ -22,6 +22,8 @@ import {
   authUserLineConnectionRelations,
   clubClub,
   clubClubRelations,
+  eventEvent,
+  eventEventRelations,
   userObjective,
   userObjectiveCategory,
   userObjectiveCategoryRelations,
@@ -78,6 +80,7 @@ abstract class AbstractDerivedGenerator<T> extends AbstractGenerator<
 type CachedGeneratorParams<T> = {
   baseGenerator: AbstractGenerator<T>;
   cachedValues: unknown[];
+  debug?: string;
 };
 
 class CachedGenerator<T> extends AbstractDerivedGenerator<
@@ -100,6 +103,7 @@ class CachedGenerator<T> extends AbstractDerivedGenerator<
       baseColumnDataType: params.baseGenerator.baseColumnDataType,
       stringLength: params.baseGenerator.stringLength,
       weightedCountSeed: params.baseGenerator.weightedCountSeed,
+      debug: params.debug,
     };
     super(derivedParams);
   }
@@ -111,13 +115,19 @@ class CachedGenerator<T> extends AbstractDerivedGenerator<
   public override generate({ i }: { i: number }) {
     const value = this.params.baseGenerator.generate({ i });
     this.params.cachedValues.push(value);
+    if (this.params.debug) {
+      console.log(this.params.debug, value);
+    }
     return value;
   }
 }
 generatorsMap.CachedGenerator = [CachedGenerator];
 
-const createCachedGenerator = <T>(baseGenerator: AbstractGenerator<T>) => {
-  return new CachedGenerator<T>({ baseGenerator });
+const createCachedGenerator = <T>(
+  baseGenerator: AbstractGenerator<T>,
+  debug?: string,
+) => {
+  return new CachedGenerator<T>({ baseGenerator, debug });
 };
 
 type ForkedGeneratorParams = {
@@ -171,6 +181,110 @@ abstract class AbstractForkableGenerator<T> extends AbstractGenerator<T> {
     );
   }
 }
+
+type ForkableParams = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  generators: CachedGenerator<any>[];
+  debug?: string;
+};
+
+class Forkable extends AbstractForkableGenerator<ForkableParams> {
+  static override readonly entityKind: string = "Forkable";
+
+  public constructor(params: ForkableParams) {
+    super(params);
+    this.forkedGeneratorParams = params.generators.map((g) => ({
+      isUnique: g.isUnique,
+      notNull: g.notNull,
+      dataType: g.dataType,
+      arraySize: g.arraySize,
+      baseColumnDataType: g.baseColumnDataType,
+      stringLength: g.stringLength,
+      weightedCountSeed: g.weightedCountSeed,
+    }));
+  }
+
+  public override init({ count, seed }: { count: number; seed: number }) {
+    this.params.generators.forEach((g) => {
+      g.init({ count, seed });
+    });
+  }
+
+  public override generate({ i }: { i: number }) {
+    const values = this.params.generators.map((g) => g.generate({ i }));
+    this.cachedValues.push(values);
+    if (this.params.debug) {
+      console.log(this.params.debug, values);
+    }
+    return values;
+  }
+}
+generatorsMap.Forkable = [Forkable];
+
+const createForkable = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  generators: CachedGenerator<any>[],
+  debug?: string,
+) => {
+  return new Forkable({ generators, debug });
+};
+
+type ForkableCachedValuesParams = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  generators: CachedGenerator<any>[];
+  debug?: string;
+};
+
+class ForkableCachedValues extends AbstractForkableGenerator<ForkableCachedValuesParams> {
+  static override readonly entityKind: string = "ForkableCachedValues";
+
+  public state: { genIdx: number } = { genIdx: 0 };
+
+  public constructor(params: ForkableCachedValuesParams) {
+    super(params);
+    this.forkedGeneratorParams = params.generators.map((g) => ({
+      isUnique: g.isUnique,
+      notNull: g.notNull,
+      dataType: g.dataType,
+      arraySize: g.arraySize,
+      baseColumnDataType: g.baseColumnDataType,
+      stringLength: g.stringLength,
+      weightedCountSeed: g.weightedCountSeed,
+    }));
+  }
+
+  generate() {
+    const [values] = this.params.generators.reduce(
+      ([acc, valuesIdx]: [readonly unknown[], number], curr) => {
+        return [
+          [
+            ...acc,
+            curr.params.cachedValues[
+              valuesIdx % curr.params.cachedValues.length
+            ],
+          ],
+          Math.floor(valuesIdx / curr.params.cachedValues.length),
+        ] as const;
+      },
+      [[], this.state.genIdx] as const,
+    );
+    this.state.genIdx = this.state.genIdx + 1;
+    this.cachedValues.push(values);
+    if (this.params.debug) {
+      console.log(this.params.debug, values);
+    }
+    return values;
+  }
+}
+generatorsMap.ForkableCachedValues = [ForkableCachedValues];
+
+const createForkableCachedValues = (
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  generators: CachedGenerator<any>[],
+  debug?: string,
+) => {
+  return new ForkableCachedValues({ generators, debug });
+};
 
 type ForkableUniqueCachedValuesParams = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -376,6 +490,63 @@ const createZipForkable = (
   return new ZipForkable({ generators });
 };
 
+type ConcatForkableParams = {
+  generators: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    generator: AbstractForkableGenerator<any>;
+    count: number;
+  }[];
+};
+
+class ConcatForkable extends AbstractForkableGenerator<ConcatForkableParams> {
+  static override readonly entityKind: string = "ConcatForkable";
+
+  public state: { genIdx: number; count: number } = { genIdx: 0, count: 0 };
+
+  public constructor(params: ConcatForkableParams) {
+    super(params);
+    this.forkedGeneratorParams =
+      params.generators[0].generator.forkedGeneratorParams;
+  }
+
+  override init({ count, seed }: { count: number; seed: number }) {
+    this.params.generators.forEach((g) => {
+      g.generator.init({ count, seed });
+    });
+  }
+
+  generate({ i }: { i: number }) {
+    if (this.state.count === this.params.generators[this.state.genIdx].count) {
+      this.state.genIdx = this.state.genIdx + 1;
+      this.state.count = 0;
+    }
+    if (
+      this.state.count ===
+      this.params.generators[this.state.genIdx].generator.cachedValues.length
+    ) {
+      this.params.generators[this.state.genIdx].generator.generate({ i });
+    }
+    const result =
+      this.params.generators[this.state.genIdx].generator.cachedValues[
+        this.state.count
+      ];
+    this.state.count = this.state.count + 1;
+    this.cachedValues.push(result);
+    return result;
+  }
+}
+generatorsMap.ConcatForkable = [ConcatForkable];
+
+const createConcatForkable = (
+  generators: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    generator: AbstractForkableGenerator<any>;
+    count: number;
+  }[],
+) => {
+  return new ConcatForkable({ generators });
+};
+
 async function main() {
   const db = drizzle({ client: postgres(safeEnv.POSTGRES_URL) });
   const schema = {
@@ -397,6 +568,8 @@ async function main() {
     userUserGroupRelations,
     userUserGroupMember,
     userUserGroupMemberRelations,
+    eventEvent,
+    eventEventRelations,
   };
   const resetSchema = {
     authUserEmailConnection,
@@ -481,21 +654,81 @@ async function main() {
     const clubGroupId = createCachedGenerator(funcs.uuid());
     const clubCount = 30;
 
+    const eventGroupId = createCachedGenerator(funcs.uuid());
+    const userEventCount = 10;
+    const clubEventCount = 10;
+    const [
+      forkedEventEventGroupId,
+      forkedEventEventEventCreatorType,
+      forkedEventEventCreatorId,
+      forkedEventUserGroupCreatorId,
+    ] = createConcatForkable([
+      {
+        generator: createZipForkable([
+          createForkable([eventGroupId]),
+          createForkableDefault([["user"]], [{}]),
+          createForkableCachedValues([userProfilePublicId]),
+          createForkableCachedValues([userProfilePublicId]),
+        ]),
+        count: userEventCount,
+      },
+      {
+        generator: createZipForkable([
+          createForkable([eventGroupId]),
+          createForkableDefault([["club"]], [{}]),
+          createForkableCachedValues([clubGroupId]),
+          createForkableCachedValues([userProfilePublicId]),
+        ]),
+        count: clubEventCount,
+      },
+    ]).getAllForkedGenerators();
+
+    const cachedForkedEventUserGroupCreatorId = createCachedGenerator(
+      forkedEventUserGroupCreatorId,
+    );
+
     const [
       forkedUserUserGroupPublicId,
       forkedUserUserGroupCreator,
       forkedUserUserGroupType,
       forkedUserUserGroupName,
-    ] = createZipForkable([
-      createForkableUniqueCachedValues([clubGroupId]),
-      createForkableUniqueCachedValues([userProfilePublicId]),
-      createForkableDefault([["club"]], [{}]),
-      createForkableRandomDefault(
-        lastNames
-          .flatMap((l) => [`Club ${l}`, `${l}'s Club`, `${l}'s Sports Club`])
-          .map((l) => [l]),
-        [{}],
-      ),
+    ] = createConcatForkable([
+      {
+        generator: createZipForkable([
+          createForkableCachedValues([clubGroupId]),
+          createForkableCachedValues([userProfilePublicId]),
+          createForkableDefault([["club"]], [{}]),
+          createForkableRandomDefault(
+            lastNames
+              .flatMap((l) => [
+                `Club ${l}`,
+                `${l}'s Club`,
+                `${l}'s Sports Club`,
+              ])
+              .map((l) => [l]),
+            [{}],
+          ),
+        ]),
+        count: clubCount,
+      },
+      {
+        generator: createZipForkable([
+          createForkableCachedValues([eventGroupId], "event"),
+          createForkable([cachedForkedEventUserGroupCreatorId]),
+          createForkableDefault([["event"]], [{}]),
+          createForkableRandomDefault(
+            lastNames
+              .flatMap((l) => [
+                `Event ${l}`,
+                `${l}'s Event`,
+                `${l}'s Sports Event`,
+              ])
+              .map((l) => [l]),
+            [{}],
+          ),
+        ]),
+        count: userEventCount + clubEventCount,
+      },
     ]).getAllForkedGenerators();
 
     return {
@@ -645,6 +878,34 @@ async function main() {
         },
         count: clubCount,
       },
+      eventEvent: {
+        columns: {
+          id: funcs.intPrimaryKey(),
+          groupId: forkedEventEventGroupId,
+          image: funcs.default({
+            defaultValue: "/asset/event/badminton-default.jpg",
+          }),
+          eventCreatorType: forkedEventEventEventCreatorType,
+          creatorId: forkedEventEventCreatorId,
+          description: funcs.loremIpsum({ sentencesCount: 4 }),
+          location: funcs.default({
+            defaultValue: null,
+          }),
+          locationDescription: funcs.streetAddress(),
+          autoAccept: funcs.boolean(),
+          sizeLimit: funcs.int({ minValue: 2, maxValue: 10 }),
+          createdAt: funcs.default({
+            defaultValue: new Date(),
+          }),
+          updatedAt: funcs.default({
+            defaultValue: new Date(),
+          }),
+          deletedAt: funcs.default({
+            defaultValue: null,
+          }),
+        },
+        count: userEventCount + clubEventCount,
+      },
       userUserGroup: {
         columns: {
           id: funcs.intPrimaryKey(),
@@ -662,7 +923,7 @@ async function main() {
             defaultValue: null,
           }),
         },
-        count: clubCount,
+        count: clubCount + userEventCount + clubEventCount,
       },
     };
   });
