@@ -122,29 +122,6 @@ export const scheduleRepositoryImpl = Layer.effect(
         );
     };
 
-    const getScheduleRepeatCondition = (date: Date) => {
-      const dateEpoch = Math.floor(date.getTime() / 1000);
-
-      return and(
-        lte(
-          sql`extract(epoch from ${eventEventSchedule.startAt}) + (${eventEventSchedule.repeatInterval} * floor((${dateEpoch} - extract(epoch from ${eventEventSchedule.startAt})) / ${eventEventSchedule.repeatInterval}))`,
-          dateEpoch,
-        ),
-        gt(
-          sql`extract(epoch from ${eventEventSchedule.endAt})  + (${eventEventSchedule.repeatInterval} * floor((${dateEpoch} - extract(epoch from ${eventEventSchedule.startAt})) / ${eventEventSchedule.repeatInterval}))`,
-          dateEpoch,
-        ),
-      );
-    };
-
-    const getScheduleRepeatIndex = (date: Date) => {
-      const dateEpoch = Math.floor(date.getTime() / 1000);
-
-      return sql`floor((${dateEpoch} - extract(epoch from ${eventEventSchedule.startAt})) / ${eventEventSchedule.repeatInterval})`.mapWith(
-        Number,
-      );
-    };
-
     return ScheduleRepository.of({
       createSchedule: ({ eventId, startAt, endAt, repeat, repeatInterval }) =>
         Effect.gen(function* () {
@@ -1212,10 +1189,9 @@ export const scheduleRepositoryImpl = Layer.effect(
       getSchedulesByDate: ({ date, offset, limit }) =>
         Effect.gen(function* () {
           const scheduleParticipants = scheduleParticipantsCTE();
+          const dateEpoch = Math.floor(date.getTime() / 1000);
 
-          const scheduleRepeatIndex = getScheduleRepeatIndex(date);
-
-          const schedules = yield* db
+          const query = db
             .with(scheduleParticipants)
             .select({
               schedule: eventEventSchedule,
@@ -1241,8 +1217,18 @@ export const scheduleRepositoryImpl = Layer.effect(
             )
             .where(
               and(
-                eq(scheduleParticipants.repeatIndex, scheduleRepeatIndex),
-                getScheduleRepeatCondition(date),
+                lte(
+                  sql`extract(epoch from ${eventEventSchedule.startAt}) + (${eventEventSchedule.repeatInterval} * floor((${dateEpoch} - extract(epoch from ${eventEventSchedule.startAt})) / ${eventEventSchedule.repeatInterval}))`,
+                  dateEpoch,
+                ),
+                gt(
+                  sql`extract(epoch from ${eventEventSchedule.endAt})  + (${eventEventSchedule.repeatInterval} * floor((${dateEpoch} - extract(epoch from ${eventEventSchedule.startAt})) / ${eventEventSchedule.repeatInterval}))`,
+                  dateEpoch,
+                ),
+                eq(
+                  sql`floor((${dateEpoch} - extract(epoch from ${eventEventSchedule.startAt})) / ${eventEventSchedule.repeatInterval})`,
+                  scheduleParticipants.repeatIndex,
+                ),
                 isNull(eventEventSchedule.deletedAt),
                 isNull(eventEvent.deletedAt),
                 isNull(userUserGroup.deletedAt),
@@ -1250,6 +1236,10 @@ export const scheduleRepositoryImpl = Layer.effect(
             )
             .offset(offset)
             .limit(limit);
+
+          console.log(query.toSQL());
+
+          const schedules = yield* query;
 
           // For each schedule, get skill levels and sport types
           const schedulesWithDetails = yield* Effect.forEach(
