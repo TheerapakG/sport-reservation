@@ -24,6 +24,7 @@
     "preview": "node .output/server/index.mjs"
   },
   "dependencies": {
+    "@date-fns/tz": "^1.2.0",
     "@effect/experimental": "catalog:",
     "@effect/platform": "catalog:",
     "@effect/platform-node": "catalog:",

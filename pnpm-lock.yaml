@@ -581,6 +581,9 @@ importers:
 
   packages/sport-reservation-event:
     dependencies:
+      '@date-fns/tz':
+        specifier: ^1.2.0
+        version: 1.2.0
       '@effect/experimental':
         specifier: 'catalog:'
         version: 0.39.1(@effect/platform-node@0.71.1(@effect/platform@0.75.1(effect@3.12.7))(effect@3.12.7))(@effect/platform@0.75.1(effect@3.12.7))(effect@3.12.7)(ioredis@5.5.0)(ws@8.18.0)

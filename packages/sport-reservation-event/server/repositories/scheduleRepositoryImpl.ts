@@ -1,3 +1,4 @@
+import { TZDate } from "@date-fns/tz";
 import { PgDrizzle } from "@effect/sql-drizzle/Pg";
 import { endOfDay, startOfDay } from "date-fns";
 import {
@@ -1190,8 +1191,15 @@ export const scheduleRepositoryImpl = Layer.effect(
       getSchedulesByDate: ({ date, offset, limit }) =>
         Effect.gen(function* () {
           const scheduleParticipants = scheduleParticipantsCTE();
-          const startDateEpoch = Math.floor(startOfDay(date).getTime() / 1000);
-          const endDateEpoch = Math.floor(endOfDay(date).getTime() / 1000);
+          const startDateEpoch = Math.floor(
+            startOfDay(
+              new TZDate(date).withTimeZone("Asia/Bangkok"),
+            ).getTime() / 1000,
+          );
+          const endDateEpoch = Math.floor(
+            endOfDay(new TZDate(date).withTimeZone("Asia/Bangkok")).getTime() /
+              1000,
+          );
 
           const query = db
             .with(scheduleParticipants)
