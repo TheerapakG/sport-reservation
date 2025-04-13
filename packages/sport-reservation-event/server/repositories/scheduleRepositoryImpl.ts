@@ -1,4 +1,5 @@
 import { PgDrizzle } from "@effect/sql-drizzle/Pg";
+import { endOfDay, startOfDay } from "date-fns";
 import {
   and,
   count,
@@ -1189,7 +1190,8 @@ export const scheduleRepositoryImpl = Layer.effect(
       getSchedulesByDate: ({ date, offset, limit }) =>
         Effect.gen(function* () {
           const scheduleParticipants = scheduleParticipantsCTE();
-          const dateEpoch = Math.floor(date.getTime() / 1000);
+          const startDateEpoch = Math.floor(startOfDay(date).getTime() / 1000);
+          const endDateEpoch = Math.floor(endOfDay(date).getTime() / 1000);
 
           const query = db
             .with(scheduleParticipants)
@@ -1218,15 +1220,15 @@ export const scheduleRepositoryImpl = Layer.effect(
             .where(
               and(
                 lte(
-                  sql`extract(epoch from ${eventEventSchedule.startAt}) + (${eventEventSchedule.repeatInterval} * floor((${dateEpoch} - extract(epoch from ${eventEventSchedule.startAt})) / ${eventEventSchedule.repeatInterval}))`,
-                  dateEpoch,
+                  sql`extract(epoch from ${eventEventSchedule.startAt}) + (${eventEventSchedule.repeatInterval} * floor((${endDateEpoch} - extract(epoch from ${eventEventSchedule.startAt})) / ${eventEventSchedule.repeatInterval}))`,
+                  endDateEpoch,
                 ),
                 gt(
-                  sql`extract(epoch from ${eventEventSchedule.endAt})  + (${eventEventSchedule.repeatInterval} * floor((${dateEpoch} - extract(epoch from ${eventEventSchedule.startAt})) / ${eventEventSchedule.repeatInterval}))`,
-                  dateEpoch,
+                  sql`extract(epoch from ${eventEventSchedule.endAt})  + (${eventEventSchedule.repeatInterval} * floor((${endDateEpoch} - extract(epoch from ${eventEventSchedule.startAt})) / ${eventEventSchedule.repeatInterval}))`,
+                  startDateEpoch,
                 ),
                 eq(
-                  sql`floor((${dateEpoch} - extract(epoch from ${eventEventSchedule.startAt})) / ${eventEventSchedule.repeatInterval})`,
+                  sql`floor((${endDateEpoch} - extract(epoch from ${eventEventSchedule.startAt})) / ${eventEventSchedule.repeatInterval})`,
                   scheduleParticipants.repeatIndex,
                 ),
                 isNull(eventEventSchedule.deletedAt),

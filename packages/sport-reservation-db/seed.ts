@@ -937,7 +937,7 @@ async function main() {
             values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
           }),
           repeatInterval: funcs.valuesFromArray({
-            values: [1, 7],
+            values: [1 * 24 * 60 * 60, 7 * 24 * 60 * 60],
           }),
           createdAt: funcs.default({
             defaultValue: new Date(),

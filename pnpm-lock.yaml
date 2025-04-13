@@ -608,6 +608,9 @@ importers:
       arktype:
         specifier: 'catalog:'
         version: 2.0.0
+      date-fns:
+        specifier: ^3.6.0
+        version: 3.6.0
       drizzle-orm:
         specifier: 'catalog:'
         version: 0.39.3(@electric-sql/pglite@0.2.17)(postgres@3.4.5)
