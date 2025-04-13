@@ -15,7 +15,8 @@ const useExampleUser = () =>
   ({
     id: "1",
     name: "Butter Bear",
-    avatar: "app/components/Assets/Image/ProfileButterBear.png",
+    avatar:
+      "https://cdn.theerapakg.moe/reservation/user/avatar/butter-bear.png",
     membership: "free",
     sports: [
       { sportId: "1", sportType: "badminton" },

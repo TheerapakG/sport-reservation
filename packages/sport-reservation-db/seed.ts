@@ -768,7 +768,7 @@ async function main() {
           avatar: funcs.valuesFromArray({
             values: [
               "/user/avatar/beth.jpeg",
-              "/user/avatar/butter_bear.png",
+              "/user/avatar/butter-bear.png",
               "/user/avatar/lisa.png",
               "/user/avatar/sarah-lee.png",
               "/user/avatar/victoria-k.png",
