@@ -38,7 +38,7 @@ import {
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { type } from "arktype";
-import { startOfToday } from "date-fns";
+import { startOfDay, startOfToday } from "date-fns";
 import { formatWithOptions, setHours, setMinutes } from "date-fns/fp";
 import { enUS } from "date-fns/locale";
 import { Effect, pipe } from "effect";
