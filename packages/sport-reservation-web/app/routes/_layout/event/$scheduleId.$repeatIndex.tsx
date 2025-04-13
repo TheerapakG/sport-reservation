@@ -174,14 +174,17 @@ function EventDetailPage() {
             ?.filter(Boolean)
             .slice(0, 4)
             .map((member, index) => (
-              <div key={index} className="flex flex-col items-center gap-y-2">
+              <div
+                key={index}
+                className="flex w-32 flex-col items-center gap-y-2 rounded bg-white p-4"
+              >
                 <UserAvatar profile={member.user} className="h-12 w-12" />
                 <span className="text-sm">{member.user?.name}</span>
                 <span className="text-xs text-gray-600">
                   {userCreator?.id === member.user?.id ? "Host" : "Member"}
                 </span>
                 {member.size > 1 && (
-                  <span className="text-xs text-gray-600">
+                  <span className="flex items-center gap-x-2 text-xs text-gray-600">
                     <UsersIcon className="h-4 w-4" />
                     {member.size - 1} guest{member.size - 1 > 1 ? "s" : ""}
                   </span>
@@ -196,7 +199,7 @@ function EventDetailPage() {
         </div>
       </div>
 
-      <div className="bg-background/95 supports-backdrop-filter:bg-background/60 flex w-full items-center justify-between border-t backdrop-blur-sm">
+      <div className="border-grid bg-background/95 supports-backdrop-filter:bg-background/60 absolute right-0 bottom-0 left-0 z-50 flex w-full items-center justify-between border-t backdrop-blur-sm">
         <div className="flex flex-col py-2 pl-4">
           <p className="text-sm text-gray-600">
             {format(actualStartAt, "PPP HH:mm")} -{" "}

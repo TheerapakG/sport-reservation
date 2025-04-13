@@ -26,6 +26,8 @@ import {
   eventEventRelations,
   eventEventSchedule,
   eventEventScheduleRelations,
+  eventScheduleMember,
+  eventScheduleMemberRelations,
   userObjective,
   userObjectiveCategory,
   userObjectiveCategoryRelations,
@@ -566,14 +568,16 @@ async function main() {
     userUserProfileObjectiveRelations,
     clubClub,
     clubClubRelations,
-    userUserGroup,
-    userUserGroupRelations,
-    userUserGroupMember,
-    userUserGroupMemberRelations,
     eventEvent,
     eventEventRelations,
     eventEventSchedule,
     eventEventScheduleRelations,
+    eventScheduleMember,
+    eventScheduleMemberRelations,
+    userUserGroup,
+    userUserGroupRelations,
+    userUserGroupMember,
+    userUserGroupMemberRelations,
   };
   const resetSchema = {
     authUserEmailConnection,
@@ -699,6 +703,12 @@ async function main() {
         createForkableCachedValues([eventGroupId]),
       ]).getAllForkedGenerators();
 
+    const [forkedEventScheduleScheduleId, forkedEventScheduleMemberUserId] =
+      createZipForkable([
+        createForkableCachedValues([eventSchedulePublicId]),
+        createForkableCachedValues([cachedForkedEventUserGroupCreatorId]),
+      ]).getAllForkedGenerators();
+
     const [
       forkedUserUserGroupPublicId,
       forkedUserUserGroupCreator,
@@ -742,6 +752,12 @@ async function main() {
         count: userEventCount + clubEventCount,
       },
     ]).getAllForkedGenerators();
+
+    const [forkedUserUserGroupMemberGroupId, forkedUserUserGroupMemberUserId] =
+      createZipForkable([
+        createForkableCachedValues([eventGroupId]),
+        createForkableCachedValues([cachedForkedEventUserGroupCreatorId]),
+      ]).getAllForkedGenerators();
 
     return {
       userUserProfile: {
@@ -951,6 +967,26 @@ async function main() {
         },
         count: userEventCount + clubEventCount,
       },
+      eventScheduleMember: {
+        columns: {
+          id: funcs.intPrimaryKey(),
+          scheduleId: forkedEventScheduleScheduleId,
+          repeatIndex: funcs.default({
+            defaultValue: 0,
+          }),
+          userId: forkedEventScheduleMemberUserId,
+          size: funcs.int({ minValue: 1, maxValue: 2 }),
+          createdAt: funcs.default({
+            defaultValue: new Date(),
+          }),
+          updatedAt: funcs.default({
+            defaultValue: new Date(),
+          }),
+          deletedAt: funcs.default({
+            defaultValue: null,
+          }),
+        },
+      },
       userUserGroup: {
         columns: {
           id: funcs.intPrimaryKey(),
@@ -969,6 +1005,25 @@ async function main() {
           }),
         },
         count: clubCount + userEventCount + clubEventCount,
+      },
+      userUserGroupMember: {
+        columns: {
+          id: funcs.intPrimaryKey(),
+          groupId: forkedUserUserGroupMemberGroupId,
+          userId: forkedUserUserGroupMemberUserId,
+          status: funcs.valuesFromArray({
+            values: ["member"],
+          }),
+          createdAt: funcs.default({
+            defaultValue: new Date(),
+          }),
+          updatedAt: funcs.default({
+            defaultValue: new Date(),
+          }),
+          deletedAt: funcs.default({
+            defaultValue: null,
+          }),
+        },
       },
     };
   });
