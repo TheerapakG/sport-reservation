@@ -1,5 +1,5 @@
 import { SqlError } from "@effect/sql";
-import { Context, Effect, Option } from "effect";
+import { Context, DateTime, Effect, Option } from "effect";
 import {
   eventEvent,
   eventEventSchedule,
@@ -155,7 +155,7 @@ export class ScheduleRepository
         SqlError.SqlError
       >;
       getSchedulesByDate: (data: {
-        date: Date;
+        date: DateTime.Zoned;
         offset: number;
         limit: number;
       }) => Effect.Effect<

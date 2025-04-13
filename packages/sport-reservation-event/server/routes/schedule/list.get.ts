@@ -4,7 +4,7 @@ import {
   effectEventHandler,
 } from "$/effectEventHandler";
 import { type } from "arktype";
-import { Effect, Match } from "effect";
+import { DateTime, Effect, Match } from "effect";
 import { parseCookies } from "h3";
 import { ClubClient } from "sport-reservation-club/client";
 import { getSubjectTypeFromToken } from "sport-reservation-oauth-common/subjects";
@@ -27,6 +27,7 @@ export const handlerConfig = defineEventHandlerConfig({
   query: params(
     type({
       date: "string.date.parse",
+      timeZone: "string",
       offset: "number",
       limit: "number",
     }),
@@ -39,7 +40,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     const { access_token: accessToken } = parseCookies(event);
     const {
       params: {
-        query: { date, offset, limit },
+        query: { date, timeZone, offset, limit },
       },
     } = yield* EventParamsContext.typed<typeof handlerConfig>();
 
@@ -61,7 +62,9 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
 
     const scheduleRepository = yield* ScheduleRepository;
     const schedules = yield* scheduleRepository.getSchedulesByDate({
-      date,
+      date: DateTime.unsafeMakeZoned(date, {
+        timeZone,
+      }),
       offset,
       limit,
     });

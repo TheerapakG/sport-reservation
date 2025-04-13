@@ -283,8 +283,8 @@ const CreateEventForm = () => {
       const { schedule } = await createScheduleMutation.mutateAsync({
         data: {
           eventId: event.eventId,
-          startAt,
-          endAt,
+          startAt: startAt.toISOString(),
+          endAt: endAt.toISOString(),
           repeat,
           repeatInterval: data.repeatInterval,
         },

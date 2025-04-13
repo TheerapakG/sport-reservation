@@ -16,7 +16,6 @@ import {
   getEventClientBodyType,
   getEventClientQueryType,
 } from "sport-reservation-event/models";
-import { effectType } from "tiara-stack/utils/effectType";
 import { readTypedFormData } from "tiara-stack/utils/formData";
 import { parseCookies } from "vinxi/http";
 import { currentUserProfileQueryOptions } from "./oauth";
@@ -102,9 +101,7 @@ export const eventKeys = () => {
 export const getScheduleServerFn = createServerFn({
   method: "GET",
 })
-  .validator((data: unknown) =>
-    Effect.runSync(effectType(getEventClientQueryType("getSchedule"), data)),
-  )
+  .validator(getEventClientQueryType("getSchedule"))
   .handler(async ({ data }) => {
     const { access_token: accessToken } = parseCookies();
 
@@ -144,11 +141,7 @@ export const getScheduleQueryOptions = ({
 export const getScheduleMemberListServerFn = createServerFn({
   method: "GET",
 })
-  .validator((data: unknown) =>
-    Effect.runSync(
-      effectType(getEventClientQueryType("getScheduleMemberList"), data),
-    ),
-  )
+  .validator(getEventClientQueryType("getScheduleMemberList"))
   .handler(async ({ data }) => {
     const { access_token: accessToken } = parseCookies();
 
@@ -189,11 +182,7 @@ export const getScheduleMemberListQueryOptions = ({
 export const getScheduleListServerFn = createServerFn({
   method: "GET",
 })
-  .validator((data: unknown) =>
-    Effect.runSync(
-      effectType(getEventClientQueryType("getScheduleList"), data),
-    ),
-  )
+  .validator(getEventClientQueryType("getScheduleList"))
   .handler(async ({ data }) => {
     const { access_token: accessToken } = parseCookies();
 
@@ -230,6 +219,7 @@ export const getScheduleListInfiniteQueryOptions = ({
       getScheduleListServerFn({
         data: {
           date: date.toISOString(),
+          timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
           limit,
           offset: pageParam,
         },
@@ -246,11 +236,7 @@ export const getScheduleListInfiniteQueryOptions = ({
 export const getUserMemberSchedulesCountServerFn = createServerFn({
   method: "GET",
 })
-  .validator((data: unknown) =>
-    Effect.runSync(
-      effectType(getEventClientQueryType("getUserMemberSchedulesCount"), data),
-    ),
-  )
+  .validator(getEventClientQueryType("getUserMemberSchedulesCount"))
   .handler(async ({ data }) => {
     const { access_token: accessToken } = parseCookies();
 
@@ -331,9 +317,7 @@ export const createEventValidators = type([
 export const createEventServerFn = createServerFn({
   method: "POST",
 })
-  .validator((data: unknown) =>
-    Effect.runSync(effectType(type("FormData"), data)),
-  )
+  .validator(type("FormData"))
   .handler(async ({ data }) => {
     const { access_token: accessToken } = parseCookies();
 
@@ -383,11 +367,7 @@ export const useCreateEventMutation = () => {
 export const createScheduleServerFn = createServerFn({
   method: "POST",
 })
-  .validator((data: unknown) =>
-    Effect.runSync(
-      effectType(getEventClientBodyType("postCreateSchedule"), data),
-    ),
-  )
+  .validator(getEventClientBodyType("postCreateSchedule"))
   .handler(async ({ data }) => {
     const { access_token: accessToken } = parseCookies();
 
@@ -428,11 +408,7 @@ export const useCreateScheduleMutation = () => {
 export const requestScheduleCreateServerFn = createServerFn({
   method: "POST",
 })
-  .validator((data: unknown) =>
-    Effect.runSync(
-      effectType(getEventClientBodyType("postScheduleRequestCreate"), data),
-    ),
-  )
+  .validator(getEventClientBodyType("postScheduleRequestCreate"))
   .handler(async ({ data }) => {
     const { access_token: accessToken } = parseCookies();
 
@@ -473,11 +449,7 @@ export const useRequestScheduleCreateMutation = () => {
 export const getScheduleClubListServerFn = createServerFn({
   method: "GET",
 })
-  .validator((data: unknown) =>
-    Effect.runSync(
-      effectType(getEventClientQueryType("getClubCreatedSchedules"), data),
-    ),
-  )
+  .validator(getEventClientQueryType("getClubCreatedSchedules"))
   .handler(async ({ data }) => {
     const { access_token: accessToken } = parseCookies();
 

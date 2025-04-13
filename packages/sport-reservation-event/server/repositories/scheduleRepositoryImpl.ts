@@ -1190,17 +1190,11 @@ export const scheduleRepositoryImpl = Layer.effect(
         Effect.gen(function* () {
           const scheduleParticipants = scheduleParticipantsCTE();
 
-          const effectDate = DateTime.unsafeMakeZoned(date, {
-            timeZone: "Asia/Bangkok",
-            adjustForTimeZone: true,
-          });
           const startDateEpoch = Math.floor(
-            pipe(effectDate, DateTime.startOf("day"), DateTime.toEpochMillis) /
-              1000,
+            pipe(date, DateTime.startOf("day"), DateTime.toEpochMillis) / 1000,
           );
           const endDateEpoch = Math.floor(
-            pipe(effectDate, DateTime.endOf("day"), DateTime.toEpochMillis) /
-              1000,
+            pipe(date, DateTime.endOf("day"), DateTime.toEpochMillis) / 1000,
           );
 
           const query = db
