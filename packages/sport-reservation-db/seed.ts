@@ -24,6 +24,8 @@ import {
   clubClubRelations,
   eventEvent,
   eventEventRelations,
+  eventEventSchedule,
+  eventEventScheduleRelations,
   userObjective,
   userObjectiveCategory,
   userObjectiveCategoryRelations,
@@ -570,6 +572,8 @@ async function main() {
     userUserGroupMemberRelations,
     eventEvent,
     eventEventRelations,
+    eventEventSchedule,
+    eventEventScheduleRelations,
   };
   const resetSchema = {
     authUserEmailConnection,
@@ -687,6 +691,14 @@ async function main() {
       forkedEventUserGroupCreatorId,
     );
 
+    const eventSchedulePublicId = createCachedGenerator(funcs.uuid());
+
+    const [forkedEventEventSchedulePublicId, forkedEventEventScheduleEventId] =
+      createZipForkable([
+        createForkable([eventSchedulePublicId]),
+        createForkableCachedValues([eventGroupId]),
+      ]).getAllForkedGenerators();
+
     const [
       forkedUserUserGroupPublicId,
       forkedUserUserGroupCreator,
@@ -713,7 +725,7 @@ async function main() {
       },
       {
         generator: createZipForkable([
-          createForkableCachedValues([eventGroupId], "event"),
+          createForkableCachedValues([eventGroupId]),
           createForkable([cachedForkedEventUserGroupCreatorId]),
           createForkableDefault([["event"]], [{}]),
           createForkableRandomDefault(
@@ -894,6 +906,39 @@ async function main() {
           locationDescription: funcs.streetAddress(),
           autoAccept: funcs.boolean(),
           sizeLimit: funcs.int({ minValue: 2, maxValue: 10 }),
+          createdAt: funcs.default({
+            defaultValue: new Date(),
+          }),
+          updatedAt: funcs.default({
+            defaultValue: new Date(),
+          }),
+          deletedAt: funcs.default({
+            defaultValue: null,
+          }),
+        },
+        count: userEventCount + clubEventCount,
+      },
+      eventEventSchedule: {
+        columns: {
+          id: funcs.intPrimaryKey(),
+          publicId: forkedEventEventSchedulePublicId,
+          eventId: forkedEventEventScheduleEventId,
+          startAt: funcs.default({
+            defaultValue: new Date(),
+          }),
+          endAt: funcs.default({
+            defaultValue: (() => {
+              const t = new Date();
+              t.setTime(t.getTime() + 1 * 60 * 60 * 1000);
+              return t;
+            })(),
+          }),
+          repeat: funcs.valuesFromArray({
+            values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+          }),
+          repeatInterval: funcs.valuesFromArray({
+            values: [1, 7],
+          }),
           createdAt: funcs.default({
             defaultValue: new Date(),
           }),

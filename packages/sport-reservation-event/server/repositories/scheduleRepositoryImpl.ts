@@ -1235,18 +1235,13 @@ export const scheduleRepositoryImpl = Layer.effect(
               userUserGroup,
               eq(eventEvent.groupId, userUserGroup.publicId),
             )
-            .leftJoin(
+            .innerJoin(
               scheduleParticipants,
-              and(
-                eq(
-                  eventEventSchedule.publicId,
-                  scheduleParticipants.scheduleId,
-                ),
-                eq(scheduleParticipants.repeatIndex, scheduleRepeatIndex),
-              ),
+              eq(eventEventSchedule.publicId, scheduleParticipants.scheduleId),
             )
             .where(
               and(
+                eq(scheduleParticipants.repeatIndex, scheduleRepeatIndex),
                 getScheduleRepeatCondition(date),
                 isNull(eventEventSchedule.deletedAt),
                 isNull(eventEvent.deletedAt),
