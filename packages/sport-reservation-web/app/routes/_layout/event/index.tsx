@@ -572,7 +572,7 @@ const SidebarCalendarCard = () => {
             date &&
             router.navigate({
               to: "/event",
-              search: { date: date.toISOString() },
+              search: { date: startOfDay(date).toISOString() },
             })
           }
           className="flex justify-center rounded-xl border-2 border-[#65D1F8] p-2"
