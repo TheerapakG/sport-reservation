@@ -193,23 +193,34 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
               ),
           );
 
-          const matchesUserAssessment = db.$with(`matchesUserAssessment`).as(
+          const minMaxDistanceTable = db.$with(`minMaxDistance`).as(
             db
               .with(distanceTable)
               .select({
-                userId: distanceTable.userId,
-                distance: distanceTable.distance,
                 minDistance: min(distanceTable.distance)
                   .mapWith(Number)
                   .as("minDistance"),
                 maxDistance: max(distanceTable.distance)
                   .mapWith(Number)
                   .as("maxDistance"),
+              })
+              .from(distanceTable),
+          );
+
+          const matchesUserAssessment = db.$with(`matchesUserAssessment`).as(
+            db
+              .with(distanceTable, minMaxDistanceTable)
+              .select({
+                userId: distanceTable.userId,
+                distance: distanceTable.distance,
+                minDistance: minMaxDistanceTable.minDistance,
+                maxDistance: minMaxDistanceTable.maxDistance,
                 rank: sql`row_number() over (order by "distance")`
                   .mapWith(Number)
                   .as("rank"),
               })
               .from(distanceTable)
+              .innerJoin(minMaxDistanceTable, sql`true`)
               .orderBy(asc(distanceTable.distance)),
           );
 
