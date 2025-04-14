@@ -224,7 +224,7 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
               .orderBy(asc(distanceTable.distance)),
           );
 
-          const matches = yield* db
+          const query = db
             .with(matchesUserAssessment)
             .select({
               userId: matchesUserAssessment.userId,
@@ -234,6 +234,10 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
             })
             .from(matchesUserAssessment)
             .where(inArray(matchesUserAssessment.rank, matchRows));
+
+          console.log(query.toSQL());
+
+          const matches = yield* query;
 
           yield* db.insert(matchingCursorMatches).values(
             matches.map((match) => ({
