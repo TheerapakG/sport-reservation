@@ -1197,7 +1197,7 @@ export const scheduleRepositoryImpl = Layer.effect(
             pipe(date, DateTime.endOf("day"), DateTime.toEpochMillis) / 1000,
           );
 
-          const query = db
+          const schedules = yield* db
             .with(scheduleParticipants)
             .select({
               schedule: eventEventSchedule,
@@ -1242,10 +1242,6 @@ export const scheduleRepositoryImpl = Layer.effect(
             )
             .offset(offset)
             .limit(limit);
-
-          console.log(query.toSQL());
-
-          const schedules = yield* query;
 
           // For each schedule, get skill levels and sport types
           const schedulesWithDetails = yield* Effect.forEach(
