@@ -876,12 +876,6 @@ export const matchingUserGeneralAssessment = pgTable(
       .$onUpdate(() => new Date()),
     deletedAt: timestamp("deleted_at", { mode: "date", withTimezone: true }),
   },
-  (table) => [
-    uniqueIndex("matching_user_general_assessment_user_id_idx").on(
-      table.userId,
-      table.assessmentVersion,
-    ),
-  ],
 );
 
 export const matchingUserGeneralAssessmentRelations = relations(
@@ -910,12 +904,6 @@ export const matchingUserBadmintonAssessment = pgTable(
       .$onUpdate(() => new Date()),
     deletedAt: timestamp("deleted_at", { mode: "date", withTimezone: true }),
   },
-  (table) => [
-    uniqueIndex("matching_user_badminton_assessment_user_id_idx").on(
-      table.userId,
-      table.assessmentVersion,
-    ),
-  ],
 );
 
 export const matchingUserBadmintonAssessmentRelations = relations(
@@ -944,12 +932,6 @@ export const matchingUserTennisAssessment = pgTable(
       .$onUpdate(() => new Date()),
     deletedAt: timestamp("deleted_at", { mode: "date", withTimezone: true }),
   },
-  (table) => [
-    uniqueIndex("matching_user_tennis_assessment_user_id_idx").on(
-      table.userId,
-      table.assessmentVersion,
-    ),
-  ],
 );
 
 export const matchingUserTennisAssessmentRelations = relations(
@@ -978,12 +960,6 @@ export const matchingUserRunningAssessment = pgTable(
       .$onUpdate(() => new Date()),
     deletedAt: timestamp("deleted_at", { mode: "date", withTimezone: true }),
   },
-  (table) => [
-    uniqueIndex("matching_user_running_assessment_user_id_idx").on(
-      table.userId,
-      table.assessmentVersion,
-    ),
-  ],
 );
 
 export const matchingUserRunningAssessmentRelations = relations(

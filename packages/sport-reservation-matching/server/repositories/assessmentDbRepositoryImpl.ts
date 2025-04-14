@@ -75,23 +75,11 @@ export const assessmentDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
             0,
           );
 
-          yield* db
-            .insert(matchingUserGeneralAssessment)
-            .values({
-              userId,
-              assessmentVersion: 1,
-              assessment: userGeneralAssessment,
-            })
-            .onConflictDoUpdate({
-              target: [
-                matchingUserGeneralAssessment.userId,
-                matchingUserGeneralAssessment.assessmentVersion,
-              ],
-              set: {
-                assessment: userGeneralAssessment,
-              },
-            })
-            .returning({ id: matchingUserGeneralAssessment.id });
+          yield* db.insert(matchingUserGeneralAssessment).values({
+            userId,
+            assessmentVersion: 1,
+            assessment: userGeneralAssessment,
+          });
 
           const query = db
             .insert(matchingUserAssessmentVector)
@@ -108,11 +96,9 @@ export const assessmentDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
               ],
             })
             .onConflictDoUpdate({
-              target: [
-                matchingUserAssessmentVector.userId,
-                matchingUserAssessmentVector.vectorVersion,
-              ],
+              target: [matchingUserAssessmentVector.userId],
               set: {
+                vectorVersion: Array.pad([1, 1, 1, 1], 16, 0),
                 passiveMatchingVector: sql`
                     ${JSON.stringify(passiveMatchingVector)}::vector || 
                     subvector(${matchingUserAssessmentVector.passiveMatchingVector}, 17, 240)
@@ -199,22 +185,11 @@ export const assessmentDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
             0,
           );
 
-          yield* db
-            .insert(matchingUserBadmintonAssessment)
-            .values({
-              userId,
-              assessmentVersion: 1,
-              assessment: userBadmintonAssessment,
-            })
-            .onConflictDoUpdate({
-              target: [
-                matchingUserBadmintonAssessment.userId,
-                matchingUserBadmintonAssessment.assessmentVersion,
-              ],
-              set: {
-                assessment: userBadmintonAssessment,
-              },
-            });
+          yield* db.insert(matchingUserBadmintonAssessment).values({
+            userId,
+            assessmentVersion: 1,
+            assessment: userBadmintonAssessment,
+          });
 
           yield* db
             .insert(matchingUserAssessmentVector)
@@ -233,11 +208,9 @@ export const assessmentDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
               ],
             })
             .onConflictDoUpdate({
-              target: [
-                matchingUserAssessmentVector.userId,
-                matchingUserAssessmentVector.vectorVersion,
-              ],
+              target: [matchingUserAssessmentVector.userId],
               set: {
+                vectorVersion: Array.pad([1, 1, 1, 1], 16, 0),
                 passiveMatchingVector: sql`
                     subvector(${matchingUserAssessmentVector.passiveMatchingVector}, 1, 16) || 
                     ${JSON.stringify(passiveMatchingVector)}::vector || 
@@ -328,22 +301,11 @@ export const assessmentDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
             0,
           );
 
-          yield* db
-            .insert(matchingUserTennisAssessment)
-            .values({
-              userId,
-              assessmentVersion: 1,
-              assessment: userTennisAssessment,
-            })
-            .onConflictDoUpdate({
-              target: [
-                matchingUserTennisAssessment.userId,
-                matchingUserTennisAssessment.assessmentVersion,
-              ],
-              set: {
-                assessment: userTennisAssessment,
-              },
-            });
+          yield* db.insert(matchingUserTennisAssessment).values({
+            userId,
+            assessmentVersion: 1,
+            assessment: userTennisAssessment,
+          });
 
           yield* db
             .insert(matchingUserAssessmentVector)
@@ -362,11 +324,9 @@ export const assessmentDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
               ],
             })
             .onConflictDoUpdate({
-              target: [
-                matchingUserAssessmentVector.userId,
-                matchingUserAssessmentVector.vectorVersion,
-              ],
+              target: [matchingUserAssessmentVector.userId],
               set: {
+                vectorVersion: Array.pad([1, 1, 1, 1], 16, 0),
                 passiveMatchingVector: sql`
                     subvector(${matchingUserAssessmentVector.passiveMatchingVector}, 1, 32) || 
                     ${JSON.stringify(passiveMatchingVector)}::vector || 
@@ -452,22 +412,11 @@ export const assessmentDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
             0,
           );
 
-          yield* db
-            .insert(matchingUserRunningAssessment)
-            .values({
-              userId,
-              assessmentVersion: 1,
-              assessment: userRunningAssessment,
-            })
-            .onConflictDoUpdate({
-              target: [
-                matchingUserRunningAssessment.userId,
-                matchingUserRunningAssessment.assessmentVersion,
-              ],
-              set: {
-                assessment: userRunningAssessment,
-              },
-            });
+          yield* db.insert(matchingUserRunningAssessment).values({
+            userId,
+            assessmentVersion: 1,
+            assessment: userRunningAssessment,
+          });
 
           yield* db
             .insert(matchingUserAssessmentVector)
@@ -486,11 +435,9 @@ export const assessmentDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
               ],
             })
             .onConflictDoUpdate({
-              target: [
-                matchingUserAssessmentVector.userId,
-                matchingUserAssessmentVector.vectorVersion,
-              ],
+              target: [matchingUserAssessmentVector.userId],
               set: {
+                vectorVersion: Array.pad([1, 1, 1, 1], 16, 0),
                 passiveMatchingVector: sql`
                   subvector(${matchingUserAssessmentVector.passiveMatchingVector}, 1, 48) || 
                   ${JSON.stringify(passiveMatchingVector)}::vector || 
