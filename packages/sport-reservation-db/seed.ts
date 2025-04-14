@@ -1047,6 +1047,15 @@ async function main() {
           activeMatchingVector: funcs.default({
             defaultValue: Array.replicate(0, 256),
           }),
+          createdAt: funcs.default({
+            defaultValue: new Date(),
+          }),
+          updatedAt: funcs.default({
+            defaultValue: new Date(),
+          }),
+          deletedAt: funcs.default({
+            defaultValue: null,
+          }),
         },
         count: 100,
       },

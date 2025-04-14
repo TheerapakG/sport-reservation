@@ -24,6 +24,28 @@ export const matchingKeys = () => {
   const all = ["matching"] as const;
   return {
     all: () => all,
+    assessment: () => {
+      const allAssessment = [...all, "assessment"] as const;
+      return {
+        all: () => allAssessment,
+        general: () => {
+          const allAssessmentGeneral = [...allAssessment, "general"] as const;
+          return {
+            all: () => allAssessmentGeneral,
+            v1: () => {
+              const allAssessmentGeneralV1 = [
+                ...allAssessmentGeneral,
+                "v1",
+              ] as const;
+              return {
+                all: () => allAssessmentGeneralV1,
+                list: () => [...allAssessmentGeneralV1, "list"] as const,
+              };
+            },
+          };
+        },
+      };
+    },
     cursor: () => {
       const allCursor = [...all, "cursor"] as const;
       return {
@@ -83,14 +105,22 @@ export const createGeneralAssessmentServerFn = createServerFn({
     return { success: true };
   });
 
-export const useCreateGeneralAssessmentMutation = () =>
-  useMutation({
+export const useCreateGeneralAssessmentMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
     mutationFn: ({
       data,
     }: {
       data: MatchingClientBodyType<"createGeneralAssessmentV1">["inferIn"];
     }) => createGeneralAssessmentServerFn({ data }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: matchingKeys().assessment().general().v1().list(),
+      });
+    },
   });
+};
 
 export const createBadmintonAssessmentServerFn = createServerFn({
   method: "POST",
@@ -201,6 +231,33 @@ export const useCreateRunningAssessmentMutation = () =>
     }: {
       data: MatchingClientBodyType<"createRunningAssessmentV1">["inferIn"];
     }) => createRunningAssessmentServerFn({ data }),
+  });
+
+export const getGeneralAssessmentV1ListServerFn = createServerFn({
+  method: "GET",
+}).handler(async () => {
+  const { access_token: accessToken } = parseCookies();
+
+  if (!accessToken) {
+    return { success: false } as const;
+  }
+
+  const { assessments } = await Effect.runPromise(
+    Effect.gen(function* () {
+      const matchingClient = yield* MatchingClient;
+      return yield* matchingClient.getGeneralAssessmentV1List({
+        headers: { Cookie: serialize("access_token", accessToken) },
+      });
+    }).pipe(provideEffectContext),
+  );
+
+  return { success: true, assessments } as const;
+});
+
+export const getGeneralAssessmentV1ListQueryOptions = () =>
+  queryOptions({
+    queryKey: matchingKeys().assessment().general().v1().list(),
+    queryFn: getGeneralAssessmentV1ListServerFn,
   });
 
 export const getMatchingCursorServerFn = createServerFn({

@@ -1,5 +1,6 @@
 import {
   getAllMatchedUsersQueryOptions,
+  getGeneralAssessmentV1ListQueryOptions,
   useCreateMatchingCursorMutation,
   useGetMatchingCursorQueryOptions,
   useMatchUsersMutation,
@@ -7,7 +8,7 @@ import {
 import MatchingCardComponent from "@/components/matching/MatchingCardComponent";
 import { Button } from "@/components/ui/button";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { userProfile } from "sport-reservation-user/models";
 
@@ -134,4 +135,13 @@ function MatchingPage() {
 
 export const Route = createFileRoute("/_layout/matching/")({
   component: MatchingPage,
+  loader: async ({ context: { queryClient } }) => {
+    const { assessments } = await queryClient.ensureQueryData(
+      getGeneralAssessmentV1ListQueryOptions(),
+    );
+
+    if ((assessments?.length ?? 0) === 0) {
+      return redirect({ to: "/assessment/ipaq" });
+    }
+  },
 });

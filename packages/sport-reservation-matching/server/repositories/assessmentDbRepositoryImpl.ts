@@ -1,6 +1,15 @@
 import { PgDrizzle } from "@effect/sql-drizzle/Pg";
-import { sql } from "drizzle-orm";
-import { Array, Effect, Layer, Number } from "effect";
+import { and, eq, isNull, sql } from "drizzle-orm";
+import {
+  Array,
+  Chunk,
+  Effect,
+  Layer,
+  Number,
+  Option,
+  pipe,
+  Stream,
+} from "effect";
 import {
   matchingUserAssessmentVector,
   matchingUserBadmintonAssessment,
@@ -8,6 +17,13 @@ import {
   matchingUserRunningAssessment,
   matchingUserTennisAssessment,
 } from "sport-reservation-db/schema";
+import { effectType } from "tiara-stack/utils/effectType";
+import {
+  badmintonAssessmentSchemas,
+  generalAssessmentSchemas,
+  runningAssessmentSchemas,
+  tennisAssessmentSchemas,
+} from "~/models";
 import { AssessmentDbRepository } from "./assessmentDbRepository";
 
 const minMaxScaler =
@@ -486,6 +502,114 @@ export const assessmentDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
         }).pipe(
           Effect.withSpan("assessmentDbRepositoryImpl.createRunningAssessment"),
         ),
+      getGeneralAssessmentV1Performed: (userId) =>
+        Effect.gen(function* () {
+          const rows = yield* db
+            .select({ assessment: matchingUserGeneralAssessment.assessment })
+            .from(matchingUserGeneralAssessment)
+            .where(
+              and(
+                eq(matchingUserGeneralAssessment.userId, userId),
+                eq(matchingUserGeneralAssessment.assessmentVersion, 1),
+                isNull(matchingUserGeneralAssessment.deletedAt),
+              ),
+            );
+
+          return yield* pipe(
+            Stream.fromIterable(rows),
+            Stream.mapEffect(({ assessment }) =>
+              pipe(
+                effectType(generalAssessmentSchemas[1], assessment),
+                Effect.option,
+              ),
+            ),
+            Stream.filter(Option.isSome),
+            Stream.map(({ value }) => value),
+            Stream.runCollect,
+            Effect.map(Chunk.toReadonlyArray),
+          );
+        }),
+      getBadmintonAssessmentV1Performed: (userId) =>
+        Effect.gen(function* () {
+          const rows = yield* db
+            .select({ assessment: matchingUserBadmintonAssessment.assessment })
+            .from(matchingUserBadmintonAssessment)
+            .where(
+              and(
+                eq(matchingUserBadmintonAssessment.userId, userId),
+                eq(matchingUserBadmintonAssessment.assessmentVersion, 1),
+                isNull(matchingUserBadmintonAssessment.deletedAt),
+              ),
+            );
+
+          return yield* pipe(
+            Stream.fromIterable(rows),
+            Stream.mapEffect(({ assessment }) =>
+              pipe(
+                effectType(badmintonAssessmentSchemas[1], assessment),
+                Effect.option,
+              ),
+            ),
+            Stream.filter(Option.isSome),
+            Stream.map(({ value }) => value),
+            Stream.runCollect,
+            Effect.map(Chunk.toReadonlyArray),
+          );
+        }),
+      getTennisAssessmentV1Performed: (userId) =>
+        Effect.gen(function* () {
+          const rows = yield* db
+            .select({ assessment: matchingUserTennisAssessment.assessment })
+            .from(matchingUserTennisAssessment)
+            .where(
+              and(
+                eq(matchingUserTennisAssessment.userId, userId),
+                eq(matchingUserTennisAssessment.assessmentVersion, 1),
+                isNull(matchingUserTennisAssessment.deletedAt),
+              ),
+            );
+
+          return yield* pipe(
+            Stream.fromIterable(rows),
+            Stream.mapEffect(({ assessment }) =>
+              pipe(
+                effectType(tennisAssessmentSchemas[1], assessment),
+                Effect.option,
+              ),
+            ),
+            Stream.filter(Option.isSome),
+            Stream.map(({ value }) => value),
+            Stream.runCollect,
+            Effect.map(Chunk.toReadonlyArray),
+          );
+        }),
+      getRunningAssessmentV1Performed: (userId) =>
+        Effect.gen(function* () {
+          const rows = yield* db
+            .select({ assessment: matchingUserRunningAssessment.assessment })
+            .from(matchingUserRunningAssessment)
+            .where(
+              and(
+                eq(matchingUserRunningAssessment.userId, userId),
+                eq(matchingUserRunningAssessment.assessmentVersion, 1),
+                isNull(matchingUserRunningAssessment.deletedAt),
+              ),
+            );
+
+          return yield* pipe(
+            Stream.fromIterable(rows),
+            Stream.mapEffect(({ assessment }) =>
+              pipe(
+                effectType(runningAssessmentSchemas[1], assessment),
+                Effect.option,
+              ),
+            ),
+            Stream.filter(Option.isSome),
+            Stream.map(({ value }) => value),
+            Stream.runCollect,
+            Effect.map(Chunk.toReadonlyArray),
+          );
+        }),
     });
   }),
 );
