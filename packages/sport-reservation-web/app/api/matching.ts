@@ -78,11 +78,7 @@ export const matchingKeys = () => {
 export const createGeneralAssessmentServerFn = createServerFn({
   method: "POST",
 })
-  .validator((data: unknown) =>
-    Effect.runSync(
-      effectType(getMatchingClientBodyType("createGeneralAssessmentV1"), data),
-    ),
-  )
+  .validator(getMatchingClientBodyType("createGeneralAssessmentV1"))
   .handler(async ({ data }) => {
     const { access_token: accessToken } = parseCookies();
 
@@ -125,14 +121,7 @@ export const useCreateGeneralAssessmentMutation = () => {
 export const createBadmintonAssessmentServerFn = createServerFn({
   method: "POST",
 })
-  .validator((data: unknown) =>
-    Effect.runSync(
-      effectType(
-        getMatchingClientBodyType("createBadmintonAssessmentV1"),
-        data,
-      ),
-    ),
-  )
+  .validator(getMatchingClientBodyType("createBadmintonAssessmentV1"))
   .handler(async ({ data }) => {
     const { access_token: accessToken } = parseCookies();
 
@@ -144,6 +133,9 @@ export const createBadmintonAssessmentServerFn = createServerFn({
       Effect.gen(function* () {
         const matchingClient = yield* MatchingClient;
         return yield* matchingClient.createBadmintonAssessmentV1({
+          headers: {
+            Cookie: serialize("access_token", accessToken),
+          },
           body: data,
         });
       }).pipe(provideEffectContext),
@@ -164,11 +156,7 @@ export const useCreateBadmintonAssessmentMutation = () =>
 export const createTennisAssessmentServerFn = createServerFn({
   method: "POST",
 })
-  .validator((data: unknown) =>
-    Effect.runSync(
-      effectType(getMatchingClientBodyType("createTennisAssessmentV1"), data),
-    ),
-  )
+  .validator(getMatchingClientBodyType("createTennisAssessmentV1"))
   .handler(async ({ data }) => {
     const { access_token: accessToken } = parseCookies();
 
@@ -180,6 +168,9 @@ export const createTennisAssessmentServerFn = createServerFn({
       Effect.gen(function* () {
         const matchingClient = yield* MatchingClient;
         return yield* matchingClient.createTennisAssessmentV1({
+          headers: {
+            Cookie: serialize("access_token", accessToken),
+          },
           body: data,
         });
       }).pipe(provideEffectContext),
@@ -200,11 +191,7 @@ export const useCreateTennisAssessmentMutation = () =>
 export const createRunningAssessmentServerFn = createServerFn({
   method: "POST",
 })
-  .validator((data: unknown) =>
-    Effect.runSync(
-      effectType(getMatchingClientBodyType("createRunningAssessmentV1"), data),
-    ),
-  )
+  .validator(getMatchingClientBodyType("createRunningAssessmentV1"))
   .handler(async ({ data }) => {
     const { access_token: accessToken } = parseCookies();
 
@@ -216,6 +203,9 @@ export const createRunningAssessmentServerFn = createServerFn({
       Effect.gen(function* () {
         const matchingClient = yield* MatchingClient;
         return yield* matchingClient.createRunningAssessmentV1({
+          headers: {
+            Cookie: serialize("access_token", accessToken),
+          },
           body: data,
         });
       }).pipe(provideEffectContext),
@@ -337,11 +327,7 @@ export const useCreateMatchingCursorMutation = () => {
 export const getAllMatchedUsersServerFn = createServerFn({
   method: "GET",
 })
-  .validator((query: unknown) =>
-    Effect.runSync(
-      effectType(getMatchingClientQueryType("getAllMatchedUsers"), query),
-    ),
-  )
+  .validator(getMatchingClientQueryType("getAllMatchedUsers"))
   .handler(async ({ data }) => {
     const { access_token: accessToken } = parseCookies();
 
@@ -375,9 +361,7 @@ export const getAllMatchedUsersQueryOptions = ({
 export const matchUsersServerFn = createServerFn({
   method: "POST",
 })
-  .validator((data: unknown) =>
-    Effect.runSync(effectType(getMatchingClientBodyType("matchUsers"), data)),
-  )
+  .validator(getMatchingClientBodyType("matchUsers"))
   .handler(async ({ data }) => {
     const { access_token: accessToken } = parseCookies();
 
