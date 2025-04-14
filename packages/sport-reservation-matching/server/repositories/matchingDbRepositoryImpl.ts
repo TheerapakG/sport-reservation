@@ -12,7 +12,16 @@ import {
   min,
   sql,
 } from "drizzle-orm";
-import { Array, Effect, Layer, Option, pipe, Random, Stream } from "effect";
+import {
+  Array,
+  Chunk,
+  Effect,
+  Layer,
+  Option,
+  pipe,
+  Random,
+  Stream,
+} from "effect";
 import {
   matchingCursor,
   matchingCursorMatches,
@@ -149,25 +158,25 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
               ),
             );
 
+          console.log(rowCount);
+
           const { vector } = cursors[0];
-          const exactMatchRows = [
-            ...(yield* Stream.runCollect(
-              pipe(
-                Stream.repeatEffect(
-                  Random.nextIntBetween(1, Math.ceil((rowCount + 1) * 0.1)),
-                ),
-                Stream.take(exactMatchCount),
-              ),
-            )),
-          ];
-          const generalMatchRows = [
-            ...(yield* Stream.runCollect(
-              pipe(
-                Stream.repeatEffect(Random.nextIntBetween(1, rowCount + 1)),
-                Stream.take(generalMatchCount),
-              ),
-            )),
-          ];
+          const exactMatchRows = yield* pipe(
+            Stream.repeatEffect(
+              Random.nextIntBetween(1, Math.ceil((rowCount + 1) * 0.1)),
+            ),
+            Stream.take(exactMatchCount),
+            Stream.runCollect,
+            Effect.map(Chunk.toReadonlyArray),
+          );
+
+          const generalMatchRows = yield* pipe(
+            Stream.repeatEffect(Random.nextIntBetween(1, rowCount + 1)),
+            Stream.take(generalMatchCount),
+            Stream.runCollect,
+            Effect.map(Chunk.toReadonlyArray),
+          );
+
           const matchRows = [...exactMatchRows, ...generalMatchRows];
 
           const distanceTable = db.$with(`distanceTable`).as(
