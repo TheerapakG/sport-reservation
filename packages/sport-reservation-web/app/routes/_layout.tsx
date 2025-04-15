@@ -168,7 +168,7 @@ const LoggedInNavigationMenuList = ({
               asChild
             >
               <Link
-                to="/"
+                to="/chat"
                 activeProps={{
                   className: "font-bold",
                 }}
