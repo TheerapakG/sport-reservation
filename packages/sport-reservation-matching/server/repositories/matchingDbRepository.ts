@@ -10,9 +10,13 @@ export class MatchingDbRepository
   extends /*@__PURE__*/ Context.Tag("MatchingDbRepository")<
     MatchingDbRepository,
     {
-      createMatchUserCursor: (
-        userId: string,
-      ) => Effect.Effect<
+      createMatchUserCursor: (data: {
+        userId: string;
+        minAge?: number;
+        maxAge?: number;
+        gender?: "male" | "female" | "prefer_not_to_say";
+        objectiveCategory: ("casual" | "competitive" | "fitness")[];
+      }) => Effect.Effect<
         Option.Option<typeof matchingCursor.$inferSelect>,
         ArktypeError | SqlError.SqlError | Cause.NoSuchElementException
       >;

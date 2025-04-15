@@ -1,15 +1,27 @@
-import { EventContext, effectEventHandler } from "$/effectEventHandler";
+import {
+  EventContext,
+  EventParamsContext,
+  effectEventHandler,
+} from "$/effectEventHandler";
 import { type } from "arktype";
 import { Effect, Option, pipe } from "effect";
 import { parseCookies } from "h3";
 import { getSubjectTypeFromToken } from "sport-reservation-oauth-common/subjects";
-import { defineEventHandlerConfig, response } from "tiara-stack/config";
+import { defineEventHandlerConfig, params, response } from "tiara-stack/config";
 import { OAuthError } from "tiara-stack/models/errors";
 import { OAuthClient } from "~/layers";
 import { MatchingDbRepository } from "~/repositories/matchingDbRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
   name: "createMatchingCursor",
+  query: params(
+    type({
+      "minAge?": "number",
+      "maxAge?": "number",
+      "gender?": "'male' | 'female' | 'prefer_not_to_say'",
+      objectiveCategory: "('casual' | 'competitive' | 'fitness' | 'casual')[]",
+    }),
+  ),
   response: response(type({ cursorId: "string", createdAt: "string" }), {
     stream: false,
   }),
@@ -19,6 +31,11 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
   Effect.gen(function* () {
     const { client: oauthClient } = yield* OAuthClient;
     const { event } = yield* EventContext;
+
+    const {
+      params: { query },
+    } = yield* EventParamsContext.typed<typeof handlerConfig>();
+
     const { access_token: accessToken } = parseCookies(event);
 
     const userId = yield* pipe(
@@ -47,7 +64,14 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
       lastCursorTime + 1000 * 60 * 60 * 24 > Date.now(),
       {
         onTrue: () => Effect.succeed(lastCursor),
-        onFalse: () => matchingDbRepository.createMatchUserCursor(userId),
+        onFalse: () =>
+          matchingDbRepository.createMatchUserCursor({
+            userId,
+            minAge: query.minAge,
+            maxAge: query.maxAge,
+            gender: query.gender,
+            objectiveCategory: query.objectiveCategory,
+          }),
       },
     );
 

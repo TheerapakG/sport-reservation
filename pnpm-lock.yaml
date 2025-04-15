@@ -917,6 +917,9 @@ importers:
       '@eslint/js':
         specifier: 'catalog:'
         version: 9.18.0
+      '@total-typescript/ts-reset':
+        specifier: ^0.6.1
+        version: 0.6.1
       '@types/eslint__eslintrc':
         specifier: 'catalog:'
         version: 2.1.2

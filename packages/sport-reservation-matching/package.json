@@ -53,6 +53,7 @@
     "@eslint/compat": "catalog:",
     "@eslint/eslintrc": "catalog:",
     "@eslint/js": "catalog:",
+    "@total-typescript/ts-reset": "^0.6.1",
     "@types/eslint__eslintrc": "catalog:",
     "@types/eslint__js": "catalog:",
     "@types/jsonwebtoken": "catalog:",

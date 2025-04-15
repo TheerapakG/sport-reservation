@@ -5,9 +5,11 @@ import {
   count,
   desc,
   eq,
+  gte,
   inArray,
   isNull,
   l2Distance,
+  lte,
   max,
   min,
   sql,
@@ -25,7 +27,12 @@ import {
 import {
   matchingCursor,
   matchingCursorMatches,
+  matchingCursorObjectiveCategory,
   matchingUserAssessmentVector,
+  userObjective,
+  userObjectiveCategory,
+  userUserProfile,
+  userUserProfileObjective,
 } from "sport-reservation-db/schema";
 import { MatchingDbRepository } from "./matchingDbRepository";
 
@@ -34,7 +41,13 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
   Effect.gen(function* () {
     const db = yield* PgDrizzle;
     return MatchingDbRepository.of({
-      createMatchUserCursor: (userId) =>
+      createMatchUserCursor: ({
+        userId,
+        minAge,
+        maxAge,
+        gender,
+        objectiveCategory,
+      }) =>
         Effect.gen(function* () {
           const matchUserAssessmentVectors = yield* db
             .select({
@@ -65,6 +78,9 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
               userId,
               vectorVersion: Array.pad([1, 1, 1, 1], 16, 0),
               vector: randomNoiseUserAssessmentVectors,
+              minAge,
+              maxAge,
+              gender,
             })
             .returning();
 
@@ -72,7 +88,16 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
             return Option.none();
           }
 
-          return Option.some(cursors[0]);
+          const cursor = cursors[0];
+
+          yield* db.insert(matchingCursorObjectiveCategory).values(
+            objectiveCategory.map((category) => ({
+              cursorId: cursor.publicId,
+              objectiveCategory: category,
+            })),
+          );
+
+          return Option.some(cursor);
         }),
       getMatchUserCursor: (userId) =>
         Effect.gen(function* () {
@@ -139,15 +164,100 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
               ),
             );
 
+          const cursorObjectiveCategories = (yield* db
+            .select({
+              objectiveCategory:
+                matchingCursorObjectiveCategory.objectiveCategory,
+            })
+            .from(matchingCursorObjectiveCategory)
+            .where(
+              and(
+                isNull(matchingCursorObjectiveCategory.deletedAt),
+                eq(matchingCursorObjectiveCategory.cursorId, cursorId),
+              ),
+            ))
+            .map((category) => category.objectiveCategory)
+            .filter(Boolean);
+
           if (Array.isEmptyArray(cursors)) {
             return [];
           }
 
+          const cursor = cursors[0];
+
+          const satisfiedUserProfileIdsCTE = db
+            .$with(`satisfiedUserProfileIds`)
+            .as(
+              db
+                .select({
+                  userId: userUserProfile.id,
+                })
+                .from(userUserProfile)
+                .innerJoin(
+                  userUserProfileObjective,
+                  eq(userUserProfile.id, userUserProfileObjective.userId),
+                )
+                .innerJoin(
+                  userObjective,
+                  eq(
+                    userUserProfileObjective.objectiveId,
+                    userObjective.publicId,
+                  ),
+                )
+                .innerJoin(
+                  userObjectiveCategory,
+                  eq(
+                    userObjective.objectiveType,
+                    userObjectiveCategory.objectiveType,
+                  ),
+                )
+                .where(
+                  and(
+                    isNull(userUserProfile.deletedAt),
+                    cursor.gender
+                      ? eq(userUserProfile.gender, cursor.gender)
+                      : undefined,
+                    cursor.minAge
+                      ? gte(
+                          userUserProfile.birthDate,
+                          new Date(
+                            Date.now() -
+                              cursor.minAge * 365 * 24 * 60 * 60 * 1000,
+                          ),
+                        )
+                      : undefined,
+                    cursor.maxAge
+                      ? lte(
+                          userUserProfile.birthDate,
+                          new Date(
+                            Date.now() -
+                              cursor.maxAge * 365 * 24 * 60 * 60 * 1000,
+                          ),
+                        )
+                      : undefined,
+                    cursorObjectiveCategories.length > 0
+                      ? inArray(
+                          userObjectiveCategory.categoryType,
+                          cursorObjectiveCategories,
+                        )
+                      : undefined,
+                  ),
+                ),
+            );
+
           const [{ count: rowCount }] = yield* db
+            .with(satisfiedUserProfileIdsCTE)
             .select({
               count: count(),
             })
             .from(matchingUserAssessmentVector)
+            .innerJoin(
+              satisfiedUserProfileIdsCTE,
+              eq(
+                matchingUserAssessmentVector.userId,
+                satisfiedUserProfileIdsCTE.userId,
+              ),
+            )
             .where(
               and(
                 isNull(matchingUserAssessmentVector.deletedAt),
@@ -160,7 +270,6 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
 
           console.log(rowCount);
 
-          const { vector } = cursors[0];
           const exactMatchRows = yield* pipe(
             Stream.repeatEffect(
               Random.nextIntBetween(1, Math.ceil((rowCount + 1) * 0.1)),
@@ -181,16 +290,24 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
 
           const distanceTable = db.$with(`distanceTable`).as(
             db
+              .with(satisfiedUserProfileIdsCTE)
               .select({
                 userId: matchingUserAssessmentVector.userId,
                 distance: l2Distance(
                   matchingUserAssessmentVector.passiveMatchingVector,
-                  vector,
+                  cursor.vector,
                 )
                   .mapWith(Number)
                   .as("distance"),
               })
               .from(matchingUserAssessmentVector)
+              .innerJoin(
+                satisfiedUserProfileIdsCTE,
+                eq(
+                  matchingUserAssessmentVector.userId,
+                  satisfiedUserProfileIdsCTE.userId,
+                ),
+              )
               .where(
                 and(
                   isNull(matchingUserAssessmentVector.deletedAt),
