@@ -41,7 +41,9 @@ export default function EventJoinModal({
       size: 0,
     },
     validators: {
-      onSubmit: type("number >= 0"),
+      onSubmit: type({
+        size: "number >= 0",
+      }),
     },
     onSubmit: async ({ value }) => {
       await requestScheduleCreateMutation.mutateAsync({
