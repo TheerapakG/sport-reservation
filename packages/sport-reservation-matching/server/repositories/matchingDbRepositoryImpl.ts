@@ -26,6 +26,7 @@ import {
 } from "effect";
 import {
   matchingCursor,
+  matchingCursorGender,
   matchingCursorMatches,
   matchingCursorObjectiveCategory,
   matchingUserAssessmentVector,
@@ -80,7 +81,6 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
               vector: randomNoiseUserAssessmentVectors,
               minAge,
               maxAge,
-              gender,
             })
             .returning();
 
@@ -89,6 +89,13 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
           }
 
           const cursor = cursors[0];
+
+          yield* db.insert(matchingCursorGender).values(
+            gender.map((gender) => ({
+              cursorId: cursor.publicId,
+              gender,
+            })),
+          );
 
           yield* db.insert(matchingCursorObjectiveCategory).values(
             objectiveCategory.map((category) => ({
@@ -164,6 +171,18 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
               ),
             );
 
+          const cursorGenders = yield* db
+            .select({
+              gender: matchingCursorGender.gender,
+            })
+            .from(matchingCursorGender)
+            .where(
+              and(
+                isNull(matchingCursorGender.deletedAt),
+                eq(matchingCursorGender.cursorId, cursorId),
+              ),
+            );
+
           const cursorObjectiveCategories = yield* db
             .select({
               objectiveCategory:
@@ -212,9 +231,6 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
                 .where(
                   and(
                     isNull(userUserProfile.deletedAt),
-                    cursor.gender
-                      ? eq(userUserProfile.gender, cursor.gender)
-                      : undefined,
                     cursor.minAge
                       ? gte(
                           userUserProfile.birthDate,
@@ -231,6 +247,12 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
                             Date.now() -
                               cursor.maxAge * 365 * 24 * 60 * 60 * 1000,
                           ),
+                        )
+                      : undefined,
+                    cursorGenders.length > 0
+                      ? inArray(
+                          userUserProfile.gender,
+                          cursorGenders.map(({ gender }) => gender),
                         )
                       : undefined,
                     cursorObjectiveCategories.length > 0

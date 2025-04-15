@@ -1025,7 +1025,6 @@ export const matchingCursor = pgTable(
     userId: uuid("user_id").notNull(),
     minAge: integer("min_age"),
     maxAge: integer("max_age"),
-    gender: userUserProfileGender("gender"),
     vectorVersion: vector("vector_version", {
       dimensions: 16,
     }).notNull(),
@@ -1056,6 +1055,39 @@ export const matchingCursorRelations = relations(
     }),
     cursorObjectiveCategories: many(matchingCursorObjectiveCategory),
     cursorMatches: many(matchingCursorMatches),
+  }),
+);
+
+export const matchingCursorGender = pgTable(
+  "matching_cursor_gender",
+  {
+    id: serial("id").primaryKey(),
+    cursorId: uuid("cursor_id").notNull(),
+    gender: userUserProfileGender("gender").notNull(),
+    createdAt: timestamp("created_at", { mode: "date", withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date", withTimezone: true })
+      .defaultNow()
+      .notNull()
+      .$onUpdate(() => new Date()),
+    deletedAt: timestamp("deleted_at", { mode: "date", withTimezone: true }),
+  },
+  (table) => [
+    uniqueIndex("matching_cursor_gender_cursor_id_gender_idx").on(
+      table.cursorId,
+      table.gender,
+    ),
+  ],
+);
+
+export const matchingCursorGenderRelations = relations(
+  matchingCursorGender,
+  ({ one }) => ({
+    cursor: one(matchingCursor, {
+      fields: [matchingCursorGender.cursorId],
+      references: [matchingCursor.publicId],
+    }),
   }),
 );
 

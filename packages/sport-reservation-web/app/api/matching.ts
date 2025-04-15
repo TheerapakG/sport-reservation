@@ -373,7 +373,7 @@ export const useMatchUsersMutation = () => {
 
   return useMutation({
     mutationFn: matchUsersServerFn,
-    onSuccess: (data, { cursorId }) => {
+    onSuccess: (data, { data: { cursorId } }) => {
       queryClient.setQueryData(
         matchingKeys().cursor().id({ id: cursorId }).matches(),
         (oldData) => {

@@ -187,7 +187,7 @@ export const assessmentDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
             assessment: userBadmintonAssessment,
           });
 
-          const query = db
+          yield* db
             .insert(matchingUserAssessmentVector)
             .values({
               userId,
@@ -219,10 +219,6 @@ export const assessmentDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
                   `,
               },
             });
-
-          console.log(query.toSQL());
-
-          yield* query;
         }).pipe(
           Effect.withSpan(
             "assessmentDbRepositoryImpl.createBadmintonAssessment",

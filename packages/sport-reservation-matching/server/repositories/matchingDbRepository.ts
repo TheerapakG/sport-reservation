@@ -14,7 +14,7 @@ export class MatchingDbRepository
         userId: string;
         minAge?: number;
         maxAge?: number;
-        gender?: "male" | "female" | "prefer_not_to_say";
+        gender: ("male" | "female" | "prefer_not_to_say")[];
         objectiveCategory: ("casual" | "competitive" | "fitness")[];
       }) => Effect.Effect<
         Option.Option<typeof matchingCursor.$inferSelect>,

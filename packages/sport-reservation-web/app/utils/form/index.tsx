@@ -5,6 +5,7 @@ import ListSelectInputField from "@/components/form/ListSelectInputField";
 import ListTextInputField from "@/components/form/ListTextInputField";
 import MultipleChoiceField from "@/components/form/MultipleChoiceField";
 import NumericInputField from "@/components/form/NumericInputField";
+import RangeInputField from "@/components/form/RangeInputField";
 import SelectInputField from "@/components/form/SelectInputField";
 import SingleChoiceField from "@/components/form/SingleChoiceField";
 import StandaloneComboBoxField from "@/components/form/StandaloneComboBoxField";
@@ -14,6 +15,7 @@ import StandaloneListSelectInputField from "@/components/form/StandaloneListSele
 import StandaloneListTextInputField from "@/components/form/StandaloneListTextInputField";
 import StandaloneMultipleChoiceField from "@/components/form/StandaloneMultipleChoiceField";
 import StandaloneNumericInputField from "@/components/form/StandaloneNumericInputField";
+import StandaloneRangeInputField from "@/components/form/StandaloneRangeInputField";
 import StandaloneSelectInputField from "@/components/form/StandaloneSelectInputField";
 import StandaloneSingleChoiceField from "@/components/form/StandaloneSingleChoiceField";
 import StandaloneTextInputField from "@/components/form/StandaloneTextInputField";
@@ -39,6 +41,7 @@ export const { useAppForm, withForm } = createFormHook({
     FileInputField,
     ListSelectInputField,
     ListTextInputField,
+    RangeInputField,
     StandaloneNumericInputField,
     StandaloneSelectInputField,
     StandaloneSingleChoiceField,
@@ -50,5 +53,6 @@ export const { useAppForm, withForm } = createFormHook({
     StandaloneFileInputField,
     StandaloneListSelectInputField,
     StandaloneListTextInputField,
+    StandaloneRangeInputField,
   },
 });
