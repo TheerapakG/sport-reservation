@@ -14,7 +14,7 @@ import { MatchingDbRepository } from "~/repositories/matchingDbRepository";
 
 export const handlerConfig = defineEventHandlerConfig({
   name: "createMatchingCursor",
-  query: params(
+  body: params(
     type({
       "minAge?": "number",
       "maxAge?": "number",
@@ -33,7 +33,7 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
     const { event } = yield* EventContext;
 
     const {
-      params: { query },
+      params: { body },
     } = yield* EventParamsContext.typed<typeof handlerConfig>();
 
     const { access_token: accessToken } = parseCookies(event);
@@ -67,10 +67,10 @@ export default /*@__PURE__*/ effectEventHandler(handlerConfig)(() =>
         onFalse: () =>
           matchingDbRepository.createMatchUserCursor({
             userId,
-            minAge: query.minAge,
-            maxAge: query.maxAge,
-            gender: query.gender,
-            objectiveCategory: query.objectiveCategory,
+            minAge: body.minAge,
+            maxAge: body.maxAge,
+            gender: body.gender,
+            objectiveCategory: body.objectiveCategory,
           }),
       },
     );

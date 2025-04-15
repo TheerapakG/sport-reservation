@@ -14,7 +14,6 @@ import {
   getMatchingClientBodyType,
   getMatchingClientQueryType,
   getMatchingClientResponseType,
-  type MatchingClientBodyType,
 } from "sport-reservation-matching/models";
 import { effectType } from "tiara-stack/utils/effectType";
 import { parseCookies } from "vinxi/http";
@@ -105,11 +104,7 @@ export const useCreateGeneralAssessmentMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      data,
-    }: {
-      data: MatchingClientBodyType<"createGeneralAssessmentV1">["inferIn"];
-    }) => createGeneralAssessmentServerFn({ data }),
+    mutationFn: createGeneralAssessmentServerFn,
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: matchingKeys().assessment().general().v1().list(),
@@ -146,11 +141,7 @@ export const createBadmintonAssessmentServerFn = createServerFn({
 
 export const useCreateBadmintonAssessmentMutation = () =>
   useMutation({
-    mutationFn: ({
-      data,
-    }: {
-      data: MatchingClientBodyType<"createBadmintonAssessmentV1">["inferIn"];
-    }) => createBadmintonAssessmentServerFn({ data }),
+    mutationFn: createBadmintonAssessmentServerFn,
   });
 
 export const createTennisAssessmentServerFn = createServerFn({
@@ -181,11 +172,7 @@ export const createTennisAssessmentServerFn = createServerFn({
 
 export const useCreateTennisAssessmentMutation = () =>
   useMutation({
-    mutationFn: ({
-      data,
-    }: {
-      data: MatchingClientBodyType<"createTennisAssessmentV1">["inferIn"];
-    }) => createTennisAssessmentServerFn({ data }),
+    mutationFn: createTennisAssessmentServerFn,
   });
 
 export const createRunningAssessmentServerFn = createServerFn({
@@ -216,11 +203,7 @@ export const createRunningAssessmentServerFn = createServerFn({
 
 export const useCreateRunningAssessmentMutation = () =>
   useMutation({
-    mutationFn: ({
-      data,
-    }: {
-      data: MatchingClientBodyType<"createRunningAssessmentV1">["inferIn"];
-    }) => createRunningAssessmentServerFn({ data }),
+    mutationFn: createRunningAssessmentServerFn,
   });
 
 export const getGeneralAssessmentV1ListServerFn = createServerFn({
@@ -286,31 +269,34 @@ export const useGetMatchingCursorQueryOptions = () => {
 
 export const createMatchingCursorServerFn = createServerFn({
   method: "POST",
-}).handler(async () => {
-  const { access_token: accessToken } = parseCookies();
+})
+  .validator(getMatchingClientBodyType("createMatchingCursor"))
+  .handler(async ({ data }) => {
+    const { access_token: accessToken } = parseCookies();
 
-  if (!accessToken) {
-    return { success: false } as const;
-  }
+    if (!accessToken) {
+      return { success: false } as const;
+    }
 
-  const cursor = await Effect.runPromise(
-    Effect.gen(function* () {
-      const matchingClient = yield* MatchingClient;
-      return yield* matchingClient.createMatchingCursor({
-        headers: { Cookie: serialize("access_token", accessToken) },
-      });
-    }).pipe(provideEffectContext),
-  );
+    const cursor = await Effect.runPromise(
+      Effect.gen(function* () {
+        const matchingClient = yield* MatchingClient;
+        return yield* matchingClient.createMatchingCursor({
+          headers: { Cookie: serialize("access_token", accessToken) },
+          body: data,
+        });
+      }).pipe(provideEffectContext),
+    );
 
-  return { success: true, cursor } as const;
-});
+    return { success: true, cursor } as const;
+  });
 
 export const useCreateMatchingCursorMutation = () => {
   const queryClient = useQueryClient();
   const currentUserProfile = useSuspenseQuery(currentUserProfileQueryOptions());
 
   return useMutation({
-    mutationFn: () => createMatchingCursorServerFn(),
+    mutationFn: createMatchingCursorServerFn,
     onSuccess: (data) => {
       queryClient.setQueryData(
         matchingKeys()
@@ -386,8 +372,7 @@ export const useMatchUsersMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: MatchingClientBodyType<"matchUsers">["inferIn"]) =>
-      matchUsersServerFn({ data }),
+    mutationFn: matchUsersServerFn,
     onSuccess: (data, { cursorId }) => {
       queryClient.setQueryData(
         matchingKeys().cursor().id({ id: cursorId }).matches(),

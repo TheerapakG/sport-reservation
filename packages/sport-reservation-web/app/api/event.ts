@@ -12,7 +12,6 @@ import { serialize } from "cookie-es";
 import { Effect, Match } from "effect";
 import { EventClient } from "sport-reservation-event/client";
 import {
-  EventClientBodyType,
   getEventClientBodyType,
   getEventClientQueryType,
 } from "sport-reservation-event/models";
@@ -433,11 +432,7 @@ export const useRequestScheduleCreateMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      data,
-    }: {
-      data: EventClientBodyType<"postScheduleRequestCreate">["inferIn"];
-    }) => requestScheduleCreateServerFn({ data }),
+    mutationFn: requestScheduleCreateServerFn,
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: eventKeys().all(),

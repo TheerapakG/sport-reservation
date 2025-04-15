@@ -11,7 +11,6 @@ import { serialize } from "cookie-es";
 import { Effect } from "effect";
 import { ClubClient } from "sport-reservation-club/client";
 import {
-  ClubClientBodyType,
   getClubClientBodyType,
   getClubClientQueryType,
 } from "sport-reservation-club/models";
@@ -261,11 +260,7 @@ export const useRequestClubMembershipCreateMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      data,
-    }: {
-      data: ClubClientBodyType<"postCreateClubMembershipRequest">["inferIn"];
-    }) => requestClubMembershipCreateServerFn({ data }),
+    mutationFn: requestClubMembershipCreateServerFn,
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: clubKeys().all(),

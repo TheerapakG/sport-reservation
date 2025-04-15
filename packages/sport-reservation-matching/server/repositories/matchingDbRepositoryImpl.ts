@@ -164,7 +164,7 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
               ),
             );
 
-          const cursorObjectiveCategories = (yield* db
+          const cursorObjectiveCategories = yield* db
             .select({
               objectiveCategory:
                 matchingCursorObjectiveCategory.objectiveCategory,
@@ -175,9 +175,7 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
                 isNull(matchingCursorObjectiveCategory.deletedAt),
                 eq(matchingCursorObjectiveCategory.cursorId, cursorId),
               ),
-            ))
-            .map((category) => category.objectiveCategory)
-            .filter(Boolean);
+            );
 
           if (Array.isEmptyArray(cursors)) {
             return [];
@@ -189,7 +187,7 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
             .$with(`satisfiedUserProfileIds`)
             .as(
               db
-                .select({
+                .selectDistinct({
                   userId: userUserProfile.id,
                 })
                 .from(userUserProfile)
@@ -238,7 +236,9 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
                     cursorObjectiveCategories.length > 0
                       ? inArray(
                           userObjectiveCategory.categoryType,
-                          cursorObjectiveCategories,
+                          cursorObjectiveCategories.map(
+                            ({ objectiveCategory }) => objectiveCategory,
+                          ),
                         )
                       : undefined,
                   ),

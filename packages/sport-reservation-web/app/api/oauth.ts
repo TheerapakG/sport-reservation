@@ -93,9 +93,7 @@ export const loginQueryOptions = ({ provider }: { provider?: string }) =>
   });
 
 export const exchangeServerFn = createServerFn({ method: "POST" })
-  .validator((data: unknown) =>
-    Effect.runSync(effectType(type({ code: "string" }), data)),
-  )
+  .validator(type({ code: "string" }))
   .handler(async ({ data: { code } }) => {
     const exchanged = await Effect.runPromise(
       Effect.gen(function* () {
@@ -120,8 +118,7 @@ export const useExchangeMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ code }: { code: string }) =>
-      exchangeServerFn({ data: { code } }),
+    mutationFn: exchangeServerFn,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: oauthKeys().all() });
     },

@@ -1064,7 +1064,8 @@ export const matchingCursorObjectiveCategory = pgTable(
   {
     id: serial("id").primaryKey(),
     cursorId: uuid("cursor_id").notNull(),
-    objectiveCategory: userObjectiveCategoryType("objective_category"),
+    objectiveCategory:
+      userObjectiveCategoryType("objective_category").notNull(),
     createdAt: timestamp("created_at", { mode: "date", withTimezone: true })
       .defaultNow()
       .notNull(),
