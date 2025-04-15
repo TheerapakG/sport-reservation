@@ -47,6 +47,7 @@ export default function StandaloneNumericInputField({
       {buttons && (
         <div className="flex flex-col gap-1">
           <Button
+            type="button"
             variant="outline"
             size="icon"
             onClick={() =>
@@ -83,6 +84,7 @@ export default function StandaloneNumericInputField({
       {buttons && (
         <div className="flex flex-col gap-1">
           <Button
+            type="button"
             variant="outline"
             size="icon"
             onClick={() =>
