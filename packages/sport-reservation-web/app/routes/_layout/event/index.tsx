@@ -53,8 +53,8 @@ const formOpts = formOptions({
     image: undefined as undefined | File,
     description: undefined as undefined | string,
     date: undefined as undefined | Date,
-    startTime: undefined as undefined | [number, number],
-    endTime: undefined as undefined | [number, number],
+    startTime: [0, 0] as undefined | [number, number],
+    endTime: [0, 0] as undefined | [number, number],
     locationDescription: undefined as undefined | string,
     sizeLimit: undefined as undefined | number,
     size: undefined as undefined | number,
@@ -301,6 +301,8 @@ const CreateEventForm = () => {
       });
     },
   });
+
+  console.log(form.getAllErrors());
 
   const sizeLimit = useStore(form.store, (state) => state.values.sizeLimit);
 
