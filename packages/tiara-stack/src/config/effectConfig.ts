@@ -57,7 +57,7 @@ const configShapeToEnvShape = <Shape extends RuntimeConfigShape>(
     ),
     "&",
     { "[string]": "unknown" },
-  );
+  ) as Type<Record<string, Config.Config<unknown>>>;
 };
 
 const _effectConfig = <Shape extends RuntimeConfigShape>(
