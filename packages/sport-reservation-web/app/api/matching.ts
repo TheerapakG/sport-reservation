@@ -107,7 +107,7 @@ export const useCreateGeneralAssessmentMutation = () => {
     mutationFn: createGeneralAssessmentServerFn,
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: matchingKeys().assessment().general().v1().list(),
+        queryKey: matchingKeys().assessment().general().all(),
       });
     },
   });

@@ -34,7 +34,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { type } from "arktype";
-import { startOfToday } from "date-fns";
+import { endOfDay, startOfToday } from "date-fns";
 import { formatWithOptions, setHours, setMinutes } from "date-fns/fp";
 import { enUS } from "date-fns/locale";
 import { Effect, pipe } from "effect";
@@ -271,9 +271,11 @@ const CreateEventForm = () => {
       );
 
       const repeat = data.repeatEndAt
-        ? (data.repeatEndAt.getTime() - endAt.getTime()) /
-            (data.repeatInterval * 1000) +
-          1
+        ? Math.floor(
+            (endOfDay(data.repeatEndAt).getTime() - endAt.getTime()) /
+              (data.repeatInterval * 1000) +
+              1,
+          )
         : 1;
 
       const { schedule } = await createScheduleMutation.mutateAsync({
