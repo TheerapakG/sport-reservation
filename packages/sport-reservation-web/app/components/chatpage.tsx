@@ -1,6 +1,6 @@
 // src/components/chat/ChatPage.tsx
-import React, { useState } from "react";
-import { Search, Smile, Camera } from "lucide-react";
+import { Camera, Search, Smile } from "lucide-react";
+import { useState } from "react";
 
 // Import local images for Beth and Ploy
 import bethPic from "@/components/bethpic.png";
@@ -79,7 +79,7 @@ export default function ChatPage() {
 
   return (
     // Parent container fills the screen height
-    <div className="flex h-screen">
+    <div className="flex h-full">
       {/* LEFT COLUMN: Friends List */}
       <aside className="flex w-96 flex-col overflow-y-auto border-r bg-[#E1F8FE] p-4">
         {/* Search Bar */}

@@ -204,7 +204,7 @@ const eventFormModalValidators = eventTypeFormValidators
 const eventFormValidators = type({
   name: "string",
   image: "File",
-  description: "string",
+  "description?": "string | undefined",
   date: "Date",
   startTime: ["number", "number"],
   endTime: ["number", "number"],
@@ -235,7 +235,7 @@ const CreateEventForm = () => {
               clubId: data.clubId,
               name: data.name,
               image: data.image,
-              description: data.description,
+              description: data.description ?? "",
               location: [0, 0],
               locationDescription: data.locationDescription,
               autoAccept: data.autoAccept,
@@ -247,7 +247,7 @@ const CreateEventForm = () => {
               creatorType: "user",
               name: data.name,
               image: data.image,
-              description: data.description,
+              description: data.description ?? "",
               location: [0, 0],
               locationDescription: data.locationDescription,
               autoAccept: data.autoAccept,
@@ -272,9 +272,11 @@ const CreateEventForm = () => {
       );
 
       const repeat = data.repeatEndAt
-        ? (data.repeatEndAt.getTime() - endAt.getTime()) /
-            (data.repeatInterval * 1000) +
-          1
+        ? Math.floor(
+            (data.repeatEndAt.getTime() - endAt.getTime()) /
+              (data.repeatInterval * 1000) +
+              1,
+          )
         : 1;
 
       const { schedule } = await createScheduleMutation.mutateAsync({

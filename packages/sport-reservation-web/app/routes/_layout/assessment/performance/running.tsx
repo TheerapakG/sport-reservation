@@ -15,7 +15,7 @@ function RouteComponent() {
       distance: undefined as undefined | number,
       pace: undefined as undefined | number,
       frequency: undefined as undefined | string,
-      goal: undefined as undefined | string,
+      goal: [] as ("casual" | "race_training" | "speed_training" | "social")[],
       bestPerformance: {
         distance: undefined as undefined | number,
         time: undefined as undefined | number,
@@ -103,7 +103,7 @@ function RouteComponent() {
       <form.AppField
         name="goal"
         children={(field) => (
-          <field.SingleChoiceField
+          <field.MultipleChoiceField
             label="4. What is your primary goal?"
             options={[
               {

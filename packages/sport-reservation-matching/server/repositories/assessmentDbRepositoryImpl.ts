@@ -462,6 +462,8 @@ export const assessmentDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
               ),
             );
 
+          console.log(rows);
+
           return yield* pipe(
             Stream.fromIterable(rows),
             Stream.mapEffect(({ assessment }) =>
