@@ -1,5 +1,5 @@
 import { encode } from "@msgpack/msgpack";
-import { type } from "arktype";
+import { ArkErrors, match, type } from "arktype";
 import { Cause, Console, Context, Effect, Exit, pipe, Stream } from "effect";
 import { Simplify } from "effect/Types";
 import {
@@ -144,7 +144,10 @@ const handleOrThrowEffect = async <A, E = never>(
       if (isBaseError(error)) {
         Effect.runSync(Console.log("[fail]", Cause.prettyErrors(cause)));
         throw createError(
-          error.cause?.message ?? "unknown error cause message",
+          match({})
+            .case(type.instanceOf(ArkErrors), (error) => error.summary)
+            .case(type.instanceOf(Error), (error) => error.message)
+            .default(() => "unknown error cause message")(error.cause),
         );
       }
     }

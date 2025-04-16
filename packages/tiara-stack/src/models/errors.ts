@@ -1,4 +1,4 @@
-import { ArkErrors } from "arktype";
+import { ArkErrors, match, type } from "arktype";
 import { FetchError as OFetchError } from "ofetch";
 
 type BaseErrorType = Error | ArkErrors;
@@ -12,7 +12,10 @@ export class BaseError<ErrorType extends BaseErrorType = BaseErrorType> {
     readonly _tag: string,
     readonly cause?: ErrorType,
   ) {
-    this.message = this.cause?.message ?? "unknown error";
+    this.message = match({})
+      .case(type.instanceOf(ArkErrors), (error) => error.summary)
+      .case(type.instanceOf(Error), (error) => error.message)
+      .default(() => "unknown error")(this.cause);
   }
 }
 
