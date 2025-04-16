@@ -66,6 +66,7 @@ export const effectEventHandlerParams = <
   { query, body, router }: C,
 ): Effect.Effect<Simplify<EffectEventHandlerParams<C>>, ArktypeError> =>
   Effect.gen(function* () {
+    console.log(getRequestHeader(event, "content-type"));
     const params = {
       ...((query && query.config.decode
         ? {
