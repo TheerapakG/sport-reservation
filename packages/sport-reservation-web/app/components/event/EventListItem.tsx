@@ -44,7 +44,7 @@ const EventJoinButton = ({
                 "pending"
                 ? "Pending"
                 : "Joined"
-              : schedule.event.sizeLimit === 0
+              : schedule.event.autoAccept
                 ? "Join"
                 : "Request to Join"}
           </div>
