@@ -1,5 +1,6 @@
+import { match } from "arktype";
 import { destr } from "destr";
-import { Effect, Match } from "effect";
+import { Effect } from "effect";
 import { Simplify } from "effect/Types";
 import {
   EventHandlerRequest,
@@ -66,7 +67,6 @@ export const effectEventHandlerParams = <
   { query, body, router }: C,
 ): Effect.Effect<Simplify<EffectEventHandlerParams<C>>, ArktypeError> =>
   Effect.gen(function* () {
-    console.log(getRequestHeader(event, "content-type"));
     const params = {
       ...((query && query.config.decode
         ? {
@@ -83,10 +83,8 @@ export const effectEventHandlerParams = <
         : {}) as { query: EventHandlerQueryType<C> }),
       ...((body && body.config.decode
         ? {
-            body: yield* Match.value(
-              getRequestHeader(event, "content-type"),
-            ).pipe(
-              Match.when("application/json", () =>
+            body: yield* match({})
+              .case("'application/json'", () =>
                 Effect.gen(function* () {
                   const bodyValue = yield* Effect.promise(() =>
                     readBody(event),
@@ -101,8 +99,8 @@ export const effectEventHandlerParams = <
                     ),
                   );
                 }),
-              ),
-              Match.when("application/x-www-form-urlencoded", () =>
+              )
+              .case("'application/x-www-form-urlencoded'", () =>
                 Effect.gen(function* () {
                   const bodyValue = yield* Effect.promise(() =>
                     readBody(event),
@@ -117,17 +115,16 @@ export const effectEventHandlerParams = <
                     ),
                   );
                 }),
-              ),
-              Match.when("multipart/form-data", () =>
+              )
+              .case(/^multipart\/form-data.*$/, () =>
                 Effect.gen(function* () {
                   const formData = yield* Effect.promise(() =>
                     readFormData(event),
                   );
                   return yield* readTypedFormData(body.type, formData);
                 }),
-              ),
-              Match.orElseAbsurd,
-            ),
+              )
+              .default("assert")(getRequestHeader(event, "content-type")),
           }
         : {}) as { body: EventHandlerBodyType<C> }),
       ...((router && router.config.decode
