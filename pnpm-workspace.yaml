@@ -19,7 +19,7 @@ catalog:
   "@types/jsonwebtoken": ^9.0.7
   "@typescript-eslint/eslint-plugin": ^8.21.0
   "@typescript-eslint/parser": ^8.21.0
-  arktype: ^2.0.0
+  arktype: ^2.1.0
   c12: ^2.0.1
   destr: ^2.0.3
   drizzle-orm: ^0.41.0

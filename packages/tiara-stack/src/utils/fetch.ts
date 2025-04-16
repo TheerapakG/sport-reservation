@@ -1,4 +1,4 @@
-import { type } from "arktype";
+import { match, type } from "arktype";
 import { Console, Context, Effect, pipe } from "effect";
 import { Simplify } from "effect/Types";
 import {
@@ -93,12 +93,17 @@ export const typedFetch = <
         )
       : query;
     const parsedBody = bodyType?.config.decode
-      ? Object.fromEntries(
-          Object.entries(body ?? {}).map(([key, value]) => [
-            key,
-            JSON.stringify(value),
-          ]),
-        )
+      ? match({
+          FormData: (body) => body,
+          unknown: (body) =>
+            Object.fromEntries(
+              Object.entries(body ?? {}).map(([key, value]) => [
+                key,
+                JSON.stringify(value),
+              ]),
+            ),
+          default: "never",
+        })
       : body;
     const parsedRequest = request
       .split("/")
@@ -175,12 +180,17 @@ export const typedRawFetch = <
         )
       : query;
     const parsedBody = bodyType?.config.decode
-      ? Object.fromEntries(
-          Object.entries(body ?? {}).map(([key, value]) => [
-            key,
-            JSON.stringify(value),
-          ]),
-        )
+      ? match({
+          FormData: (body) => body,
+          unknown: (body) =>
+            Object.fromEntries(
+              Object.entries(body ?? {}).map(([key, value]) => [
+                key,
+                JSON.stringify(value),
+              ]),
+            ),
+          default: "never",
+        })
       : body;
     const parsedRequest = request
       .split("/")

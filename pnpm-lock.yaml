@@ -58,8 +58,8 @@ catalogs:
       specifier: ^8.21.0
       version: 8.21.0
     arktype:
-      specifier: ^2.0.0
-      version: 2.0.0
+      specifier: ^2.1.0
+      version: 2.1.19
     c12:
       specifier: ^2.0.1
       version: 2.0.1
@@ -165,7 +165,7 @@ importers:
         version: 0.3.7(arctic@2.3.4)(hono@4.6.20)
       arktype:
         specifier: 'catalog:'
-        version: 2.0.0
+        version: 2.1.19
       drizzle-orm:
         specifier: 'catalog:'
         version: 0.41.0(@electric-sql/pglite@0.2.17)(postgres@3.4.5)
@@ -292,7 +292,7 @@ importers:
         version: 0.3.7(arctic@2.3.4)(hono@4.6.20)
       arktype:
         specifier: 'catalog:'
-        version: 2.0.0
+        version: 2.1.19
       drizzle-orm:
         specifier: 'catalog:'
         version: 0.41.0(@electric-sql/pglite@0.2.17)(postgres@3.4.5)
@@ -419,7 +419,7 @@ importers:
         version: 0.3.7(arctic@2.3.4)(hono@4.6.20)
       arktype:
         specifier: 'catalog:'
-        version: 2.0.0
+        version: 2.1.19
       drizzle-orm:
         specifier: 'catalog:'
         version: 0.41.0(@electric-sql/pglite@0.2.17)(postgres@3.4.5)
@@ -522,7 +522,7 @@ importers:
     dependencies:
       drizzle-arktype:
         specifier: ^0.1.2
-        version: 0.1.2(arktype@2.0.0)(drizzle-orm@0.41.0(@electric-sql/pglite@0.2.17)(postgres@3.4.5))
+        version: 0.1.2(arktype@2.1.19)(drizzle-orm@0.41.0(@electric-sql/pglite@0.2.17)(postgres@3.4.5))
       drizzle-orm:
         specifier: 'catalog:'
         version: 0.41.0(@electric-sql/pglite@0.2.17)(postgres@3.4.5)
@@ -553,7 +553,7 @@ importers:
         version: 8.21.0(eslint@9.18.0(jiti@2.4.2))(typescript@5.8.2)
       arktype:
         specifier: 'catalog:'
-        version: 2.0.0
+        version: 2.1.19
       drizzle-kit:
         specifier: ^0.30.2
         version: 0.30.2
@@ -610,7 +610,7 @@ importers:
         version: 0.3.7(arctic@2.3.4)(hono@4.6.20)
       arktype:
         specifier: 'catalog:'
-        version: 2.0.0
+        version: 2.1.19
       drizzle-orm:
         specifier: 'catalog:'
         version: 0.41.0(@electric-sql/pglite@0.2.17)(postgres@3.4.5)
@@ -740,7 +740,7 @@ importers:
         version: 0.3.7(arctic@2.3.4)(hono@4.6.20)
       arktype:
         specifier: 'catalog:'
-        version: 2.0.0
+        version: 2.1.19
       drizzle-orm:
         specifier: 'catalog:'
         version: 0.41.0(@electric-sql/pglite@0.2.17)(postgres@3.4.5)
@@ -867,7 +867,7 @@ importers:
         version: 0.3.7(arctic@2.3.4)(hono@4.6.20)
       arktype:
         specifier: 'catalog:'
-        version: 2.0.0
+        version: 2.1.19
       drizzle-orm:
         specifier: 'catalog:'
         version: 0.41.0(@electric-sql/pglite@0.2.17)(postgres@3.4.5)
@@ -1000,7 +1000,7 @@ importers:
         version: 0.3.7(arctic@2.3.4)(hono@4.6.20)
       arktype:
         specifier: 'catalog:'
-        version: 2.0.0
+        version: 2.1.19
       drizzle-orm:
         specifier: 'catalog:'
         version: 0.41.0(@electric-sql/pglite@0.2.17)(postgres@3.4.5)
@@ -1112,7 +1112,7 @@ importers:
         version: 0.3.7(arctic@2.3.4)(hono@4.6.20)
       arktype:
         specifier: 'catalog:'
-        version: 2.0.0
+        version: 2.1.19
       vitest:
         specifier: 'catalog:'
         version: 3.0.4(@types/node@22.5.2)(jiti@2.4.2)(lightningcss@1.29.1)(terser@5.31.6)(tsx@4.19.2)(yaml@2.5.0)
@@ -1203,7 +1203,7 @@ importers:
         version: 0.29.1(@effect/experimental@0.39.1(@effect/platform-node@0.71.1(@effect/platform@0.75.1(effect@3.12.7))(effect@3.12.7))(@effect/platform@0.75.1(effect@3.12.7))(effect@3.12.7)(ioredis@5.5.0)(ws@8.18.0))(@effect/platform@0.75.1(effect@3.12.7))(@effect/sql@0.28.1(@effect/experimental@0.39.1(@effect/platform-node@0.71.1(@effect/platform@0.75.1(effect@3.12.7))(effect@3.12.7))(@effect/platform@0.75.1(effect@3.12.7))(effect@3.12.7)(ioredis@5.5.0)(ws@8.18.0))(@effect/platform@0.75.1(effect@3.12.7))(effect@3.12.7))(effect@3.12.7)
       arktype:
         specifier: 'catalog:'
-        version: 2.0.0
+        version: 2.1.19
       drizzle-orm:
         specifier: 'catalog:'
         version: 0.41.0(@electric-sql/pglite@0.2.17)(postgres@3.4.5)
@@ -1318,7 +1318,7 @@ importers:
         version: 0.3.7(arctic@2.3.4)(hono@4.6.20)
       arktype:
         specifier: 'catalog:'
-        version: 2.0.0
+        version: 2.1.19
       drizzle-orm:
         specifier: 'catalog:'
         version: 0.41.0(@electric-sql/pglite@0.2.17)(postgres@3.4.5)
@@ -1538,7 +1538,7 @@ importers:
         version: 1.114.27(@tanstack/react-router@1.114.27(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(vite@6.1.0(@types/node@22.5.2)(jiti@2.4.2)(lightningcss@1.29.1)(terser@5.31.6)(tsx@4.19.2)(yaml@2.5.0))
       arktype:
         specifier: 'catalog:'
-        version: 2.0.0
+        version: 2.1.19
       babel-plugin-react-compiler:
         specifier: 19.0.0-beta-decd7b8-20250118
         version: 19.0.0-beta-decd7b8-20250118
@@ -1731,7 +1731,7 @@ importers:
         version: 0.3.7(arctic@2.3.4)(hono@4.6.20)
       arktype:
         specifier: 'catalog:'
-        version: 2.0.0
+        version: 2.1.19
       c12:
         specifier: 'catalog:'
         version: 2.0.1(magicast@0.3.5)
@@ -1846,7 +1846,7 @@ importers:
         version: 0.29.1(@effect/experimental@0.39.1(@effect/platform-node@0.71.1(@effect/platform@0.75.1(effect@3.12.7))(effect@3.12.7))(@effect/platform@0.75.1(effect@3.12.7))(effect@3.12.7)(ioredis@5.5.0)(ws@8.18.0))(@effect/platform@0.75.1(effect@3.12.7))(@effect/sql@0.28.1(@effect/experimental@0.39.1(@effect/platform-node@0.71.1(@effect/platform@0.75.1(effect@3.12.7))(effect@3.12.7))(@effect/platform@0.75.1(effect@3.12.7))(effect@3.12.7)(ioredis@5.5.0)(ws@8.18.0))(@effect/platform@0.75.1(effect@3.12.7))(effect@3.12.7))(effect@3.12.7)
       arktype:
         specifier: 'catalog:'
-        version: 2.0.0
+        version: 2.1.19
       effect:
         specifier: 'catalog:'
         version: 3.12.7
@@ -1940,11 +1940,14 @@ packages:
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
     engines: {node: '>=6.0.0'}
 
-  '@ark/schema@0.35.0':
-    resolution: {integrity: sha512-cV3tiYpIFIt4JB4ZrXSUJ6v2nnAzbX5DqaNWRMpk4pVQV15HMEawg6wYn+JKEI16vfRCIcGqxxdGBvE0zIxqKw==}
+  '@ark/schema@0.45.9':
+    resolution: {integrity: sha512-rG0v/JI0sibn/0wERAHTYVLCtEqoMP2IIlxnb+S5DrEjCI5wpubbZSWMDW50tZ8tV6FANu6zzHDeeKbp6lsZdg==}
 
   '@ark/util@0.35.0':
     resolution: {integrity: sha512-KxhwMOGMoV605zcqoBVyNFEtKAc3PKy95IWmVz9dwuUzIQ+sh7Bk9KEnlGPXcPAD8DCDs/10deHeO1kfWWONvg==}
+
+  '@ark/util@0.45.9':
+    resolution: {integrity: sha512-0WYNAb8aRGp7dNt6xIvIrRzL7V1XL3u3PK2vcklhtTrdaP235DjC9qJhzidrxtWr68mA5ySSjUrgrXk622bKkw==}
 
   '@aws-crypto/crc32@5.2.0':
     resolution: {integrity: sha512-nLbCWqQNgUiwwtFsen1AdzAtvuLRsQS8rYgMuxCrdKf9kOssamGLuPwyTY9wyYblNr9+1XM8v6zoDTPPSIeANg==}
@@ -5239,8 +5242,8 @@ packages:
     resolution: {integrity: sha512-y+CcFFwelSXpLZk/7fMB2mUbGtX9lKycf1MWJ7CaTIERyitVlyQx6C+sxcROU2BAJ24OiZyK+8wj2i8AlBoS3A==}
     engines: {node: '>=10'}
 
-  arktype@2.0.0:
-    resolution: {integrity: sha512-LVuXndcKO+zB7Hg9laGJmXYD5BZYhm/cUFL5pgB/75/3sGnvN8fsQ/yuBlf4JSn90g4rOoU7+9aTvdn5lToWOg==}
+  arktype@2.1.19:
+    resolution: {integrity: sha512-notORSuTSpfLV7rq0kYC4mTgIVlVR0xQuvtFxOaE9aKiXyON/kgoIBwZZcKeSSb4BebNcfJoGlxJicAUl/HMdw==}
 
   assertion-error@2.0.1:
     resolution: {integrity: sha512-Izi8RQcffqCeNVgFigKli1ssklIbpHnCYc6AknXGYoB6grJqyeby7jv12JUQgmTAnIDnbck1uxksT4dzN3PWBA==}
@@ -8263,11 +8266,13 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.5
       '@jridgewell/trace-mapping': 0.3.25
 
-  '@ark/schema@0.35.0':
+  '@ark/schema@0.45.9':
     dependencies:
-      '@ark/util': 0.35.0
+      '@ark/util': 0.45.9
 
   '@ark/util@0.35.0': {}
+
+  '@ark/util@0.45.9': {}
 
   '@aws-crypto/crc32@5.2.0':
     dependencies:
@@ -12286,10 +12291,10 @@ snapshots:
     dependencies:
       tslib: 2.7.0
 
-  arktype@2.0.0:
+  arktype@2.1.19:
     dependencies:
-      '@ark/schema': 0.35.0
-      '@ark/util': 0.35.0
+      '@ark/schema': 0.45.9
+      '@ark/util': 0.45.9
 
   assertion-error@2.0.1: {}
 
@@ -12729,9 +12734,9 @@ snapshots:
 
   dotenv@16.4.7: {}
 
-  drizzle-arktype@0.1.2(arktype@2.0.0)(drizzle-orm@0.41.0(@electric-sql/pglite@0.2.17)(postgres@3.4.5)):
+  drizzle-arktype@0.1.2(arktype@2.1.19)(drizzle-orm@0.41.0(@electric-sql/pglite@0.2.17)(postgres@3.4.5)):
     dependencies:
-      arktype: 2.0.0
+      arktype: 2.1.19
       drizzle-orm: 0.41.0(@electric-sql/pglite@0.2.17)(postgres@3.4.5)
 
   drizzle-kit@0.30.2:
