@@ -61,7 +61,7 @@ const formOpts = formOptions({
     skillLevel: [],
     sportType: [],
     clubId: undefined as undefined | string,
-    repeatInterval: undefined as undefined | number,
+    repeatInterval: 2147483617 as undefined | number,
     repeatEndAt: undefined as undefined | Date,
     autoAccept: false,
   },

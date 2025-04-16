@@ -44,7 +44,9 @@ const EventJoinButton = ({
                 "pending"
                 ? "Pending"
                 : "Joined"
-              : "Join"}
+              : schedule.event.sizeLimit === 0
+                ? "Join"
+                : "Request to Join"}
           </div>
         </button>
       </EventJoinModal>

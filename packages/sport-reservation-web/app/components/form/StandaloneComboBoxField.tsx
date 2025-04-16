@@ -47,7 +47,10 @@ export default function StandaloneSingleChoiceField<
               }
             : {})}
         >
-          <span className="truncate">{fieldValue ?? placeholder}</span>
+          <span className="truncate">
+            {options.find((option) => option.value === fieldValue)?.label ??
+              placeholder}
+          </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>

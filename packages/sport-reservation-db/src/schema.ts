@@ -740,10 +740,9 @@ export const eventScheduleMember = pgTable(
   (table) => [
     index("event_schedule_member_schedule_id_idx").on(table.scheduleId),
     index("event_schedule_member_user_id_idx").on(table.userId),
-    uniqueIndex("event_schedule_member_schedule_id_user_id_idx").on(
-      table.scheduleId,
-      table.userId,
-    ),
+    uniqueIndex(
+      "event_schedule_member_schedule_id_repeat_index_user_id_idx",
+    ).on(table.scheduleId, table.repeatIndex, table.userId),
   ],
 );
 
