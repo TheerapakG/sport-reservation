@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { objectives } from "@/utils/lookup/objective";
 import { sports } from "@/utils/lookup/sport";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { useRouter } from "@tanstack/react-router";
 import { Effect, HashSet, Sink, Stream } from "effect";
 import { motion } from "framer-motion";
 import { useState } from "react";
@@ -43,6 +44,7 @@ const InternalMatchingCardComponent = ({
   onFlipped?: (flipped: boolean) => void;
   disabled?: boolean;
 }) => {
+  const router = useRouter();
   const [previousFlipped, setPreviousFlipped] = useState(flipped);
   const [flippedState, setFlippedState] = useState(flipped);
 
@@ -139,6 +141,7 @@ const InternalMatchingCardComponent = ({
                 variant="default"
                 className="flex-1 rounded-lg bg-gradient-to-r from-[#65D1F8] to-[#6CCFD0] px-6 py-2 text-base font-medium text-white hover:opacity-90"
                 disabled={disabled}
+                onClick={() => router.navigate({ to: "/chat" })}
               >
                 Message
               </Button>
@@ -242,6 +245,7 @@ const InternalMatchingCardComponent = ({
               type="button"
               variant="default"
               className="flex-1 rounded-lg bg-gradient-to-r from-[#65D1F8] to-[#6CCFD0] px-6 py-2 text-base font-medium text-white hover:opacity-90"
+              onClick={() => router.navigate({ to: "/chat" })}
               disabled={disabled}
             >
               Message
