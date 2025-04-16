@@ -112,7 +112,7 @@ const EventTypeForm = withForm({
 });
 
 const eventClubFormValidators = type({
-  "clubId?": "string",
+  "clubId?": "string | undefined",
 });
 
 const EventClubForm = withForm({
@@ -156,7 +156,7 @@ const eventScheduleFormValidators = type([
   "|",
   {
     repeatInterval: "2147483647",
-    "repeatEndAt?": "Date",
+    "repeatEndAt?": "Date | undefined",
   },
 ]);
 
@@ -212,10 +212,7 @@ const eventFormValidators = type({
   sizeLimit: "number",
   size: "number",
   autoAccept: "boolean",
-})
-  .and(eventTypeFormValidators)
-  .and(eventClubFormValidators)
-  .and(eventScheduleFormValidators);
+}).and(eventFormModalValidators);
 
 const CreateEventForm = () => {
   const createEventMutation = useCreateEventMutation();
