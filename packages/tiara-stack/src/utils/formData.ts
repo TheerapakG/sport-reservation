@@ -19,10 +19,10 @@ export const typedFormData = <T extends type.Any<Record<string, unknown>>>(
 export const readTypedFormData = <T extends type.Any<Record<string, unknown>>>(
   type: T,
   formData: FormData,
-) =>
-  effectType(
-    type,
-    Object.fromEntries(
-      [...formData.keys()].map((key) => [key, destr(formData.get(key))]),
-    ),
+) => {
+  const data = Object.fromEntries(
+    [...formData.keys()].map((key) => [key, destr(formData.get(key))]),
   );
+  console.log(data);
+  return effectType(type, data);
+};

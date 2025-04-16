@@ -342,7 +342,7 @@ export const scheduleRepositoryImpl = Layer.effect(
             }
           }
 
-          const q1 = db
+          yield* db
             .insert(userUserGroupMember)
             .values({
               groupId: schedule.event.groupId,
@@ -358,10 +358,7 @@ export const scheduleRepositoryImpl = Layer.effect(
               setWhere: isNotNull(userUserGroupMember.deletedAt),
             });
 
-          console.log(q1.toSQL());
-          yield* q1;
-
-          const q2 = db
+          yield* db
             .insert(eventScheduleMember)
             .values({
               scheduleId,
@@ -381,9 +378,6 @@ export const scheduleRepositoryImpl = Layer.effect(
               },
               setWhere: isNotNull(eventScheduleMember.deletedAt),
             });
-
-          console.log(q2.toSQL());
-          yield* q2;
         }).pipe(Effect.withSpan("scheduleRepositoryImpl.requestScheduleJoin")),
       acceptScheduleJoin: ({ scheduleId, repeatIndex, userId }) =>
         Effect.gen(function* () {
