@@ -15,7 +15,7 @@ import {
   getEventClientBodyType,
   getEventClientQueryType,
 } from "sport-reservation-event/models";
-import { readTypedFormData } from "tiara-stack/utils/formData";
+import { readTypedFormData, typedFormData } from "tiara-stack/utils/formData";
 import { parseCookies } from "vinxi/http";
 import { currentUserProfileQueryOptions } from "./oauth";
 
@@ -333,13 +333,19 @@ export const createEventServerFn = createServerFn({
           Match.when({ creatorType: "user" }, ({ creatorType, ...event }) =>
             eventClient.postCreateUserEvent({
               headers: { Cookie: serialize("access_token", accessToken) },
-              body: event,
+              body: typedFormData(
+                getEventClientBodyType("postCreateUserEvent"),
+                event,
+              ),
             }),
           ),
           Match.when({ creatorType: "club" }, ({ creatorType, ...event }) =>
             eventClient.postCreateClubEvent({
               headers: { Cookie: serialize("access_token", accessToken) },
-              body: event,
+              body: typedFormData(
+                getEventClientBodyType("postCreateClubEvent"),
+                event,
+              ),
             }),
           ),
           Match.exhaustive,
