@@ -197,7 +197,7 @@ function MatchingPage() {
 export const Route = createFileRoute("/_layout/matching/")({
   component: MatchingPage,
   loader: async ({ context: { queryClient } }) => {
-    const { assessments } = await queryClient.ensureQueryData(
+    const { assessments } = await queryClient.fetchQuery(
       getGeneralAssessmentV1ListQueryOptions(),
     );
 
