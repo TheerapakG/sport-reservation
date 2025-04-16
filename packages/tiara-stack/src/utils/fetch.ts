@@ -103,7 +103,7 @@ export const typedFetch = <
               ]),
             ),
           default: "never",
-        })
+        })(body)
       : body;
     const parsedRequest = request
       .split("/")
@@ -190,7 +190,7 @@ export const typedRawFetch = <
               ]),
             ),
           default: "never",
-        })
+        })(body)
       : body;
     const parsedRequest = request
       .split("/")
