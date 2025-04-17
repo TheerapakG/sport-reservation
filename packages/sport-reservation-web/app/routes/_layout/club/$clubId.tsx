@@ -72,14 +72,6 @@ function EventDetailPage() {
             <p className="text-base font-semibold">{club.creator.name}</p>
           </div>
         </div>
-        <div className="bg-background/95 supports-backdrop-filter:bg-background/60 flex w-full flex-col items-center justify-between gap-y-2 border-t backdrop-blur-sm">
-          {schedules.map(({ schedule, participants }) => (
-            <EventListItem
-              key={schedule.schedule.id}
-              schedule={{ schedule, participants }}
-            />
-          ))}
-        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-x-8">
@@ -107,7 +99,16 @@ function EventDetailPage() {
         </div>
       </div>
 
-      <div className="border-grid bg-background/95 supports-backdrop-filter:bg-background/60 absolute right-0 bottom-0 left-0 z-50 flex w-full items-center justify-between border-t backdrop-blur-sm">
+      <div className="bg-background/95 supports-backdrop-filter:bg-background/60 flex w-full flex-col items-center justify-between gap-y-2 border-t backdrop-blur-sm">
+        {schedules.map(({ schedule, participants }) => (
+          <EventListItem
+            key={schedule.schedule.id}
+            schedule={{ schedule, participants }}
+          />
+        ))}
+      </div>
+
+      <div className="border-grid bg-background/95 supports-backdrop-filter:bg-background/60 sticky right-0 bottom-0 left-0 z-50 flex w-full items-center justify-between border-t backdrop-blur-sm">
         <div className="flex flex-col py-2 pl-4">
           <p className="text-2xl font-bold text-gray-600">{club.name}</p>
         </div>

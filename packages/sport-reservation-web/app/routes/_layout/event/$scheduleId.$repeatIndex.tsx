@@ -200,7 +200,7 @@ function EventDetailPage() {
         </div>
       </div>
 
-      <div className="border-grid bg-background/95 supports-backdrop-filter:bg-background/60 absolute right-0 bottom-0 left-0 z-50 flex w-full items-center justify-between border-t backdrop-blur-sm">
+      <div className="border-grid bg-background/95 supports-backdrop-filter:bg-background/60 sticky right-0 bottom-0 left-0 z-50 flex w-full items-center justify-between border-t backdrop-blur-sm">
         <div className="flex flex-col py-2 pl-4">
           <p className="text-sm text-gray-600">
             {format(actualStartAt, "PPP")} ({format(actualStartAt, "HH:mm")} -{" "}
