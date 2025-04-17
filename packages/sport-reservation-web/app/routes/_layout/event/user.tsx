@@ -7,6 +7,7 @@ import {
   useGetUserMemberSchedulesQueryOptions,
   useRequestScheduleCreateMutation,
 } from "@/api/event";
+import EventCreatedModal from "@/components/event/EventCreatedModal";
 import EventListItem from "@/components/event/EventListItem";
 import FormHeaderComponent from "@/components/form/FormHeaderComponent";
 import { Button } from "@/components/ui/button";
@@ -39,7 +40,8 @@ import { formatWithOptions, setHours, setMinutes } from "date-fns/fp";
 import { enUS } from "date-fns/locale";
 import { Effect, pipe } from "effect";
 import { PlusCircle } from "lucide-react";
-import { Suspense, useCallback, useEffect, useRef } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { scheduleInstanceType } from "sport-reservation-event/models";
 import { effectType } from "tiara-stack/utils/effectType";
 import { typedFormData } from "tiara-stack/utils/formData";
 
@@ -49,15 +51,15 @@ const formOpts = formOptions({
     image: undefined as undefined | File,
     description: undefined as undefined | string,
     date: undefined as undefined | Date,
-    startTime: undefined as undefined | [number, number],
-    endTime: undefined as undefined | [number, number],
+    startTime: [0, 0] as undefined | [number, number],
+    endTime: [0, 0] as undefined | [number, number],
     locationDescription: undefined as undefined | string,
     sizeLimit: undefined as undefined | number,
     size: undefined as undefined | number,
     skillLevel: [],
     sportType: [],
     clubId: undefined as undefined | string,
-    repeatInterval: undefined as undefined | number,
+    repeatInterval: 2147483647 as undefined | number,
     repeatEndAt: undefined as undefined | Date,
     autoAccept: false,
   },
@@ -108,7 +110,7 @@ const EventTypeForm = withForm({
 });
 
 const eventClubFormValidators = type({
-  "clubId?": "string",
+  "clubId?": "string | undefined",
 });
 
 const EventClubForm = withForm({
@@ -152,7 +154,7 @@ const eventScheduleFormValidators = type([
   "|",
   {
     repeatInterval: "2147483647",
-    "repeatEndAt?": "Date",
+    "repeatEndAt?": "Date | undefined",
   },
 ]);
 
@@ -200,7 +202,7 @@ const eventFormModalValidators = eventTypeFormValidators
 const eventFormValidators = type({
   name: "string",
   image: "File",
-  description: "string",
+  "description?": "string | undefined",
   date: "Date",
   startTime: ["number", "number"],
   endTime: ["number", "number"],
@@ -208,15 +210,17 @@ const eventFormValidators = type({
   sizeLimit: "number",
   size: "number",
   autoAccept: "boolean",
-})
-  .and(eventTypeFormValidators)
-  .and(eventClubFormValidators)
-  .and(eventScheduleFormValidators);
+}).and(eventFormModalValidators);
 
 const CreateEventForm = () => {
   const createEventMutation = useCreateEventMutation();
   const createScheduleMutation = useCreateScheduleMutation();
   const requestScheduleCreateMutation = useRequestScheduleCreateMutation();
+
+  const [createdSchedule, setCreatedSchedule] = useState<
+    typeof scheduleInstanceType.infer | undefined
+  >(undefined);
+
   const form = useAppForm({
     ...formOpts,
     validators: {
@@ -234,7 +238,7 @@ const CreateEventForm = () => {
               clubId: data.clubId,
               name: data.name,
               image: data.image,
-              description: data.description,
+              description: data.description ?? "",
               location: [0, 0],
               locationDescription: data.locationDescription,
               autoAccept: data.autoAccept,
@@ -246,7 +250,7 @@ const CreateEventForm = () => {
               creatorType: "user",
               name: data.name,
               image: data.image,
-              description: data.description,
+              description: data.description ?? "",
               location: [0, 0],
               locationDescription: data.locationDescription,
               autoAccept: data.autoAccept,
@@ -288,15 +292,17 @@ const CreateEventForm = () => {
         },
       });
 
-      if (!schedule?.scheduleId) return;
+      if (!schedule?.schedule.schedule.id) return;
 
       await requestScheduleCreateMutation.mutateAsync({
         data: {
-          scheduleId: schedule.scheduleId,
+          scheduleId: schedule.schedule.schedule.id,
           repeatIndex: 0,
           size: data.size + 1,
         },
       });
+
+      setCreatedSchedule(schedule);
     },
   });
 
@@ -546,6 +552,13 @@ const CreateEventForm = () => {
           )}
         />
       </form>
+      {createdSchedule && (
+        <EventCreatedModal
+          open={!!createdSchedule}
+          onOpenChange={() => setCreatedSchedule(undefined)}
+          schedule={createdSchedule}
+        />
+      )}
     </>
   );
 };

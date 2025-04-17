@@ -39,7 +39,7 @@ import {
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { type } from "arktype";
-import { startOfDay, startOfToday } from "date-fns";
+import { endOfDay, startOfDay, startOfToday } from "date-fns";
 import { formatWithOptions, setHours, setMinutes } from "date-fns/fp";
 import { enUS } from "date-fns/locale";
 import { Effect, pipe } from "effect";
@@ -280,7 +280,7 @@ const CreateEventForm = () => {
 
       const repeat = data.repeatEndAt
         ? Math.floor(
-            (data.repeatEndAt.getTime() - endAt.getTime()) /
+            (endOfDay(data.repeatEndAt).getTime() - endAt.getTime()) /
               (data.repeatInterval * 1000) +
               1,
           )
@@ -309,8 +309,6 @@ const CreateEventForm = () => {
       setCreatedSchedule(schedule);
     },
   });
-
-  console.log(form.getAllErrors());
 
   const sizeLimit = useStore(form.store, (state) => state.values.sizeLimit);
 
