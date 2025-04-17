@@ -90,19 +90,23 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
 
           const cursor = cursors[0];
 
-          yield* db.insert(matchingCursorGender).values(
-            gender.map((gender) => ({
-              cursorId: cursor.publicId,
-              gender,
-            })),
-          );
+          if (gender.length > 0) {
+            yield* db.insert(matchingCursorGender).values(
+              gender.map((gender) => ({
+                cursorId: cursor.publicId,
+                gender,
+              })),
+            );
+          }
 
-          yield* db.insert(matchingCursorObjectiveCategory).values(
-            objectiveCategory.map((category) => ({
-              cursorId: cursor.publicId,
-              objectiveCategory: category,
-            })),
-          );
+          if (objectiveCategory.length > 0) {
+            yield* db.insert(matchingCursorObjectiveCategory).values(
+              objectiveCategory.map((category) => ({
+                cursorId: cursor.publicId,
+                objectiveCategory: category,
+              })),
+            );
+          }
 
           return Option.some(cursor);
         }),
