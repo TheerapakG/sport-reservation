@@ -94,8 +94,9 @@ export default function EventJoinModal({
             <div className="flex flex-col gap-y-2">
               <h2 className="text-xl font-semibold">{schedule.event.name}</h2>
               <p className="text-base text-gray-600">
-                {format(actualStartAt, "EEEE PPP HH:mm")} -{" "}
-                {format(actualEndAt, "EEEE PPP HH:mm")}
+                {format(actualStartAt, "EEEE PPP")} (
+                {format(actualStartAt, "HH:mm")} -{" "}
+                {format(actualEndAt, "HH:mm")})
               </p>
             </div>
           </div>

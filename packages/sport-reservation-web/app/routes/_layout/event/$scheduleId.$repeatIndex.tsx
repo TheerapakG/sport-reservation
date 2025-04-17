@@ -149,8 +149,9 @@ function EventDetailPage() {
             <ClockIcon className="h-8 w-8" />
             <div className="flex flex-col">
               <h1 className="text-xl font-semibold">
-                {format(actualStartAt, "EEEE PPP HH:mm")} -{" "}
-                {format(actualEndAt, "EEEE PPP HH:mm")}
+                {format(actualStartAt, "EEEE PPP")} (
+                {format(actualStartAt, "HH:mm")} -{" "}
+                {format(actualEndAt, "HH:mm")})
               </h1>
             </div>
           </div>
@@ -202,8 +203,8 @@ function EventDetailPage() {
       <div className="border-grid bg-background/95 supports-backdrop-filter:bg-background/60 absolute right-0 bottom-0 left-0 z-50 flex w-full items-center justify-between border-t backdrop-blur-sm">
         <div className="flex flex-col py-2 pl-4">
           <p className="text-sm text-gray-600">
-            {format(actualStartAt, "PPP HH:mm")} -{" "}
-            {format(actualEndAt, "PPP HH:mm")}
+            {format(actualStartAt, "PPP")} ({format(actualStartAt, "HH:mm")} -{" "}
+            {format(actualEndAt, "HH:mm")})
           </p>
           <p className="text-2xl font-bold text-gray-600">
             {schedule.event.name}

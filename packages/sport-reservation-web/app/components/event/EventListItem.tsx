@@ -97,8 +97,8 @@ export default function EventListItem({
           className="flex w-full flex-col justify-between"
         >
           <p className="text-sm text-[#F28382]">
-            {format(actualStartAt, "EEEE PPP HH:mm")} -{" "}
-            {format(actualEndAt, "EEEE PPP HH:mm")}
+            {format(actualStartAt, "EEEE PPP")} (
+            {format(actualStartAt, "HH:mm")} - {format(actualEndAt, "HH:mm")})
           </p>
           <p className="text-xl font-semibold">{schedule.event.name}</p>
           <p className="text-sm text-gray-600">{schedule.event.description}</p>

@@ -239,16 +239,20 @@ const createForkable = (
 type ForkableCachedValuesParams = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   generators: CachedGenerator<any>[];
+  config?: { skip?: number };
   debug?: string;
 };
 
 class ForkableCachedValues extends AbstractForkableGenerator<ForkableCachedValuesParams> {
   static override readonly entityKind: string = "ForkableCachedValues";
 
-  public state: { genIdx: number } = { genIdx: 0 };
+  public state: { genIdx: number };
 
   public constructor(params: ForkableCachedValuesParams) {
     super(params);
+    this.state = {
+      genIdx: params.config?.skip ?? 0,
+    };
     this.forkedGeneratorParams = params.generators.map((g) => ({
       isUnique: g.isUnique,
       notNull: g.notNull,
@@ -288,9 +292,10 @@ generatorsMap.ForkableCachedValues = [ForkableCachedValues];
 const createForkableCachedValues = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   generators: CachedGenerator<any>[],
+  config?: { skip?: number },
   debug?: string,
 ) => {
-  return new ForkableCachedValues({ generators, debug });
+  return new ForkableCachedValues({ generators, config, debug });
 };
 
 type ForkableUniqueCachedValuesParams = {
@@ -675,13 +680,34 @@ async function main() {
       forkedEventEventEventCreatorType,
       forkedEventEventCreatorId,
       forkedEventUserGroupCreatorId,
+      forkedEventEventDescription,
     ] = createConcatForkable([
+      {
+        generator: createZipForkable([
+          createForkable([eventGroupId]),
+          createForkableDefault([["club"]], [{}]),
+          createForkableCachedValues([clubGroupId]),
+          createForkableCachedValues([userProfilePublicId]),
+          createForkableDefault(
+            [
+              [
+                "Looking for a fun and energetic way to spend your time? Join us for an exciting badminton session where players of all skill levels are welcome!",
+              ],
+            ],
+            [{}],
+          ),
+        ]),
+        count: 1,
+      },
       {
         generator: createZipForkable([
           createForkable([eventGroupId]),
           createForkableDefault([["user"]], [{}]),
           createForkableCachedValues([userProfilePublicId]),
           createForkableCachedValues([userProfilePublicId]),
+          createForkable([
+            createCachedGenerator(funcs.loremIpsum({ sentencesCount: 4 })),
+          ]),
         ]),
         count: userEventCount,
       },
@@ -691,8 +717,11 @@ async function main() {
           createForkableDefault([["club"]], [{}]),
           createForkableCachedValues([clubGroupId]),
           createForkableCachedValues([userProfilePublicId]),
+          createForkable([
+            createCachedGenerator(funcs.loremIpsum({ sentencesCount: 4 })),
+          ]),
         ]),
-        count: clubEventCount,
+        count: clubEventCount - 1,
       },
     ]).getAllForkedGenerators();
 
@@ -702,11 +731,64 @@ async function main() {
 
     const eventSchedulePublicId = createCachedGenerator(funcs.uuid());
 
-    const [forkedEventEventSchedulePublicId, forkedEventEventScheduleEventId] =
-      createZipForkable([
-        createForkable([eventSchedulePublicId]),
-        createForkableCachedValues([eventGroupId]),
-      ]).getAllForkedGenerators();
+    const [
+      forkedEventEventSchedulePublicId,
+      forkedEventEventScheduleEventId,
+      forkedEventEventScheduleStartAt,
+      forkedEventEventScheduleEndAt,
+    ] = createConcatForkable([
+      {
+        generator: createZipForkable([
+          createForkable([eventSchedulePublicId]),
+          createForkableCachedValues([eventGroupId]),
+          createForkableDefault([[new Date()]], [{}]),
+          createForkableDefault(
+            [
+              [
+                (() => {
+                  const t = new Date();
+                  t.setTime(t.getTime() + 1 * 60 * 60 * 1000);
+                  return t;
+                })(),
+              ],
+            ],
+            [{}],
+          ),
+        ]),
+        count: 1,
+      },
+      {
+        generator: createZipForkable([
+          createForkable([eventSchedulePublicId]),
+          createForkableCachedValues([eventGroupId], { skip: 1 }),
+          createForkableDefault(
+            [
+              [
+                (() => {
+                  const t = new Date();
+                  t.setTime(t.getTime() + 24 * 60 * 60 * 1000);
+                  return t;
+                })(),
+              ],
+            ],
+            [{}],
+          ),
+          createForkableDefault(
+            [
+              [
+                (() => {
+                  const t = new Date();
+                  t.setTime(t.getTime() + 25 * 60 * 60 * 1000);
+                  return t;
+                })(),
+              ],
+            ],
+            [{}],
+          ),
+        ]),
+        count: userEventCount + clubEventCount - 1,
+      },
+    ]).getAllForkedGenerators();
 
     const [forkedEventScheduleScheduleId, forkedEventScheduleMemberUserId] =
       createZipForkable([
@@ -743,6 +825,15 @@ async function main() {
           createForkableCachedValues([eventGroupId]),
           createForkable([cachedForkedEventUserGroupCreatorId]),
           createForkableDefault([["event"]], [{}]),
+          createForkableDefault([["101 Friendly Match Badminton"]], [{}]),
+        ]),
+        count: 1,
+      },
+      {
+        generator: createZipForkable([
+          createForkableCachedValues([eventGroupId], { skip: 1 }),
+          createForkable([cachedForkedEventUserGroupCreatorId]),
+          createForkableDefault([["event"]], [{}]),
           createForkableRandomDefault(
             lastNames
               .flatMap((l) => [
@@ -754,7 +845,7 @@ async function main() {
             [{}],
           ),
         ]),
-        count: userEventCount + clubEventCount,
+        count: userEventCount + clubEventCount - 1,
       },
     ]).getAllForkedGenerators();
 
@@ -924,7 +1015,7 @@ async function main() {
           }),
           eventCreatorType: forkedEventEventEventCreatorType,
           creatorId: forkedEventEventCreatorId,
-          description: funcs.loremIpsum({ sentencesCount: 4 }),
+          description: forkedEventEventDescription,
           location: funcs.default({
             defaultValue: null,
           }),
@@ -948,16 +1039,8 @@ async function main() {
           id: funcs.intPrimaryKey(),
           publicId: forkedEventEventSchedulePublicId,
           eventId: forkedEventEventScheduleEventId,
-          startAt: funcs.default({
-            defaultValue: new Date(),
-          }),
-          endAt: funcs.default({
-            defaultValue: (() => {
-              const t = new Date();
-              t.setTime(t.getTime() + 1 * 60 * 60 * 1000);
-              return t;
-            })(),
-          }),
+          startAt: forkedEventEventScheduleStartAt,
+          endAt: forkedEventEventScheduleEndAt,
           repeat: funcs.valuesFromArray({
             values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
           }),
