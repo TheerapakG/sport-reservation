@@ -211,7 +211,7 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
             .as(
               db
                 .selectDistinct({
-                  userId: userUserProfile.id,
+                  userId: userUserProfile.publicId,
                 })
                 .from(userUserProfile)
                 .innerJoin(
