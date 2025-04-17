@@ -216,7 +216,7 @@ export const matchingDbRepositoryImpl = /*@__PURE__*/ Layer.effect(
                 .from(userUserProfile)
                 .innerJoin(
                   userUserProfileObjective,
-                  eq(userUserProfile.id, userUserProfileObjective.userId),
+                  eq(userUserProfile.publicId, userUserProfileObjective.userId),
                 )
                 .innerJoin(
                   userObjective,
