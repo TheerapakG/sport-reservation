@@ -8,6 +8,7 @@ import {
   useRequestScheduleCreateMutation,
 } from "@/api/event";
 import Calendar from "@/components/calendar";
+import EventCreatedModal from "@/components/event/EventCreatedModal";
 import EventListItem from "@/components/event/EventListItem";
 import FormHeaderComponent from "@/components/form/FormHeaderComponent";
 import { Button } from "@/components/ui/button";
@@ -43,7 +44,8 @@ import { formatWithOptions, setHours, setMinutes } from "date-fns/fp";
 import { enUS } from "date-fns/locale";
 import { Effect, pipe } from "effect";
 import { PlusCircle } from "lucide-react";
-import { Suspense, useEffect, useRef } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { scheduleInstanceType } from "sport-reservation-event/models";
 import { effectType } from "tiara-stack/utils/effectType";
 import { typedFormData } from "tiara-stack/utils/formData";
 
@@ -218,6 +220,11 @@ const CreateEventForm = () => {
   const createEventMutation = useCreateEventMutation();
   const createScheduleMutation = useCreateScheduleMutation();
   const requestScheduleCreateMutation = useRequestScheduleCreateMutation();
+
+  const [createdSchedule, setCreatedSchedule] = useState<
+    typeof scheduleInstanceType.infer | undefined
+  >(undefined);
+
   const form = useAppForm({
     ...formOpts,
     validators: {
@@ -289,15 +296,17 @@ const CreateEventForm = () => {
         },
       });
 
-      if (!schedule?.scheduleId) return;
+      if (!schedule?.schedule.schedule.id) return;
 
       await requestScheduleCreateMutation.mutateAsync({
         data: {
-          scheduleId: schedule.scheduleId,
+          scheduleId: schedule.schedule.schedule.id,
           repeatIndex: 0,
           size: data.size + 1,
         },
       });
+
+      setCreatedSchedule(schedule);
     },
   });
 
@@ -549,6 +558,13 @@ const CreateEventForm = () => {
           )}
         />
       </form>
+      {createdSchedule && (
+        <EventCreatedModal
+          open={!!createdSchedule}
+          onOpenChange={() => setCreatedSchedule(undefined)}
+          schedule={createdSchedule}
+        />
+      )}
     </>
   );
 };
