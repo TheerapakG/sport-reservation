@@ -231,6 +231,9 @@ const CreateEventForm = () => {
       onChange: eventFormModalValidators,
       onSubmit: eventFormValidators,
     },
+    onSubmitInvalid: ({ formApi }) => {
+      alert(JSON.stringify(formApi.state.errors));
+    },
     onSubmit: async ({ value }) => {
       const data = await Effect.runPromise(
         effectType(eventFormValidators, value),
