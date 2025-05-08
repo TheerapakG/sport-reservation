@@ -542,12 +542,11 @@ const CreateEventForm = () => {
         />
 
         <form.Subscribe
-          selector={(state) => [state.canSubmit, state.isSubmitting]}
-          children={([canSubmit, isSubmitting]) => (
+          selector={(state) => [state.isSubmitting]}
+          children={([isSubmitting]) => (
             <div className="mt-4 flex justify-center">
               <button
                 type="submit"
-                disabled={!canSubmit}
                 className="rounded bg-gradient-to-r from-[#65D1F8] to-[#6CCFD0] px-4 py-2 text-white hover:opacity-90"
               >
                 {isSubmitting ? "Creating..." : "Create Event!"}
